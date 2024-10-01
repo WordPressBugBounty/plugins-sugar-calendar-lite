@@ -1,0 +1,1 @@
+# plugins-sugar-calendar-lite
