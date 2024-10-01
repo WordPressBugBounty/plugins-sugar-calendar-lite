@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sugar-calendar/block",
+  "version": "1.0.0",
+  "title": "Events Calendar",
+  "category": "sugar-calendar",
+  "description": "Sugar Calendar block for displaying the events calendar.",
+  "example": {},
+  "attributes": {
+    "calendarId": {
+      "type": "string",
+      "default": ""
+    },
+    "display": {
+      "type": "string",
+      "default": "month"
+    },
+    "accentColor": {
+      "type": "string",
+      "default": "#5685BD"
+    },
+    "calendars": {
+      "type": "array",
+      "default": []
+    },
+    "allowUserChangeDisplay": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "sugar-calendar-block",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "script": [
+    "sugar-calendar-js"
+  ]
+}

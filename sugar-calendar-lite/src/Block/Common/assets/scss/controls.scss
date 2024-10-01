@@ -1,0 +1,264 @@
+@import 'include-media';
+@import 'variables';
+@import 'mixins';
+
+.sugar-calendar-block__controls {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 14px;
+	font-style: normal;
+	gap: 10px;
+	justify-content: space-between;
+	margin-bottom: $spacing-md;
+
+	@include media('<tablet') {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: $spacing-md;
+	}
+
+	&__left {
+		align-items: center;
+		display: flex;
+		gap: $spacing-md;
+
+		@include media('<tablet') {
+			justify-content: space-between;
+			width: 100%;
+		}
+
+		button.sugar-calendar-block__controls__left__date {
+			@include transparent-button;
+
+			align-items: center;
+			cursor: pointer;
+			color: $text-color-primary;
+			display: flex;
+			font-size: 24px;
+			gap: 5px;
+			padding: 0;
+
+			@include media('<tablet') {
+				font-size: 20px;
+			}
+
+			&.sugar-calendar-block__controls__settings__btn_active {
+				background: transparent;
+
+				svg {
+					color: $text-color-primary;
+				}
+			}
+
+			svg {
+				color: $text-color-secondary;
+				padding-left: 5px;
+			}
+
+			&:hover svg {
+				color: $text-color-primary;
+			}
+		}
+
+		&__pagination {
+			border: 1px solid $border-color-secondary;
+			border-radius: 4px;
+			display: flex;
+			justify-content: center;
+
+			button.sugar-calendar-block__controls__left__pagination__prev,
+			button.sugar-calendar-block__controls__left__pagination__current,
+			button.sugar-calendar-block__controls__left__pagination__next {
+				@include transparent-button;
+
+				align-items: center;
+				color: $text-color-secondary;
+				display: flex;
+			}
+
+			.sugar-calendar-block__controls__left__pagination__prev,
+			.sugar-calendar-block__controls__left__pagination__next {
+				align-items: center;
+				cursor: pointer;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				padding: 0;
+				width: 24px;
+
+				&:hover {
+					background: $border-hover-color;
+					color: $text-color-primary;
+				}
+			}
+
+			.sugar-calendar-block__controls__left__pagination__current {
+				color: $text-color-secondary;
+				cursor: pointer;
+				text-align: center;
+				font-size: 12px;
+				font-weight: 400;
+				line-height: normal;
+				letter-spacing: 0.048px;
+				padding: 5px 10px;
+
+				&:hover {
+					background: $border-hover-color;
+					color: $text-color-primary;
+				}
+			}
+
+			&__divider {
+				align-self: stretch;
+				background: $border-color-secondary;
+				width: 1px;
+			}
+		}
+	}
+
+	&__right {
+		align-items: center;
+		align-self: stretch;
+		display: flex;
+		gap: $spacing-md;
+
+		@include media('<tablet') {
+			flex-direction: row-reverse;
+			justify-content: space-between;
+		}
+
+		button.sugar-calendar-block__controls__right__settings__btn {
+
+			@include calendar-settings-btn;
+
+			cursor: pointer;
+			padding: 11.5px 14px;
+
+			&:hover {
+				background: $border-hover-color;
+				border-color: transparent;
+
+				svg {
+					color: $text-color-primary;
+				}
+			}
+
+			svg {
+				color: $text-color-secondary;
+			}
+		}
+
+		button.sugar-calendar-block__controls__right__view__btn {
+
+			@include calendar-settings-btn;
+
+			color: $text-color-secondary;
+			cursor: pointer;
+			text-align: center;
+			font-weight: 400;
+			gap: 16px;
+			justify-content: space-between;
+			line-height: 20px;
+			letter-spacing: 0.035px;
+			padding: 8px 15px;
+
+			&:hover {
+				background: $border-hover-color;
+				border-color: transparent;
+
+				span,
+				svg {
+					color: $text-color-primary;
+				}
+			}
+		}
+
+		&__search {
+			position: relative;
+
+			@include media('<tablet') {
+				flex-grow: 2;
+				margin-right: 4px;
+			}
+
+			input[type="text"].sugar-calendar-block__controls__right__search__field {
+				color: $text-color-secondary;
+				font-size: 14px;
+				font-weight: 400;
+				letter-spacing: 0.035px;
+				line-height: normal;
+				padding: 9.5px 12px 9.5px 0;
+				text-indent: 36px;
+				width: 230px;
+
+				@include calendar-settings-btn;
+
+				&::placeholder {
+					color: $text-color-secondary;
+					opacity: 1;
+				}
+
+				&:focus {
+					border-color:  var(--accent-color);
+					outline: var(--accent-color) solid 1px;
+				}
+
+				@include media('<tablet') {
+					padding-right: 0;
+					width: 100%;
+				}
+			}
+
+			&__icon,
+			&__clear {
+				bottom: 0;
+				color: $text-color-secondary;
+				cursor: pointer;
+				position: absolute;
+				margin: auto;
+				top: 0;
+
+				&:hover {
+					color: $text-color-primary;
+				}
+			}
+
+			&__icon {
+				left: 15px;
+			}
+
+			&__clear {
+				display: none;
+				right: 10px;
+			}
+
+			&.sugar-calendar-block__controls__right__search--active {
+
+				input[type="text"].sugar-calendar-block__controls__right__search__field,
+				input[type="text"].sugar-calendar-block__controls__right__search__field::placeholder,
+				svg {
+					color: $text-color-primary;
+				}
+			}
+		}
+	}
+
+	button.sugar-calendar-block__controls__settings__btn_active {
+		background: $border-hover-color;
+		border-color: transparent;
+		color: $text-color-primary;
+
+		svg {
+			color: $text-color-primary;
+		}
+	}
+
+	.sugar-calendar-block__view-heading {
+		font-weight: 700;
+
+		&--year {
+			font-weight: 500;
+		}
+	}
+}

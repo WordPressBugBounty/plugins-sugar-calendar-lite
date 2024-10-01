@@ -1,0 +1,13 @@
+.icon .icon-sugar-calendar {
+  display: inline-block;
+  width: 28px;
+}
+.icon .icon-sugar-calendar:before {
+  background: url("../../../images/icon-sugar-calendar.svg") no-repeat center center;
+  background-size: contain;
+  content: "";
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2ludGVncmF0aW9ucy9lbGVtZW50b3IvZWRpdG9yLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDQztFQUNBOztBQUVBO0VBQ0M7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvaW50ZWdyYXRpb25zL2VsZW1lbnRvci9lZGl0b3IuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLmljb24gLmljb24tc3VnYXItY2FsZW5kYXIge1xuXHRkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG5cdHdpZHRoOiAyOHB4O1xuXG5cdCY6YmVmb3JlIHtcblx0XHRiYWNrZ3JvdW5kOiB1cmwoJy4uLy4uLy4uL2ltYWdlcy9pY29uLXN1Z2FyLWNhbGVuZGFyLnN2ZycpIG5vLXJlcGVhdCBjZW50ZXIgY2VudGVyO1xuXHRcdGJhY2tncm91bmQtc2l6ZTogY29udGFpbjtcblx0XHRjb250ZW50OiAnJztcblx0XHRkaXNwbGF5OiBibG9jaztcblx0XHR3aWR0aDogMjhweDtcblx0XHRoZWlnaHQ6IDI4cHg7XG5cdH1cbn1cbiJdfQ== */

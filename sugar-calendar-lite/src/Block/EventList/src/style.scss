@@ -1,0 +1,133 @@
+@import '../../Common/assets/scss/include-media';
+@import '../../Common/assets/scss/variables';
+
+.sugar-calendar-event-list-block {
+	@import '../../Common/assets/scss/controls';
+	@import '../../Common/assets/scss/popover/month_selector';
+	@import '../../Common/assets/scss/popover/calendar_selector';
+	@import '../../Common/assets/scss/popover/display_selector';
+
+	// Loading State.
+	@import '../../Common/assets/scss/loading-state';
+
+	// Custom month selector.
+	@import '../../Common/assets/scss/popover/datepicker';
+
+	.sugar-calendar-event-list-block__base-container {
+		@import '../../Common/assets/scss/no-events';
+		@import './views/listview';
+		@import './views/gridview';
+		@import './views/plainview';
+
+		.sugar-calendar-event-list-block__event__title {
+			color: var(--links-color, $text-color-primary);
+			font-style: normal;
+			font-weight: 700;
+			line-height: normal;
+			margin: 0 0 5px 0;
+
+			@include media('<tablet') {
+				font-size: 16px !important;
+			}
+
+			a {
+				color: var(--links-color, $text-color-primary);
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+
+		.sugar-calendar-event-list-block__event__datetime {
+			color: $text-color-tertiary;
+			font-weight: 500;
+
+			@include media('<tablet') {
+				font-size: 13px !important;
+			}
+
+			span {
+				vertical-align: middle;
+			}
+
+			img {
+				display: inline;
+				height: 15px;
+				margin-left: 8px;
+				vertical-align: middle;
+			}
+
+			.sugar-calendar-event-list-block__event__datetime__icons {
+				display: inline;
+				vertical-align: middle;
+
+				img {
+					margin-left: 8px;
+					height: 15px;
+				}
+			}
+		}
+
+		.sugar-calendar-event-list-block__event__desc {
+			color: $text-color-primary;
+			font-weight: 400;
+		}
+	}
+
+	&.sugar-calendar-event-list-block__plain-view {
+
+		.sugar-calendar-block__base-container__no-events {
+			border-top: 0;
+
+			&__msg {
+				margin: $spacing-lg 0;
+			}
+		}
+
+		.sugar-calendar-event-list-block__footer {
+			padding-top: $spacing-lg;
+		}
+	}
+
+	.sugar-calendar-event-list-block__footer {
+		border-top: 1px solid $border-hover-color;
+		display: flex;
+		justify-content: space-between;
+		padding-top: 50px;
+
+		@include media('<tablet') {
+			padding-top: $spacing-md;
+		}
+
+		button.sugar-calendar-event-list-block__footer__prev_btn,
+		button.sugar-calendar-event-list-block__footer__next_btn {
+			align-items: center;
+			align-self: stretch;
+			background: rgba(255, 255, 255, 0.50);
+			border: 1px solid $border-color-secondary;
+			border-radius: $radius-lg;
+			color: $text-color-secondary;
+			display: flex;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 400;
+			gap: $spacing-sm;
+			line-height: 20px; /* 142.857% */
+			letter-spacing: 0.035px;
+			padding: $spacing-sm 15px;
+			text-align: center;
+
+			&:hover {
+				background: $border-hover-color;
+				border-color: transparent;
+				color: $text-color-primary;
+			}
+		}
+	}
+}
+
+.sugar-calendar-block-hide-element {
+	display: none !important;
+}

@@ -1,0 +1,72 @@
+#sc-event-ticketing-wrap .container {
+  width: 100%;
+}
+
+#sc-event-ticketing-wrap .container.modal-body,
+#sc-event-ticketing-checkout .container.modal-body {
+  padding: 0;
+}
+
+#sc-event-ticketing-wrap .container.modal-body .row,
+#sc-event-ticketing-checkout .container.modal-body .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#sc-event-ticketing-checkout .modal-body {
+  padding-top: 0;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#sc-event-ticketing-checkout-main {
+  padding-top: 1rem;
+}
+
+#sc-event-ticketing-checkout-totals {
+  background: #efefef;
+  padding-top: 1rem;
+}
+
+.sc-event-ticketing-attendee .btn {
+  left: -2px;
+  position: relative;
+}
+
+#sc-event-ticketing-checkout .sc-et-error {
+  margin-top: 1rem;
+}
+
+#sc-event-ticketing-checkout h3 {
+  margin: 0;
+}
+
+#sc-event-ticketing-checkout fieldset,
+#sc-event-ticketing-checkout label,
+#sc-event-ticketing-checkout legend,
+#sc-event-ticketing-checkout p {
+  margin: 0 0 15px;
+  padding: 0;
+  border: none;
+}
+
+#sc-event-ticketing-checkout legend {
+  font-weight: bold;
+}
+
+#sc-event-ticketing-checkout div.form-control,
+#sc-event-ticketing-checkout input.form-control {
+  padding: 0.375rem 0.75rem;
+}
+
+#sc-event-ticketing-price-wrap a,
+#sc-event-ticketing-price-wrap .input-group-text,
+#sc-event-ticketing-checkout a.sc-event-ticketing-remove-attendee {
+  text-decoration: none;
+}
+
+#sc-event-ticketing-card-element {
+  height: auto;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2ZlYXR1cmVzL2V2ZW50LXRpY2tldGluZy9mcm9udGVuZC9sdHIvZ2VuZXJhbC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0M7OztBQUVEO0FBQUE7RUFFQzs7O0FBRUQ7QUFBQTtFQUVDO0VBQ0E7OztBQUVEO0VBQ0M7RUFDQTtFQUNBO0VBQ0E7OztBQUdEO0VBQ0M7OztBQUdEO0VBQ0M7RUFDQTs7O0FBR0Q7RUFDQztFQUNBOzs7QUFHRDtFQUNDOzs7QUFHRDtFQUNDOzs7QUFFRDtBQUFBO0FBQUE7QUFBQTtFQUlDO0VBQ0E7RUFDQTs7O0FBR0Q7RUFDQzs7O0FBR0Q7QUFBQTtFQUVDOzs7QUFFRDtBQUFBO0FBQUE7RUFHQzs7O0FBR0Q7RUFDQyIsImZpbGUiOiJhc3NldHMvY3NzL2ZlYXR1cmVzL2V2ZW50LXRpY2tldGluZy9mcm9udGVuZC9sdHIvZ2VuZXJhbC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIjc2MtZXZlbnQtdGlja2V0aW5nLXdyYXAgLmNvbnRhaW5lciB7XG5cdHdpZHRoOiAxMDAlO1xufVxuI3NjLWV2ZW50LXRpY2tldGluZy13cmFwIC5jb250YWluZXIubW9kYWwtYm9keSxcbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgLmNvbnRhaW5lci5tb2RhbC1ib2R5IHtcblx0cGFkZGluZzogMDtcbn1cbiNzYy1ldmVudC10aWNrZXRpbmctd3JhcCAuY29udGFpbmVyLm1vZGFsLWJvZHkgLnJvdyxcbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgLmNvbnRhaW5lci5tb2RhbC1ib2R5IC5yb3cgIHtcblx0bWFyZ2luLWxlZnQ6IDA7XG5cdG1hcmdpbi1yaWdodDogMDtcbn1cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgLm1vZGFsLWJvZHkge1xuXHRwYWRkaW5nLXRvcDogMDtcblx0d2lkdGg6IDEwMCU7XG5cdG1hcmdpbi1sZWZ0OiAwO1xuXHRtYXJnaW4tcmlnaHQ6IDA7XG59XG5cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQtbWFpbiB7XG5cdHBhZGRpbmctdG9wOiAxcmVtO1xufVxuXG4jc2MtZXZlbnQtdGlja2V0aW5nLWNoZWNrb3V0LXRvdGFscyB7XG5cdGJhY2tncm91bmQ6ICNlZmVmZWY7XG5cdHBhZGRpbmctdG9wOiAxcmVtO1xufVxuXG4uc2MtZXZlbnQtdGlja2V0aW5nLWF0dGVuZGVlIC5idG4ge1xuXHRsZWZ0OiAtMnB4O1xuXHRwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgLnNjLWV0LWVycm9yIHtcblx0bWFyZ2luLXRvcDogMXJlbTtcbn1cblxuI3NjLWV2ZW50LXRpY2tldGluZy1jaGVja291dCBoMyB7XG5cdG1hcmdpbjogMDtcbn1cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgZmllbGRzZXQsXG4jc2MtZXZlbnQtdGlja2V0aW5nLWNoZWNrb3V0IGxhYmVsLFxuI3NjLWV2ZW50LXRpY2tldGluZy1jaGVja291dCBsZWdlbmQsXG4jc2MtZXZlbnQtdGlja2V0aW5nLWNoZWNrb3V0IHAge1xuXHRtYXJnaW46IDAgMCAxNXB4O1xuXHRwYWRkaW5nOiAwO1xuXHRib3JkZXI6IG5vbmU7XG59XG5cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgbGVnZW5kIHtcblx0Zm9udC13ZWlnaHQ6IGJvbGQ7XG59XG5cbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgZGl2LmZvcm0tY29udHJvbCxcbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgaW5wdXQuZm9ybS1jb250cm9sIHtcblx0cGFkZGluZzogLjM3NXJlbSAuNzVyZW07XG59XG4jc2MtZXZlbnQtdGlja2V0aW5nLXByaWNlLXdyYXAgYSxcbiNzYy1ldmVudC10aWNrZXRpbmctcHJpY2Utd3JhcCAuaW5wdXQtZ3JvdXAtdGV4dCxcbiNzYy1ldmVudC10aWNrZXRpbmctY2hlY2tvdXQgYS5zYy1ldmVudC10aWNrZXRpbmctcmVtb3ZlLWF0dGVuZGVlIHtcblx0dGV4dC1kZWNvcmF0aW9uOiBub25lO1xufVxuXG4jc2MtZXZlbnQtdGlja2V0aW5nLWNhcmQtZWxlbWVudCB7XG5cdGhlaWdodDogYXV0bztcbn1cbiJdfQ== */

@@ -1,0 +1,25 @@
+@import 'variables';
+
+.sugar-calendar-block__loading-state {
+	opacity: 0.2;
+	pointer-events: none;
+}
+
+.sugar-calendar-block__loading {
+	animation: loading 1s linear infinite;
+	border: 5px solid $text-color-tertiary;
+	border-top-color: $text-color-primary;
+	border-radius: 50%;
+	height: 25px;
+	left: 50%;
+	position: absolute;
+	top: 40%;
+	width: 25px;
+
+	@keyframes loading {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+}
+

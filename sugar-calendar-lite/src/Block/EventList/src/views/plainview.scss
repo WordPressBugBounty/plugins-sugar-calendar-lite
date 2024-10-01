@@ -1,0 +1,32 @@
+@import '../../../Common/assets/scss/variables';
+@import '../../../Common/assets/scss/include-media';
+
+.sugar-calendar-event-list-block__plainview {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+	padding-bottom: $spacing-lg;
+
+	@include media('<tablet') {
+		gap: $spacing-md;
+	}
+
+	.sugar-calendar-event-list-block__plainview__event {
+		font-style: normal;
+		line-height: normal;
+
+		h4 {
+			font-size: 16px;
+		}
+
+		&__time {
+			font-size: 14px;
+			margin-bottom: 7px;
+		}
+
+		&__desc {
+			font-size: 14px;
+			line-height: 20px; /* 142.857% */
+		}
+	}
+}

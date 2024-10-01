@@ -1,0 +1,114 @@
+@import '../../../Common/assets/scss/variables';
+@import '../../../Common/assets/scss/include-media';
+
+.sugar-calendar-event-list-block__listview {
+	border-top: 1px solid #D6D6D6;
+	display: flex;
+	flex-direction: column;
+	gap: 50px;
+	padding: 50px 0;
+
+	@include media('<tablet') {
+		gap: $spacing-md;
+		padding: $spacing-md 0;
+	}
+
+	&__event {
+		display: flex;
+		font-style: normal;
+		gap: 30px;
+		line-height: normal;
+
+		@include media('<tablet') {
+			gap: $spacing-md;
+		}
+
+		&__day {
+			flex: 0 0 76px;
+
+			&__block {
+				border-radius: $radius-lg;
+				background: $background-light;
+				padding: 15px;
+				text-align: center;
+
+				&-name {
+					color: $text-color-tertiary;
+					font-size: 14px;
+					font-weight: 500;
+					text-transform: uppercase;
+
+					@include media('<tablet') {
+						font-size: 12px;
+					}
+				}
+
+				&-num {
+					color: $text-color-primary;
+					font-size: 36px;
+					font-weight: 700;
+
+					@include media('<tablet') {
+						font-size: 24px;
+					}
+				}
+			}
+		}
+
+		&__body {
+			display: flex;
+			flex: 1;
+			gap: 30px;
+			justify-content: space-between;
+
+			@include media('<tablet') {
+				flex-direction: column;
+				gap: $spacing-sm;
+			}
+
+			&__content {
+				@include media('<tablet') {
+					order: 2;
+				}
+
+				h4 {
+					font-size: 24px;
+				}
+
+				&__time {
+					font-size: 15px;
+				}
+
+				&__desc {
+					font-size: 15px;
+					line-height: 22px; /* 146.667% */
+					margin-top: 15px;
+
+					@include media('<tablet') {
+						font-size: 14px;
+						line-height: 20px; /* 142.857% */
+						margin-top: 7px;
+					}
+				}
+			}
+
+			&__image {
+				flex: 0 0 50%;
+				max-width: 340px;
+
+				@include media('<tablet') {
+					flex: initial;
+					max-width: none;
+					order: 1;
+				}
+
+				&__container {
+					background: lightgray 50% / cover no-repeat;
+					border-radius: $radius-lg;
+					height: 190.5px;
+					width: 100%;
+				}
+			}
+		}
+	}
+}

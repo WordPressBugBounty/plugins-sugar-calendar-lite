@@ -1,0 +1,48 @@
+.sugar-calendar-setting-row#sugar-calendar-setting-row-stripe-connect a.sugar-calendar-stripe-connect {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 24px;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 19px;
+  text-decoration: none;
+  color: #fff;
+  background-color: #635BFF;
+  border-radius: 4px;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-stripe-connect a.sugar-calendar-stripe-connect:focus {
+  border: none;
+  box-shadow: none;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-stripe-connect a.sugar-calendar-stripe-connect:after {
+  display: inline-block;
+  content: "";
+  mask: url("../../../images/features/event-ticketing/stripe-logo.svg") center center no-repeat;
+  mask-size: contain;
+  background-color: #fff;
+  width: 41px;
+  height: 18px;
+  margin-left: 6px;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-receipt-message .sugar-calendar-setting-field dl, .sugar-calendar-setting-row#sugar-calendar-setting-row-ticket-message .sugar-calendar-setting-field dl {
+  margin-bottom: 0;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-receipt-message .sugar-calendar-setting-field dl dt, .sugar-calendar-setting-row#sugar-calendar-setting-row-ticket-message .sugar-calendar-setting-field dl dt {
+  clear: both;
+  width: 140px;
+  text-align: left;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-receipt-message .sugar-calendar-setting-field dl dt,
+.sugar-calendar-setting-row#sugar-calendar-setting-row-receipt-message .sugar-calendar-setting-field dl dd, .sugar-calendar-setting-row#sugar-calendar-setting-row-ticket-message .sugar-calendar-setting-field dl dt,
+.sugar-calendar-setting-row#sugar-calendar-setting-row-ticket-message .sugar-calendar-setting-field dl dd {
+  margin: 0;
+  width: auto;
+  float: left;
+}
+.sugar-calendar-setting-row#sugar-calendar-setting-row-receipt-message .sugar-calendar-setting-field dl:after, .sugar-calendar-setting-row#sugar-calendar-setting-row-ticket-message .sugar-calendar-setting-field dl:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2ZlYXR1cmVzL2V2ZW50LXRpY2tldGluZy9hZG1pbi1zZXR0aW5ncy5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdHO0VBQ0M7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNDO0VBQ0E7O0FBR0Q7RUFDQztFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQVNGO0VBQ0M7O0FBRUE7RUFDQztFQUNBO0VBQ0E7O0FBR0Q7QUFBQTtBQUFBO0VBRUM7RUFDQTtFQUNBOztBQVNEO0VBQ0M7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvZmVhdHVyZXMvZXZlbnQtdGlja2V0aW5nL2FkbWluLXNldHRpbmdzLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi5zdWdhci1jYWxlbmRhci1zZXR0aW5nLXJvdyB7XG5cdCYjc3VnYXItY2FsZW5kYXItc2V0dGluZy1yb3ctc3RyaXBlLWNvbm5lY3Qge1xuXHRcdGEge1xuXHRcdFx0Ji5zdWdhci1jYWxlbmRhci1zdHJpcGUtY29ubmVjdCB7XG5cdFx0XHRcdGRpc3BsYXk6IGlubGluZS1mbGV4O1xuXHRcdFx0XHRhbGlnbi1pdGVtczogY2VudGVyO1xuXHRcdFx0XHRwYWRkaW5nOiA4cHggMjRweDtcblx0XHRcdFx0Zm9udC1zaXplOiAxNXB4O1xuXHRcdFx0XHRmb250LXN0eWxlOiBub3JtYWw7XG5cdFx0XHRcdGZvbnQtd2VpZ2h0OiA0MDA7XG5cdFx0XHRcdGxpbmUtaGVpZ2h0OiAxOXB4O1xuXHRcdFx0XHR0ZXh0LWRlY29yYXRpb246IG5vbmU7XG5cdFx0XHRcdGNvbG9yOiAjZmZmO1xuXHRcdFx0XHRiYWNrZ3JvdW5kLWNvbG9yOiAjNjM1QkZGO1xuXHRcdFx0XHRib3JkZXItcmFkaXVzOiA0cHg7XG5cblx0XHRcdFx0Jjpmb2N1cyB7XG5cdFx0XHRcdFx0Ym9yZGVyOiBub25lO1xuXHRcdFx0XHRcdGJveC1zaGFkb3c6IG5vbmU7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHQmOmFmdGVyIHtcblx0XHRcdFx0XHRkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG5cdFx0XHRcdFx0Y29udGVudDogXCJcIjtcblx0XHRcdFx0XHRtYXNrOiB1cmwoXCIuLi8uLi8uLi9pbWFnZXMvZmVhdHVyZXMvZXZlbnQtdGlja2V0aW5nL3N0cmlwZS1sb2dvLnN2Z1wiKSBjZW50ZXIgY2VudGVyIG5vLXJlcGVhdDtcblx0XHRcdFx0XHRtYXNrLXNpemU6IGNvbnRhaW47XG5cdFx0XHRcdFx0YmFja2dyb3VuZC1jb2xvcjogI2ZmZjtcblx0XHRcdFx0XHR3aWR0aDogNDFweDtcblx0XHRcdFx0XHRoZWlnaHQ6IDE4cHg7XG5cdFx0XHRcdFx0bWFyZ2luLWxlZnQ6IDZweDtcblx0XHRcdFx0fVxuXHRcdFx0fVxuXHRcdH1cblx0fVxuXG5cdCYjc3VnYXItY2FsZW5kYXItc2V0dGluZy1yb3ctcmVjZWlwdC1tZXNzYWdlLFxuXHQmI3N1Z2FyLWNhbGVuZGFyLXNldHRpbmctcm93LXRpY2tldC1tZXNzYWdlIHtcblx0XHQuc3VnYXItY2FsZW5kYXItc2V0dGluZy1maWVsZCB7XG5cdFx0XHRkbCB7XG5cdFx0XHRcdG1hcmdpbi1ib3R0b206IDA7XG5cblx0XHRcdFx0ZHQge1xuXHRcdFx0XHRcdGNsZWFyOiBib3RoO1xuXHRcdFx0XHRcdHdpZHRoOiAxNDBweDtcblx0XHRcdFx0XHR0ZXh0LWFsaWduOiBsZWZ0O1xuXHRcdFx0XHR9XG5cblx0XHRcdFx0ZHQsXG5cdFx0XHRcdGRkIHtcblx0XHRcdFx0XHRtYXJnaW46IDA7XG5cdFx0XHRcdFx0d2lkdGg6IGF1dG87XG5cdFx0XHRcdFx0ZmxvYXQ6IGxlZnQ7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHRkZCB7XG5cdFx0XHRcdFx0Y29kZSB7XG5cblx0XHRcdFx0XHR9XG5cdFx0XHRcdH1cblxuXHRcdFx0XHQmOmFmdGVyIHtcblx0XHRcdFx0XHRjb250ZW50OiBcIlwiO1xuXHRcdFx0XHRcdGRpc3BsYXk6IGJsb2NrO1xuXHRcdFx0XHRcdGNsZWFyOiBib3RoO1xuXHRcdFx0XHR9XG5cdFx0XHR9XG5cdFx0fVxuXHR9XG59XG4iXX0= */

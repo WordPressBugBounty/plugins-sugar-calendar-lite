@@ -1,0 +1,97 @@
+@import '../variables';
+@import '../mixins';
+@import '../include-media';
+
+.sugar-calendar-block__popover__month_selector {
+	@include popover;
+
+	&__container {
+		@include popover-container;
+
+		line-height: normal;
+		padding: $spacing-md;
+
+		@include media('<tablet') {
+			padding: 10px 10px 5px 20px;
+		}
+
+		.sugar-calendar-block__controls__datepicker {
+			width: 320px;
+
+			.datepicker-years .table-condensed tbody tr td span.year,
+			.datepicker-months .table-condensed tbody tr td span.month {
+				border-radius: 3px;
+				cursor: pointer;
+				display: block;
+				float: left;
+				margin-right: $spacing-md;
+				margin-top: $spacing-md;
+				padding: $radius-lg 0;
+				text-align: center;
+				width: 65px;
+
+				&:nth-child(4n) {
+					margin-right: 0;
+				}
+
+				&.active,
+				&.active:hover {
+					background: var(--accent-color);
+					color: #FFF;
+				}
+
+				&:hover {
+					background: $border-hover-color;
+				}
+			}
+
+			.datepicker-days .table-condensed {
+				thead tr th.dow {
+					padding-top: $spacing-lg;
+				}
+
+				tbody tr td.day {
+					cursor: pointer;
+					padding: 6px;
+
+					&.active,
+					&.active:hover {
+						background: var(--accent-color);
+						border-radius: 3px;
+						color: #FFF;
+					}
+
+					&:hover {
+						background: $border-hover-color;
+					}
+				}
+			}
+
+			.table-condensed {
+				border: 0;
+				border-collapse: collapse;
+				margin: 0;
+				width: 100%;
+
+				th, td {
+					background: transparent;
+					border: 0;
+					padding: 0;
+					text-align: center;
+				}
+
+				thead th.prev svg,
+				thead th.next svg {
+					margin: auto;
+				}
+
+				thead th.prev,
+				thead th.next,
+				thead th.datepicker-switch {
+					cursor: pointer;
+					vertical-align: middle;
+				}
+			}
+		}
+	}
+}

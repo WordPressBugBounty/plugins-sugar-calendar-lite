@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "sugar-calendar/event-list-block",
+	"version": "1.0.0",
+	"title": "Events List",
+	"category": "sugar-calendar",
+	"description": "Sugar Calendar block for displaying the events list.",
+	"example": {},
+	"attributes": {
+		"blockId": {
+			"type": "string",
+			"default": ""
+		},
+		"display": {
+			"type": "string",
+			"default": "list"
+		},
+		"accentColor": {
+			"type": "string",
+			"default": "#5685BD"
+		},
+		"linksColor": {
+			"type": "string",
+			"default": "#000000D9"
+		},
+		"calendars": {
+			"type": "array",
+			"default": []
+		},
+		"allowUserChangeDisplay": {
+			"type": "boolean",
+			"default": true
+		},
+    "showFeaturedImages": {
+			"type": "boolean",
+			"default": true
+		},
+    "showDescriptions": {
+			"type": "boolean",
+			"default": true
+		}
+  },
+	"textdomain": "sugar-calendar-event-list-block",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"script": [
+		"sc-frontend-blocks-event-list-js"
+	]
+}

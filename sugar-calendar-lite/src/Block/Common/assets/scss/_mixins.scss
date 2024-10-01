@@ -1,0 +1,37 @@
+@import 'variables';
+
+@mixin popover {
+	display: none;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: max-content;
+	z-index: 99;
+}
+
+@mixin popover-container {
+	background: #FFF;
+	border-radius: 9px;
+	border: 1px solid $border-color-secondary;
+	box-shadow: 0 12px 16px 0 $border-hover-color;
+}
+
+@mixin transparent-button {
+	background: transparent;
+	border: 0;
+	outline: none;
+}
+
+@mixin calendar-settings-flex {
+	align-items: center;
+	display: flex;
+}
+
+@mixin calendar-settings-btn {
+	@include calendar-settings-flex;
+
+	background: transparent;
+	border: 1px solid $border-color-secondary;
+	border-radius: 6px;
+	outline: none;
+}

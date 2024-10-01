@@ -1,0 +1,60 @@
+@import '../../../Common/assets/scss/variables';
+@import '../../../Common/assets/scss/include-media';
+
+.sugar-calendar-event-list-block__gridview {
+	border-top: 1px solid #D6D6D6;
+	column-gap: 50px;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	row-gap: 50px;
+	padding: 50px 0;
+
+	@include media('<tablet') {
+		column-gap: normal;
+		display: flex;
+		flex-direction: column;
+		row-gap: $spacing-md;
+		padding: $spacing-md 0;
+	}
+
+	.sugar-calendar-event-list-block__gridview__event {
+		&__body {
+			&__image {
+				margin-bottom: 30px;
+
+				@include media('<tablet') {
+					margin-bottom: $spacing-sm;
+				}
+
+				&__container {
+					background: lightgray 50% / cover no-repeat;
+					border-radius: $radius-lg;
+					height: 190px;
+				}
+			}
+
+			&__content {
+				font-style: normal;
+				line-height: normal;
+
+				h4 {
+					font-size: 20px;
+				}
+
+				&__time {
+					font-size: 14px;
+				}
+
+				&__desc {
+					font-size: 14px;
+					line-height: 20px; /* 142.857% */
+					margin-top: 15px;
+
+					@include media('<tablet') {
+						margin-top: 7px;
+					}
+				}
+			}
+		}
+	}
+}
