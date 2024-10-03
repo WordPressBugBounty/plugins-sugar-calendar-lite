@@ -237,6 +237,21 @@ class SettingsGeneralTab extends Settings {
 			]
 		);
 
+		// Dark Mode.
+		UI::select_input(
+			[
+				'id'          => 'single_event_appearance_mode',
+				'name'        => 'single_event_appearance_mode',
+				'options'     => [
+					'light' => esc_html__( 'Light', 'sugar-calendar' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+				],
+				'value'       => Editor\get_single_event_appearance_mode(),
+				'label'       => esc_html__( 'Single Event Page Appearance', 'sugar-calendar' ),
+				'description' => __( 'Adjust the frontend display of event single page.', 'sugar-calendar' ),
+			]
+		);
+
 		// Editing heading.
 		UI::heading(
 			[
@@ -483,6 +498,7 @@ class SettingsGeneralTab extends Settings {
 			'custom_fields',
 			'default_calendar',
 			'hide_announcements',
+			'single_event_appearance_mode',
 		];
 
 		foreach ( $settings as $key ) {
@@ -537,6 +553,11 @@ class SettingsGeneralTab extends Settings {
 
 				case 'timezone':
 					$value = sanitize_option( 'timezone_string', $value );
+					break;
+
+				case 'single_event_appearance_mode':
+					$modes = [ 'light', 'dark' ];
+					$value = in_array( $value, $modes, true ) ? $value : $modes[0];
 					break;
 			}
 

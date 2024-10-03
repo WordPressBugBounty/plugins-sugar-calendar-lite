@@ -17,6 +17,15 @@ class Checkout {
 	public $errors;   // Submission errors
 	public $stripe;   // Stripe gateway
 
+	/**
+	 * Nonce key for the checkout form.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @var string
+	 */
+	const NONCE_KEY = 'sc_et_nonce';
+
 	public function __construct() {
 
 		$this->gateways = apply_filters( 'sc_et_gateways', array(
@@ -73,9 +82,20 @@ class Checkout {
 		wp_send_json_success( array( 'success' => true, 'data' => $data ) );
 	}
 
+	/**
+	 * Process the checkout form.
+	 *
+	 * @since 3.1.0
+	 * @since {VERDION} Added nonce verification.
+	 */
 	public function process_form() {
 
-		if ( ! isset( $_POST['sc_et_action'] ) || ( 'checkout' !== $_POST['sc_et_action'] ) ) {
+		if (
+			! isset( $_POST['sc_et_action'] ) ||
+			$_POST['sc_et_action'] !== 'checkout' ||
+			! isset( $_POST['sc_et_nonce'] ) ||
+			! wp_verify_nonce( wp_unslash( $_POST['sc_et_nonce'] ), self::NONCE_KEY ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		) {
 			return;
 		}
 

@@ -1,5 +1,120 @@
 @import '../../Common/assets/scss/include-media';
 @import '../../Common/assets/scss/variables';
+@import '../../Common/assets/scss/mixins';
+
+// Dark mode.
+@mixin dark-mode-list {
+
+	&[data-appearance="dark"] {
+
+		.sugar-calendar-event-list-block__base-container {
+
+			// Counter for @import '../../Common/assets/scss/no-events'.
+			.sugar-calendar-block__base-container__no-events {
+
+				border-top: 1px solid $border-hover-color-dark;
+
+				&__msg {
+					background: $border-hover-color-dark;
+					color: $text-color-dark-primary;
+				}
+			}
+
+			// Counter for @import './views/listview'.
+			.sugar-calendar-event-list-block__listview {
+
+				border-top: 1px solid $cell-border-color-dark;
+
+				&__event {
+
+					&__day {
+
+						&__block {
+
+							background: $background-dark;
+
+							&-name {
+								color: $text-color-dark-tertiary;
+							}
+
+							&-num {
+								color: $text-color-dark-primary;
+							}
+						}
+					}
+
+					&__body {
+
+						&__image {
+
+							&__container {
+								background: darkgray 50% / cover no-repeat;
+							}
+						}
+					}
+				}
+			}
+
+			// Counter for @import './views/gridview'.
+			.sugar-calendar-event-list-block__gridview {
+
+				border-top: 1px solid $cell-border-color-dark;
+
+				.sugar-calendar-event-list-block__gridview__event {
+					&__body {
+						&__image {
+							&__container {
+								background: darkgray 50% / cover no-repeat;
+							}
+						}
+					}
+				}
+			}
+
+			// Counter for @import './views/plainview'.
+			.sugar-calendar-event-list-block__plainview {
+				.sugar-calendar-event-list-block__plainview__event {
+					&__desc {
+						color: $text-color-dark-primary;
+					}
+				}
+			}
+
+			.sugar-calendar-event-list-block__event__title {
+				color: var(--links-color, $text-color-dark-primary);
+
+				a {
+					color: var(--links-color, $text-color-dark-primary);
+				}
+			}
+
+			.sugar-calendar-event-list-block__event__datetime {
+				color: $text-color-dark-tertiary;
+			}
+
+			.sugar-calendar-event-list-block__event__desc {
+				color: $text-color-dark-primary;
+			}
+		}
+
+		.sugar-calendar-event-list-block__footer {
+			border-top: 1px solid $border-hover-color-dark;
+		}
+
+		button.sugar-calendar-event-list-block__footer__prev_btn,
+		button.sugar-calendar-event-list-block__footer__next_btn {
+			background: rgba(0, 0, 0, 0.50);
+			border: 1px solid $border-color-dark-secondary;
+			color: $text-color-dark-secondary;
+
+			&:hover {
+				background: $border-hover-color-dark;
+				border-color: transparent;
+				color: $text-color-dark-primary;
+			}
+		}
+	}
+}
 
 .sugar-calendar-event-list-block {
 	@import '../../Common/assets/scss/controls';
@@ -126,6 +241,9 @@
 			}
 		}
 	}
+
+	@include dark-mode;
+	@include dark-mode-list;
 }
 
 .sugar-calendar-block-hide-element {

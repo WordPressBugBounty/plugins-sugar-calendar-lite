@@ -9,6 +9,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\Event;
 use Sugar_Calendar\Helpers;
 
 /**
@@ -62,86 +63,120 @@ class Stripe extends Checkout {
 	 * Contact the Stripe API and attempt to create a Payment Intent.
 	 *
 	 * @since 1.0.0
+	 * @since 3.3.0 Add nonce check and refactor.
 	 */
-	public function create_payment_intent() {
+	public function create_payment_intent() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
-		// Load the Stripe SDK
-		$this->load_sdk();
+		check_ajax_referer( Checkout::NONCE_KEY, 'nonce' );
 
-		// Get the Event ID
-		$event_id = ! empty( $_POST['event_id'] )
-			? absint( $_POST['event_id'] )
-			: 0;
+		$event_id = ! empty( $_POST['event_id'] ) ? absint( $_POST['event_id'] ) : 0;
+		$event    = sugar_calendar_get_event( $event_id );
 
-		// Get the quantity
-		$quantity = ! empty( $_POST['quantity'] )
-			? absint( $_POST['quantity'] )
-			: 0;
-
-		// Get the Email
-		$email = ! empty( $_POST['email'] )
-			? sanitize_email( $_POST['email'] )
-			: '';
-
-		// Get the customer from Stripe
-		$customer = Functions\get_stripe_secret_key()
-			? $this->get_customer( $email )
-			: false;
-
-		// Get our start date / time
-		$event = sugar_calendar_get_event( $event_id );
-
-		// Format
-		if ( ! empty( $event ) ) {
-			$format      = sc_get_date_format() . ' ' . sc_get_time_format();
-			$datetime    = $event->format_date( $format, $event->start );
-			$title       = $event->title;
-			$description = sprintf( esc_html__( 'Event ticket for %s on %s', 'sugar-calendar' ), $title, $datetime );
-
-			// Event is missing
-		} else {
-			$description = esc_html__( 'No event found for this ticket', 'sugar-calendar' );
+		if ( empty( $event ) ) {
+			wp_send_json_error(
+				[
+					'msg'     => esc_html__( 'No event found for this request.', 'sugar-calendar' ),
+					'sandbox' => false,
+				]
+			);
 		}
 
-		// Get payment intent info
-		$amount    = $this->get_amount( $event_id, $quantity );
-		$currency  = strtolower( Functions\get_currency() );
-		$statement = apply_filters( 'sc_et_stripe_statement_descriptor', esc_html__( 'Event Tickets', 'sugar-calendar' ) );
+		$quantity   = ! empty( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
+		$amount     = $this->get_amount( $event_id, $quantity );
+		$is_sandbox = Functions\is_sandbox();
 
-		// Stripe key exists, so create an intent via the API
-		if ( ! empty( $event ) && ! empty( $customer->id ) && Functions\get_stripe_secret_key() ) {
+		if ( empty( $amount ) ) {
+			// Do not proceed to Stripe processing if the amount is zero (ticket is free).
+			wp_send_json_success(
+				[
+					'is_free' => true,
+					'sandbox' => $is_sandbox,
+				]
+			);
+		}
 
-			$args = [
-				'amount'               => $amount,
-				'currency'             => $currency,
-				'statement_descriptor' => $statement,
-				'receipt_email'        => $email,
-				'customer'             => $customer->id,
-				'description'          => $description,
-				'metadata'             => [
-					'event_id' => $event_id,
-				],
-			];
+		if ( empty( Functions\get_stripe_secret_key() ) && ! $is_sandbox ) {
+			wp_send_json_error(
+				[
+					'msg'     => esc_html__( 'No Stripe API key found.', 'sugar-calendar' ),
+					'sandbox' => false,
+				]
+			);
+		}
 
-			if ( ! Helpers::is_license_valid() || ! sugar_calendar()->is_pro() || Helpers::is_application_fee_supported() ) {
-				$args['application_fee_amount'] = (int) round( $amount * 0.03, 2 );
-			}
+		$email  = ! empty( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$intent = $this->send_payment_intent_create( $email, $event, $amount );
 
-			// Send payment intent to Stripe API
-			$intent = \Stripe\PaymentIntent::create( $args );
-
-			// Send the response as success
+		if ( ! empty( $intent ) ) {
 			wp_send_json_success( $intent );
 		}
 
-		// Always succeed if sandboxed
-		if ( Functions\is_sandbox() ) {
+		// Always succeed if sandboxed.
+		if ( $is_sandbox ) {
 			wp_send_json_success( [ 'sandbox' => true ] );
-
-			// Fail if not sandboxed
 		} else {
 			wp_send_json_error( [ 'sandbox' => false ] );
 		}
+	}
+
+	/**
+	 * Send the Create Payment Intent request to the Stripe API.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param string $email  Customer's email address.
+	 * @param Event  $event  SC Event object.
+	 * @param double $amount The amount to charge.
+	 *
+	 * @return false|\Stripe\PaymentIntent
+	 */
+	private function send_payment_intent_create( $email, $event, $amount ) {
+
+		// Load the Stripe SDK.
+		$this->load_sdk();
+
+		$customer = $this->get_customer( $email );
+
+		if ( empty( $customer->id ) ) {
+			return false;
+		}
+
+		/**
+		 * Filter the statement descriptor for the Stripe payment.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param string $statement_descriptor The statement descriptor.
+		 */
+		$statement   = apply_filters( 'sc_et_stripe_statement_descriptor', esc_html__( 'Event Tickets', 'sugar-calendar' ) ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		$description = sprintf(
+			/* translators: %1$s: Event title, %2$s: Event date. */
+			esc_html__( 'Event ticket for %1$s on %2$s', 'sugar-calendar' ),
+			$event->title,
+			$event->format_date(
+				sc_get_date_format() . ' ' . sc_get_time_format(),
+				$event->start
+			)
+		);
+
+		$args = [
+			'amount'               => $amount,
+			'currency'             => strtolower( Functions\get_currency() ),
+			'statement_descriptor' => $statement,
+			'receipt_email'        => $email,
+			'customer'             => $customer->id,
+			'description'          => $description,
+			'metadata'             => [
+				'event_id' => $event->id,
+			],
+		];
+
+		if ( ! Helpers::is_license_valid() || ! sugar_calendar()->is_pro() || Helpers::is_application_fee_supported() ) {
+			$args['application_fee_amount'] = (int) round( $amount * 0.03, 2 );
+		}
+
+		// phpcs:ignore WPForms.PHP.BackSlash.UseShortSyntax
+		return \Stripe\PaymentIntent::create( $args );
 	}
 
 	/**
@@ -290,23 +325,30 @@ class Stripe extends Checkout {
 	}
 
 	/**
+	 * Trigger after the checkout is complete.
 	 *
 	 * @since 1.0.0
+	 * @since 3.3.0 Do not send the request to Stripe if the amount is zero.
 	 *
-	 * @param int   $order_id
-	 * @param array $order_data
+	 * @param int   $order_id   The order ID.
+	 * @param array $order_data The order data.
 	 */
 	public function after_complete( $order_id = 0, $order_data = [] ) {
 
-		// Bail if no Stripe connection
+		if (
+			empty( $order_data['total'] ) ||
+			(float) $order_data['total'] <= 0
+		) {
+			return;
+		}
+
 		if ( ! Functions\get_stripe_secret_key() ) {
 			return;
 		}
 
-		// Load the SDK
 		$this->load_sdk();
 
-		// Store order ID in Stripe meta data
+		// Store order ID in Stripe meta data.
 		\Stripe\PaymentIntent::update(
 			$order_data['transaction_id'],
 			[

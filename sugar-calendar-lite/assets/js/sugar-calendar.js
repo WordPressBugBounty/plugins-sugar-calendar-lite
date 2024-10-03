@@ -281,17 +281,32 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 */
 	SettingsPopoverEvents.prototype.show = function ( $button, $popover, key ) {
 
+		const isMobile = window.innerWidth < 768;
+
+		let middlewares = [
+			FloatingUIDOM.offset( 10 ),
+			FloatingUIDOM.shift(),
+		];
+
+		// If the popover is happening on mobile,
+		// scroll the button into view.
+		// Otherwise, do nothing but flip the popover.
+		if ( isMobile ) {
+
+			$button[0].scrollIntoView( {
+				behavior: 'smooth',
+			} );
+		} else {
+			middlewares.push( FloatingUIDOM.flip() );
+		}
+
 		// Computer for the popover position.
 		FloatingUIDOM.computePosition(
 			$button[0],
 			$popover[0],
 			{
 				placement: key === 'calendar_selector' ? 'bottom-end' : 'bottom-start',
-				middleware: [
-					FloatingUIDOM.offset( 10 ),
-					FloatingUIDOM.flip(),
-					FloatingUIDOM.shift()
-				]
+				middleware: middlewares,
 			}
 		).
 		then( ({x, y} ) => {

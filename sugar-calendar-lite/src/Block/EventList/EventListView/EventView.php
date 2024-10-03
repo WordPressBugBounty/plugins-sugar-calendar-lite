@@ -193,17 +193,30 @@ class EventView {
 	 */
 	private function get_icons_display() {
 
+		// In dark mode?
+		$is_dark_mode = $this->block->get_appearance_mode() === 'dark';
+
 		$icons = [];
 
 		if ( ! empty( $this->event->recurrence ) ) {
-			$icons[] = Helpers::get_svg_url( 'recur' );
+
+			// Icons: recur, recur-dark.
+			$icons[] = Helpers::get_svg_url(
+				sprintf(
+					'recur%s',
+					$is_dark_mode ? '-dark' : ''
+				)
+			);
 		}
 
-		if ( $this->event->is_multi() ) {
-			$icons[] = Helpers::get_svg_url( 'calendar-multiday' );
-		} else {
-			$icons[] = Helpers::get_svg_url( 'calendar-day' );
-		}
+		// Icons: calendar-day, calendar-day-dark, calendar-multiday, calendar-multiday-dark.
+		$icons[] = Helpers::get_svg_url(
+			sprintf(
+				'%1$s%2$s',
+				$this->event->is_multi() ? 'calendar-multiday' : 'calendar-day',
+				$is_dark_mode ? '-dark' : ''
+			)
+		);
 
 		/**
 		 * Filters the icons to display in the event list block.

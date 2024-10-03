@@ -1325,12 +1325,13 @@ class Base extends WP_List_Table {
 	 * Get a global request variable.
 	 *
 	 * @since 2.0.0
+	 * @since 3.3.0 Update return value to mixed.
 	 *
 	 * @param string $var      Variable name.
 	 * @param string $sanitize Sanitiazion function.
 	 * @param string $default  Default value.
 	 *
-	 * @return string
+	 * @return mixed
 	 */
 	protected function get_request_var( $var = '', $sanitize = 'sanitize_text_field', $default = '' ) {
 

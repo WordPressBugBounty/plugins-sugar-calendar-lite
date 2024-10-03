@@ -9,6 +9,7 @@ namespace Sugar_Calendar;
 
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Notifications;
+use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Block\Loader;
 use Sugar_Calendar\Migrations\Migrations;
 use Sugar_Calendar\Tasks\Tasks;
@@ -71,7 +72,7 @@ final class Plugin {
 		// Setup the singleton
 		self::setup_instance( $file );
 
-		// Bootstrap
+		// Bootstrap.
 		self::$instance->setup_files();
 		self::$instance->setup_application();
 		self::$instance->hooks();
@@ -220,6 +221,7 @@ final class Plugin {
 
 		if ( is_admin() ) {
 			$this->get_admin();
+			$this->get_importers();
 		}
 
 		if ( $this->is_pro() ) {
@@ -855,5 +857,26 @@ final class Plugin {
 		$key     = $license['key'] ?? '';
 
 		return $key;
+	}
+
+	/**
+	 * Get the importers.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return Importers
+	 */
+	public function get_importers() {
+
+		static $importers;
+
+		if ( ! isset( $importers ) ) {
+
+			$importers = new Importers();
+
+			$importers->hooks();
+		}
+
+		return $importers;
 	}
 }

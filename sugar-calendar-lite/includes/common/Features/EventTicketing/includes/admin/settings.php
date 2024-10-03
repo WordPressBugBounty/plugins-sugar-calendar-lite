@@ -9,6 +9,8 @@ use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\Helpers\Helpers;
+use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Admin\Area;
 
 /**
  * Register page ids.
@@ -254,15 +256,6 @@ function payments_section() {
 		]
 	);
 
-	// Stripe integration.
-	UI::field_wrapper(
-		[
-			'label' => esc_html__( 'Connection Status', 'sugar-calendar' ),
-			'id'    => 'stripe-connect',
-		],
-		display_stripe_connect_field( $is_sandbox )
-	);
-
 	// Test mode
 	$test_mode_description = sprintf( /* translators: %1$s - test mode help; %2$s - link to Stripe dashboard; %3$s - link text. */
 		'%1$s <a href="%2$s" target="_blank"> %3$s</a>.',
@@ -288,6 +281,15 @@ function payments_section() {
 			'label'       => esc_html__( 'Test Mode', 'sugar-calendar' ),
 			'description' => $test_mode_description,
 		]
+	);
+
+	// Stripe integration.
+	UI::field_wrapper(
+		[
+			'label' => esc_html__( 'Connection Status', 'sugar-calendar' ),
+			'id'    => 'stripe-connect',
+		],
+		display_stripe_connect_field( $is_sandbox )
 	);
 
 	$receipt_page_description = sprintf( /* translators: %1$s - field description; %2$s - configuration hints; %3$s - shortcode. */
@@ -732,16 +734,14 @@ function add_page_states( $states = [], $post = false ) {
 }
 
 /**
- * Save the settings.
+ * Get setting names.
  *
- * @since 2.2.4
- * @since 3.1.0 Loop through the data instead of the settings.
+ * @since 3.3.0
  *
- * @param array $post_data Array containing the data to be saved.
+ * @return array
  */
-function handle_post( $post_data ) {
-
-	$settings = [
+function get_setting_names() {
+	return [
 		'sandbox',
 		'receipt_page',
 		'currency',
@@ -756,6 +756,29 @@ function handle_post( $post_data ) {
 		'ticket_subject',
 		'ticket_message',
 	];
+}
+
+/**
+ * Save the settings.
+ *
+ * @since 2.2.4
+ * @since 3.1.0 Loop through the data instead of the settings.
+ * @since 3.3.0 Decouple setting field names.
+ *
+ * @param array $post_data Array containing the data to be saved.
+ */
+function handle_post( $post_data ) {
+
+	// Work only in payments or tickets section.
+	if (
+		! isset( $_GET['section'] )
+		||
+		! in_array( $_GET['section'], [ 'payments', 'tickets' ], true )
+	) {
+		return;
+	}
+
+	$settings = get_setting_names();
 
 	$options = get_option( 'sc_et_settings', [] );
 
@@ -773,4 +796,93 @@ function handle_post( $post_data ) {
 	}
 
 	update_option( 'sc_et_settings', $options );
+
+	WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar' ), WP::ADMIN_NOTICE_SUCCESS );
+}
+
+/**
+ * Handle AJAX requests for saving settings.
+ *
+ * @since 3.3.0
+ *
+ * @return void
+ */
+function handle_post_ajax() {
+
+	// Bail if not an AJAX request.
+	if ( ! wp_doing_ajax() ) {
+		return;
+	}
+
+	// Verify the nonce.
+	if ( ! check_ajax_referer( Area::SLUG, 'nonce', false ) ) {
+		wp_send_json_error(
+			[
+				'success' => false,
+				'message' => esc_html__( 'Nonce verification failed.', 'sugar-calendar' ),
+			]
+		);
+	}
+
+	// Exit if no options are set.
+	if (
+		! isset( $_POST['options'] )
+		||
+		! is_array( $_POST['options'] )
+		||
+		empty( $_POST['options'] )
+	) {
+		wp_send_json_error(
+			[
+				'success' => false,
+				'message' => esc_html__( 'No options were set.', 'sugar-calendar' ),
+			]
+		);
+	}
+
+	// Posted data.
+	$posted_data = $_POST['options'];
+
+	// Setting names.
+	$setting_names = get_setting_names();
+
+	// Current options.
+	$options = get_option( 'sc_et_settings', [] );
+
+	// Loop through the data and sanitize.
+	foreach ( $posted_data as $key => $value ) {
+
+		// Skip if not a setting.
+		if ( ! in_array( $key, $setting_names, true ) ) {
+			continue;
+		}
+
+		// Switch on the key.
+		switch ( $key ) {
+
+			case 'sandbox':
+				$options[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				break;
+
+			default:
+				$options[ $key ] = sanitize_textarea_field( $value );
+				break;
+		}
+	}
+
+	// Save the settings.
+	$is_settings_saved = update_option( 'sc_et_settings', $options );
+
+	$response = [
+		'success' => $is_settings_saved,
+		'message' =>
+			$is_settings_saved
+			?
+			esc_html__( 'Settings saved.', 'sugar-calendar' )
+			:
+			esc_html__( 'Settings not saved.', 'sugar-calendar' ),
+	];
+
+	// Return the response.
+	wp_send_json( $response );
 }

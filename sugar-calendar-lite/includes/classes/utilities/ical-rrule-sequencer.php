@@ -2406,13 +2406,13 @@ class Sequence {
 	 */
 	protected function limit_bysetpos( $limited_dates = array() ) {
 
-		// Default return value
-		$retval = array();
+		// Default return value.
+		$retval = [];
 
-		// Get date count
+		// Get date count.
 		$num = count( $limited_dates );
 
-		// Loop through positions
+		// Loop through positions.
 		foreach ( $this->bysetpos as $pos ) {
 
 			// Reposition if negative...
@@ -2420,11 +2420,13 @@ class Sequence {
 				$pos = $num + $pos + 1;
 			}
 
-			// Add limited date to return value
-			$retval[] = $limited_dates[ $pos - 1 ];
+			// Add limited date to return value.
+			if ( isset( $limited_dates[ $pos - 1 ] ) ) {
+				$retval[] = $limited_dates[ $pos - 1 ];
+			}
 		}
 
-		// Return
+		// Return.
 		return $retval;
 	}
 

@@ -16,6 +16,7 @@ import { InspectorControls, useBlockProps, PanelColorSettings } from '@wordpress
 import {
 	PanelBody,
 	ToggleControl,
+	SelectControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalHeading as Heading
@@ -97,6 +98,34 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes( { linksColor: linksColor } );
 	}
 
+	const onChangeAppearance = ( appearance ) => {
+
+		const predefinedLinksColor = {
+			light: '#000000D9',
+			dark: '#FFFFFF'
+		}
+
+		let appearanceColor = {
+			appearance: appearance,
+		}
+
+		if (
+			appearance === 'dark'
+			&&
+			attributes.linksColor === predefinedLinksColor.light
+		) {
+			appearanceColor.linksColor = predefinedLinksColor.dark;
+		} else if (
+			appearance === 'light'
+			&&
+			attributes.linksColor === predefinedLinksColor.dark
+		) {
+			appearanceColor.linksColor = predefinedLinksColor.light;
+		}
+
+		setAttributes( appearanceColor );
+	}
+
 	return (
 		<>
 			<InspectorControls>
@@ -165,6 +194,16 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						label={ __( 'Show Descriptions', 'sugar-calendar-event-list-block' ) }
 						checked={ attributes.showDescriptions }
 						onChange={ onShowDescriptions }
+					/>
+
+					<SelectControl
+						label={ __( 'Appearance', 'sugar-calendar-block' ) }
+						value={attributes.appearance}
+						options={ [
+							{ label: __( 'Light', 'sugar-calendar-event-list-block' ), value: 'light' },
+							{ label: __( 'Dark', 'sugar-calendar-event-list-block' ), value: 'dark' },
+						] }
+						onChange={ onChangeAppearance }
 					/>
 
 					<Heading

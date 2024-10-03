@@ -46,6 +46,348 @@ $event-margin: 18px;
 	}
 }
 
+@mixin dark-mode-calendar {
+
+	&[data-appearance="dark"] {
+
+		.sugar-calendar-block__loading {
+			border: 5px solid $text-color-dark-tertiary;
+			border-top-color: $text-color-dark-primary;
+		}
+
+		.sugar-calendar-block__calendar-month,
+		.sugar-calendar-block__calendar-week,
+		.sugar-calendar-block__calendar-day {
+			@include media('>=tablet') {
+				border: 1px solid $border-color-dark-secondary;
+			}
+		}
+
+		.sugar-calendar-block__calendar-month {
+
+			// Event Cell
+			.sugar-calendar-block__event-cell {
+
+				&__time {
+					color: $text-color-dark-tertiary;
+
+					&--recur {
+						background: url( "../../../../assets/images/icons/recur-dark.svg" ) no-repeat 0 1px;
+					}
+				}
+
+				&__title {
+					color: $text-color-dark-primary;
+				}
+			}
+
+			&__body__week {
+				&:last-child {
+					.sugar-calendar-block__calendar-month__cell {
+						border-bottom: 0;
+					}
+				}
+
+				> .sugar-calendar-block__calendar-month__cell:last-of-type {
+					border-right: 0;
+				}
+			}
+
+			&__header {
+
+				&__day {
+					border-right: 1px solid $cell-border-color-dark;
+					color: $text-color-dark-secondary;
+				}
+
+				@include media('<tablet') {
+					&__day {
+						border-right: 0;
+					}
+				}
+			}
+
+			&__body {
+
+				&__day {
+
+					border-right: 1px solid $cell-border-color-dark;
+
+					@include media('<tablet') {
+
+						&:hover {
+							background: $cell-border-color-dark;
+						}
+					}
+
+					&-offset {
+						.sugar-calendar-block__calendar-month__body__day__number {
+							color: $text-color-dark-tertiary;
+						}
+					}
+
+					&__number {
+						color: $text-color-dark-primary;
+					}
+				}
+
+				@include media('<tablet') {
+
+					&__day {
+						border-right: 0;
+					}
+				}
+			}
+
+			&__cell {
+				border-bottom: 1px solid $cell-border-color-dark;
+			}
+
+			@include media('<tablet') {
+				&__cell {
+					border-bottom: 0;
+				}
+			}
+		}
+
+		.sugar-calendar-block__mobile_event_list {
+
+			border-top: 1px solid $cell-border-color-dark;
+
+			&__date {
+				color: $text-color-dark-primary;
+			}
+
+			&__events_container {
+
+				.sugar-calendar-block__event-cell {
+
+					.sugar-calendar-block__event-cell__time {
+						color: $text-color-dark-tertiary;
+
+						&--recur {
+							background: url( "../../../../assets/images/icons/recur-dark.svg" ) no-repeat left;
+						}
+					}
+
+					.sugar-calendar-block__event-cell__title {
+						color: $text-color-dark-primary;
+					}
+				}
+			}
+		}
+
+		/**
+		 * Day View Specific
+		 */
+		.sugar-calendar-block__calendar-day {
+
+			&__all-day {
+				.sugar-calendar-block__calendar-day__time-label-cell {
+					border-top: 0;
+				}
+
+				.sugar-calendar-block__calendar-day__event-slot--all-day {
+					border-top: 0;
+				}
+			}
+
+			@include media('<tablet') {
+
+				border-top: 1px solid $border-hover-color-dark;
+
+				&__all-day,
+				.sugar-calendar-block__calendar-day__time-grid {
+
+					.sugar-calendar-block__event-cell {
+
+						.sugar-calendar-block__calendar-week__event-cell__container {
+
+							.sugar-calendar-block__event-cell__desc {
+
+								color: $text-color-dark-primary;
+							}
+						}
+					}
+				}
+			}
+
+			&__event-slot {
+				border-top: 1px solid $cell-border-color-dark;
+			}
+
+			@include media('<tablet') {
+				&__event-slot {
+					border-top: 0;
+				}
+			}
+		}
+
+		/**
+		 * Week View Specific
+		 */
+		.sugar-calendar-block__calendar-week {
+
+			&__header__cell,
+			&__header__spacer {
+				border-right: 1px solid $cell-border-color-dark;
+			}
+
+			@include media('<tablet') {
+				&__header__cell,
+				&__header__spacer {
+					border-right: 0;
+				}
+			}
+
+			&__header__cell:last-child {
+				border-right: 0;
+			}
+
+			&__time-grid__day-col {
+				&:last-child {
+					.sugar-calendar-block__calendar-week__event-slot {
+						border-right: 0;
+					}
+				}
+
+				.sugar-calendar-block__calendar-week__event-slot:last-child {
+					border-bottom: 0;
+				}
+			}
+
+			&__all-day {
+
+				.sugar-calendar-block__calendar-week__event-slot {
+
+					&:last-child {
+						border-right: 0;
+					}
+				}
+			}
+
+			&__event-slot {
+				border-right: 1px solid $cell-border-color-dark;
+				border-top: 1px solid $cell-border-color-dark;
+			}
+
+			@include media('<tablet') {
+				&__event-slot {
+					border-top: 0;
+					border-right: 0;
+				}
+			}
+		}
+
+		.sugar-calendar-block__calendar-week,
+		.sugar-calendar-block__calendar-day {
+
+			/* Event Cell */
+			.sugar-calendar-block__event-cell {
+
+				background: #000;
+
+				&__time {
+					color: $text-color-dark-tertiary;
+
+					&--recur {
+						background: url( "../../../../assets/images/icons/recur-dark.svg" ) no-repeat 0 1px;
+					}
+				}
+
+				&__title {
+					color: $text-color-dark-primary;
+				}
+			}
+
+			&__time-label-cell {
+				border-right: 1px solid $cell-border-color-dark;
+				border-top: 1px solid $cell-border-color-dark;
+				color: $text-color-dark-secondary;
+			}
+
+			&__header {
+
+				&__cell {
+
+					&__name, &__name-mobile {
+						color: $text-color-dark-tertiary;
+					}
+
+					&__num {
+						color: $text-color-dark-secondary;
+					}
+				}
+			}
+
+			/*
+			Mobile
+			*/
+			@include media('<tablet') {
+
+				&__header {
+					border-bottom: 1px solid $cell-border-color-dark;
+
+					&__cell {
+
+						&--active {
+							background: $border-hover-color-dark;
+						}
+
+						@include media('<tablet') {
+							&--active {
+								border-radius: 6px;
+							}
+						}
+					}
+				}
+			}
+
+			&__all-day {
+
+				.sugar-calendar-block__calendar-week__event-cell__container {
+
+					.sugar-calendar-block__event-cell__title {
+						color: $text-color-dark-primary;
+					}
+				}
+			}
+
+			.sugar-calendar-block__calendar-week__time-grid__day-col--active,
+			.sugar-calendar-block__calendar-week__event-slot--all-day--active {
+
+				.sugar-calendar-block__event-cell {
+
+					.sugar-calendar-block__calendar-week__event-cell__container {
+
+						.sugar-calendar-block__event-cell__desc {
+
+							color: $text-color-dark-primary;
+						}
+					}
+				}
+			}
+		}
+
+		// Base container.
+		.sugar-calendar-block__base-container {
+
+			background: rgba(0, 0, 0, 0.50);
+
+			&__overlay {
+				background: $border-hover-color-dark;
+			}
+		}
+
+		@include media('<tablet') {
+			.sugar-calendar-block__base-container {
+
+				background: none;
+			}
+		}
+	}
+}
+
 .sugar-calendar-block {
 
 	@import '../../Common/assets/scss/controls';
@@ -126,6 +468,7 @@ $event-margin: 18px;
 
 	.sugar-calendar-block__base-container {
 		background: rgba(255, 255, 255, 0.50);
+		border-radius: 6px;
 		position: relative;
 
 		&__overlay {
@@ -209,7 +552,7 @@ $event-margin: 18px;
 				-webkit-line-clamp: 1;
 
 				&--recur {
-					background: url( "../../../../assets/images/icons/recur.svg" ) no-repeat 0 1px;
+					background: url( "../../../../assets/images/icons/recur-dark.svg" ) no-repeat 0 1px;
 					text-indent: 15px;
 				}
 			}
@@ -466,8 +809,7 @@ $event-margin: 18px;
 					}
 				}
 
-				.sugar-calendar-block__event-cell__time,
-				{
+				.sugar-calendar-block__event-cell__time {
 					display: none;
 				}
 
@@ -672,8 +1014,7 @@ $event-margin: 18px;
 	 */
 	&__calendar-week {
 		&__header__cell,
-		&__header__spacer,
-		{
+		&__header__spacer {
 			border-right: 1px solid $cell-border-color;
 		}
 
@@ -833,7 +1174,6 @@ $event-margin: 18px;
 
 			@include media('<tablet') {
 				&.sugar-calendar-block__calendar-week__event-cell--has-overlap {
-					box-shadow: 0 0 0 1px #FFF;
 					left: 0 !important;
 					width: 100% !important;
 				}
@@ -1158,4 +1498,7 @@ $event-margin: 18px;
 			}
 		}
 	}
+
+	@include dark-mode;
+	@include dark-mode-calendar;
 }

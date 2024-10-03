@@ -172,7 +172,8 @@ function order_status_label( $status = '' ) {
  * @since 1.0.0
  *
  * @param array $data
- * @return int
+ *
+ * @return bool|int Returns the ticket ID if successful, otherwise `false`.
  */
 function add_ticket( $data = array() ) {
 
@@ -638,15 +639,23 @@ function get_currency() {
 }
 
 /**
- * Sanitize Amount
+ * Sanitize Amount.
  *
  * Returns a sanitized amount by stripping out thousands separators.
  *
  * @since 1.0.0
- * @param string $amount amount amount to format
+ * @since 3.3.0 Added default `$amount` value which is `0`.
+ *
+ * @param string $amount Amount to format.
+ *
  * @return string $amount Newly sanitized amount
  */
 function sanitize_amount( $amount ) {
+
+	// Default.
+	if ( empty( $amount ) ) {
+		$amount = 0;
+	}
 
 	$is_negative   = false;
 	$thousands_sep = Settings\get_setting( 'thousands_separator', ',' );
@@ -831,13 +840,20 @@ function is_zero_decimal_currency() {
 }
 
 /**
- * Formats the currency display
+ * Formats the currency display.
  *
  * @since 1.0.0
- * @param string $amount amount
+ * @since 3.3.0 Handle empty `$amount`.
+ *
+ * @param string $amount The amount.
+ *
  * @return array $currency Currencies displayed correctly
  */
 function currency_filter( $amount ) {
+
+	if ( empty( $amount ) ) {
+		$amount = 0.0;
+	}
 
 	$currency = get_currency();
 	$position = Settings\get_setting( 'currency_position', 'before' );

@@ -16,6 +16,7 @@ import { InspectorControls, useBlockProps, PanelColorSettings } from '@wordpress
 import {
 	PanelBody,
 	ToggleControl,
+	SelectControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalHeading as Heading
@@ -141,6 +142,16 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						label={ __( 'Allow Users to Change Display', 'sugar-calendar-block' ) }
 						checked={ attributes.allowUserChangeDisplay }
 						onChange={ onAllowUserChangeDisplay }
+					/>
+
+					<SelectControl
+						label={ __( 'Appearance', 'sugar-calendar-block' ) }
+						value={attributes.appearance}
+						options={ [
+							{ label: __( 'Light', 'sugar-calendar-block' ), value: 'light' },
+							{ label: __( 'Dark', 'sugar-calendar-block' ), value: 'dark' },
+						] }
+						onChange={ ( mode ) => setAttributes( { appearance: mode } ) }
 					/>
 
 					<Heading

@@ -115,4 +115,16 @@ class Block extends AbstractBlock {
 
 		return $label;
 	}
+
+	/**
+	 * Get appearance mode.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return string
+	 */
+	public function get_appearance_mode() {
+
+		return $this->attributes['appearance'];
+	}
 }

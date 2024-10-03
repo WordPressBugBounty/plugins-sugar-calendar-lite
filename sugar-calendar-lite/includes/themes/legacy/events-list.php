@@ -17,6 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * @see sc_events_list_widget
  *
  * @since 1.0.0
+ * @since 3.3.0 Added support to 'upcoming_with_recurring' display.
+ *
  * @param string $display
  * @param null $category
  * @param int $number
@@ -89,7 +91,9 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 				'before'    => $now
 			)
 		);
-
+	} elseif ( $display === 'upcoming_with_recurring' ) {
+		$events = Helpers::get_upcoming_events_list_with_recurring( $number, $category );
+		$args   = [];
 	// All events
 	} else {
 		$args = array(
@@ -115,8 +119,9 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 		'no_found_rows' => true
 	) );
 
-	// Query for events
-	$events = sugar_calendar_get_events( $r );
+	if ( empty( $events ) ) {
+		$events = sugar_calendar_get_events( $r );
+	}
 
 	// Bail if no events
 	if ( empty( $events ) ) {

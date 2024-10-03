@@ -27,7 +27,11 @@
 		"allowUserChangeDisplay": {
 			"type": "boolean",
 			"default": true
-		}
+		},
+    "appearance" : {
+      "type": "string",
+      "default": "light"
+    }
 	},
 	"textdomain": "sugar-calendar-block",
 	"editorScript": "file:./index.js",

@@ -12,6 +12,7 @@ use Sugar_Calendar\Block\EventList\EventListView;
 	data-ogday="<?php echo esc_attr( $context->get_day_num_without_zero() ); ?>"
 	data-ogmonth="<?php echo esc_attr( $context->get_month_num_without_zero() ); ?>"
 	data-ogyear="<?php echo esc_attr( $context->get_year() ); ?>"
+	data-appearance="<?php echo esc_attr( $context->get_appearance_mode() ); ?>"
 	style="<?php echo esc_attr( $context->get_styles() ); ?>"
 >
 	<?php

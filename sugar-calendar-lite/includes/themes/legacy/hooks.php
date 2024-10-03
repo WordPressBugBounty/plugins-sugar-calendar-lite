@@ -40,6 +40,9 @@ if ( wp_using_themes() || wp_doing_ajax() ) {
 	add_filter( 'the_content', 'sc_event_content_hooks' );
 	add_filter( 'the_excerpt', 'sc_event_content_hooks' );
 
+	// Body class hook.
+	// add_filter( 'body_class', 'sc_modify_body_classes' );
+
 	// Event Details
 	add_action( 'sc_before_event_content', 'sc_add_event_details'     );
 }

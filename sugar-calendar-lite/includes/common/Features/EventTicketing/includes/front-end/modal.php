@@ -2,6 +2,7 @@
 namespace Sugar_Calendar\AddOn\Ticketing\Frontend\Modal;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Helpers;
 
@@ -105,6 +106,15 @@ function display() {
 	}
 
 	$price = get_event_meta( $event->id, 'ticket_price', true );
+
+	$is_ticket_free = false;
+
+	if (
+		empty( $price ) ||
+		floatval( $price ) <= 0
+	) {
+		$is_ticket_free = true;
+	}
 	?>
 
 	<div class="modal fade " id="sc-event-ticketing-modal" tabindex="-1" role="dialog" aria-labelledby="sc-event-ticketing-modalLabel" aria-hidden="true">
@@ -172,7 +182,11 @@ function display() {
 									</div>
 								</fieldset>
 
-								<fieldset id="sc-event-ticketing-modal-payment-fieldset">
+								<?php
+								$payment_fieldset_display = $is_ticket_free ? 'display:none' : '';
+								?>
+
+								<fieldset id="sc-event-ticketing-modal-payment-fieldset" style="<?php echo esc_attr( $payment_fieldset_display ); ?>">
 									<legend><?php esc_html_e( 'Payment Card', 'sugar-calendar' ); ?></legend>
 									<div class="form-group">
 										<div class="input-group">
@@ -280,6 +294,7 @@ function display() {
 							<input type="hidden" id="sc_et_ticket_price" value="<?php echo esc_attr( $price ); ?>" />
 							<input type="hidden" name="sc_et_gateway" value="stripe" />
 							<input type="hidden" name="sc_et_action" value="checkout" />
+							<input type="hidden" id="sc_et_nonce" name="sc_et_nonce" value="<?php echo esc_attr( wp_create_nonce( Checkout::NONCE_KEY ) ); ?>" />
 						</div>
 					</div>
 				</form>

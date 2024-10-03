@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Admin\Events\Tables;
 
+use Sugar_Calendar\Helpers\WP;
+
 /**
  * Event table.
  *
@@ -42,6 +44,9 @@ class Basic extends Base {
 
 		parent::__construct( $args );
 
+		// Process bulk actions.
+		$this->process_bulk_action();
+
 		// Compensate for inverted user supplied values.
 		if ( $this->start_year >= $this->year ) {
 			$view_start = "{$this->year}-01-01 00:00:00";
@@ -56,6 +61,76 @@ class Basic extends Base {
 
 		// Filter the Date_Query arguments for this List Table.
 		$this->filter_date_query_arguments();
+
+		// Add hooks.
+		$this->hooks();
+	}
+
+	/**
+	 * Add hooks.
+	 *
+	 * @since 3.3.0
+	 */
+	public function hooks() {
+
+		// Add admin notice.
+		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
+	}
+
+	/**
+	 * Output admin notices.
+	 *
+	 * @since 3.3.0
+	 */
+	public function admin_notices() {
+
+		// If bulk_trashed_event is set, show a notice.
+		$is_trashed_event = $this->get_request_var( 'bulk_trashed_event' );
+
+		if ( $is_trashed_event ) {
+
+			// Use _n to print admin notice.
+			WP::add_admin_notice(
+				/* translators: %s: Number of events trashed. */
+				sprintf( _n( '%s event moved to the Trash.', '%s events moved to the Trash.', $is_trashed_event, 'sugar-calendar' ), $is_trashed_event ),
+				WP::ADMIN_NOTICE_SUCCESS,
+				true
+			);
+		}
+
+		// If bulk_deleted_event is set, show a notice.
+		$is_deleted_event = $this->get_request_var( 'bulk_deleted_event' );
+
+		if ( $is_deleted_event ) {
+
+			WP::add_admin_notice(
+				sprintf(
+					/* translators: %s: Number of events deleted. */
+					_n( '%s event permanently deleted.', '%s events permanently deleted.', $is_deleted_event, 'sugar-calendar' ),
+					$is_deleted_event
+				),
+				WP::ADMIN_NOTICE_SUCCESS,
+				true
+			);
+		}
+
+		// If bulk_restored_event is set, show a notice.
+		$is_restored_event = $this->get_request_var( 'bulk_restored_event' );
+
+		if ( $is_restored_event ) {
+
+			WP::add_admin_notice(
+				sprintf(
+					/* translators: %s: Number of events restored. */
+					_n( '%s event restored.', '%s events restored.', $is_restored_event, 'sugar-calendar' ),
+					$is_restored_event
+				),
+				WP::ADMIN_NOTICE_SUCCESS,
+				true
+			);
+		}
+
+		WP::display_admin_notices();
 	}
 
 	/**
@@ -219,6 +294,7 @@ class Basic extends Base {
 
 		// Default columns.
 		$columns = [
+			'cb'       => '<input type="checkbox">',
 			'title'    => esc_html_x( 'Title', 'Noun', 'sugar-calendar' ),
 			'start'    => esc_html_x( 'Start', 'Noun', 'sugar-calendar' ),
 			'end'      => esc_html_x( 'End', 'Noun', 'sugar-calendar' ),
@@ -260,6 +336,191 @@ class Basic extends Base {
 	protected function get_primary_column_name() {
 
 		return 'title';
+	}
+
+	/**
+	 * Return the checkbox column.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param object $item Current item.
+	 *
+	 * @return string
+	 */
+	public function column_cb( $item = null ) {
+
+		// Bail if no item.
+		if ( empty( $item ) ) {
+			return;
+		}
+
+		return sprintf(
+			'<input type="checkbox" name="post[]" value="%s"/>',
+			esc_attr( $item->object_id )
+		);
+	}
+
+	/**
+	 * No bulk actions.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return array An associative array containing all the bulk actions.
+	 */
+	public function get_bulk_actions() {
+
+		$actions = [];
+
+		// Actions in trash status.
+		if ( $this->get_request_var( 'status' ) === 'trash' ) {
+
+			$actions['restore'] = esc_html__( 'Restore', 'sugar-calendar' );
+			$actions['delete']  = esc_html__( 'Delete Permanently', 'sugar-calendar' );
+
+		} else {
+
+			// Default actions.
+			$actions['trash'] = esc_html__( 'Move to Trash', 'sugar-calendar' );
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Generate the table navigation above or below the table.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param string $which Table navigation area.
+	 */
+	protected function display_tablenav( $which = 'top' ) {
+
+		if ( $which === 'top' ) {
+			wp_nonce_field( 'bulk-actions-' . $this->_args['plural'], 'bulk_actions_wpnonce', false );
+		}
+		?>
+
+        <div class="tablenav <?php echo esc_attr( $which ); ?> sugar-calendar-tablenav sugar-calendar-tablenav-<?php echo esc_attr( $which ); ?>">
+
+			<?php if ( $this->has_items() ) : ?>
+				<div class="alignleft actions bulkactions">
+					<?php $this->bulk_actions( $which ); ?>
+				</div>
+			<?php endif; ?>
+
+			<?php
+
+			// Output Month, Year tablenav.
+			echo $this->extra_tablenav( $which ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			// Top only output.
+			if ( $which === 'top' ) :
+
+				// Pagination.
+				echo $this->extra_tablenav( 'pagination' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+				// Tools.
+				echo $this->extra_tablenav( 'tools' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			endif;
+
+			?>
+            <br class="clear">
+        </div>
+
+		<?php
+	}
+
+	/**
+	 * Handle bulk action requests.
+	 *
+	 * @since 3.3.0
+	 */
+	public function process_bulk_action() {
+
+		// Validate nonce, by default it's already sanitized.
+		$nonce       = $this->get_request_var( 'bulk_actions_wpnonce' );
+		$bulk_action = $this->get_request_var( 'action2' );
+
+		// Validate nonce.
+		if ( ! wp_verify_nonce( $nonce, 'bulk-actions-' . $this->_args['plural'] ) ) {
+			return;
+		}
+
+		// Define action map.
+		$actions_map = [
+			'trash'   => [
+				'callback' => 'wp_trash_post',
+				'event'    => 'bulk_trashed_event',
+			],
+			'delete'  => [
+				'callback' => 'wp_delete_post',
+				'event'    => 'bulk_deleted_event',
+			],
+			'restore' => [
+				'callback' => 'wp_untrash_post',
+				'event'    => 'bulk_restored_event',
+			],
+		];
+
+		// If the bulk action is not supported or no items, do nothing.
+		if ( ! isset( $actions_map[ $bulk_action ] ) ) {
+			return;
+		}
+
+		// Get the items for the action.
+		$items = $this->get_request_var( 'post', [ $this, 'sanitize_array_key_values' ] );
+
+		// Bail if no items.
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		// Get redirect URL.
+		$redirect = remove_query_arg( [ 'action', 'action2', 'bulk_actions_wpnonce' ] );
+
+		// Process the items.
+		foreach ( $items as $post_id ) {
+			call_user_func( $actions_map[ $bulk_action ]['callback'], (int) $post_id ?? false );
+		}
+
+		// Add success message to the redirect URL.
+		$redirect = add_query_arg( $actions_map[ $bulk_action ]['event'], count( $items ), $redirect );
+
+		// Redirect to remove query string.
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+
+	/**
+	 * Sanitize array key and value.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param array $unsanitized_array Array to sanitize.
+	 *
+	 * @return array
+	 */
+	public function sanitize_array_key_values( $unsanitized_array = [] ) {
+
+		// Default return value.
+		$sanitized_array = [];
+
+		// Loop through unsanitized_array.
+		foreach ( $unsanitized_array as $key => $value ) {
+
+			// Sanitize key.
+			$key = sanitize_key( $key );
+
+			// Sanitize value.
+			$value = sanitize_text_field( $value );
+
+			// Add to return value.
+			$sanitized_array[ $key ] = $value;
+		}
+
+		// Return sanitized array.
+		return $sanitized_array;
 	}
 
 	/**

@@ -39,7 +39,11 @@
     "showDescriptions": {
 			"type": "boolean",
 			"default": true
-		}
+		},
+    "appearance" : {
+      "type": "string",
+      "default": "light"
+    }
   },
 	"textdomain": "sugar-calendar-event-list-block",
 	"editorScript": "file:./index.js",

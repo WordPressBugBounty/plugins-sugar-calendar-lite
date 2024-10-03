@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Block;
 
+use Sugar_Calendar\Common\Editor;
+
 class Loader {
 
 	/**
@@ -43,6 +45,7 @@ class Loader {
 	public function hooks() {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 
 	/**
@@ -101,6 +104,29 @@ class Loader {
 				'settings' => [
 					'sow' => absint( sc_get_week_start_day() ),
 				],
+			]
+		);
+	}
+
+	/**
+	 * Enqueue the common editor assets.
+	 *
+	 * @since 3.3.0
+	 */
+	public function enqueue_editor_assets() {
+
+		// Get dark mode setting.
+		$display_mode = Editor\get_single_event_appearance_mode();
+
+		/**
+		 * Enqueue the common editor assets.
+		 * This can be used by all the blocks since it's localized for the first one.
+		 */
+		wp_localize_script(
+			'sugar-calendar-block-editor-script',
+			'sugar_calendar_settings',
+			[
+				'appearance' => $display_mode,
 			]
 		);
 	}

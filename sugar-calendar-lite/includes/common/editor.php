@@ -86,3 +86,24 @@ function custom_fields() {
 	// Filter & return
 	return apply_filters( 'sugar_calendar_get_custom_fields', $retval, false );
 }
+
+/**
+ * Check if dark mode is enabled.
+ *
+ * @since 3.3.0
+ *
+ * @return string
+ */
+function get_single_event_appearance_mode() {
+
+	$retval = Options::get( 'single_event_appearance_mode', 'light' );
+
+	/**
+	 * Filter to determine if dark mode is enabled.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param bool $retval  The current dark mode enabled status.
+	 */
+	return apply_filters( 'sugar_calendar_get_single_event_appearance_mode', $retval );
+}

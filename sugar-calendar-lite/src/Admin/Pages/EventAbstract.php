@@ -80,7 +80,7 @@ abstract class EventAbstract extends PageAbstract {
 
 		global $pagenow;
 
-		if ( ! in_array( $pagenow, [ 'post-new.php', 'post.php' ] ) ) {
+		if ( ! in_array( $pagenow, [ 'post-new.php', 'post.php' ], true ) ) {
 			return;
 		}
 		?>
@@ -112,6 +112,20 @@ abstract class EventAbstract extends PageAbstract {
 	}
 
 	/**
+	 * Localized data to be used in admin-event.js.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return array
+	 */
+	public function get_localized_scripts() {
+
+		return [
+			'notice_title_required' => esc_html__( 'Event name is required', 'sugar-calendar' ),
+		];
+	}
+
+	/**
 	 * Enqueue assets.
 	 *
 	 * @since 3.0.0
@@ -133,6 +147,12 @@ abstract class EventAbstract extends PageAbstract {
 			[],
 			SC_PLUGIN_VERSION,
 			true
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-event',
+			'sugar_calendar_admin_event_vars',
+			$this->get_localized_scripts()
 		);
 	}
 }

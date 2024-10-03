@@ -11,7 +11,7 @@
  * Domain Path:       /assets/languages
  * Requires PHP:      7.4
  * Requires at least: 5.8
- * Version:           3.2.1
+ * Version:           3.3.0
  */
 
 // Exit if accessed directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
 	 *
 	 * @since 3.0.0
 	 */
-	define( 'SC_PLUGIN_VERSION', '3.2.1' );
+	define( 'SC_PLUGIN_VERSION', '3.3.0' );
 }
 
 if ( ! defined( 'SC_PLUGIN_FILE' ) ) {

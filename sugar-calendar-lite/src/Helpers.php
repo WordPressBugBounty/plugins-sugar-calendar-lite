@@ -227,13 +227,14 @@ class Helpers {
 	public static function is_on_admin_editor() {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-		return defined( 'REST_REQUEST' ) && REST_REQUEST && ( $_GET['context'] === 'edit' );
+		return defined( 'REST_REQUEST' ) && REST_REQUEST && ! empty( $_GET['context'] ) && ( $_GET['context'] === 'edit' );
 	}
 
 	/**
 	 * Sanitize the attributes.
 	 *
 	 * @since 3.1.0
+	 * @since 3.3.0 Add 'appearance' attribute.
 	 *
 	 * @param array $attributes Attributes to sanitize.
 	 *
@@ -247,10 +248,13 @@ class Helpers {
 			'allowUserChangeDisplay',
 			'showDescriptions',
 			'showFeaturedImages',
+			'appearance',
 		];
 
 		foreach ( $event_list_attr as $attr ) {
-			$sanitized_attributes[ $attr ] = ! empty( $attributes[ $attr ] ) && $attributes[ $attr ] === 'true';
+			$sanitized_attributes[ $attr ] = ! empty( $attributes[ $attr ] ) && $attributes[ $attr ] === 'true'
+				? true
+				: sanitize_text_field( $attributes[ $attr ] );
 		}
 
 		return $sanitized_attributes;
@@ -535,5 +539,350 @@ class Helpers {
 
 		// Filter & return.
 		return $retval;
+	}
+
+	/**
+	 * Get the upcoming events list with recurring events.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int    $number   The number of events to get.
+	 * @param string $category The categories separated by comma.
+	 *
+	 * @return Event[]
+	 */
+	public static function get_upcoming_events_list_with_recurring( $number = 5, $category = '' ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+
+		global $wpdb;
+
+		$left_join              = '';
+		$where_categories_query = '';
+
+		// Get the category left join and where queries if necessary.
+		if ( ! empty( $category ) ) {
+			$category_arr    = explode( ',', $category );
+			$categories_data = [];
+
+			foreach ( $category_arr as $cat ) {
+				$categories_data[] = get_term_by( 'slug', $cat, sugar_calendar_get_calendar_taxonomy_id() );
+			}
+
+			if ( ! empty( $categories_data ) ) {
+				$left_join              = 'LEFT JOIN wp_term_relationships ON (sc_e.object_id = wp_term_relationships.object_id)';
+				$where_categories_query = $wpdb->prepare(
+					'AND ( wp_term_relationships.term_taxonomy_id IN (%1$s) )',
+					implode( ',', wp_list_pluck( $categories_data, 'term_taxonomy_id' ) )
+				);
+			}
+		}
+
+		$now          = sugar_calendar_get_request_time( 'mysql' );
+		$select_query = 'SELECT sc_e.id FROM wp_sc_events sc_e';
+
+		if ( ! empty( $left_join ) ) {
+			$select_query .= ' ' . $left_join;
+		}
+
+		$where_query = $wpdb->prepare(
+			"WHERE sc_e.object_type = 'post' AND sc_e.status = 'publish' AND (
+				(
+					sc_e.recurrence IN ('daily','weekly','monthly','yearly') AND
+					sc_e.start <= %s AND
+					(
+						sc_e.recurrence_end <= '0000-01-01 00:00:00' OR
+						sc_e.recurrence_end >= %s
+					)
+				)
+				OR
+				(
+					sc_e.recurrence = '' AND
+					sc_e.end >= %s
+				)
+			)",
+			$now,
+			$now,
+			$now
+		);
+
+		if ( ! empty( $where_categories_query ) ) {
+			$where_query .= ' ' . $where_categories_query;
+		}
+
+		$order_by = $wpdb->prepare(
+			'ORDER BY sc_e.start ASC LIMIT %d',
+			$number
+		);
+
+		// The query below is prepared/sanitized individually.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$event_ids = $wpdb->get_results( $select_query . ' ' . $where_query . ' ' . $order_by );
+
+		if ( empty( $event_ids ) ) {
+			return [];
+		}
+
+		return sugar_calendar_get_events(
+			[
+				'id__in' => wp_list_pluck( $event_ids, 'id' ),
+			]
+		);
+	}
+
+	/**
+	 * Sanitizes the start MySQL datetime, so that
+	 * if all-day, time is set to midnight.
+	 *
+	 * @since 2.0.5
+	 * @since 3.3.0 Moved to Helpers class.
+	 *
+	 * @param string $start   The start time, in MySQL format.
+	 * @param string $end     The end time, in MySQL format.
+	 * @param bool   $all_day True|False, whether the event is all-day.
+	 *
+	 * @return string
+	 */
+	public static function sanitize_start( $start = '', $end = '', $all_day = false ) {
+
+		// Bail early if start or end are empty or malformed.
+		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
+			return $start;
+		}
+
+		// Check if the user attempted to set an end date and/or time.
+		$start_int = strtotime( $start );
+
+		// All day events end at the final second.
+		if ( $all_day === true ) {
+			$start_int = gmmktime(
+				0,
+				0,
+				0,
+				gmdate( 'n', $start_int ),
+				gmdate( 'j', $start_int ),
+				gmdate( 'Y', $start_int )
+			);
+		}
+
+		// Format.
+		$retval = gmdate( 'Y-m-d H:i:s', $start_int );
+
+		// Return the new start.
+		return $retval;
+	}
+
+	/**
+	 * Original function - \Sugar_Calendar\Admin\Editor\Meta.
+	 * overridden due to has_end() function.
+	 *
+	 * Sanitizes the end MySQL datetime, so that:
+	 *
+	 * - It does not end before it starts.
+	 * - It is at least as long as the minimum event duration (if exists).
+	 * - If the date is empty, the time can still be used.
+	 * - If both the date and the time are empty, it will equal the start.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param string $end     The end time, in MySQL format.
+	 * @param string $start   The start time, in MySQL format.
+	 * @param bool   $all_day True|False, whether the event is all-day.
+	 *
+	 * @return string
+	 */
+	public static function sanitize_end( $end = '', $start = '', $all_day = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+
+		// Bail early if start or end are empty or malformed.
+		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
+			return $end;
+		}
+
+		// See if there a minimum duration to enforce.
+		$minimum = sugar_calendar_get_minimum_event_duration();
+
+		// Convert to integers for faster comparisons.
+		$start_int = strtotime( $start );
+		$end_int   = strtotime( $end );
+
+		// Calculate the end, based on a minimum duration (if set).
+		$end_compare = ! empty( $minimum )
+			? strtotime( '+' . $minimum, $end_int )
+			: $end_int;
+
+		// Check if the user attempted to set an end date and/or time.
+		$has_end = true;
+
+		// Bail if event duration exceeds the minimum (great!).
+		if ( $end_compare > $start_int ) {
+			return $end;
+		}
+
+		// ...or the user attempted an end date and this isn't an all-day event.
+		if ( $all_day === false ) {
+			// If there is a minimum, the new end is the start + the minimum.
+			if ( ! empty( $minimum ) ) {
+				$end_int = strtotime( '+' . $minimum, $start_int );
+
+				// If there isn't a minimum, then the end needs to be rejected.
+			} else {
+				$has_end = false;
+			}
+		}
+
+		// The above logic deterimned that the end needs to equal the start.
+		// This is how events are allowed to have a start without a known end.
+		if ( $has_end === false ) {
+			$end_int = $start_int;
+		}
+
+		// All day events end at the final second.
+		if ( $all_day === true ) {
+			$end_int = mktime(
+				23,
+				59,
+				59,
+				gmdate( 'n', $end_int ),
+				gmdate( 'j', $end_int ),
+				gmdate( 'Y', $end_int )
+			);
+		}
+
+		// Return the new end.
+		return gmdate( 'Y-m-d H:i:s', $end_int );
+	}
+
+	/**
+	 * Sanitizes the all-day value.
+	 *
+	 * - If times align, all-day is made true
+	 *
+	 * @since 2.0.5
+	 * @since 3.3.0 Moved to Helpers class.
+	 *
+	 * @param bool   $all_day True|False, whether the event is all-day.
+	 * @param string $start   The start time, in MySQL format.
+	 * @param string $end     The end time, in MySQL format.
+	 *
+	 * @return string
+	 */
+	public static function sanitize_all_day( $all_day = false, $start = '', $end = '' ) {
+
+		// Bail early if start or end are empty or malformed.
+		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
+			return $start;
+		}
+
+		// Check if the user attempted to set an end date and/or time.
+		$start_int = strtotime( $start );
+		$end_int   = strtotime( $end );
+
+		// Starts at midnight and ends 1 second before.
+		if (
+			( '00:00:00' === gmdate( 'H:i:s', $start_int ) )
+			&&
+			( '23:59:59' === gmdate( 'H:i:s', $end_int ) )
+		) {
+			$all_day = true;
+		}
+
+		// Return the new start.
+		return (bool) $all_day;
+	}
+
+	/**
+	 * Sanitize a timezone value.
+	 *
+	 * - it can be empty                     (Floating)
+	 * - it can be valid PHP/Olson time zone (America/Chicago)
+	 * - it can be UTC offset                (UTC-13)
+	 *
+	 * @since 2.1.0
+	 * @since 3.3.0 Moved to Helpers class.
+	 *
+	 * @param string $timezone1 First timezone.
+	 * @param string $timezone2 Second timezone.
+	 * @param string $all_day   Whether the event spans a full day.
+	 *
+	 * @return string
+	 */
+	public static function sanitize_timezone( $timezone1 = '', $timezone2 = '', $all_day = false ) {
+
+		// Default return value.
+		$retval = $timezone1;
+
+		// All-day events have no time zones.
+		if ( ! empty( $all_day ) ) {
+			$retval = '';
+
+			// Not all-day, so check time zones.
+		} else {
+
+			// Maybe fallback to whatever time zone is not empty.
+			$retval = ! empty( $timezone1 )
+				? $timezone1
+				: $timezone2;
+		}
+
+		// Sanitize & return.
+		return sugar_calendar_sanitize_timezone( $retval );
+	}
+
+	/**
+	 * Wrapper for set_time_limit to see if it is enabled.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int $limit Time limit.
+	 */
+	public static function set_time_limit( $limit = 0 ) {
+
+		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.safe_modeDeprecatedRemoved
+			@set_time_limit( $limit ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+	}
+
+	/**
+	 * Remove UTF-8 BOM signature if it presents.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param string $str String to process.
+	 *
+	 * @return string
+	 */
+	public static function remove_utf8_bom( $str ): string {
+
+		if ( strpos( bin2hex( $str ), 'efbbbf' ) === 0 ) {
+			$str = substr( $str, 3 );
+		}
+
+		return $str;
+	}
+
+	/**
+	 * Get the English weekday name by number.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int $num The number of the weekday.
+	 *
+	 * @return false|string Returns the English weekday name or `false` if not found.
+	 */
+	public static function get_english_weekday_by_number( $num ) {
+
+		$weekdays = [
+			'Sunday',
+			'Monday',
+			'Tuesday',
+			'Wednesday',
+			'Thursday',
+			'Friday',
+			'Saturday',
+		];
+
+		if ( ! empty( $weekdays[ $num ] ) ) {
+			return $weekdays[ $num ];
+		}
+
+		return false;
 	}
 }

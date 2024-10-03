@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use DateInterval;
 use DatePeriod;
 use Sugar_Calendar\Helper;
+use Sugar_Calendar\Helpers;
 
 /**
  * Abstract Block Class.
@@ -619,6 +620,7 @@ abstract class AbstractBlock {
 	 * we also display the previous month's offset day in the calendar.
 	 *
 	 * @since 3.1.0
+	 * @since 3.3.0 Fixed issue where `$start_period` isn't computed because of non-english `$weekday`.
 	 *
 	 * @return DateTimeImmutable
 	 *
@@ -626,20 +628,17 @@ abstract class AbstractBlock {
 	 */
 	public function get_first_weekday() {
 
-		$start_period = $this->get_datetime();
-
-		global $wp_locale;
-
+		$start_period      = $this->get_datetime();
 		$sc_week_start_day = (int) sc_get_week_start_day();
 		$day_date_weekday  = (int) $start_period->format( 'w' );
-		$wp_locale_weekday = $wp_locale->get_weekday( $sc_week_start_day );
+		$weekday           = Helpers::get_english_weekday_by_number( $sc_week_start_day );
 
-		if ( $wp_locale_weekday && $sc_week_start_day !== $day_date_weekday ) {
+		if ( $weekday && $sc_week_start_day !== $day_date_weekday ) {
 
 			$start_period = $start_period->modify(
 				sprintf(
 					'last %s',
-					$wp_locale_weekday
+					$weekday
 				)
 			);
 		}

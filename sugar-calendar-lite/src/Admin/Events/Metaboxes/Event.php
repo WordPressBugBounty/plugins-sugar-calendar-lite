@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Events\Metaboxes;
 
 use Sugar_Calendar\Admin\Events\MetaboxInterface;
 use Sugar_Calendar\Event as EventRow;
+use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
 
 /**
@@ -123,6 +124,8 @@ class Event implements MetaboxInterface {
 	private function hooks() {
 
 		add_filter( 'sugar_calendar_event_to_save', [ $this, 'save_post' ] );
+
+		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'set_script_translations' ] );
 	}
 
 	/**
@@ -929,11 +932,11 @@ class Event implements MetaboxInterface {
 		$end_tz   = $this->prepare_timezone( 'end' );
 
 		// Sanitize to prevent data entry errors.
-		$start    = $this->sanitize_start( $start, $end, $all_day );
+		$start    = Helpers::sanitize_start( $start, $end, $all_day );
 		$end      = $this->sanitize_end( $end, $start, $all_day );
-		$all_day  = $this->sanitize_all_day( $all_day, $start, $end );
-		$start_tz = $this->sanitize_timezone( $start_tz, $end_tz, $all_day );
-		$end_tz   = $this->sanitize_timezone( $end_tz, $start_tz, $all_day );
+		$all_day  = Helpers::sanitize_all_day( $all_day, $start, $end );
+		$start_tz = Helpers::sanitize_timezone( $start_tz, $end_tz, $all_day );
+		$end_tz   = Helpers::sanitize_timezone( $end_tz, $start_tz, $all_day );
 
 		$data = array_merge(
 			[
@@ -943,7 +946,7 @@ class Event implements MetaboxInterface {
 				'end_tz'   => $end_tz,
 				'all_day'  => $all_day,
 			],
-			$data,
+			$data
 		);
 
 		return $data;
@@ -1012,47 +1015,6 @@ class Event implements MetaboxInterface {
 
 		// Return the prepared time zone.
 		return $zone;
-	}
-
-	/**
-	 * Sanitizes the start MySQL datetime, so that
-	 * if all-day, time is set to midnight.
-	 *
-	 * @since 2.0.5
-	 *
-	 * @param string $start   The start time, in MySQL format.
-	 * @param string $end     The end time, in MySQL format.
-	 * @param bool   $all_day True|False, whether the event is all-day.
-	 *
-	 * @return string
-	 */
-	private function sanitize_start( $start = '', $end = '', $all_day = false ) {
-
-		// Bail early if start or end are empty or malformed.
-		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
-			return $start;
-		}
-
-		// Check if the user attempted to set an end date and/or time.
-		$start_int = strtotime( $start );
-
-		// All day events end at the final second.
-		if ( $all_day === true ) {
-			$start_int = gmmktime(
-				0,
-				0,
-				0,
-				gmdate( 'n', $start_int ),
-				gmdate( 'j', $start_int ),
-				gmdate( 'Y', $start_int )
-			);
-		}
-
-		// Format.
-		$retval = gmdate( 'Y-m-d H:i:s', $start_int );
-
-		// Return the new start.
-		return $retval;
 	}
 
 	/**
@@ -1133,80 +1095,6 @@ class Event implements MetaboxInterface {
 
 		// Return the new end.
 		return $retval;
-	}
-
-	/**
-	 * Sanitizes the all-day value.
-	 *
-	 * - If times align, all-day is made true
-	 *
-	 * @since 2.0.5
-	 *
-	 * @param bool   $all_day True|False, whether the event is all-day.
-	 * @param string $start   The start time, in MySQL format.
-	 * @param string $end     The end time, in MySQL format.
-	 *
-	 * @return string
-	 */
-	private function sanitize_all_day( $all_day = false, $start = '', $end = '' ) {
-
-		// Bail early if start or end are empty or malformed.
-		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
-			return $start;
-		}
-
-		// Check if the user attempted to set an end date and/or time.
-		$start_int = strtotime( $start );
-		$end_int   = strtotime( $end );
-
-		// Starts at midnight and ends 1 second before.
-		if (
-			( '00:00:00' === gmdate( 'H:i:s', $start_int ) )
-			&&
-			( '23:59:59' === gmdate( 'H:i:s', $end_int ) )
-		) {
-			$all_day = true;
-		}
-
-		// Return the new start.
-		return (bool) $all_day;
-	}
-
-	/**
-	 * Sanitize a timezone value.
-	 *
-	 * - it can be empty                     (Floating)
-	 * - it can be valid PHP/Olson time zone (America/Chicago)
-	 * - it can be UTC offset                (UTC-13)
-	 *
-	 * @since 2.1.0
-	 *
-	 * @param string $timezone1 First timezone.
-	 * @param string $timezone2 Second timezone.
-	 * @param string $all_day   Whether the event spans a full day.
-	 *
-	 * @return string
-	 */
-	private function sanitize_timezone( $timezone1 = '', $timezone2 = '', $all_day = false ) {
-
-		// Default return value.
-		$retval = $timezone1;
-
-		// All-day events have no time zones.
-		if ( ! empty( $all_day ) ) {
-			$retval = '';
-
-			// Not all-day, so check time zones.
-		} else {
-
-			// Maybe fallback to whatever time zone is not empty.
-			$retval = ! empty( $timezone1 )
-				? $timezone1
-				: $timezone2;
-		}
-
-		// Sanitize & return.
-		return sugar_calendar_sanitize_timezone( $retval );
 	}
 
 	/**
@@ -1368,7 +1256,26 @@ class Event implements MetaboxInterface {
 				'date_format'   => sugar_calendar_get_user_preference( 'date_format' ),
 				'time_format'   => sugar_calendar_get_user_preference( 'time_format' ),
 				'timezone'      => sugar_calendar_get_user_preference( 'timezone' ),
+				'timezone_type' => sugar_calendar_get_user_preference( 'timezone_type' ),
+				'clock_type'    => sugar_calendar_get_clock_type(),
 			]
+		);
+	}
+
+	/**
+	 * Add translation support to scripts.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return void
+	 */
+	public function set_script_translations() {
+
+		// Support admin-event-meta-box script.
+		wp_set_script_translations(
+			'sugar-calendar-admin-event-meta-box',
+			'sugar-calendar',
+			SC_PLUGIN_DIR . 'languages'
 		);
 	}
 }

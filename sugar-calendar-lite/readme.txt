@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.8
 Tested up to:      6.6
-Stable tag:        3.2.1
+Stable tag:        3.3.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -176,6 +176,20 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.3.0 - 2024-10-03 =
+- Added: The Events Calendar one-click migration to Sugar Calendar.
+- Added: Sugar Calendar exporter and importer.
+- Added: Dark mode support for the Event Calendar, Event List blocks, and single event page.
+- Added: Support for parameter `upcoming_with_recurring` in `[sc_events_list]` shortcode.
+- Added: Bulk select controls in Event List view on the events admin page.
+- Changed: Allow checkout for free event tickets.
+- Changed: Improved Stripe's "Test Mode" and "Connect with Stripe" flow.
+- Changed: Improved Event creation date and time.
+- Fixed: The filter popup in the Event List and Calendar blocks on mobile devices.
+- Fixed: Event List block breaking on non-english WP sites.
+- Fixed: Prevent the creation of an event without a name.
+- Fixed: Event date and time validation when creating or editing an event.
+
 = 3.2.1 - 2024-08-15 =
 - Added: Support manual UTC offsets timezone.
 - Fixed: Elementor Widgets not working.

@@ -16,6 +16,10 @@ use Sugar_Calendar\Admin\Pages\SettingsGeneralTab;
 use Sugar_Calendar\Admin\Pages\SettingsMapsTab;
 use Sugar_Calendar\Admin\Pages\SettingsMiscTab;
 use Sugar_Calendar\Admin\Pages\SettingsZapierTab;
+use Sugar_Calendar\Admin\Pages\Tools;
+use Sugar_Calendar\Admin\Pages\ToolsExportTab;
+use Sugar_Calendar\Admin\Pages\ToolsImportTab;
+use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
 use Sugar_Calendar\Admin\Pages\Welcome;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
@@ -151,6 +155,7 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 * @since 3.0.1 Apply filter on Sugar Calendar Menu capability.
+	 * @since 3.3.0 Added 'Tools' submenu.
 	 *
 	 * @return void
 	 */
@@ -231,6 +236,16 @@ class Area {
 			Settings::get_slug(),
 			[ $this, 'display' ],
 			Settings::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
+			Tools::get_title(),
+			Tools::get_title(),
+			Tools::get_capability(),
+			Tools::get_slug(),
+			[ $this, 'display' ],
+			Tools::get_priority()
 		);
 
 		add_submenu_page(
@@ -319,6 +334,7 @@ class Area {
 	 * Get the current page identifier.
 	 *
 	 * @since 3.0.0
+	 * @since 3.3.0 Added support for Tools page and its tabs.
 	 *
 	 * @return string|null
 	 */
@@ -364,7 +380,7 @@ class Area {
 						break;
 
 					case 'sc-settings':
-						$page_id = 'settings';
+						$page_id = $this->get_settings_page_id();
 						break;
 
 					case Events::get_slug():
@@ -378,30 +394,10 @@ class Area {
 					case CalendarEdit::get_slug():
 						$page_id = 'calendar_edit';
 						break;
-				}
 
-				// Settings page tabs.
-				if ( $page_id === 'settings' ) {
-
-					$section = $_GET['section'] ?? 'general'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-					switch ( $section ) {
-						case 'general':
-							$page_id = 'settings_general';
-							break;
-
-						case 'feeds':
-							$page_id = 'settings_feeds';
-							break;
-
-						case 'maps':
-							$page_id = 'settings_maps';
-							break;
-
-						case 'misc':
-							$page_id = 'settings_misc';
-							break;
-					}
+					case Tools::get_slug():
+						$page_id = $this->get_tools_page_id();
+						break;
 				}
 			}
 		} elseif ( WP::is_doing_ajax() && isset( $_REQUEST['page_id'] ) ) {
@@ -420,6 +416,71 @@ class Area {
 		$page_id = apply_filters( 'sugar_calendar_admin_area_current_page_id', $page_id );
 
 		return $page_id;
+	}
+
+	/**
+	 * Get the settings page id/tab.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return string
+	 */
+	private function get_settings_page_id() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+
+		if ( empty( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return 'settings_general';
+		}
+
+		// phpcs:disable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
+
+		switch ( $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			case 'general':
+				return 'settings_general';
+
+			case 'feeds':
+				return 'settings_feeds';
+
+			case 'maps':
+				return 'settings_maps';
+
+			case 'misc':
+				return 'settings_misc';
+
+			default:
+				return 'settings';
+		}
+		// phpcs:enable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
+	}
+
+	/**
+	 * Get the tools page id/tab.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return string
+	 */
+	private function get_tools_page_id() {
+
+		if ( empty( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return 'tools_import';
+		}
+
+		// phpcs:disable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
+
+		switch ( $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			case 'import':
+				return 'tools_import';
+
+			case 'export':
+				return 'tools_export';
+
+			case 'migrate':
+				return 'tools_migrate';
+
+			default:
+				return 'tools';
+		}
+		// phpcs:enable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 	}
 
 	/**
@@ -444,6 +505,10 @@ class Area {
 			'settings_feeds'   => SettingsFeedsTab::class,
 			'settings_maps'    => SettingsMapsTab::class,
 			'settings_misc'    => SettingsMiscTab::class,
+			'tools'            => Tools::class,
+			'tools_import'     => ToolsImportTab::class,
+			'tools_export'     => ToolsExportTab::class,
+			'tools_migrate'    => ToolsMigrateTab::class,
 		];
 
 		/**
@@ -765,6 +830,7 @@ class Area {
 	 * Enqueue assets.
 	 *
 	 * @since 3.0.0
+	 * @since 3.3.0 Add wp-date script as a dependency for admin-event-meta-box script.
 	 *
 	 * @param string $hook The current admin page.
 	 */
@@ -853,7 +919,7 @@ class Area {
 		wp_register_script(
 			'sugar-calendar-admin-event-meta-box',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-event-metabox' . WP::asset_min() . '.js',
-			[ 'jquery', 'jquery-ui-datepicker', 'sugar-calendar-vendor-choices' ],
+			[ 'jquery', 'jquery-ui-datepicker', 'sugar-calendar-vendor-choices', 'wp-date', 'wp-i18n' ],
 			SC_PLUGIN_VERSION,
 			true
 		);
@@ -879,6 +945,22 @@ class Area {
 			[ 'jquery', 'sugar-calendar-vendor-choices' ],
 			SC_PLUGIN_VERSION,
 			true
+		);
+
+		wp_enqueue_script(
+			'sugar-calendar-admin-common',
+			SC_PLUGIN_ASSETS_URL . 'admin/js/common' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			SC_PLUGIN_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-common',
+			'sugar_calendar_admin_common',
+			[
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			]
 		);
 
 		// Bail if not in an admin page.
@@ -1013,5 +1095,17 @@ class Area {
 		}
 
 		return $tabs;
+	}
+
+	/**
+	 * Whether we are on a Sugar Calendar admin page.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return bool
+	 */
+	public function is_sc_admin_page() {
+
+		return ! empty( $this->current_page ) && $this->current_page instanceof PageInterface;
 	}
 }

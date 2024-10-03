@@ -9,6 +9,11 @@
 		@include popover-container;
 		min-width: 200px;
 
+		@include media('<tablet') {
+			max-height: 400px;
+			overflow: scroll;
+		}
+
 		&__heading {
 			color: $text-color-secondary;
 			font-size: 11px;

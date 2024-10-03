@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Frontend;
 
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Common\Editor;
 
 /**
  * Frontend Loader.
@@ -39,6 +40,9 @@ class Loader {
 		add_action( 'sugar_calendar_frontend_event_details', [ $this, 'render_event_time' ], 30 );
 		add_action( 'sugar_calendar_frontend_event_details', [ $this, 'render_event_location' ], 40 );
 		add_action( 'sugar_calendar_frontend_event_details', [ $this, 'render_event_calendars' ], 50 );
+
+		// Body class hook for single event detail.
+		add_filter( 'body_class', [ $this, 'sc_modify_single_event_body_classes' ] );
 	}
 
 	/**
@@ -261,5 +265,31 @@ class Loader {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Filter for body class.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param array $classes Body classes.
+	 *
+	 * @return array
+	 */
+	public function sc_modify_single_event_body_classes( $classes = [] ) {
+
+		// Return if not single event page.
+		if ( ! is_singular( sugar_calendar_get_event_post_type_id() ) ) {
+			return $classes;
+		}
+
+		// If dark mode is enabled.
+		if ( Editor\get_single_event_appearance_mode() === 'dark' ) {
+
+			$classes[] = 'single-sc_event-dark';
+		}
+
+		// Return the classes.
+		return $classes;
 	}
 }

@@ -78,20 +78,21 @@ class Options {
 	public static function get_defaults() {
 
 		$defaults = [
-			'number_of_events'     => 30,
-			'start_of_week'        => get_option( 'start_of_week' ),
-			'date_format'          => get_option( 'date_format' ),
-			'time_format'          => get_option( 'time_format' ),
-			'day_color_style'      => 'none',
-			'timezone_convert'     => false,
-			'timezone_type'        => 'off',
-			'timezone'             => get_option( 'timezone_string' ),
-			'editor_type'          => 'classic',
-			'custom_fields'        => true,
-			'default_calendar'     => null,
-			'hide_announcements'   => false,
-			'allow_usage_tracking' => false,
-			'maps_google_api_key'  => '',
+			'number_of_events'             => 30,
+			'start_of_week'                => get_option( 'start_of_week' ),
+			'date_format'                  => get_option( 'date_format' ),
+			'time_format'                  => get_option( 'time_format' ),
+			'day_color_style'              => 'none',
+			'timezone_convert'             => false,
+			'timezone_type'                => 'off',
+			'timezone'                     => get_option( 'timezone_string' ),
+			'editor_type'                  => 'classic',
+			'custom_fields'                => true,
+			'default_calendar'             => null,
+			'hide_announcements'           => false,
+			'allow_usage_tracking'         => false,
+			'maps_google_api_key'          => '',
+			'single_event_appearance_mode' => 'light',
 		];
 
 		/**

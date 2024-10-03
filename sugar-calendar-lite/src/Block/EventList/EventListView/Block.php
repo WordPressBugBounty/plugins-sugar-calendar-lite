@@ -211,4 +211,16 @@ class Block extends AbstractBlock {
 
 		return __( 'There are no events scheduled this week.', 'sugar-calendar' );
 	}
+
+	/**
+	 * Get appearance mode.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return string
+	 */
+	public function get_appearance_mode() {
+
+		return $this->get_settings_attributes()['appearance'];
+	}
 }

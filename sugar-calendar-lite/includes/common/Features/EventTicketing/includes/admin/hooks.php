@@ -39,3 +39,6 @@ add_action( 'sugar_calendar_admin_meta_box_setup_sections', __NAMESPACE__ . '\\M
 // Admin nav
 add_action( 'sugar_calendar_admin_nav_after_items', __NAMESPACE__ . '\\Nav\\test_mode' );
 add_action( 'sugar_calendar_admin_nav_after_items', __NAMESPACE__ . '\\Nav\\stripe_connect' );
+
+// Admin ajax
+add_action( 'wp_ajax_sugar_calendar_admin_area_handle_post', __NAMESPACE__ . '\\Settings\\handle_post_ajax' );

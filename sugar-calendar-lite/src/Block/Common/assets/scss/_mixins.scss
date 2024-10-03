@@ -16,6 +16,11 @@
 	box-shadow: 0 12px 16px 0 $border-hover-color;
 }
 
+@mixin popover-container-dark {
+	background: #000;
+	border: 1px solid $border-color-dark-secondary;
+}
+
 @mixin transparent-button {
 	background: transparent;
 	border: 0;
@@ -34,4 +39,321 @@
 	border: 1px solid $border-color-secondary;
 	border-radius: 6px;
 	outline: none;
+}
+
+@mixin calendar-settings-btn-dark {
+	border: 1px solid $border-color-dark-secondary;
+}
+
+@mixin dark-mode {
+
+	&[data-appearance="dark"] {
+
+		// Counter for @import '../../Common/assets/scss/controls'.
+		.sugar-calendar-block__controls {
+
+			&__left {
+
+				button.sugar-calendar-block__controls__left__date {
+
+					color: $text-color-dark-primary;
+
+					&.sugar-calendar-block__controls__settings__btn_active {
+
+						svg {
+							color: $text-color-dark-primary;
+						}
+					}
+
+					svg {
+						color: $text-color-dark-secondary;
+					}
+
+					&:hover svg {
+						color: $text-color-dark-primary;
+					}
+				}
+
+				&__pagination {
+
+					border: 1px solid $border-color-dark-secondary;
+
+					button.sugar-calendar-block__controls__left__pagination__prev,
+					button.sugar-calendar-block__controls__left__pagination__current,
+					button.sugar-calendar-block__controls__left__pagination__next {
+						color: $text-color-dark-secondary;
+					}
+
+					.sugar-calendar-block__controls__left__pagination__prev,
+					.sugar-calendar-block__controls__left__pagination__next {
+
+						&:hover {
+							background: $border-hover-color-dark;
+							color: $text-color-dark-primary;
+						}
+					}
+
+					.sugar-calendar-block__controls__left__pagination__current {
+
+						color: $text-color-dark-secondary;
+
+						&:hover {
+							background: $border-hover-color-dark;
+							color: $text-color-dark-primary;
+						}
+					}
+
+					&__divider {
+						background: $border-color-dark-secondary;
+					}
+				}
+			}
+
+			&__right {
+
+				button.sugar-calendar-block__controls__right__settings__btn {
+
+					@include calendar-settings-btn-dark;
+
+					&:hover,
+					&:focus {
+						background: $border-hover-color-dark;
+						border-color: transparent;
+
+						svg {
+							color: $text-color-dark-primary;
+						}
+					}
+
+					svg {
+						color: $text-color-dark-secondary;
+					}
+				}
+
+				button.sugar-calendar-block__controls__right__view__btn {
+
+					@include calendar-settings-btn-dark;
+
+					color: $text-color-dark-secondary;
+
+					&:hover,
+					&:focus {
+						background: $border-hover-color-dark;
+						border-color: transparent;
+						color: $text-color-dark-primary;
+
+						span,
+						svg {
+							color: $text-color-dark-primary;
+						}
+					}
+				}
+
+				&__search {
+
+					input[type="text"].sugar-calendar-block__controls__right__search__field {
+
+						color: $text-color-dark-secondary;
+
+						@include calendar-settings-btn-dark;
+
+						&::placeholder {
+							color: $text-color-dark-secondary;
+						}
+
+						@include media('<tablet') {
+
+							&::placeholder {
+								color: transparent;
+							}
+						}
+
+						&:focus {
+							background: $border-hover-color-dark;
+							outline-color: transparent;
+						}
+					}
+
+					&__icon,
+					&__clear {
+						color: $text-color-dark-secondary;
+
+						&:hover {
+							color: $text-color-dark-primary;
+						}
+					}
+
+					&.sugar-calendar-block__controls__right__search--active {
+
+						input[type="text"].sugar-calendar-block__controls__right__search__field,
+						input[type="text"].sugar-calendar-block__controls__right__search__field::placeholder,
+						svg {
+							color: $text-color-dark-primary;
+						}
+					}
+				}
+			}
+
+			button.sugar-calendar-block__controls__settings__btn_active {
+
+				background: $border-hover-color-dark;
+				color: $text-color-dark-primary;
+
+				svg {
+					color: $text-color-dark-primary;
+				}
+			}
+		}
+
+		// Counter for @import '../../Common/assets/scss/popover/month_selector';
+		.sugar-calendar-block__popover__month_selector {
+
+			&__container {
+
+				@include popover-container-dark;
+
+				.sugar-calendar-block__controls__datepicker {
+
+					.datepicker-years .table-condensed tbody tr td span.year,
+					.datepicker-months .table-condensed tbody tr td span.month,
+					.datepicker-days .table-condensed tbody tr td.day {
+
+						color: $text-color-dark-primary;
+
+						&.active {
+							color: rgba(0, 0, 0, 0.5);
+						}
+
+						&.active:hover {
+							color: $text-color-dark-primary;
+						}
+
+						&:hover {
+							background: $border-hover-color-dark;
+						}
+					}
+
+					.datepicker-days .table-condensed tbody tr td.day {
+
+						&.active,
+						&.active:hover {
+							background: var(--accent-color);
+						}
+					}
+
+					.table-condensed {
+
+						thead th.prev svg,
+						thead th.next svg {
+							color: $text-color-dark-secondary;
+						}
+
+						thead th.dow,
+						thead th.datepicker-switch {
+							color: $text-color-dark-primary;
+						}
+					}
+				}
+			}
+		}
+
+		// Counter for @import '../../Common/assets/scss/popover/calendar_selector';
+		.sugar-calendar-block__popover__calendar_selector {
+
+			&__container {
+
+				@include popover-container-dark;
+
+				&__heading {
+					color: $text-color-dark-secondary;
+				}
+
+				&__options {
+
+					&__val {
+
+						color: $text-color-dark-primary;
+
+						input::before {
+							content: "";
+							position: absolute;
+							width: 16px;
+							height: 16px;
+							background-color: #666;
+							opacity: 0.5;
+						}
+
+						input:checked::before {
+							display: none;
+						}
+
+						input:hover {
+							accent-color: #6f6d6d;
+						}
+					}
+				}
+
+				&__days, &__time {
+					border-color: $cell-border-color-dark;
+				}
+			}
+		}
+
+		// Counter for @import '../../Common/assets/scss/popover/display_selector';
+		.sugar-calendar-block__popover__display_selector {
+
+			&__container {
+
+				@include popover-container-dark;
+
+				&__body__option {
+
+					color: $text-color-dark-primary;
+
+					&:hover {
+						background: $border-hover-color-dark;
+					}
+				}
+			}
+		}
+
+		// Popover for event details.
+		.sugar-calendar-block__popover__event {
+
+			background: #000;
+			border: 1px solid $border-color-dark-secondary;
+
+			&__container {
+
+				&__content {
+
+					&__title__link {
+						color: $text-color-dark-primary
+					}
+
+					&__date, &__time, &__calendar {
+						color: $text-color-dark-tertiary;
+					}
+
+					&__description {
+						color: $text-color-dark-secondary;
+					}
+				}
+			}
+		}
+
+		// Custom month selector.
+		&.sugar-calendar-block__week-view,
+		&.sugar-calendar-event-list-block__list-view {
+
+			// Counter for @import '../../Common/assets/scss/popover/datepicker'.
+			.sugar-calendar-block__popover__month_selector .datepicker-days .table-condensed tbody tr {
+
+				&:hover td,
+				&:has(> td.active) td {
+					background: $border-hover-color-dark;
+				}
+			}
+		}
+	}
 }

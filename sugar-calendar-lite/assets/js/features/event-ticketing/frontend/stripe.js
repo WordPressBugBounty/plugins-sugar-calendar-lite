@@ -8,7 +8,7 @@ jQuery( document ).ready( function( $ ) {
 		// Get variables
 		var stripe   = Stripe( sc_event_ticket_vars.publishable_key ),
 			elements = stripe.elements(),
-			card     = elements.create( 'card', {
+			cardArgs = {
 				style: {
 					base: {
 						color:      '#32325d',
@@ -19,7 +19,15 @@ jQuery( document ).ready( function( $ ) {
 					base: 'form-group'
 				},
 				hidePostalCode: false
-			} );
+			};
+
+		// Check "single-sc_event-dark" class in body.
+		if ( $( 'body' ).hasClass( 'single-sc_event-dark' ) ) {
+			cardArgs.style.base.iconColor = '#ffffff';
+			cardArgs.style.base.color     = 'rgba(255, 255, 255, 0.85)';
+		}
+
+		var card = elements.create( 'card', cardArgs );
 
 		// Add Stripe card elements
 		card.mount( '#sc-event-ticketing-card-element' );
@@ -48,6 +56,12 @@ jQuery( document ).ready( function( $ ) {
 
 	$( 'body' ).on( 'sc_et_gateway_ajax', function() {
 
+		const nonce = $( '#sc_et_nonce' ).val();
+
+		if ( ! nonce ) {
+			return;
+		}
+
 		// Get values
 		var email     = $( '#sc-event-ticketing-email' ).val(),
 			firstname = $( '#sc-event-ticketing-first-name' ).val(),
@@ -65,7 +79,8 @@ jQuery( document ).ready( function( $ ) {
 				email:    email,
 				name:     firstname + ' ' + lastname,
 				event_id: eventid,
-				quantity: quantity
+				quantity: quantity,
+				nonce: nonce,
 			},
 			success: function( response ) {
 
@@ -116,7 +131,7 @@ jQuery( document ).ready( function( $ ) {
 					});
 
 				// Sandbox mode passes the transaction through
-				} else if ( response.data.sandbox ) {
+				} else if ( response.data.sandbox || response.data.is_free ) {
 					$( '#sc-event-ticketing-checkout' )
 						.get(0)
 						.submit();

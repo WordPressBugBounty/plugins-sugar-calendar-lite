@@ -193,6 +193,7 @@ class List_Table extends \WP_List_Table {
 	 * Render the order column.
 	 *
 	 * @since 1.0.0
+	 * @since 3.3.0 Remove errors when `$order` was not found.
 	 *
 	 * @return string
 	 */
@@ -204,39 +205,43 @@ class List_Table extends \WP_List_Table {
 
 		} else {
 			$order  = Functions\get_order( $item->order_id );
-			$status = $order->status;
+			$status = empty( $order ) ? null : $order->status;
 		}
 
-		// Setup URL
-		$url = add_query_arg(
-			array(
-				'page'     => 'sc-event-ticketing',
-				'order_id' => $item->order_id
-			),
-			admin_url( 'admin.php' )
-		);
+		if ( ! empty( $order ) ) {
+			// Setup URL.
+			$url = add_query_arg(
+				[
+					'page'     => 'sc-event-ticketing',
+					'order_id' => $item->order_id,
+				],
+				admin_url( 'admin.php' )
+			);
 
-		// Filter URL
-		$link = apply_filters( 'sc_et_tickets_list_table_order_link', $url, $item );
+			// Filter URL.
+			$link = apply_filters( 'sc_et_tickets_list_table_order_link', $url, $item );
 
-		// Setup HTML
-		$link = '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'View or edit ticket', 'sugar-calendar' ) . '">' ;
-		$link .= esc_html( $item->order_id );
+			// Setup HTML.
+			$link  = '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'View or edit ticket', 'sugar-calendar' ) . '">';
+			$link .= esc_html( $item->order_id );
 
-		// Refunded
-		if ( 'refunded' === $status ) {
-			$link .= ' ' . esc_html__( '(Refunded)', 'sugar-calendar' );
+			// Refunded.
+			if ( $status === 'refunded' ) {
+				$link .= ' ' . esc_html__( '(Refunded)', 'sugar-calendar' );
+			}
+
+			// Close HTML.
+			$link .= '</a><br>';
+		} else {
+			$link = '';
 		}
 
-		// Close HTML
-		$link .= '</a>';
-
-		// Format
+		// Format.
 		$start_date = sugar_calendar_format_date( sc_get_date_format(), $item->date_created );
 		$start_time = sugar_calendar_format_date( sc_get_time_format(), $item->date_created );
 
-		// Return HTML
-		return $link . '<br>' . esc_html( $start_date ) . '<br>' . esc_html( $start_time );
+		// Return HTML.
+		return $link . esc_html( $start_date ) . '<br>' . esc_html( $start_time );
 	}
 
 	/**
