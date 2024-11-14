@@ -112,63 +112,85 @@ function update_eventmeta_cache( $ids ) {
 }
 
 /**
- * Register metadata keys & sanitization callbacks
+ * Return the meta data schema for Events.
+ *
+ * @since 3.4.0
+ *
+ * @return array
+ */
+function sugar_calendar_get_meta_data_schema() {
+
+	/**
+	 * Filters the meta data schema for Events.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param array $schema The meta data schema for Events.
+	 */
+	return apply_filters(
+		'sugar_calendar_meta_data',
+		[
+			'audience' => [
+				'type'              => 'string',
+				'description'       => '',
+				'single'            => true,
+				'sanitize_callback' => 'sugar_calendar_sanitize_audience',
+				'auth_callback'     => null,
+				'show_in_rest'      => false,
+			],
+			'capacity' => [
+				'type'              => 'string',
+				'description'       => '',
+				'single'            => true,
+				'sanitize_callback' => 'sugar_calendar_sanitize_capacity',
+				'auth_callback'     => null,
+				'show_in_rest'      => false,
+			],
+			'language' => [
+				'type'              => 'string',
+				'description'       => '',
+				'single'            => true,
+				'sanitize_callback' => 'sugar_calendar_sanitize_language',
+				'auth_callback'     => null,
+				'show_in_rest'      => false,
+			],
+			'location' => [
+				'type'              => 'string',
+				'description'       => '',
+				'single'            => true,
+				'sanitize_callback' => 'sugar_calendar_sanitize_location',
+				'auth_callback'     => null,
+				'show_in_rest'      => false,
+			],
+			'color' => [
+				'type'              => 'string',
+				'description'       => '',
+				'single'            => true,
+				'sanitize_callback' => 'sugar_calendar_sanitize_color',
+				'auth_callback'     => null,
+				'show_in_rest'      => false,
+			],
+		]
+	);
+}
+
+/**
+ * Register metadata keys & sanitization callbacks.
  *
  * Note: Calendar Color metadata is saved in Sugar_Calendar\Term_Meta_UI
  *
  * @since 2.0.0
+ * @since 3.4.0 Use sugar_calendar_get_meta_data_schema() to register meta.
+ *
+ * @return void
  */
 function sugar_calendar_register_meta_data() {
 
-	// Audience
-	register_meta( 'sc_event', 'audience', array(
-		'type'              => 'string',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sugar_calendar_sanitize_audience',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
+    $schema = sugar_calendar_get_meta_data_schema();
 
-	// Capacity
-	register_meta( 'sc_event', 'capacity', array(
-		'type'              => 'string',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sugar_calendar_sanitize_capacity',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
-
-	// Language
-	register_meta( 'sc_event', 'language', array(
-		'type'              => 'string',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sugar_calendar_sanitize_language',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
-
-	// Location
-	register_meta( 'sc_event', 'location', array(
-		'type'              => 'string',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sugar_calendar_sanitize_location',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
-
-	// Color
-	register_meta( 'sc_event', 'color', array(
-		'type'              => 'string',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sugar_calendar_sanitize_color',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
+    foreach ( $schema as $key => $args ) {
+        register_meta( 'sc_event', $key, $args );
+    }
 }
 
 /**
@@ -235,4 +257,35 @@ function sugar_calendar_sanitize_color( $value = '' ) {
  */
 function sugar_calendar_sanitize_timezone( $value = '' ) {
 	return sugar_calendar_validate_timezone( trim( strip_tags( $value ) ) );
+}
+
+/**
+ * Copy event meta data from one event to another.
+ *
+ * @since 3.4.0
+ *
+ * @param int $from_event_id The ID of the event to copy from.
+ * @param int $to_event_id   The ID of the event to copy to.
+ *
+ * @return void
+ */
+function sugar_calendar_copy_event_meta_data( $from_event_id = 0, $to_event_id = 0 ) {
+
+	// Bail if no event IDs.
+	if ( empty( $from_event_id ) || empty( $to_event_id ) ) {
+		return;
+	}
+
+	// Get meta data schema.
+	$schema = sugar_calendar_get_meta_data_schema();
+
+	// Loop through each meta key.
+	foreach ( $schema as $key => $args ) {
+
+		// Get the meta value.
+		$meta_value = get_event_meta( $from_event_id, $key, true );
+
+		// Update the meta value.
+		update_event_meta( $to_event_id, $key, $meta_value );
+	}
 }

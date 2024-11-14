@@ -24,6 +24,18 @@
 			"type": "array",
 			"default": []
 		},
+    "showBlockHeader": {
+      "type": "boolean",
+      "default": true
+    },
+		"showFilters": {
+			"type": "boolean",
+			"default": true
+		},
+		"showSearch": {
+			"type": "boolean",
+			"default": true
+		},
 		"allowUserChangeDisplay": {
 			"type": "boolean",
 			"default": true

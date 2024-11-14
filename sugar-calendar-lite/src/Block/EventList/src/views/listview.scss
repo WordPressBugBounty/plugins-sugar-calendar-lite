@@ -110,5 +110,26 @@
 				}
 			}
 		}
+
+		// Image position: left.
+		&[data-imageposition='left'] {
+
+			// Should only apply to tablet and above.
+			@include media('>=tablet') {
+
+				.sugar-calendar-event-list-block__listview__event__body {
+
+					justify-content: left;
+
+					&__image {
+						order: 1;
+					}
+
+					&__content {
+						order: 2;
+					}
+				}
+			}
+		}
 	}
 }

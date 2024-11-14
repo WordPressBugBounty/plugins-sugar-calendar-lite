@@ -98,6 +98,7 @@ class CalendarNew extends CalendarAbstract {
 	 * Output the form event name field.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Added the `required` attribute.
 	 *
 	 * @return void
 	 */
@@ -109,6 +110,7 @@ class CalendarNew extends CalendarAbstract {
 				'id'          => 'tag-name',
 				'value'       => $this->term->name,
 				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar' ),
+				'required'    => true,
 			],
 			true
 		);

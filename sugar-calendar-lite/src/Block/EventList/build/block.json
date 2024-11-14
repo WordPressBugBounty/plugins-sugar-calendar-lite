@@ -12,9 +12,61 @@
       "type": "string",
       "default": ""
     },
+    "calendars": {
+      "type": "array",
+      "default": []
+    },
+    "groupEventsByWeek": {
+      "type": "boolean",
+      "default": true
+    },
+    "eventsPerPage": {
+      "type": "number",
+      "default": 10
+    },
+    "maximumEventsToShow": {
+      "type": "number",
+      "default": 10
+    },
     "display": {
       "type": "string",
       "default": "list"
+    },
+    "showBlockHeader": {
+      "type": "boolean",
+      "default": true
+    },
+    "allowUserChangeDisplay": {
+      "type": "boolean",
+      "default": true
+    },
+    "showFilters": {
+      "type": "boolean",
+      "default": true
+    },
+    "showSearch": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDateCards": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDescriptions": {
+      "type": "boolean",
+      "default": true
+    },
+    "showFeaturedImages": {
+      "type": "boolean",
+      "default": true
+    },
+    "imagePosition": {
+      "type": "string",
+      "default": "right"
+    },
+    "appearance": {
+      "type": "string",
+      "default": "light"
     },
     "accentColor": {
       "type": "string",
@@ -23,26 +75,6 @@
     "linksColor": {
       "type": "string",
       "default": "#000000D9"
-    },
-    "calendars": {
-      "type": "array",
-      "default": []
-    },
-    "allowUserChangeDisplay": {
-      "type": "boolean",
-      "default": true
-    },
-    "showFeaturedImages": {
-      "type": "boolean",
-      "default": true
-    },
-    "showDescriptions": {
-      "type": "boolean",
-      "default": true
-    },
-    "appearance": {
-      "type": "string",
-      "default": "light"
     }
   },
   "textdomain": "sugar-calendar-event-list-block",

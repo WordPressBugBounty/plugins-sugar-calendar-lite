@@ -5,16 +5,38 @@ use Sugar_Calendar\Block\EventList\EventListView\EventView;
 /**
  * @var \Sugar_Calendar\Block\EventList\EventListView\PlainView $context
  */
+
+$view_class = 'sugar-calendar-event-list-block__plainview sugar-calendar-block__events-display-container';
+
+// If block header is not to be displayed.
+if ( ! $context->get_block()->should_render_block_header() ) {
+	$view_class .= ' sugar-calendar-block__events-display-container__no-header';
+}
 ?>
-<div class="sugar-calendar-event-list-block__plainview sugar-calendar-block__events-display-container">
+<div class="<?php echo esc_attr( $view_class ); ?>">
 	<?php
 	$events = $context->get_block()->get_events();
 
-	foreach ( $context->get_block()->get_week_period() as $day ) {
+	if ( $context->get_block()->should_group_events_by_week() ) {
+		$period = $context->get_block()->get_week_period();
+	} else {
+		$period = $context->get_block()->get_upcoming_period();
+	}
+
+	foreach ( $period as $day ) {
+
+		if ( ! isset( $events[ $day->format( 'Y-m-d' ) ] ) ) {
+			continue;
+		}
+
 		foreach ( $events[ $day->format( 'Y-m-d' ) ] as $event ) {
 
-			if ( in_array( $event->id, $context->get_block()->get_displayed_events(), true ) ) {
-				// We should only display an event once.
+			// We should only display an event once when grouping by week.
+			if (
+				$context->get_block()->should_group_events_by_week()
+				&&
+				in_array( $event->id, $context->get_block()->get_displayed_events(), true )
+			) {
 				continue;
 			}
 

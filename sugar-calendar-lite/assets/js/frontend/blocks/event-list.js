@@ -35,6 +35,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 	 *
 	 * @since 3.1.0
 	 * @since 3.1.2 Convert to visitor timezone if necessary.
+	 * @since 3.4.0 Add paged data support.
 	 */
 	Block.prototype.update = function( args ) {
 
@@ -42,6 +43,18 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 
 		const updateDisplay = ( args.update_display === undefined ) ? false : args.update_display;
 		const blockAction = ( args.action === undefined ) ? '' : args.action;
+
+		// Pagination number.
+		let paged = parseInt( this.$blockContainer.data( 'paged' ), 10 ) || 1;
+
+		// If the action is previous or next week, update the paged number.
+		if ( blockAction === 'previous_week' ) {
+			paged--;
+		} else if ( blockAction === 'next_week' ) {
+			paged++;
+		} else {
+			paged = 1;
+		}
 
 		let blockData = {
 			attributes: this.$blockContainer.data( 'attributes' ),
@@ -55,6 +68,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 			visitor_tz_convert: parseInt( this.controls.$formContainer.find( 'input[name="sc_visitor_tz_convert"]' ).val() ),
 			visitor_tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
 			updateDisplay: updateDisplay,
+			paged: paged,
 			action: blockAction
 		};
 
@@ -77,6 +91,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 
 				// Update the heading.
 				that.$blockContainer.find( '.sugar-calendar-block__view-heading' ).text( response.data.heading );
+				that.$blockContainer.find( '.sugar-calendar-block__view-heading-mobile' ).text( response.data.heading_mobile );
 
 				// Update the body.
 				that.$baseContainer.html( response.data.body );
@@ -85,6 +100,21 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 
 				if ( typeof SCTimeZones !== 'undefined' ) {
 					SCTimeZones.convertEventsTime();
+				}
+
+				// Update the paged attribute if it exists.
+				if ( response.data.paged !== undefined ) {
+					that.$blockContainer.data( 'paged', response.data.paged );
+				}
+
+				// Update next pagination button.
+				if ( response.data.enable_next !== undefined ) {
+					that.$blockContainer.find( '.sugar-calendar-event-list-block__footer__next_btn' ).prop( 'disabled', ! response.data.enable_next );
+				}
+
+				// Update previous pagination button.
+				if ( response.data.enable_previous !== undefined ) {
+					that.$blockContainer.find( '.sugar-calendar-event-list-block__footer__prev_btn' ).prop( 'disabled', ! response.data.enable_previous );
 				}
 			}
 		);

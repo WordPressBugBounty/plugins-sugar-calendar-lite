@@ -134,6 +134,14 @@
 		@import './views/gridview';
 		@import './views/plainview';
 
+		.sugar-calendar-block__events-display-container {
+
+			&__no-header {
+				border-top: none;
+				padding-top: 0;
+			}
+		}
+
 		.sugar-calendar-event-list-block__event__title {
 			color: var(--links-color, $text-color-primary);
 			font-style: normal;
@@ -233,6 +241,10 @@
 			letter-spacing: 0.035px;
 			padding: $spacing-sm 15px;
 			text-align: center;
+
+			&:disabled {
+				display: none;
+			}
 
 			&:hover {
 				background: $border-hover-color;

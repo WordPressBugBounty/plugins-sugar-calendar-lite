@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar 3.3.0\n"
+"Project-Id-Version: Sugar Calendar 3.4.0\n"
 "Report-Msgid-Bugs-To: https://sugarcalendar.com/support/\n"
 "Last-Translator: Sugar Calendar <support@sugarcalendar.com>\n"
 "Language-Team: Sugar Calendar <support@sugarcalendar.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-10-03T11:56:37+00:00\n"
+"POT-Creation-Date: 2024-11-13T15:38:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: sugar-calendar\n"
@@ -16,7 +16,7 @@ msgstr ""
 #. Author of the plugin
 #: src/Admin/Area.php:165
 #: src/Admin/Area.php:166
-#: src/Block/Calendar/Loader.php:373
+#: src/Block/Calendar/Loader.php:368
 msgid "Sugar Calendar"
 msgstr ""
 
@@ -49,7 +49,7 @@ msgstr ""
 #: includes/admin/help.php:34
 #: includes/admin/nav.php:25
 #: src/Admin/Events/Tables/Base.php:369
-#: src/Admin/Pages/Calendars.php:253
+#: src/Admin/Pages/Calendars.php:361
 #: src/Admin/Pages/Events.php:44
 #: src/Admin/Pages/Events.php:112
 #: src/Admin/Pages/Events.php:139
@@ -245,7 +245,7 @@ msgstr ""
 #: src/Admin/Events/Tables/Week.php:295
 #: src/Block/Calendar/templates/week/multi-and-all-day-events-rows.php:9
 #: src/Block/Common/templates/popovers.php:99
-#: src/Helpers.php:334
+#: src/Helpers.php:409
 msgid "All Day"
 msgstr ""
 
@@ -271,7 +271,7 @@ msgstr ""
 
 #: includes/admin/help.php:133
 #: src/Admin/Events/Tables/Base.php:436
-#: src/Block/Calendar/CalendarView/Block.php:89
+#: src/Block/Calendar/CalendarView/Block.php:92
 #: src/Integrations/Elementor/CalendarWidget.php:145
 msgid "Day"
 msgstr ""
@@ -343,7 +343,7 @@ msgstr ""
 #: includes/admin/help.php:189
 #: src/Admin/Events/Tables/Base.php:435
 #: src/Admin/Events/Tables/Month.php:113
-#: src/Block/Calendar/CalendarView/Block.php:88
+#: src/Block/Calendar/CalendarView/Block.php:91
 #: src/Integrations/Elementor/CalendarWidget.php:144
 msgid "Week"
 msgstr ""
@@ -359,7 +359,7 @@ msgstr ""
 #: includes/admin/help.php:213
 #: includes/themes/legacy/calendar.php:159
 #: src/Admin/Events/Tables/Base.php:434
-#: src/Block/Calendar/CalendarView/Block.php:87
+#: src/Block/Calendar/CalendarView/Block.php:90
 #: src/Integrations/Elementor/CalendarWidget.php:143
 msgid "Month"
 msgstr ""
@@ -958,7 +958,7 @@ msgid "Event Ticket Orders"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:19
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:277
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:346
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:103
 #: includes/common/Features/EventTicketing/includes/admin/view.php:174
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:96
@@ -1048,37 +1048,37 @@ msgstr ""
 msgid "Receipt not resent."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:257
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:326
 msgid "Edit order"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:257
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:326
 msgid "Edit"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:276
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:345
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:211
 msgid "Total"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:278
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:347
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:76
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:217
 msgid "Status"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:279
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:348
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:205
 msgid "Customer"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:280
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:349
 #: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:48
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:189
 msgid "Order ID"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:281
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:350
 #: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:301
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:88
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:227
@@ -1088,7 +1088,7 @@ msgstr ""
 msgid "Event"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:282
+#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:351
 #: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:302
 msgid "Order Date"
 msgstr ""
@@ -1350,7 +1350,7 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:56
 #: includes/common/Features/EventTicketing/includes/common/functions.php:146
 #: includes/themes/legacy/widgets.php:172
-#: includes/themes/legacy/widgets.php:361
+#: includes/themes/legacy/widgets.php:399
 msgid "All"
 msgstr ""
 
@@ -1459,7 +1459,7 @@ msgid "ID"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/view.php:236
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1271
+#: includes/common/Features/EventTicketing/includes/common/functions.php:1285
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:115
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:344
 msgid "Print"
@@ -1853,15 +1853,15 @@ msgstr ""
 msgid "Vietnamese Dong"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1085
+#: includes/common/Features/EventTicketing/includes/common/functions.php:1099
 msgid "Order Receipt"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1122
+#: includes/common/Features/EventTicketing/includes/common/functions.php:1136
 msgid "Event Ticket"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1272
+#: includes/common/Features/EventTicketing/includes/common/functions.php:1286
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:116
 msgid "View"
 msgstr ""
@@ -1958,13 +1958,13 @@ msgid "You have reached the maximum number of tickets available to be purchased.
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:24
-#: src/Helpers.php:275
+#: src/Helpers.php:350
 msgid "Date/Time:"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:49
 #: includes/themes/legacy/event-display.php:134
-#: src/Helpers.php:278
+#: src/Helpers.php:353
 msgid "Date:"
 msgstr ""
 
@@ -2333,11 +2333,11 @@ msgstr ""
 
 #: includes/post/taxonomies.php:42
 #: src/Admin/Pages/Calendars.php:40
-#: src/Admin/Pages/Calendars.php:116
+#: src/Admin/Pages/Calendars.php:138
 #: src/Admin/Pages/ToolsExportTab.php:143
 #: src/Block/Common/templates/popovers.php:25
 #: src/Integrations/Elementor/CalendarWidget.php:124
-#: src/Integrations/Elementor/ListWidget.php:127
+#: src/Integrations/Elementor/ListWidget.php:135
 msgid "Calendars"
 msgstr ""
 
@@ -2353,12 +2353,12 @@ msgstr ""
 
 #: includes/post/taxonomies.php:46
 #: includes/themes/legacy/calendar.php:106
-#: includes/themes/legacy/widgets.php:377
+#: includes/themes/legacy/widgets.php:415
 msgid "All Calendars"
 msgstr ""
 
 #: includes/post/taxonomies.php:47
-#: src/Admin/Pages/CalendarAbstract.php:268
+#: src/Admin/Pages/CalendarAbstract.php:282
 msgid "Parent Calendar"
 msgstr ""
 
@@ -2382,7 +2382,7 @@ msgstr ""
 
 #: includes/post/taxonomies.php:52
 #: src/Admin/Pages/CalendarNew.php:46
-#: src/Admin/Pages/CalendarNew.php:146
+#: src/Admin/Pages/CalendarNew.php:148
 msgid "Add New Calendar"
 msgstr ""
 
@@ -2475,7 +2475,7 @@ msgid "View Events"
 msgstr ""
 
 #: includes/post/types.php:72
-#: src/Block/Common/templates/controls.php:78
+#: src/Block/Common/templates/controls.php:114
 msgid "Search Events"
 msgstr ""
 
@@ -2560,38 +2560,7 @@ msgstr ""
 msgid "Event scheduled."
 msgstr ""
 
-#: includes/pro/Features/DuplicateEvent/Feature.php:41
-msgid "Invalid item ID."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:46
-#: includes/pro/Features/DuplicateEvent/Feature.php:66
-msgid "Sorry, this item cannot be copied."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:58
-msgid "The item you are trying to copy no longer exists."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:71
-msgid "Sorry, you are not allowed to copy this item."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:79
-msgid "This post does not have event data."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:86
-msgctxt "noun"
-msgid "Copy"
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:99
-#: includes/pro/Features/DuplicateEvent/Feature.php:114
-msgid "Error copying the item."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:148
+#: includes/pro/Features/DuplicateEvent/Feature.php:152
 msgctxt "verb"
 msgid "Duplicate"
 msgstr ""
@@ -2621,10 +2590,12 @@ msgid "Next"
 msgstr ""
 
 #: includes/themes/legacy/calendar.php:335
+#: src/Block/EventList/templates/base.php:17
 msgid "Previous"
 msgstr ""
 
 #: includes/themes/legacy/calendar.php:349
+#: src/Block/EventList/templates/base.php:18
 msgid "Next"
 msgstr ""
 
@@ -2642,27 +2613,27 @@ msgstr ""
 msgid "Read More"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1614
+#: includes/themes/legacy/functions.php:1620
 msgid "Starts %s then every %s until %s"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1628
+#: includes/themes/legacy/functions.php:1634
 msgid "Starts %s then every month on the %s until %s"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1642
+#: includes/themes/legacy/functions.php:1648
 msgid "Starts %s then every year on the %s of %s until %s"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1662
+#: includes/themes/legacy/functions.php:1668
 msgid "Starts %s then every %s"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1675
+#: includes/themes/legacy/functions.php:1681
 msgid "Starts %s then every month on the %s"
 msgstr ""
 
-#: includes/themes/legacy/functions.php:1688
+#: includes/themes/legacy/functions.php:1694
 msgid "Starts %s then every year on the %s of %s"
 msgstr ""
 
@@ -2675,9 +2646,9 @@ msgid "Displays a monthly event calendar widget."
 msgstr ""
 
 #: includes/themes/legacy/widgets.php:159
-#: includes/themes/legacy/widgets.php:354
-#: includes/themes/legacy/widgets.php:511
-#: includes/themes/legacy/widgets.php:686
+#: includes/themes/legacy/widgets.php:392
+#: includes/themes/legacy/widgets.php:549
+#: includes/themes/legacy/widgets.php:724
 msgid "Title:"
 msgstr ""
 
@@ -2694,7 +2665,7 @@ msgid "Large"
 msgstr ""
 
 #: includes/themes/legacy/widgets.php:170
-#: includes/themes/legacy/widgets.php:375
+#: includes/themes/legacy/widgets.php:413
 #: src/Frontend/Loader.php:252
 msgid "Calendar:"
 msgstr ""
@@ -2715,94 +2686,94 @@ msgstr ""
 msgid "Displays all/upcoming/past events as a list."
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:359
+#: includes/themes/legacy/widgets.php:397
 msgid "Time Period:"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:362
+#: includes/themes/legacy/widgets.php:400
 msgid "Upcoming"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:363
+#: includes/themes/legacy/widgets.php:401
 msgid "Past"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:367
-#: includes/themes/legacy/widgets.php:646
+#: includes/themes/legacy/widgets.php:405
+#: includes/themes/legacy/widgets.php:684
 msgid "Order:"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:369
+#: includes/themes/legacy/widgets.php:407
 msgid "Default for Period"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:370
+#: includes/themes/legacy/widgets.php:408
 msgid "Oldest First"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:371
+#: includes/themes/legacy/widgets.php:409
 msgid "Newest First"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:388
+#: includes/themes/legacy/widgets.php:426
 msgid "Number to show"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:392
+#: includes/themes/legacy/widgets.php:430
 msgid "Show widget title"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:396
+#: includes/themes/legacy/widgets.php:434
 msgctxt "Start & end if available"
 msgid "Show event dates"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:400
+#: includes/themes/legacy/widgets.php:438
 msgctxt "Start & end if available"
 msgid "Show event times"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:404
+#: includes/themes/legacy/widgets.php:442
 msgid "Show event categories"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:426
+#: includes/themes/legacy/widgets.php:464
 msgid "(Sugar Calendar) Calendar List"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:428
+#: includes/themes/legacy/widgets.php:466
 msgid "Display all of the available calendars as a list."
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:534
+#: includes/themes/legacy/widgets.php:572
 msgid "(Sugar Calendar) Event Filters"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:536
+#: includes/themes/legacy/widgets.php:574
 msgid "Event Archive only. Controls for filtering how to list events."
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:639
+#: includes/themes/legacy/widgets.php:677
 msgid "Upcoming events"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:640
+#: includes/themes/legacy/widgets.php:678
 msgid "In-progress events"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:641
+#: includes/themes/legacy/widgets.php:679
 msgid "Past events"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:642
+#: includes/themes/legacy/widgets.php:680
 msgid "All events"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:647
+#: includes/themes/legacy/widgets.php:685
 msgid "Newest first"
 msgstr ""
 
-#: includes/themes/legacy/widgets.php:649
+#: includes/themes/legacy/widgets.php:687
 msgid "Oldest first"
 msgstr ""
 
@@ -3091,8 +3062,8 @@ msgid "Address"
 msgstr ""
 
 #: src/Admin/Events/Tables/Base.php:437
-#: src/Block/EventList/EventListView/Block.php:76
-#: src/Integrations/Elementor/ListWidget.php:146
+#: src/Block/EventList/EventListView/Block.php:150
+#: src/Integrations/Elementor/ListWidget.php:205
 msgid "List"
 msgstr ""
 
@@ -3215,7 +3186,7 @@ msgstr ""
 #: src/Admin/Events/Tables/Day.php:110
 #: src/Admin/Events/Tables/Month.php:288
 #: src/Admin/Events/Tables/Week.php:145
-#: src/Block/Calendar/CalendarView/Block.php:104
+#: src/Block/Calendar/CalendarView/Block.php:107
 #: src/Block/Calendar/Loader.php:110
 msgid "Today"
 msgstr ""
@@ -3316,7 +3287,7 @@ msgstr ""
 
 #: src/Admin/Events/Tables/Day.php:112
 #: src/Admin/Events/Tables/Week.php:146
-#: src/Block/EventList/templates/base.php:43
+#: src/Block/EventList/templates/base.php:13
 msgid "Next Week"
 msgstr ""
 
@@ -3326,7 +3297,7 @@ msgstr ""
 
 #: src/Admin/Events/Tables/Day.php:114
 #: src/Admin/Events/Tables/Week.php:148
-#: src/Block/EventList/templates/base.php:37
+#: src/Block/EventList/templates/base.php:12
 msgid "Previous Week"
 msgstr ""
 
@@ -3355,33 +3326,57 @@ msgstr ""
 msgid "Watch Video"
 msgstr ""
 
-#: src/Admin/Pages/CalendarAbstract.php:191
+#: src/Admin/Pages/CalendarAbstract.php:159
+msgid "Calendar added."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:160
+msgid "Calendar deleted."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:161
+msgid "Calendar updated."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:162
+msgid "Calendar not added."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:163
+msgid "Calendar not updated."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:164
+msgid "Calendars deleted."
+msgstr ""
+
+#: src/Admin/Pages/CalendarAbstract.php:204
 msgid "Options"
 msgstr ""
 
-#: src/Admin/Pages/CalendarAbstract.php:250
+#: src/Admin/Pages/CalendarAbstract.php:263
 msgid "Slug"
 msgstr ""
 
-#: src/Admin/Pages/CalendarAbstract.php:259
+#: src/Admin/Pages/CalendarAbstract.php:272
 msgid "The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens."
 msgstr ""
 
-#: src/Admin/Pages/CalendarAbstract.php:282
+#: src/Admin/Pages/CalendarAbstract.php:296
 #: src/Admin/Pages/SettingsGeneralTab.php:220
 msgid "None"
 msgstr ""
 
-#: src/Admin/Pages/CalendarAbstract.php:292
+#: src/Admin/Pages/CalendarAbstract.php:307
 msgid "Description"
 msgstr ""
 
 #: src/Admin/Pages/CalendarEdit.php:111
-#: src/Admin/Pages/CalendarNew.php:111
+#: src/Admin/Pages/CalendarNew.php:112
 msgid "Name this Calendar"
 msgstr ""
 
-#: src/Admin/Pages/Calendars.php:121
+#: src/Admin/Pages/Calendars.php:143
 msgid "Add Calendar"
 msgstr ""
 
@@ -3398,6 +3393,7 @@ msgstr ""
 #: src/Admin/Pages/Settings.php:114
 #: src/Admin/Pages/SettingsFeedsTab.php:77
 #: src/Admin/Pages/SettingsZapierTab.php:77
+#: src/Integrations/Elementor/ListWidget.php:126
 msgid "Settings"
 msgstr ""
 
@@ -3451,7 +3447,7 @@ msgstr ""
 
 #: src/Admin/Pages/SettingsGeneralTab.php:116
 #: src/Integrations/Elementor/CalendarWidget.php:141
-#: src/Integrations/Elementor/ListWidget.php:144
+#: src/Integrations/Elementor/ListWidget.php:193
 msgid "Display"
 msgstr ""
 
@@ -3484,10 +3480,14 @@ msgid "The theme-side Calendar Color styling strategy.<br><strong>None</strong> 
 msgstr ""
 
 #: src/Admin/Pages/SettingsGeneralTab.php:246
+#: src/Integrations/Elementor/CalendarWidget.php:158
+#: src/Integrations/Elementor/ListWidget.php:338
 msgid "Light"
 msgstr ""
 
 #: src/Admin/Pages/SettingsGeneralTab.php:247
+#: src/Integrations/Elementor/CalendarWidget.php:159
+#: src/Integrations/Elementor/ListWidget.php:339
 msgid "Dark"
 msgstr ""
 
@@ -3677,10 +3677,10 @@ msgstr ""
 #: src/Admin/Pages/ToolsImportTab.php:56
 #: src/Admin/Tools/Importers.php:85
 #: src/Admin/Tools/Importers.php:194
-#: src/Block/Calendar/Loader.php:249
-#: src/Block/Calendar/Loader.php:259
-#: src/Block/Calendar/Loader.php:308
-#: src/Block/EventList/Loader.php:200
+#: src/Block/Calendar/Loader.php:242
+#: src/Block/Calendar/Loader.php:252
+#: src/Block/Calendar/Loader.php:301
+#: src/Block/EventList/Loader.php:204
 msgid "Invalid request."
 msgstr ""
 
@@ -3988,14 +3988,14 @@ msgid_plural "%s attendees"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Block/Calendar/CalendarView/Block.php:108
+#: src/Block/Calendar/CalendarView/Block.php:111
 #: src/Block/Calendar/Loader.php:109
-#: src/Block/EventList/EventListView/Block.php:161
+#: src/Block/EventList/EventListView/Block.php:242
 #: src/Block/Loader.php:102
 msgid "This Week"
 msgstr ""
 
-#: src/Block/Calendar/CalendarView/Block.php:112
+#: src/Block/Calendar/CalendarView/Block.php:115
 #: src/Block/Calendar/Loader.php:108
 msgid "This Month"
 msgstr ""
@@ -4037,22 +4037,22 @@ msgstr ""
 msgid "Night"
 msgstr ""
 
-#: src/Block/EventList/EventListView/Block.php:77
-#: src/Integrations/Elementor/ListWidget.php:147
+#: src/Block/EventList/EventListView/Block.php:151
+#: src/Integrations/Elementor/ListWidget.php:206
 msgid "Grid"
 msgstr ""
 
-#: src/Block/EventList/EventListView/Block.php:78
-#: src/Integrations/Elementor/ListWidget.php:148
+#: src/Block/EventList/EventListView/Block.php:152
+#: src/Integrations/Elementor/ListWidget.php:207
 msgid "Plain"
 msgstr ""
 
-#: src/Block/EventList/EventListView/Block.php:209
-#: src/Block/EventList/Loader.php:148
+#: src/Block/EventList/EventListView/Block.php:363
+#: src/Block/EventList/Loader.php:160
 msgid "There are no events scheduled that match your criteria."
 msgstr ""
 
-#: src/Block/EventList/EventListView/Block.php:212
+#: src/Block/EventList/EventListView/Block.php:366
 msgid "There are no events scheduled this week."
 msgstr ""
 
@@ -4115,8 +4115,20 @@ msgid "Pro version installed but needs to be activated on the Plugins page."
 msgstr ""
 
 #. translators: 1: start date, 2: end date.
-#: src/Helpers.php:304
+#: src/Helpers.php:379
 msgid "%1$s - %2$s"
+msgstr ""
+
+#: src/Helpers.php:1000
+msgid "There are no events to display."
+msgstr ""
+
+#: src/Helpers.php:1004
+msgid "There are no upcoming events to display."
+msgstr ""
+
+#: src/Helpers.php:1008
+msgid "There are no past events to display."
 msgstr ""
 
 #: src/Helpers/UI.php:44
@@ -4129,12 +4141,17 @@ msgid "Events Calendar"
 msgstr ""
 
 #: src/Integrations/Elementor/CalendarWidget.php:156
-#: src/Integrations/Elementor/ListWidget.php:159
+#: src/Integrations/Elementor/ListWidget.php:336
+msgid "Appearance"
+msgstr ""
+
+#: src/Integrations/Elementor/CalendarWidget.php:170
+#: src/Integrations/Elementor/ListWidget.php:231
 msgid "Allow Users to Change Display"
 msgstr ""
 
-#: src/Integrations/Elementor/CalendarWidget.php:167
-#: src/Integrations/Elementor/ListWidget.php:190
+#: src/Integrations/Elementor/CalendarWidget.php:181
+#: src/Integrations/Elementor/ListWidget.php:351
 msgid "Accent Color"
 msgstr ""
 
@@ -4143,15 +4160,63 @@ msgstr ""
 msgid "Events List"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:169
-msgid "Show Featured Images"
+#: src/Integrations/Elementor/ListWidget.php:152
+msgid "Group events by week"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:179
+#: src/Integrations/Elementor/ListWidget.php:162
+msgid "Events per page"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:178
+msgid "Max events to show"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:203
+msgid "Display Type"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:218
+msgid "Show Block Header"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:245
+msgid "Show Filters"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:259
+msgid "Show Search"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:273
+msgid "Show Date Cards"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:286
 msgid "Show Descriptions"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:200
+#: src/Integrations/Elementor/ListWidget.php:296
+msgid "Show Featured Images"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:309
+msgid "Image position"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:311
+msgid "Left"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:312
+msgid "Right"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:326
+msgid "Styles"
+msgstr ""
+
+#: src/Integrations/Elementor/ListWidget.php:361
 msgid "Links Color"
 msgstr ""
 
@@ -4160,11 +4225,11 @@ msgstr ""
 msgid "There was an error while upgrading the %1$s database. Please contact %2$s support with this information: %3$s."
 msgstr ""
 
-#: sugar-calendar-plugin.php:569
+#: sugar-calendar-plugin.php:573
 msgid "My Calendar"
 msgstr ""
 
-#: sugar-calendar-plugin.php:572
+#: sugar-calendar-plugin.php:576
 msgid "The default calendar events will be added to."
 msgstr ""
 

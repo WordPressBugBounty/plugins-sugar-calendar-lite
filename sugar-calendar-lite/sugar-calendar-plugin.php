@@ -14,6 +14,7 @@ use Sugar_Calendar\Block\Loader;
 use Sugar_Calendar\Migrations\Migrations;
 use Sugar_Calendar\Tasks\Tasks;
 use Sugar_Calendar\UsageTracking\UsageTracking;
+use Sugar_Calendar\Shortcodes\ModernShortcodes;
 
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
@@ -215,6 +216,9 @@ final class Plugin {
 
 		// Load the Block.
 		$this->get_blocks();
+
+		// Load the Shortcodes.
+		$this->get_modern_shortcodes();
 
 		// Load the integrations.
 		$this->get_integrations();
@@ -801,6 +805,28 @@ final class Plugin {
 		}
 
 		return $blocks;
+	}
+
+	/**
+	 * Get the Shortcodes.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return ModernShortcodes
+	 */
+	public function get_modern_shortcodes() {
+
+		static $shortcodes;
+
+		if ( ! isset( $shortcodes ) ) {
+
+			// Initialize the Shortcodes loader.
+			$shortcodes = new ModernShortcodes();
+
+			$shortcodes->init();
+		}
+
+		return $shortcodes;
 	}
 
 	/**

@@ -6,7 +6,7 @@ use Sugar_Calendar\Block\Common\Template;
  */
 ?>
 
-<div id="sc-<?php echo esc_attr( $context->get_block_id() ); ?>"
+<div id="<?php echo esc_attr( $context->get_block_id() ); ?>"
 	class="<?php echo esc_attr( implode( ' ', $context->get_classes() ) ); ?>"
 	data-accentcolor="<?php echo esc_attr( $context->get_default_accent_color() ); ?>"
 	data-ogday="<?php echo esc_attr( $context->get_day_num_without_zero() ); ?>"

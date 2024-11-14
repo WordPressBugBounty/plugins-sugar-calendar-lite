@@ -32,12 +32,15 @@ class Block extends AbstractBlock {
 	 * Get the heading.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0
+	 *
+	 * @param bool $use_abbreviated_month Whether to use abbreviated month or not.
 	 *
 	 * @return string
 	 */
-	public function get_heading() {
+	public function get_heading( $use_abbreviated_month = false ) {
 
-		return $this->get_view()->get_heading();
+		return $this->get_view()->get_heading( $use_abbreviated_month );
 	}
 
 	/**
@@ -126,5 +129,17 @@ class Block extends AbstractBlock {
 	public function get_appearance_mode() {
 
 		return $this->attributes['appearance'];
+	}
+
+	/**
+	 * Always show the block left controls.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return boolean
+	 */
+	public function should_render_block_left_controls() {
+
+		return true;
 	}
 }

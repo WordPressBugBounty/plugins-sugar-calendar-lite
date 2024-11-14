@@ -270,7 +270,45 @@ class sc_events_list_widget extends WP_Widget {
 		do_action( 'sc_before_event_list_widget' );
 
 		echo '<div id="sc_list_wrap">';
-		echo sc_get_events_list( $display, $category, $number, array('date' => $show_date, 'time' => $show_time, 'categories' => $show_categories), $order );
+
+		$display_events_list = sc_get_events_list(
+			$display,
+			$category,
+			$number,
+			[
+				'categories' => $show_categories,
+				'date'       => $show_date,
+				'time'       => $show_time,
+			],
+			$order
+		);
+
+		if ( empty( $display_events_list ) ) {
+			echo '<p>' .
+				esc_html(
+					/**
+					 * Filters the message to display when there are no events.
+					 *
+					 * @since 3.4.0
+					 *
+					 * @param string $no_events_message The message to display when there are no events.
+					 * @param string $display           The display type of events.
+					 * @param array  $args              The arguments passed to the widget.
+					 */
+					apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+						'sc_events_list_widget_no_events',
+						\Sugar_Calendar\Helpers::get_no_events_message_for_legacy_event_list( $display ),
+						$display,
+						$args
+					)
+				)
+				. '</p>';
+		} else {
+			// Escaping happens in the origin function.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $display_events_list;
+		}
+
 		echo '</div>';
 
 		do_action( 'sc_after_event_list_widget' );

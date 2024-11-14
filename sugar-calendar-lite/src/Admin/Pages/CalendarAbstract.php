@@ -130,6 +130,7 @@ abstract class CalendarAbstract extends PageAbstract {
 	 * Filter notice messages after a create/update request.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Moved list to a static method.
 	 *
 	 * @param array $messages Map of messages.
 	 *
@@ -139,17 +140,29 @@ abstract class CalendarAbstract extends PageAbstract {
 
 		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
 
-		$messages[ $taxonomy ] = [
-			0 => '',
-			1 => __( 'Calendar added.' ),
-			2 => __( 'Calendar deleted.' ),
-			3 => __( 'Calendar updated.' ),
-			4 => __( 'Calendar not added.' ),
-			5 => __( 'Calendar not updated.' ),
-			6 => __( 'Calendars deleted.' ),
-		];
+		$messages[ $taxonomy ] = self::get_calendar_updated_messages();
 
 		return $messages;
+	}
+
+	/**
+	 * Get list of calendar update messages.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return array
+	 */
+	public static function get_calendar_updated_messages() {
+
+		return [
+			0 => '',
+			1 => __( 'Calendar added.', 'sugar-calendar' ),
+			2 => __( 'Calendar deleted.', 'sugar-calendar' ),
+			3 => __( 'Calendar updated.', 'sugar-calendar' ),
+			4 => __( 'Calendar not added.', 'sugar-calendar' ),
+			5 => __( 'Calendar not updated.', 'sugar-calendar' ),
+			6 => __( 'Calendars deleted.', 'sugar-calendar' ),
+		];
 	}
 
 	/**
@@ -257,6 +270,7 @@ abstract class CalendarAbstract extends PageAbstract {
 						'id'          => 'tag-slug',
 						'value'       => $this->term->slug,
 						'description' => esc_html__( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.', 'sugar-calendar' ),
+						'preserved'   => true,
 					],
 					true
 				);
@@ -281,6 +295,7 @@ abstract class CalendarAbstract extends PageAbstract {
 					'orderby'          => 'name',
 					'show_option_none' => __( 'None', 'sugar-calendar' ),
 					'description'      => $tax->labels->parent_field_description,
+					'preserved'        => true,
 				];
 
 				UI::calendar_dropdown_control( $args, true );
@@ -298,12 +313,14 @@ abstract class CalendarAbstract extends PageAbstract {
 						'id'          => 'tag-description',
 						'value'       => $this->term->description,
 						'description' => $tax->labels->desc_field_description,
+						'preserved'   => true,
 					],
 					true
 				);
 				?>
             </div>
         </div>
+
 
 		<?php static::form_additional_fields(); ?>
 

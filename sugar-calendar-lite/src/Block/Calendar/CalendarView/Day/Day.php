@@ -176,16 +176,25 @@ class Day implements InterfaceBaseView {
 	 * Get the heading of the Day view.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0
+	 *
+	 * @param bool $use_abbreviated_month Whether to use abbreviated month or not.
 	 *
 	 * @return string
 	 */
-	public function get_heading() {
+	public function get_heading( $use_abbreviated_month = false ) {
 
 		global $wp_locale;
 
+		$month = $wp_locale->get_month( $this->get_block()->get_month_num_without_zero() );
+
+		if ( $use_abbreviated_month ) {
+			$month = $wp_locale->get_month_abbrev( $month );
+		}
+
 		return sprintf(
 			'%1$s %2$s, %3$d',
-			$wp_locale->get_month( $this->get_block()->get_month_num_without_zero() ),
+			$month,
 			$this->get_block()->get_day_num_without_zero(),
 			$this->get_block()->get_year()
 		);

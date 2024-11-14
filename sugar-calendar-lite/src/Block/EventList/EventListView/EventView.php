@@ -262,6 +262,24 @@ class EventView {
 	}
 
 	/**
+	 * Get image display position.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string
+	 */
+	public function get_image_display_position() {
+
+		$position = 'default';
+
+		if ( ! empty( $this->block->get_settings_attributes()['imagePosition'] ) ) {
+			$position = $this->block->get_settings_attributes()['imagePosition'];
+		}
+
+		return $position;
+	}
+
+	/**
 	 * Whether or not we should display the description.
 	 *
 	 * @since 3.1.0
@@ -271,6 +289,18 @@ class EventView {
 	public function should_display_description() {
 
 		return ! empty( $this->block->get_settings_attributes()['showDescriptions'] );
+	}
+
+	/**
+	 * Whether or not we should display the date cards.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_display_date_cards() {
+
+		return ! empty( $this->block->get_settings_attributes()['showDateCards'] );
 	}
 
 	/**

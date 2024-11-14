@@ -121,6 +121,14 @@ class ListWidget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'section_title_settings',
+			[
+				'label' => __( 'Settings', 'sugar-calendar' ),
+				'type'  => Controls_Manager::HEADING,
+			]
+		);
+
+		$this->add_control(
 			'calendars',
 			[
 				'default'  => [],
@@ -138,10 +146,61 @@ class ListWidget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'group_events_by_week',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Group events by week', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+			]
+		);
+
+		$this->add_control(
+			'events_per_page',
+			[
+				'default'    => 10,
+				'label'      => esc_html__( 'Events per page', 'sugar-calendar' ),
+				'show_label' => true,
+				'type'       => Controls_Manager::NUMBER,
+				'min'        => 1,
+				'max'        => 30,
+				'step'       => 1,
+				'condition'  => [
+					'group_events_by_week!' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'maximum_events_to_show',
+			[
+				'default'    => 10,
+				'label'      => esc_html__( 'Max events to show', 'sugar-calendar' ),
+				'show_label' => true,
+				'type'       => Controls_Manager::NUMBER,
+				'min'        => 1,
+				'max'        => 30,
+				'step'       => 1,
+				'condition'  => [
+					'group_events_by_week!' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'section_title_display',
+			[
+				'label'     => __( 'Display', 'sugar-calendar' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			]
+		);
+
+		$this->add_control(
 			'display_mode',
 			[
 				'default'    => 'list',
-				'label'      => esc_html__( 'Display', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Display Type', 'sugar-calendar' ),
 				'options'    => [
 					'list'  => esc_html__( 'List', 'sugar-calendar' ),
 					'grid'  => esc_html__( 'Grid', 'sugar-calendar' ),
@@ -153,10 +212,78 @@ class ListWidget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'show_block_header',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Block Header', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!' => 'plain',
+				],
+			]
+		);
+
+		$this->add_control(
 			'allow_users_to_change_display',
 			[
 				'default'      => 'yes',
 				'label'        => esc_html__( 'Allow Users to Change Display', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_filters',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Filters', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_search',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Search', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_date_cards',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Date Cards', 'sugar-calendar' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode' => 'list',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_descriptions',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Descriptions', 'sugar-calendar' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 			]
@@ -169,16 +296,50 @@ class ListWidget extends Widget_Base {
 				'label'        => esc_html__( 'Show Featured Images', 'sugar-calendar' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!' => 'plain',
+				],
 			]
 		);
 
 		$this->add_control(
-			'show_descriptions',
+			'image_position',
 			[
-				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Descriptions', 'sugar-calendar' ),
-				'return_value' => 'yes',
-				'type'         => Controls_Manager::SWITCHER,
+				'default'    => 'right',
+				'label'      => esc_html__( 'Image position', 'sugar-calendar' ),
+				'options'    => [
+					'left'  => esc_html__( 'Left', 'sugar-calendar' ),
+					'right' => esc_html__( 'Right', 'sugar-calendar' ),
+				],
+				'show_label' => true,
+				'type'       => Controls_Manager::SELECT,
+				'condition'  => [
+					'display_mode'         => 'list',
+					'show_featured_images' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'section_title_styles',
+			[
+				'label'     => __( 'Styles', 'sugar-calendar' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			]
+		);
+
+		$this->add_control(
+			'appearance',
+			[
+				'default'    => 'light',
+				'label'      => esc_html__( 'Appearance', 'sugar-calendar' ),
+				'options'    => [
+					'light' => esc_html__( 'Light', 'sugar-calendar' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+				],
+				'show_label' => true,
+				'type'       => Controls_Manager::SELECT,
 			]
 		);
 
@@ -209,26 +370,45 @@ class ListWidget extends Widget_Base {
 	 * Render widget output.
 	 *
 	 * @since 3.2.0
+	 * @since 3.4.0 Additional options for event list block.
 	 */
 	protected function render() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
+		$group_events_by_week          = $this->get_settings_for_display( 'group_events_by_week' );
+		$events_per_page               = $this->get_settings_for_display( 'events_per_page' );
+		$maximum_events_to_show        = $this->get_settings_for_maximum_events_to_show( $events_per_page );
 		$display                       = $this->get_settings_for_display( 'display_mode' );
-		$allow_users_to_change_display = $this->get_settings_for_display( 'allow_users_to_change_display' );
-		$show_featured_images          = $this->get_settings_for_display( 'show_featured_images' );
+		$show_block_header             = $this->get_settings_for_display( 'show_block_header' );
+		$allow_users_to_change_display = $show_block_header === 'yes' ? $this->get_settings_for_display( 'allow_users_to_change_display' ) : '';
+		$show_filters                  = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_filters' ) : '';
+		$show_search                   = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_search' ) : '';
+		$show_date_cards               = $this->get_settings_for_display( 'show_date_cards' );
 		$show_descriptions             = $this->get_settings_for_display( 'show_descriptions' );
+		$show_featured_images          = $this->get_settings_for_display( 'show_featured_images' );
+		$image_position                = $this->get_settings_for_display( 'image_position' );
+		$appearance                    = $this->get_settings_for_display( 'appearance' );
 		$accent_color                  = $this->get_settings_for_display( 'accent_color' );
-		$links_color                   = $this->get_settings_for_display( 'links_color' );
+		$links_color                   = $this->get_settings_for_links_color( $appearance );
 
 		$attr = [
 			'blockId'                => $this->get_id(),
 			'calendars'              => ! empty( $calendars ) ? array_map( 'absint', $calendars ) : [],
+			'groupEventsByWeek'      => ! empty( $group_events_by_week ) && $group_events_by_week === 'yes',
+			'eventsPerPage'          => ! empty( $events_per_page ) ? absint( $events_per_page ) : 10,
+			'maximumEventsToShow'    => ! empty( $maximum_events_to_show ) ? absint( $maximum_events_to_show ) : 10,
 			'display'                => ! empty( $display ) ? $display : 'list',
+			'showBlockHeader'        => ! empty( $show_block_header ) && $show_block_header === 'yes',
+			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
+			'showFilters'            => ! empty( $show_filters ) && $show_filters === 'yes',
+			'showSearch'             => ! empty( $show_search ) && $show_search === 'yes',
+			'showDateCards'          => ! empty( $show_date_cards ) && $show_date_cards === 'yes',
+			'showDescriptions'       => ! empty( $show_descriptions ) && $show_descriptions === 'yes',
+			'showFeaturedImages'     => ! empty( $show_featured_images ) && $show_featured_images === 'yes',
+			'imagePosition'          => ! empty( $image_position ) ? $image_position : 'right',
+			'appearance'             => ! empty( $appearance ) ? $appearance : 'light',
 			'accentColor'            => ! empty( $accent_color ) ? $accent_color : '#5685BD',
 			'linksColor'             => ! empty( $links_color ) ? $links_color : '#000000D9',
-			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
-			'showFeaturedImages'     => ! empty( $show_featured_images ) && $show_featured_images === 'yes',
-			'showDescriptions'       => ! empty( $show_descriptions ) && $show_descriptions === 'yes',
 			'should_not_load_events' => false,
 		];
 
@@ -256,5 +436,69 @@ class ListWidget extends Widget_Base {
 		echo $block->get_html();
 
 		Plugin::instance()->frontend->add_content_filter();
+	}
+
+	/**
+	 * Get settings for Links Color.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $appearance Appearance.
+	 *
+	 * @return string
+	 */
+	private function get_settings_for_links_color( $appearance ) {
+
+		$links_color = $this->get_settings_for_display( 'links_color' );
+
+		// Default links color.
+		$default_links_color = [
+			'light' => '#000000D9',
+			'dark'  => '#ffffff',
+		];
+
+		// Update default links color with default color based on appearance.
+		if ( $appearance === 'dark' && $links_color === $default_links_color['light'] ) {
+
+			$links_color = $default_links_color['dark'];
+
+			$this->update_control(
+				'links_color',
+				[
+					'default' => $default_links_color['dark'],
+				]
+			);
+		} elseif ( $appearance === 'light' && $links_color === $default_links_color['dark'] ) {
+
+			$links_color = $default_links_color['light'];
+
+			$this->update_control(
+				'links_color',
+				[
+					'default' => $default_links_color['light'],
+				]
+			);
+		}
+
+		return $links_color;
+	}
+
+	/**
+	 * Get settings for Maximum Events to Show.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param int $events_per_page Events per page.
+	 *
+	 * @return int
+	 */
+	private function get_settings_for_maximum_events_to_show( $events_per_page ) {
+
+		// Default maximum events to show.
+		$maximum_events_to_show = $this->get_settings_for_display( 'maximum_events_to_show' );
+
+		return $events_per_page > $maximum_events_to_show
+			? $events_per_page
+			: $maximum_events_to_show;
 	}
 }

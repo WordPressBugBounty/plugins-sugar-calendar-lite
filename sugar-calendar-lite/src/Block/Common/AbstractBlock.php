@@ -209,10 +209,12 @@ abstract class AbstractBlock {
 
 		$this->block_id = '';
 
-		if ( ! empty( $this->attributes['calendarId'] ) ) {
-			$this->block_id = substr( $this->attributes['calendarId'], 0, 8 );
+		if ( ! empty( $this->attributes['user_generated_dom_id'] ) ) {
+			$this->block_id = $this->attributes['user_generated_dom_id'];
+		} elseif ( ! empty( $this->attributes['calendarId'] ) ) {
+			$this->block_id = 'sc-' . substr( $this->attributes['calendarId'], 0, 8 );
 		} elseif ( ! empty( $this->attributes['blockId'] ) ) {
-			$this->block_id = substr( $this->attributes['blockId'], 0, 8 );
+			$this->block_id = 'sc-' . substr( $this->attributes['blockId'], 0, 8 );
 		}
 
 		return $this->block_id;
@@ -290,12 +292,15 @@ abstract class AbstractBlock {
 	 * Get the heading.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0
+	 *
+	 * @param bool $use_abbreviated_month Whether to use abbreviated month or not.
 	 *
 	 * @return string
 	 */
-	public function get_heading() {
+	public function get_heading( $use_abbreviated_month = false ) {
 
-		return $this->get_view()->get_heading();
+		return $this->get_view()->get_heading( $use_abbreviated_month );
 	}
 
 	/**
@@ -477,6 +482,35 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Whether to render the block left control.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_render_block_left_controls() {
+
+		return ! empty( $this->get_attributes()['groupEventsByWeek'] ) && $this->get_attributes()['groupEventsByWeek'];
+	}
+
+	/**
+	 * Whether to render the block header.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_render_block_header() {
+
+		// Check if ajax request.
+		if ( $this->is_ajax() ) {
+			return ! empty( $this->get_attributes()['attributes']['showBlockHeader'] ) && $this->get_attributes()['attributes']['showBlockHeader'];
+		} else {
+			return ! empty( $this->get_attributes()['showBlockHeader'] ) && $this->get_attributes()['showBlockHeader'];
+		}
+	}
+
+	/**
 	 * Whether to render the display mode settings.
 	 *
 	 * @since 3.0.0
@@ -486,6 +520,30 @@ abstract class AbstractBlock {
 	public function should_render_display_mode_settings() {
 
 		return ! empty( $this->get_attributes()['allowUserChangeDisplay'] ) && $this->get_attributes()['allowUserChangeDisplay'];
+	}
+
+	/**
+	 * Whether to render the display search.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_render_search() {
+
+		return ! empty( $this->get_attributes()['showSearch'] ) && $this->get_attributes()['showSearch'];
+	}
+
+	/**
+	 * Whether to render the display filters.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_render_filters() {
+
+		return ! empty( $this->get_attributes()['showFilters'] ) && $this->get_attributes()['showFilters'];
 	}
 
 	/**

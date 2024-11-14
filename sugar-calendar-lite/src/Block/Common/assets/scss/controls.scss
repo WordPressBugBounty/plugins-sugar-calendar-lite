@@ -260,5 +260,24 @@
 		&--year {
 			font-weight: 500;
 		}
+
+		@include media('<tablet') {
+			display: none;
+		}
+	}
+
+	.sugar-calendar-block__view-heading-mobile {
+		display: none;
+
+		@include media('<tablet') {
+			display: block;
+		}
+	}
+
+	&.sugar-calendar-block__controls--right-hidden {
+
+		@include media('<tablet') {
+			gap: 0;
+		}
 	}
 }

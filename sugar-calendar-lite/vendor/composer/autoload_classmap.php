@@ -427,6 +427,7 @@ return array(
     'Sugar_Calendar\\Pro\\License\\Updater' => $baseDir . '/src/Pro/License/Updater.php',
     'Sugar_Calendar\\Pro\\Migrations\\LicenseKeyMigration' => $baseDir . '/src/Pro/Migrations/LicenseKeyMigration.php',
     'Sugar_Calendar\\Pro\\Tasks\\LicenseCheckTask' => $baseDir . '/src/Pro/Tasks/LicenseCheckTask.php',
+    'Sugar_Calendar\\Shortcodes\\ModernShortcodes' => $baseDir . '/src/Shortcodes/ModernShortcodes.php',
     'Sugar_Calendar\\Tasks\\Task' => $baseDir . '/src/Tasks/Task.php',
     'Sugar_Calendar\\Tasks\\Tasks' => $baseDir . '/src/Tasks/Tasks.php',
     'Sugar_Calendar\\UsageTracking\\SendUsageTask' => $baseDir . '/src/UsageTracking/SendUsageTask.php',

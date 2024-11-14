@@ -1,4 +1,4 @@
-=== Sugar Calendar - Simple Event Management ===
+=== Sugar Calendar - Event Calendar, Event Tickets, and Event Management Platform ===
 Contributors:      jaredatch, smub, capuderg, donmhico
 Author:            Sugar Calendar
 Author URI:        https://sugarcalendar.com
@@ -7,9 +7,9 @@ License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 License:           GNU General Public License v2 or later
 Tags:              events, calendar, event calendar, event management, event tickets
 Requires PHP:      7.4
-Requires at least: 5.8
-Tested up to:      6.6
-Stable tag:        3.3.0
+Requires at least: 5.9
+Tested up to:      6.7
+Stable tag:        3.4.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -29,6 +29,8 @@ Most event calendar plugins are either way too simple, or overly complex and blo
 
 **Events List WordPress block** - Add our Events List WP block on your page or in the sidebar and your visitors will have an awesome experience filtering, selecting and viewing your events in a beautiful list, grid or plain view.
 
+**The Events Calendar one-click migration** - Easily migrate your events from The Events Calendar plugin to Sugar Calendar with a single click.
+
 **Google Maps Integration** - Display a Google Maps map of the event location on the event details page.
 
 **Event Ticketing** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticekting-addon) - Extend the functionality of our Event Ticketing feature which is available in the free version of our plugin. With this addon you will be able to process payments with the WooCommerce integration.
@@ -44,6 +46,12 @@ Most event calendar plugins are either way too simple, or overly complex and blo
 **Recurring Events** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=recurring-events-pro) - Sugar Calendar supports recurring events, even with super complex schedules.
 
 **Customize date and time format** - Display dates and times however you want, you can select from all the most common formats, or customize it to your exact liking.
+
+**Export and Import Events** - Easily export and import your Sugar Calendar events, tickets, attendees, calendars and more, from one WordPress site to another.
+
+**Dark Mode** - You can switch the Event Calendar or Events List WP block to dark mode, to match your dark styled theme.
+
+**Elementor blocks** - Sugar Calendar provides two Elementor blocks: Events Calendar and Events List, so you can easily add them to your pages.
 
 **Event Link** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-link-pro) - Configure a custom URL for each event. This can be used to redirect to an external website, if needed.
 
@@ -176,6 +184,19 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.4.0 - 2024-11-14 =
+- Added: Appearance option for the Events Calendar and Events List Elementor widgets.
+- Added: Allow usage of Events Calendar and Events List blocks through the new shortcodes `[sugarcalendar_events_calendar]` and `[sugarcalendar_events_list]`.
+- Added: Display a no events message on the Event List shortcode when there are no events to display.
+- Added: Ability to only show upcoming events in the Event List block.
+- Added: More UI controls for the Event List block.
+- Changed: Calendar name is now required when creating a new calendar.
+- Changed: Bump the minimum required WP version to 5.9.
+- Fixed: The shortcode `[sc_events_list display='upcoming_with_recurring']` is not working properly on some WP installations.
+- Fixed: Event metadata such as location, link etc. are not carried over when duplicating an event.
+- Fixed: Events Calendar and Events List block JS file loading.
+- Fixed: Missing url escaping.
+
 = 3.3.0 - 2024-10-03 =
 - Added: The Events Calendar one-click migration to Sugar Calendar.
 - Added: Sugar Calendar exporter and importer.

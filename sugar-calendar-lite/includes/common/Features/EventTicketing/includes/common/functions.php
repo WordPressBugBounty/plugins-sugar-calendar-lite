@@ -639,6 +639,20 @@ function get_currency() {
 }
 
 /**
+ * Sanitize boolean.
+ *
+ * @since 3.4.0
+ *
+ * @param mixed $value Value to sanitize.
+ *
+ * @return bool
+ */
+function sanitize_boolean( $value ) {
+
+	return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+}
+
+/**
  * Sanitize Amount.
  *
  * Returns a sanitized amount by stripping out thousands separators.

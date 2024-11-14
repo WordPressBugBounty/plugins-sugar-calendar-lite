@@ -523,6 +523,7 @@ class UI {
 	 * Output a calendar dropdown setting control.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Added the `preserved` argument.
 	 *
 	 * @param array $args Control arguments.
 	 * @param bool  $bare Whether to output the control wrapper.
@@ -534,7 +535,8 @@ class UI {
 		$args = wp_parse_args(
 			$args,
 			[
-				'type' => 'select',
+				'type'      => 'select',
+				'preserved' => false,
 			]
 		);
 
@@ -548,6 +550,10 @@ class UI {
 
 		if ( ! empty( $name ) && ! $bare ) {
 			$args['name'] = "sugar-calendar[$name]";
+		}
+
+		if ( $args['preserved'] && self::is_preserved( $name ) ) {
+			$args['selected'] = self::get_preserved_value( $name );
 		}
 
 		ob_start();
@@ -652,6 +658,7 @@ class UI {
 	 * Output a text setting control.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Added the `preserved` argument.
 	 *
 	 * @param array $args Control arguments.
 	 * @param bool  $bare Whether to output the control wrapper.
@@ -669,6 +676,8 @@ class UI {
 				'value'       => '',
 				'placeholder' => '',
 				'description' => '',
+				'required'    => false,
+				'preserved'   => false,
 			]
 		);
 
@@ -688,6 +697,11 @@ class UI {
 		$value       = $args['value'];
 		$placeholder = $args['placeholder'];
 
+		// If the value is preserved, get from $_REQUEST.
+		if ( $args['preserved'] && self::is_preserved( $name ) ) {
+			$value = urldecode( self::get_preserved_value( $name ) );
+		}
+
 		ob_start();
 		?>
 
@@ -695,7 +709,9 @@ class UI {
                name="<?php echo esc_attr( $name ); ?>"
                value="<?php echo esc_attr( $value ); ?>"
                id="<?php echo esc_attr( $id ); ?>"
-               placeholder="<?php echo esc_attr( $placeholder ); ?>"/>
+               placeholder="<?php echo esc_attr( $placeholder ); ?>"
+			   <?php echo ( $args['required'] ? esc_attr( 'required' ) : '' ); ?>
+        />
 
 		<?php
 
@@ -714,6 +730,7 @@ class UI {
 	 * Output a textarea setting control.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Added the `preserved` argument.
 	 *
 	 * @param array $args Control arguments.
 	 * @param bool  $bare Whether to output the control wrapper.
@@ -732,6 +749,7 @@ class UI {
 				'rows'        => '5',
 				'cols'        => '40',
 				'description' => '',
+				'preserved'   => false,
 			]
 		);
 
@@ -751,6 +769,11 @@ class UI {
 		$placeholder = $args['placeholder'];
 		$rows        = $args['rows'];
 		$cols        = $args['cols'];
+
+		// If the value is preserved, get from $_REQUEST.
+		if ( $args['preserved'] && self::is_preserved( $name ) ) {
+			$value = self::get_preserved_value( $name );
+		}
 
 		ob_start();
 		?>
@@ -862,5 +885,33 @@ class UI {
 
 		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Check if a value is preserved.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $name Key of the value in $_REQUEST['preserved'].
+	 *
+	 * @return bool
+	 */
+	public static function is_preserved( $name ) {
+
+		return isset( $_REQUEST['preserved'][ $name ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	}
+
+	/**
+	 * Get preserved values from the request.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $name Key of the value in $_REQUEST['preserved'].
+	 *
+	 * @return string
+	 */
+	public static function get_preserved_value( $name ) {
+
+		return isset( $_REQUEST['preserved'][ $name ] ) ? wp_unslash( $_REQUEST['preserved'][ $name ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	}
 }

@@ -60,15 +60,84 @@ class List_Table extends \WP_List_Table {
 		$pending_count   = '&nbsp;<span class="count">(' . number_format_i18n( $this->pending_count  ) . ')</span>';
 		$refunded_count  = '&nbsp;<span class="count">(' . number_format_i18n( $this->refunded_count ) . ')</span>';
 
-		// Views
-		$views = array(
-			'all'      => sprintf( '<a href="%s"%s>%s</a>', remove_query_arg( array( 'status', 'paged' ) ), $current === 'all' || $current === '' ? ' class="current"' : '', Functions\order_status_label( 'all' ) . $total_count ),
-			'pending'  => sprintf( '<a href="%s"%s>%s</a>', add_query_arg( array( 'status' => 'pending',  'paged' => false ) ), $current === 'pending'  ? ' class="current"' : '', Functions\order_status_label( 'pending'  ) . $pending_count ),
-			'paid'     => sprintf( '<a href="%s"%s>%s</a>', add_query_arg( array( 'status' => 'paid',     'paged' => false ) ), $current === 'paid'     ? ' class="current"' : '', Functions\order_status_label( 'paid'     ) . $paid_count ),
-			'refunded' => sprintf( '<a href="%s"%s>%s</a>', add_query_arg( array( 'status' => 'refunded', 'paged' => false ) ), $current === 'refunded' ? ' class="current"' : '', Functions\order_status_label( 'refunded' ) . $refunded_count ),
-		);
+		// Views.
+		$views = [
+			'all'      => sprintf(
+				'<a href="%s"%s>%s</a>',
+				esc_url( remove_query_arg( [ 'status', 'paged' ] ) ),
+				$current === 'all' || $current === '' ? ' class="current"' : '',
+				wp_kses(
+					Functions\order_status_label( 'all' ) . $total_count,
+					[
+						'span' => [
+							'class' => [],
+						],
+					]
+				)
+			),
+			'pending'  => sprintf(
+				'<a href="%s"%s>%s</a>',
+				esc_url(
+					add_query_arg(
+						[
+							'status' => 'pending',
+							'paged'  => false,
+						]
+					)
+				),
+				$current === 'pending' ? ' class="current"' : '',
+				wp_kses(
+					Functions\order_status_label( 'pending' ) . $pending_count,
+					[
+						'span' => [
+							'class' => [],
+						],
+					]
+				)
+			),
+			'paid'     => sprintf(
+				'<a href="%s"%s>%s</a>',
+				esc_url(
+					add_query_arg(
+						[
+							'status' => 'paid',
+							'paged'  => false,
+						]
+					)
+				),
+				$current === 'paid' ? ' class="current"' : '',
+				wp_kses(
+					Functions\order_status_label( 'paid' ) . $paid_count,
+					[
+						'span' => [
+							'class' => [],
+						],
+					]
+				)
+			),
+			'refunded' => sprintf(
+				'<a href="%s"%s>%s</a>',
+				esc_url(
+					add_query_arg(
+						[
+							'status' => 'refunded',
+							'paged'  => false,
+						]
+					)
+				),
+				$current === 'refunded' ? ' class="current"' : '',
+				wp_kses(
+					Functions\order_status_label( 'refunded' ) . $refunded_count,
+					[
+						'span' => [
+							'class' => [],
+						],
+					]
+				)
+			),
+		];
 
-		// Filter & return
+		// Filter & return.
 		return apply_filters( 'sc_event_tickets_list_table_views', $views );
 	}
 

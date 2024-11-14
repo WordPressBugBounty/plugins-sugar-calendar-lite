@@ -129,6 +129,10 @@ class Helpers {
 				'default' => 'month',
 				'type'    => 'string',
 			],
+			'appearance'         => [
+				'default' => 'light',
+				'type'    => 'string',
+			],
 			'visitor_tz_convert' => [
 				'default' => 0,
 				'type'    => 'int',
@@ -142,6 +146,10 @@ class Helpers {
 				'type'    => 'bool',
 			],
 			'day'                => [
+				'default' => 0,
+				'type'    => 'int',
+			],
+			'paged'              => [
 				'default' => 0,
 				'type'    => 'int',
 			],
@@ -245,16 +253,83 @@ class Helpers {
 		$sanitized_attributes = [];
 
 		$event_list_attr = [
-			'allowUserChangeDisplay',
-			'showDescriptions',
-			'showFeaturedImages',
-			'appearance',
+			[
+				'name'    => 'blockId',
+				'type'    => 'string',
+				'default' => '',
+			],
+			[
+				'name' => 'groupEventsByWeek',
+				'type' => 'boolean',
+			],
+			[
+				'name'    => 'eventsPerPage',
+				'type'    => 'int',
+				'default' => 10,
+			],
+			[
+				'name'    => 'maximumEventsToShow',
+				'type'    => 'int',
+				'default' => 10,
+			],
+			[
+				'name' => 'showBlockHeader',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'allowUserChangeDisplay',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'showSearch',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'showFilters',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'showDateCards',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'showFeaturedImages',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'showDescriptions',
+				'type' => 'boolean',
+			],
+			[
+				'name'    => 'imagePosition',
+				'type'    => 'string',
+				'default' => 'right',
+			],
+			[
+				'name'    => 'appearance',
+				'type'    => 'string',
+				'default' => 'light',
+			],
 		];
 
 		foreach ( $event_list_attr as $attr ) {
-			$sanitized_attributes[ $attr ] = ! empty( $attributes[ $attr ] ) && $attributes[ $attr ] === 'true'
-				? true
-				: sanitize_text_field( $attributes[ $attr ] );
+
+			if ( $attr['type'] === 'boolean' ) {
+
+				$sanitized_attributes[ $attr['name'] ] = ! empty( $attributes[ $attr['name'] ] ) && $attributes[ $attr['name'] ] === 'true';
+
+			} elseif ( $attr['type'] === 'string' ) {
+
+				$sanitized_attributes[ $attr['name'] ] = ! empty( $attributes[ $attr['name'] ] )
+					? sanitize_text_field( $attributes[ $attr['name'] ] )
+					: $attr['default'];
+
+			} elseif ( $attr['type'] === 'int' ) {
+
+				$sanitized_attributes[ $attr['name'] ] = ! empty( $attributes[ $attr['name'] ] )
+					? absint( $attributes[ $attr['name'] ] )
+					: $attr['default'];
+			}
 		}
 
 		return $sanitized_attributes;
@@ -545,18 +620,26 @@ class Helpers {
 	 * Get the upcoming events list with recurring events.
 	 *
 	 * @since 3.3.0
+	 * @since 3.4.0 Added support for the 'search' parameter.
+	 * @since 3.4.0 Use `$wpdb->prefix` instead of hardcoding 'wp_'.
 	 *
 	 * @param int    $number   The number of events to get.
 	 * @param string $category The categories separated by comma.
+	 * @param string $search   The search keyword for the event title.
 	 *
 	 * @return Event[]
 	 */
-	public static function get_upcoming_events_list_with_recurring( $number = 5, $category = '' ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	public static function get_upcoming_events_list_with_recurring( // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+		$number = 5,
+		$category = '',
+		$search = ''
+	) {
 
 		global $wpdb;
 
 		$left_join              = '';
 		$where_categories_query = '';
+		$where_search_query     = '';
 
 		// Get the category left join and where queries if necessary.
 		if ( ! empty( $category ) ) {
@@ -567,17 +650,29 @@ class Helpers {
 				$categories_data[] = get_term_by( 'slug', $cat, sugar_calendar_get_calendar_taxonomy_id() );
 			}
 
+			$term_taxonomy_ids = array_map( 'absint', wp_list_pluck( $categories_data, 'term_taxonomy_id' ) );
+
 			if ( ! empty( $categories_data ) ) {
-				$left_join              = 'LEFT JOIN wp_term_relationships ON (sc_e.object_id = wp_term_relationships.object_id)';
+				$left_join              = 'LEFT JOIN ' . $wpdb->term_relationships . ' ON (sc_e.object_id = ' . $wpdb->term_relationships . '.object_id)';
 				$where_categories_query = $wpdb->prepare(
-					'AND ( wp_term_relationships.term_taxonomy_id IN (%1$s) )',
-					implode( ',', wp_list_pluck( $categories_data, 'term_taxonomy_id' ) )
+					'AND ( ' . $wpdb->term_relationships . '.term_taxonomy_id IN (%1$s) )',
+					implode( ',', $term_taxonomy_ids )
 				);
 			}
 		}
 
+		// Get the search query if necessary.
+		if ( ! empty( $search ) ) {
+			$left_join .= ' LEFT JOIN ' . $wpdb->posts . ' wp ON (sc_e.object_id = wp.ID)';
+
+			$where_search_query = $wpdb->prepare(
+				'AND wp.post_title LIKE %s',
+				'%' . $wpdb->esc_like( $search ) . '%'
+			);
+		}
+
 		$now          = sugar_calendar_get_request_time( 'mysql' );
-		$select_query = 'SELECT sc_e.id FROM wp_sc_events sc_e';
+		$select_query = 'SELECT sc_e.id FROM ' . $wpdb->prefix . 'sc_events sc_e';
 
 		if ( ! empty( $left_join ) ) {
 			$select_query .= ' ' . $left_join;
@@ -586,8 +681,8 @@ class Helpers {
 		$where_query = $wpdb->prepare(
 			"WHERE sc_e.object_type = 'post' AND sc_e.status = 'publish' AND (
 				(
-					sc_e.recurrence IN ('daily','weekly','monthly','yearly') AND
-					sc_e.start <= %s AND
+					sc_e.recurrence IN ('daily','weekly','monthly','yearly')
+					AND
 					(
 						sc_e.recurrence_end <= '0000-01-01 00:00:00' OR
 						sc_e.recurrence_end >= %s
@@ -600,12 +695,15 @@ class Helpers {
 				)
 			)",
 			$now,
-			$now,
 			$now
 		);
 
 		if ( ! empty( $where_categories_query ) ) {
 			$where_query .= ' ' . $where_categories_query;
+		}
+
+		if ( ! empty( $where_search_query ) ) {
+			$where_query .= ' ' . $where_search_query;
 		}
 
 		$order_by = $wpdb->prepare(
@@ -623,7 +721,9 @@ class Helpers {
 
 		return sugar_calendar_get_events(
 			[
-				'id__in' => wp_list_pluck( $event_ids, 'id' ),
+				'id__in'  => wp_list_pluck( $event_ids, 'id' ),
+				'orderby' => 'start',
+				'order'   => 'ASC',
 			]
 		);
 	}
@@ -884,5 +984,31 @@ class Helpers {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the no events message for the legacy event list.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $display The display type. This can be 'all', 'upcoming', or 'past'. Default 'all'.
+	 *
+	 * @return string
+	 */
+	public static function get_no_events_message_for_legacy_event_list( $display = 'all' ) {
+
+		$no_events_message = __( 'There are no events to display.', 'sugar-calendar' );
+
+		switch ( $display ) {
+			case 'upcoming':
+				$no_events_message = __( 'There are no upcoming events to display.', 'sugar-calendar' );
+				break;
+
+			case 'past':
+				$no_events_message = __( 'There are no past events to display.', 'sugar-calendar' );
+				break;
+		}
+
+		return $no_events_message;
 	}
 }

@@ -188,12 +188,24 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 * Get the heading of the month view.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0
+	 *
+	 * @param bool $use_abbreviated_month Whether to use abbreviated month or not.
 	 *
 	 * @return string
 	 */
-	public function get_heading() {
+	public function get_heading( $use_abbreviated_month = false ) {
 
-		return $this->get_month_string();
+		$month = $this->get_month_string();
+
+		if ( $use_abbreviated_month ) {
+
+			global $wp_locale;
+
+			$month = $wp_locale->get_month_abbrev( $month );
+		}
+
+		return $month;
 	}
 
 	/**

@@ -80,16 +80,26 @@ class Loader {
 		// Default attributes.
 		$default_attr = [
 			'clientId'               => '',
+			'groupEventsByWeek'      => true,
+			'eventsPerPage'          => 10,
+			'maximumEventsToShow'    => 10,
 			'display'                => 'list',
 			'accentColor'            => '#5685BD',
 			'linksColor'             => '#000000D9',
 			'allowUserChangeDisplay' => true,
+			'showBlockHeader'        => true,
 			'showFeaturedImages'     => true,
 			'showDescriptions'       => true,
+			'showDateCards'          => true,
+			'showSearch'             => true,
+			'showFilters'            => true,
+			'imagePosition'          => 'right',
+			'appearance'             => 'light',
 			'should_not_load_events' => $should_not_load_events,
 		];
 
-		$attr  = wp_parse_args( $block_attributes, $default_attr );
+		$attr = wp_parse_args( $block_attributes, $default_attr );
+
 		$block = new Block( $attr );
 
 		switch ( $attr['display'] ) {
@@ -107,7 +117,9 @@ class Loader {
 
 		$block->set_view( $view );
 
-		return $block->get_html();
+		$html = $block->get_html();
+
+		return $html;
 	}
 
 	/**
@@ -156,31 +168,23 @@ class Loader {
 	 *
 	 * @since 3.2.0
 	 * @since 3.2.1 Added the filter to determine if the assets should be loaded.
+	 * @since 3.4.0 Removed the additional checks.
 	 *
 	 * @return bool
 	 */
 	private function should_load_assets() {
 
-		if ( ! is_singular() ) {
-			return false;
-		}
-
-		return (
-				// Check if the block is present.
-				function_exists( 'has_block' ) &&
-				has_block( 'sugar-calendar/event-list-block' )
-			) ||
-			/**
-			 * Filter to determine if the assets should be loaded.
-			 *
-			 * @since 3.2.1
-			 *
-			 * @param bool $should_load_assets Whether the assets should be loaded.
-			 */
-			apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-				'sugar_calendar_block_list_should_load_assets',
-				false
-			);
+		/**
+		 * Filter to determine if the assets should be loaded.
+		 *
+		 * @since 3.2.1
+		 *
+		 * @param bool $should_load_assets Whether the assets should be loaded.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_list_should_load_assets',
+			true
+		);
 	}
 
 	/**
@@ -230,17 +234,30 @@ class Loader {
 
 		$body = ob_get_clean();
 
-		wp_send_json_success(
-			[
-				'body'              => $body,
-				'heading'           => $view->get_heading(),
-				'is_update_display' => $clean_data['updateDisplay'],
-				'date'              => [
-					'day'   => $block->get_day_num_without_zero(),
-					'month' => $block->get_month_num_without_zero(),
-					'year'  => $block->get_year(),
-				],
-			]
-		);
+		$response = [
+			'body'              => $body,
+			'heading'           => $view->get_heading(),
+			'heading_mobile'    => $view->get_heading( true ),
+			'is_update_display' => $clean_data['updateDisplay'],
+			'date'              => [
+				'day'   => $block->get_day_num_without_zero(),
+				'month' => $block->get_month_num_without_zero(),
+				'year'  => $block->get_year(),
+			],
+		];
+
+		// Add pagination response.
+		if (
+			! $block->should_group_events_by_week()
+		) {
+			// Add the current page to the response.
+			$response['paged'] = $block->get_paged();
+
+			// Respond whether there are upcoming events.
+			$response['enable_next']     = $block->has_upcoming_events();
+			$response['enable_previous'] = $block->has_previous_events();
+		}
+
+		wp_send_json_success( $response );
 	}
 }

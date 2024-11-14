@@ -13,7 +13,7 @@ use Sugar_Calendar\Helper;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-function sc_get_events_for_calendar_with_custom_range( $start_range, $end_range, $category = '', $search = '' ) {
+function sc_get_events_for_calendar_with_custom_range( $start_range, $end_range, $category = '', $search = '', $number = null ) {
 
 	if (
 		! ( $start_range instanceof DateTimeInterface ) ||
@@ -25,10 +25,16 @@ function sc_get_events_for_calendar_with_custom_range( $start_range, $end_range,
 	$view_start = $start_range->format( 'Y-m-d H:i:s' );
 	$view_end   = $end_range->format( 'Y-m-d 23:59:59' );
 
+	if ( is_null( $number ) ) {
+		$number = sc_get_number_of_events();
+	} else {
+		$number = absint( $number );
+	}
+
 	// Default arguments.
 	$args = [
 		'no_found_rows' => true,
-		'number'        => sc_get_number_of_events(),
+		'number'        => $number,
 		'object_type'   => 'post',
 		'status'        => 'publish',
 		'orderby'       => 'start',

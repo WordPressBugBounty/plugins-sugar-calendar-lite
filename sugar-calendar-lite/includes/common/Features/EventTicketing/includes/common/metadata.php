@@ -5,41 +5,55 @@ namespace Sugar_Calendar\AddOn\Ticketing\Metadata;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Register meta data keys & sanitization callbacks
+ * Meta schema.
+ *
+ * @since 3.4.0
+ *
+ * @return array
+ */
+function schema() {
+
+	return [
+		'tickets' => [
+			'type'              => 'boolean',
+			'description'       => '',
+			'single'            => true,
+			'sanitize_callback' => 'Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\sanitize_boolean',
+			'auth_callback'     => null,
+			'show_in_rest'      => false,
+		],
+		'ticket_price' => [
+			'type'              => 'number',
+			'description'       => '',
+			'single'            => true,
+			'sanitize_callback' => 'Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\sanitize_amount',
+			'auth_callback'     => null,
+			'show_in_rest'      => true,
+		],
+		'ticket_quantity' => [
+			'type'              => 'integer',
+			'description'       => '',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => null,
+			'show_in_rest'      => false,
+		],
+	];
+}
+
+/**
+ * Register meta data keys & sanitization callbacks.
  *
  * @since 1.0.0
+ * @since 3.4.0 Use schema() to define meta keys.
+ *
+ * @param array $schema
+ *
+ * @return array
  */
-function register_meta_data() {
+function register_meta_data( $schema = [] ) {
 
-	// Enable Tickets
-	register_meta( 'sc_event', 'tickets', array(
-		'type'              => 'boolean',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => '__return_true',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
-
-	// Ticket Price
-	register_meta( 'sc_event', 'ticket_price', array(
-		'type'              => 'number',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\sanitize_amount',
-		'auth_callback'     => null,
-		'show_in_rest'      => true,
-	) );
-
-	// Ticket Quantity
-	register_meta( 'sc_event', 'ticket_quantity', array(
-		'type'              => 'integer',
-		'description'       => '',
-		'single'            => true,
-		'sanitize_callback' => 'sanitize_text_field',
-		'auth_callback'     => null,
-		'show_in_rest'      => false,
-	) );
+	return array_merge( $schema, schema() );
 }
 
 /**

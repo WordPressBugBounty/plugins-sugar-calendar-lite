@@ -121,31 +121,23 @@ class Loader {
 	 *
 	 * @since 3.2.0
 	 * @since 3.2.1 Added the filter to determine if the assets should be loaded.
+	 * @since 3.4.0 Removed the additional checks.
 	 *
 	 * @return bool
 	 */
 	private function should_load_assets() {
 
-		if ( ! is_singular() ) {
-			return false;
-		}
-
-		return (
-				// Check if the block is present.
-				function_exists( 'has_block' ) &&
-				has_block( 'sugar-calendar/block' )
-			) ||
-			/**
-			 * Filter to determine if the assets should be loaded.
-			 *
-			 * @since 3.2.1
-			 *
-			 * @param bool $should_load_assets Whether the assets should be loaded.
-			 */
-			apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-				'sugar_calendar_block_calendar_should_load_assets',
-				false
-			);
+		/**
+		 * Filter to determine if the assets should be loaded.
+		 *
+		 * @since 3.2.1
+		 *
+		 * @param bool $should_load_assets Whether the assets should be loaded.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_calendar_should_load_assets',
+			true
+		);
 	}
 
 	/**
@@ -191,6 +183,7 @@ class Loader {
 			 * since we still need to get the visitor's timezone from the browser.
 			 */
 			'should_not_load_events' => $should_not_load_events,
+			'groupEventsByWeek'      => true,
 		];
 
 		$attr  = wp_parse_args( $block_attributes, $default_attr );
@@ -329,7 +322,8 @@ class Loader {
 		}
 
 		// Get the heading.
-		$heading = $cal->get_heading();
+		$heading        = $cal->get_heading();
+		$heading_mobile = $cal->get_heading( true );
 
 		ob_start();
 
@@ -345,6 +339,7 @@ class Loader {
 			[
 				'body'              => $body,
 				'heading'           => $heading,
+				'heading_mobile'    => $heading_mobile,
 				'is_update_display' => $clean_data['updateDisplay'],
 				'date'              => [
 					'day'   => $block->get_day_num_without_zero(),

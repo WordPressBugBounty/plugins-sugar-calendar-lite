@@ -150,6 +150,20 @@ class CalendarWidget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'appearance',
+			[
+				'default'    => 'light',
+				'label'      => esc_html__( 'Appearance', 'sugar-calendar' ),
+				'options'    => [
+					'light' => esc_html__( 'Light', 'sugar-calendar' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+				],
+				'show_label' => true,
+				'type'       => Controls_Manager::SELECT,
+			]
+		);
+
+		$this->add_control(
 			'allow_users_to_change_display',
 			[
 				'default'      => 'yes',
@@ -183,13 +197,19 @@ class CalendarWidget extends Widget_Base {
 		$allow_users_to_change_display = $this->get_settings_for_display( 'allow_users_to_change_display' );
 		$accent_color                  = $this->get_settings_for_display( 'accent_color' );
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
+		$appearance                    = $this->get_settings_for_display( 'appearance' );
 
 		$attr = [
 			'blockId'                => $this->get_id(),
 			'display'                => ! empty( $display ) ? $display : 'month',
 			'accentColor'            => ! empty( $accent_color ) ? $accent_color : '#5685BD',
-			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
 			'calendars'              => ! empty( $calendars ) ? array_map( 'absint', $calendars ) : [],
+			'groupEventsByWeek'      => true,
+			'showBlockHeader'        => true,
+			'showFilters'            => true,
+			'showSearch'             => true,
+			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
+			'appearance'             => ! empty( $appearance ) ? $appearance : 'light',
 			'should_not_load_events' => false,
 		];
 

@@ -17,6 +17,7 @@ import {
 	PanelBody,
 	ToggleControl,
 	SelectControl,
+	TextControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalHeading as Heading
@@ -74,6 +75,45 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes({ calendars: selectedCalendarIds });
 	}
 
+	const onGroupEventsByWeek = ( groupEventsByWeek ) => {
+		let newAttributes = { groupEventsByWeek: groupEventsByWeek };
+
+		if ( groupEventsByWeek ) {
+			newAttributes.eventsPerPage = 10;
+			newAttributes.maximumEventsToShow = 10;
+		}
+
+		setAttributes( newAttributes );
+	};
+
+	const onEventsPerPage = (eventsPerPage) => {
+		eventsPerPage = parseInt(eventsPerPage) || 0;
+
+		let newAttributes = { eventsPerPage: eventsPerPage };
+
+		if (eventsPerPage > attributes.maximumEventsToShow) {
+			newAttributes.maximumEventsToShow = eventsPerPage;
+		}
+
+		setAttributes(newAttributes);
+	};
+
+	const onMaximumEventsToShow = (maximumEventsToShow) => {
+		maximumEventsToShow = parseInt(maximumEventsToShow) || 0;
+		let newAttributes = { maximumEventsToShow: maximumEventsToShow };
+
+		// Adjust eventsPerPage if it's higher than maximumEventsToShow
+		if (maximumEventsToShow < attributes.eventsPerPage) {
+			newAttributes.eventsPerPage = maximumEventsToShow;
+		}
+
+		if (attributes.eventsPerPage === 0 && maximumEventsToShow > 0) {
+			newAttributes.eventsPerPage = maximumEventsToShow;
+		}
+
+		setAttributes(newAttributes);
+	};
+
 	const onChangeDisplay = ( display ) => {
 		setAttributes( { display: display } );
 	};
@@ -82,21 +122,38 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes( { allowUserChangeDisplay: allowUserChangeDisplay } );
 	}
 
-	const onShowFeaturedImages = ( showFeaturedImages ) => {
-		setAttributes( { showFeaturedImages: showFeaturedImages } );
+	const onShowBlockHeader = ( showBlockHeader ) => {
+		setAttributes( {
+			showBlockHeader: showBlockHeader,
+			allowUserChangeDisplay: showBlockHeader,
+			showFilters: showBlockHeader,
+			showSearch: showBlockHeader,
+		} );
+	};
+
+	const onShowFilters = ( showFilters ) => {
+		setAttributes( { showFilters: showFilters } );
+	};
+
+	const onShowSearch = ( showSearch ) => {
+		setAttributes( { showSearch: showSearch } );
+	};
+
+	const onShowDateCards = ( showDateCards ) => {
+		setAttributes( { showDateCards: showDateCards } );
 	};
 
 	const onShowDescriptions = ( showDescriptions ) => {
 		setAttributes( { showDescriptions: showDescriptions } );
 	};
 
-	const onChangeAccentColor = ( accentColor ) => {
-		setAttributes( { accentColor: accentColor } );
+	const onShowFeaturedImages = ( showFeaturedImages ) => {
+		setAttributes( { showFeaturedImages: showFeaturedImages } );
 	};
 
-	const onChangeLinksColor = ( linksColor ) => {
-		setAttributes( { linksColor: linksColor } );
-	}
+	const onImagePosition = ( imagePosition ) => {
+		setAttributes( { imagePosition: imagePosition } );
+	};
 
 	const onChangeAppearance = ( appearance ) => {
 
@@ -126,10 +183,21 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes( appearanceColor );
 	}
 
+	const onChangeAccentColor = ( accentColor ) => {
+		setAttributes( { accentColor: accentColor } );
+	};
+
+	const onChangeLinksColor = ( linksColor ) => {
+		setAttributes( { linksColor: linksColor } );
+	}
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'sugar-calendar-event-list-block' ) }>
+				<PanelBody
+					title={ __( 'Settings', 'sugar-calendar-event-list-block' ) }
+					initialOpen={ true }
+				>
 
 					{
 						hasFinishedGettingCalendars &&
@@ -168,9 +236,39 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						/>
 					}
 
+					<ToggleControl
+						label={ __( 'Group Events by Week', 'sugar-calendar-event-list-block' ) }
+						checked={ attributes.groupEventsByWeek }
+						onChange={ onGroupEventsByWeek }
+					/>
+
+					{ ! attributes.groupEventsByWeek && (
+						<>
+							<TextControl
+								label={ __( 'Events Per Page', 'sugar-calendar-event-list-block' ) }
+								type="text"
+								value={ attributes.eventsPerPage || '' }
+								onChange={ (value) => onEventsPerPage(parseInt(value, 10) ) }
+							/>
+
+							<TextControl
+								label={ __( 'Maximum Events To Show', 'sugar-calendar-event-list-block' ) }
+								type="text"
+								value={ attributes.maximumEventsToShow || '' }
+								onChange={ (value) => onMaximumEventsToShow(parseInt(value, 10) ) }
+							/>
+						</>
+					) }
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Display', 'sugar-calendar-event-list-block' ) }
+					initialOpen={ false }
+				>
+
 					<ToggleGroupControl
 						onChange={ onChangeDisplay }
-						label={ __( 'Display', 'sugar-calendar-block' ) }
+						label={ __( 'Display Type', 'sugar-calendar-block' ) }
 						value={ attributes.display }
 						isBlock>
 						<ToggleGroupControlOption value="list" label={ __( 'List', 'sugar-calendar-event-list-block' ) } />
@@ -178,23 +276,92 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						<ToggleGroupControlOption value="plain" label={ __( 'Plain', 'sugar-calendar-event-list-block' ) } />
 					</ToggleGroupControl>
 
-					<ToggleControl
-						label={ __( 'Allow Users to Change Display', 'sugar-calendar-event-list-block' ) }
-						checked={ attributes.allowUserChangeDisplay }
-						onChange={ onAllowUserChangeDisplay }
-					/>
+					{ attributes.display !== 'plain' && (
+						<ToggleControl
+							label={ __( 'Show Block Header', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.showBlockHeader }
+							onChange={ onShowBlockHeader }
+						/>
+					) }
 
-					<ToggleControl
-						label={ __( 'Show Featured Images', 'sugar-calendar-event-list-block' ) }
-						checked={ attributes.showFeaturedImages }
-						onChange={ onShowFeaturedImages }
-					/>
+					{ attributes.display !== 'plain' && (
+						<ToggleControl
+							label={ __( 'Allow Users to Change Display', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.allowUserChangeDisplay }
+							onChange={ onAllowUserChangeDisplay }
+							disabled={ ! attributes.showBlockHeader }
+						/>
+					) }
+
+					{ attributes.display !== 'plain' && (
+						<ToggleControl
+							label={ __( 'Show Filters', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.showFilters }
+							onChange={ onShowFilters }
+							disabled={ ! attributes.showBlockHeader }
+						/>
+					) }
+
+
+					{ attributes.display !== 'plain' && (
+						<ToggleControl
+							label={ __( 'Show Search', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.showSearch }
+							onChange={ onShowSearch }
+							disabled={ ! attributes.showBlockHeader }
+						/>
+					) }
+
+
+					{/* Show only in list display */}
+					{ attributes.display === 'list' && (
+						<ToggleControl
+							label={ __( 'Show Date Cards', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.showDateCards }
+							onChange={ onShowDateCards }
+						/>
+					) }
 
 					<ToggleControl
 						label={ __( 'Show Descriptions', 'sugar-calendar-event-list-block' ) }
 						checked={ attributes.showDescriptions }
 						onChange={ onShowDescriptions }
 					/>
+
+					{/* Show only when display is other than plain. */}
+					{ attributes.display !== 'plain' && (
+						<ToggleControl
+							label={ __( 'Show Featured Images', 'sugar-calendar-event-list-block' ) }
+							checked={ attributes.showFeaturedImages }
+							onChange={ onShowFeaturedImages }
+						/>
+					) }
+
+					{/* Show when showFeaturedImages is enabled. */}
+					{/* Hide when display is in plain or grid mode. */}
+					{
+						attributes.display !== 'plain'
+						&&
+						attributes.display !== 'grid'
+						&&
+						attributes.showFeaturedImages
+						&& (
+						<SelectControl
+							label={ __( 'Image Position', 'sugar-calendar-event-list-block' ) }
+							value={ attributes.imagePosition }
+							options={ [
+								{ label: __( 'Left', 'sugar-calendar-event-list-block' ), value: 'left' },
+								{ label: __( 'Right', 'sugar-calendar-event-list-block' ), value: 'right' },
+							] }
+							onChange={ onImagePosition }
+						/>
+					) }
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Styles', 'sugar-calendar-event-list-block' ) }
+					initialOpen={ false }
+				>
 
 					<SelectControl
 						label={ __( 'Appearance', 'sugar-calendar-block' ) }
@@ -228,7 +395,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 							},
 						] }
 					/>
-
 				</PanelBody>
 			</InspectorControls>
 

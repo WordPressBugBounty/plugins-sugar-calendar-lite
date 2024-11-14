@@ -452,6 +452,7 @@ class ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e
         'Sugar_Calendar\\Pro\\License\\Updater' => __DIR__ . '/../..' . '/src/Pro/License/Updater.php',
         'Sugar_Calendar\\Pro\\Migrations\\LicenseKeyMigration' => __DIR__ . '/../..' . '/src/Pro/Migrations/LicenseKeyMigration.php',
         'Sugar_Calendar\\Pro\\Tasks\\LicenseCheckTask' => __DIR__ . '/../..' . '/src/Pro/Tasks/LicenseCheckTask.php',
+        'Sugar_Calendar\\Shortcodes\\ModernShortcodes' => __DIR__ . '/../..' . '/src/Shortcodes/ModernShortcodes.php',
         'Sugar_Calendar\\Tasks\\Task' => __DIR__ . '/../..' . '/src/Tasks/Task.php',
         'Sugar_Calendar\\Tasks\\Tasks' => __DIR__ . '/../..' . '/src/Tasks/Tasks.php',
         'Sugar_Calendar\\UsageTracking\\SendUsageTask' => __DIR__ . '/../..' . '/src/UsageTracking/SendUsageTask.php',

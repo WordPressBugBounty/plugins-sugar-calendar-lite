@@ -842,6 +842,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 					switch ( that.getDisplay() ) {
 						case 'day':
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading' ).text( response.data.heading );
+							that.$mainContainer.find( '.sugar-calendar-block__view-heading-mobile' ).text( response.data.heading_mobile );
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading--year' ).hide();
 
 							if ( response.data.is_update_display ) {
@@ -851,6 +852,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 							break;
 						case 'week':
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading' ).text( response.data.heading );
+							that.$mainContainer.find( '.sugar-calendar-block__view-heading-mobile' ).text( response.data.heading_mobile );
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading--year' ).hide();
 
 							if ( response.data.is_update_display ) {
@@ -861,6 +863,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 							break;
 						default:
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading' ).text( response.data.heading );
+							that.$mainContainer.find( '.sugar-calendar-block__view-heading-mobile' ).text( response.data.heading_mobile );
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading--year' ).text( response.data.date.year );
 							that.$mainContainer.find( '.sugar-calendar-block__view-heading--year' ).show();
 

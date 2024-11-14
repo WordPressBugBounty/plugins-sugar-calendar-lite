@@ -14,6 +14,8 @@ namespace JJJ\WP\Term\Meta;
  * @version 4.0.0
  */
 
+use Sugar_Calendar\Helpers\UI as UI_Helper;
+
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
@@ -663,7 +665,12 @@ if ( ! class_exists( __NAMESPACE__ . '\\UI' ) ) :
 			// Get the meta value
 			$value = isset( $term->term_id )
 				? $this->get_meta( $term->term_id )
-				: ''; ?>
+				: '';
+
+			if ( UI_Helper::is_preserved( 'term-' . $this->meta_key ) ) {
+				$value = sanitize_text_field( UI_Helper::get_preserved_value( 'term-' . $this->meta_key ) );
+			}
+			?>
 
             <input type="text" name="term-<?php echo esc_attr( $this->meta_key ); ?>" id="term-<?php echo esc_attr( $this->meta_key ); ?>" value="<?php echo esc_attr( $value ); ?>">
 

@@ -209,16 +209,25 @@ function sugar_calendar_get_events( $args = array() ) {
  *
  * @since 2.2.0
  * @since 3.2.0 Preserved the original start time and time zone.
+ * @since 3.4.0 Added the $max_recurrences parameter.
  *
  * @param int          $event_id
  * @param DateTime     $after
  * @param DateTime     $before
  * @param DateTimeZone $timezone
  * @param string       $start_of_week
+ * @param int          $max_recurrences
  *
  * @return array
  */
-function sugar_calendar_get_event_sequence( $event_id = 0, $after = null, $before = null, $timezone = '', $start_of_week = '' ) {
+function sugar_calendar_get_event_sequence(
+	$event_id = 0,
+	$after = null,
+	$before = null,
+	$timezone = '',
+	$start_of_week = '',
+	$max_recurrences = 500
+) {
 
 	// Get the event
 	$event = sugar_calendar_get_event( $event_id );
@@ -315,7 +324,7 @@ function sugar_calendar_get_event_sequence( $event_id = 0, $after = null, $befor
 			$n++;
 
 			// Avoid infinite loops (500 is arbitrary; maybe change later)
-			if ( $n >= 500 ) {
+			if ( $n > $max_recurrences ) {
 				break;
 			}
 		}
@@ -329,16 +338,25 @@ function sugar_calendar_get_event_sequence( $event_id = 0, $after = null, $befor
  * Given an array of Events, get a combined array of recurring sequences.
  *
  * @since 2.2.0
+ * @since 3.4.0 Added the $max_recurrences parameter.
  *
  * @param int          $events
  * @param DateTime     $after
  * @param DateTime     $before
  * @param DateTimeZone $timezone
  * @param string       $start_of_week
+ * @param int          $max_recurrences
  *
  * @return array
  */
-function sugar_calendar_get_event_sequences( $events = array(), $after = null, $before = null, $timezone = '', $start_of_week = '' ) {
+function sugar_calendar_get_event_sequences(
+	$events = array(),
+	$after         = null,
+	$before        = null,
+	$timezone      = '',
+	$start_of_week = '',
+	$max_recurrences = 500
+) {
 
 	// Default return value
 	$retval = array();
@@ -357,7 +375,8 @@ function sugar_calendar_get_event_sequences( $events = array(), $after = null, $
 			$after,
 			$before,
 			$timezone,
-			$start_of_week
+			$start_of_week,
+			$max_recurrences
 		);
 
 		// Merge arrays

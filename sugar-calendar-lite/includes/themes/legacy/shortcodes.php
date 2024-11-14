@@ -82,30 +82,34 @@ function sc_events_calendar_shortcode( $atts = array(), $content = null ) {
 }
 
 /**
- * Event list shortcode callback
+ * Event list shortcode callback.
  *
  * @since 1.0.0
+ * @since 3.4.0 Return a no events message when there are no events.
  *
- * @param $atts
- * @param null $content
+ * @param array $atts    The attributes passed to the shortcode.
+ * @param null  $content The content inside the shortcode.
  *
  * @return string
  */
-function sc_events_list_shortcode( $atts = array(), $content = null ) {
+function sc_events_list_shortcode( $atts = [], $content = null ) {
 
-	// Parse
-	$atts = shortcode_atts( array(
-		'display'         => 'upcoming',
-		'order'           => '',
-		'number'          => '5',
-		'category'        => null,
-		'show_date'       => null,
-		'show_time'       => null,
-		'show_categories' => null,
-		'show_link'       => null,
-	), $atts );
+	// Parse.
+	$atts = shortcode_atts(
+		[
+			'display'         => 'upcoming',
+			'order'           => '',
+			'number'          => '5',
+			'category'        => null,
+			'show_date'       => null,
+			'show_time'       => null,
+			'show_categories' => null,
+			'show_link'       => null,
+		],
+		$atts
+	);
 
-	// Escape all values
+	// Escape all values.
 	$display         = esc_attr( $atts['display'] );
 	$order           = esc_attr( $atts['order'] );
 	$category        = esc_attr( $atts['category'] );
@@ -115,13 +119,37 @@ function sc_events_list_shortcode( $atts = array(), $content = null ) {
 	$show_categories = esc_attr( $atts['show_categories'] );
 	$show_link       = esc_attr( $atts['show_link'] );
 
-	// Return arguments
-	$args = array(
+	// Return arguments.
+	$args = [
 		'date'       => $show_date,
 		'time'       => $show_time,
 		'categories' => $show_categories,
-		'link'       => $show_link
-	);
+		'link'       => $show_link,
+	];
 
-	return sc_get_events_list( $display, $category, $number, $args, $order );
+	$events_list = sc_get_events_list( $display, $category, $number, $args, $order );
+
+	if ( empty( $events_list ) ) {
+		$events_list = '<p>' .
+			esc_html(
+				/**
+				 * Filters the message to display when there are no events.
+				 *
+				 * @since 3.4.0
+				 *
+				 * @param string $no_events_message The message to display when there are no events.
+				 * @param string $display           The display type of events.
+				 * @param array  $args              The arguments passed to the widget.
+				 */
+				apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+					'sc_events_list_shortcode_no_events',
+					\Sugar_Calendar\Helpers::get_no_events_message_for_legacy_event_list( $display ),
+					$display,
+					$args
+				)
+			)
+			. '</p>';
+	}
+
+	return $events_list;
 }

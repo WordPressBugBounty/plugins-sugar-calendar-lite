@@ -186,6 +186,15 @@ function sugar_calendar_copy_post( $original_id = 0, $data = array() ) {
 	// Unset the ID column, so an update does not occur
 	unset( $save['ID'] );
 
+	// Ensure post_name is unique.
+	$save['post_name'] = wp_unique_post_slug(
+		$save['post_name'],
+		0, // No post ID, since we are creating a duplicate.
+		$post['post_status'], // Use the same status as the original post.
+		$save['post_type'],
+		$save['post_parent']
+	);
+
 	// Insert the post into the database
 	$new_id = wp_insert_post( $save, false, false );
 

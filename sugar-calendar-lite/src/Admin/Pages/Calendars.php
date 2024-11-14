@@ -88,6 +88,7 @@ class Calendars extends PageAbstract {
 	 * Register page hooks.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Add term_updated_messages filter.
 	 */
 	public function hooks() {
 
@@ -100,6 +101,27 @@ class Calendars extends PageAbstract {
 
 		// Change the count column label.
 		add_filter( 'manage_edit-sc_event_category_columns', [ $this, 'change_count_column_label' ] );
+
+		// Set Calendar updated messages.
+		add_filter( 'term_updated_messages', [ $this, 'get_calendar_updated_messages' ] );
+	}
+
+	/**
+	 * Get list of calendar update messages.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param array $messages Map of messages.
+	 *
+	 * @return array
+	 */
+	public function get_calendar_updated_messages( $messages ) {
+
+		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
+
+		$messages[ $taxonomy ] = CalendarAbstract::get_calendar_updated_messages();
+
+		return $messages;
 	}
 
 	/**
@@ -187,6 +209,7 @@ class Calendars extends PageAbstract {
 	 * Filter the redirect location after a calendar create/update request.
 	 *
 	 * @since 3.0.0
+	 * @since 3.4.0 Breaks down the method into smaller parts.
 	 *
 	 * @param string  $location Redirect location.
 	 * @param WP_Term $taxonomy Current term.
@@ -195,31 +218,116 @@ class Calendars extends PageAbstract {
 	 */
 	public function redirect_after_save( $location, $taxonomy ) {
 
-		if ( $taxonomy->name !== sugar_calendar_get_calendar_taxonomy_id() ) {
-			return $location;
-		}
-
-		$action = $_REQUEST['action'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( $action !== 'add-tag' ) {
+		if (
+			! $this->is_valid_taxonomy( $taxonomy )
+			||
+			! $this->is_valid_request_action()
+		) {
 			return $location;
 		}
 
 		// Defined in edit-tags.php.
 		global $ret;
 
-		// Redirect to edit screen if calendar was created successfully.
-		if ( $ret && ! is_wp_error( $ret ) ) {
-			return add_query_arg(
-				[
-					'page'        => CalendarEdit::get_slug(),
-					'calendar_id' => $ret['term_id'],
-				],
-				$location
-			);
+		if ( $this->is_successful_creation( $ret ) ) {
+
+			$location = $this->get_after_success_redirect_url( $location, $ret['term_id'] );
+
+		} elseif ( is_wp_error( $ret ) ) {
+
+			$location = $this->add_preserved_submitted_values( $location );
 		}
 
 		return $location;
+	}
+
+	/**
+	 * Check if the taxonomy is valid.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param WP_Taxonomy $taxonomy Taxonomy object.
+	 *
+	 * @return boolean
+	 */
+	private function is_valid_taxonomy( $taxonomy ) {
+
+		return $taxonomy->name === sugar_calendar_get_calendar_taxonomy_id();
+	}
+
+	/**
+	 * Check if the request action is valid.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return boolean
+	 */
+	private function is_valid_request_action() {
+
+		$action = isset( $_REQUEST['action'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		return $action === 'add-tag';
+	}
+
+	/**
+	 * Check if the term was successfully created.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param array|WP_Error $ret Return value from the term creation function.
+	 *
+	 * @return boolean
+	 */
+	private function is_successful_creation( $ret ) {
+
+		return $ret && ! is_wp_error( $ret );
+	}
+
+	/**
+	 * Get redirect URL after successful Calendar creation.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string
+	 */
+	private function get_after_success_redirect_url() {
+
+		$calendar_list_url = admin_url( 'edit-tags.php' );
+
+		// Add success message.
+		return add_query_arg(
+			[
+				'taxonomy' => sugar_calendar_get_calendar_taxonomy_id(),
+				'message'  => 1,
+			],
+			$calendar_list_url
+		);
+	}
+
+	/**
+	 * Preserve submitted values after a failed term creation.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param string $location Redirect location.
+	 *
+	 * @return string
+	 */
+	private function add_preserved_submitted_values( $location ) {
+
+		return add_query_arg(
+			[
+				'preserved' => [
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
+					'slug'        => isset( $_REQUEST['slug'] ) ? sanitize_title( wp_unslash( $_REQUEST['slug'] ) ) : null,
+					'parent'      => isset( $_REQUEST['parent'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['parent'] ) ) : null,
+					'description' => isset( $_REQUEST['description'] ) ? sanitize_textarea_field( wp_unslash( $_REQUEST['description'] ) ) : null,
+					'term-color'  => isset( $_REQUEST['term-color'] ) ? rawurlencode( sanitize_text_field( wp_unslash( $_REQUEST['term-color'] ) ) ) : null,
+					// phpcs:enable WordPress.Security.NonceVerification.Recommended
+				],
+			],
+			$location
+		);
 	}
 
 	/**

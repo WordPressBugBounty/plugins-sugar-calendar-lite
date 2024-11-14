@@ -2,9 +2,14 @@
 
 namespace Sugar_Calendar\Block\EventList\EventListView;
 
+use DateTimeImmutable;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Sugar_Calendar\Block\Common\AbstractBlock;
 use Sugar_Calendar\Block\Common\Template;
-use Sugar_Calendar\Options;
+use Sugar_Calendar\Helper;
+use Sugar_Calendar\Helpers;
 
 class Block extends AbstractBlock {
 
@@ -34,6 +39,75 @@ class Block extends AbstractBlock {
 	 * @var string[]
 	 */
 	private $displayed_events = [];
+
+	/**
+	 * The upcoming period.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @var DatePeriod
+	 */
+	private $upcoming_period;
+
+	/**
+	 * Whether the block has upcoming events.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @var bool
+	 */
+	private $has_upcoming_events;
+
+	/**
+	 * Whether the block has previous events.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @var bool
+	 */
+	private $has_previous_events;
+
+	/**
+	 * The start date of the upcoming period.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @var string
+	 */
+	public $upcoming_start_period;
+
+	/**
+	 * The end date of the upcoming period.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @var string
+	 */
+	public $upcoming_end_period;
+
+	/**
+	 * Returns whether the block has upcoming events or not.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool Whether the block has upcoming events or not.
+	 */
+	public function has_upcoming_events() {
+
+		return $this->has_upcoming_events;
+	}
+
+	/**
+	 * Returns whether the block has previous events or not.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool Whether the block has previous events or not.
+	 */
+	public function has_previous_events() {
+
+		return $this->has_previous_events;
+	}
 
 	/**
 	 * Constructor.
@@ -118,7 +192,14 @@ class Block extends AbstractBlock {
 			return $this->events;
 		}
 
-		$this->events = $this->get_week_events();
+		if ( $this->should_group_events_by_week() ) {
+
+			$this->events = $this->get_week_events();
+
+		} else {
+
+			$this->events = $this->get_upcoming_events();
+		}
 
 		return $this->events;
 	}
@@ -197,15 +278,88 @@ class Block extends AbstractBlock {
 	}
 
 	/**
+	 * Get paged attribute if defined.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return int
+	 */
+	public function get_paged() {
+
+		return empty( $this->get_attributes()['paged'] ) ? 1 : $this->get_attributes()['paged'];
+	}
+
+	/**
+	 * Check if set to group events by week.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_group_events_by_week() {
+
+		return $this->get_settings_attributes()['groupEventsByWeek'];
+	}
+
+	/**
+	 * Get events per page attribute setting if defined.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return int
+	 */
+	public function get_settings_attribute_events_per_page() {
+
+		$attributes = $this->get_settings_attributes();
+
+		// If isset eventsPerPage attribute, return it.
+		if ( isset( $attributes['eventsPerPage'] ) ) {
+			return $attributes['eventsPerPage'];
+		}
+
+		return sc_get_number_of_events();
+	}
+
+	/**
+	 * Whether or not we should display the block footer.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return bool
+	 */
+	public function should_render_block_footer() {
+
+		if ( $this->should_group_events_by_week() ) {
+			return true;
+		}
+
+		if ( ! $this->has_upcoming_events() ) {
+			return false;
+		}
+
+		$events_per_page        = $this->get_settings_attribute_events_per_page();
+		$maximum_events_to_show = $this->get_settings_attributes()['maximumEventsToShow'];
+
+		return ! ( $events_per_page === $maximum_events_to_show );
+	}
+
+	/**
 	 * Get the no events message.
 	 *
 	 * @since 3.1.0
+	 * @since 3.4.0 Added the no events message for the upcoming event mode.
 	 *
 	 * @return string
 	 */
 	public function get_no_events_msg() {
 
-		if ( ! empty( $this->get_search_term() ) || ! empty( $this->get_calendars() ) ) {
+		if (
+			! empty( $this->get_search_term() )
+			||
+			! empty( $this->get_calendars() )
+			||
+			! $this->should_group_events_by_week()
+		) {
 			return __( 'There are no events scheduled that match your criteria.', 'sugar-calendar' );
 		}
 
@@ -222,5 +376,345 @@ class Block extends AbstractBlock {
 	public function get_appearance_mode() {
 
 		return $this->get_settings_attributes()['appearance'];
+	}
+
+	/**
+	 * Get upcoming events with pagination inside the loop.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return Event[]
+	 */
+	public function get_upcoming_events() { // phpcs:ignore Generic.Metrics.NestingLevel.MaxExceeded, Generic.Metrics.CyclomaticComplexity.MaxExceeded, Generic.Metrics.CyclomaticComplexity.TooHigh
+
+		$events = [];
+
+		$upcoming_events_transient = [
+			'events'              => [],
+			'has_previous_events' => false,
+			'has_upcoming_events' => false,
+		];
+
+		// Block attributes.
+		$attributes = $this->get_settings_attributes();
+
+		// Limits.
+		$events_per_page  = $attributes['eventsPerPage'];
+		$max_events_count = $attributes['maximumEventsToShow'];
+		$page             = $this->get_paged();
+
+		// Current time.
+		$now      = sugar_calendar_get_request_time( 'mysql' );
+		$date_now = new DateTime( $now );
+
+		/**
+		 * End time modify filter.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param string $upcoming_events_limit The upcoming events limit time modification.
+		 * @param array  $attributes            The block attributes.
+		 */
+		$upcoming_events_limit = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_limit',
+			'+3 month',
+			$attributes
+		);
+
+		// End time.
+		$end = $date_now->modify( $upcoming_events_limit )->format( 'Y-m-d H:i:s' );
+
+		// Set period.
+		$this->upcoming_start_period = $now;
+		$this->upcoming_end_period   = $end;
+
+		// Set the period.
+		$calendar_period = $this->get_upcoming_period();
+
+		$start_period_range = $calendar_period->getStartDate();
+		$end_period_range   = $calendar_period->getEndDate();
+
+		if ( $this->get_visitor_timezone() ) {
+			$start_period_range = $start_period_range->modify( '-1 day' );
+			$end_period_range   = $end_period_range->modify( '+1 day' );
+		}
+
+		// List of calendar slugs.
+		$calendar_slugs = '';
+
+		if ( ! empty( $this->get_calendars() ) ) {
+
+			// Get the calendar ids.
+			$calendars = $this->get_calendars();
+
+			// Get the calendar slugs.
+			$calendar_slugs_array = array_map(
+				function ( $calendar_id ) {
+					// Get the calendar.
+					$calendar = get_term_by(
+						'id',
+						$calendar_id,
+						sugar_calendar_get_calendar_taxonomy_id()
+					);
+
+					return $calendar->slug;
+				},
+				$calendars
+			);
+
+			// Implode the calendar slugs.
+			$calendar_slugs = implode( ',', $calendar_slugs_array );
+		}
+
+		// Search term if any.
+		$search_term = $this->get_search_term();
+
+		/**
+		 * Event variety filter.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param int   $quantity   The quantity of different events to fetch.
+		 * @param array $attributes The block attributes.
+		 */
+		$max_number_of_events = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_max_number_of_events',
+			max( 30, $events_per_page ),
+			$attributes
+		);
+
+		/**
+		 * Event sequences limit to fetch.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param int $quantity The quantity of event sequences to fetch.
+		 */
+		$events_sequences_limit = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_sequences_limit',
+			max( 60, $max_events_count )
+		);
+
+		/**
+		 * Whether to use transient for upcoming events.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param bool  $use_transient Whether to use transient for upcoming events.
+		 * @param array $attributes    The block attributes.
+		 */
+		$use_transient = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_use_transient',
+			true,
+			$attributes
+		);
+
+		$transient_key = wp_sprintf(
+			'sugar_calendar_upcoming_events_%1$s%2$s',
+			$attributes['blockId'],
+			md5(
+				':'
+				. $page
+				. ':'
+				. $events_per_page
+				. ':'
+				. $max_events_count
+				. ':'
+				. $max_number_of_events
+				. ':'
+				. $events_sequences_limit
+				. ':'
+				. $calendar_slugs
+				. ':'
+				. $search_term
+			)
+		);
+
+		if ( $use_transient ) {
+
+			$upcoming_events_transient = get_transient( $transient_key );
+
+			if ( $upcoming_events_transient ) {
+
+				$events = ! empty( $upcoming_events_transient['events'] ) ? $upcoming_events_transient['events'] : [];
+
+				// Set the pagination flags.
+				$this->has_previous_events = $upcoming_events_transient['has_previous_events'];
+				$this->has_upcoming_events = $upcoming_events_transient['has_upcoming_events'];
+
+				return $events;
+			}
+		}
+
+		// Fetch events as an "infinite" list.
+		$events_list = Helpers::get_upcoming_events_list_with_recurring(
+			$max_number_of_events,
+			$calendar_slugs,
+			$search_term
+		);
+
+		// If we found no events by this point, return an empty array.
+		if ( empty( $events_list ) ) {
+			return $events;
+		}
+
+		// Build event sequences within the given timeframe.
+		$events_sequences = sugar_calendar_get_event_sequences(
+			$events_list,
+			$start_period_range,
+			$end_period_range,
+			'',
+			'',
+			$events_sequences_limit
+		);
+
+		// Update max events count based on the fetched events if search term is set.
+		if ( ! empty( $search_term ) ) {
+			$max_events_count = count( $events_sequences );
+		}
+
+		// Event counters.
+		$queried_events        = [];
+		$event_count           = 0;
+		$displayed_event_count = 0;
+		$last_event            = null;
+		$is_last_page          = false;
+
+		$offset = ( $page - 1 ) * $events_per_page;
+
+		// Loop through each day in the calendar period.
+		foreach ( $calendar_period as $d ) {
+
+			// Filter events for the current day.
+			$filtered_events = Helper::filter_events_by_day(
+				$events_sequences,
+				$d->format( 'd' ),
+				$d->format( 'm' ),
+				$d->format( 'Y' ),
+				$this->get_visitor_timezone()
+			);
+
+			// Group the filtered events by day.
+			$queried_events[ $d->format( 'Y-m-d' ) ] = $filtered_events;
+
+			if ( ! empty( $filtered_events ) ) {
+				$last_event = end( $filtered_events );
+			}
+		}
+
+		// Loop through each day in the calendar period.
+		foreach ( $queried_events as $date => $event_singles ) {
+
+			if ( empty( $event_singles ) ) {
+				continue;
+			}
+
+			// Loop event singles.
+			foreach ( $event_singles as $event_single ) {
+
+				if ( $event_count < $offset ) {
+
+					++$event_count;
+
+					continue;
+				}
+
+				// Add event if still below the events per page and total events count below max events count.
+				if (
+					$displayed_event_count < $events_per_page
+					&&
+					$event_count < $max_events_count
+				) {
+
+					$events[ $date ][] = $event_single;
+
+					if (
+						$event_single->id === $last_event->id
+						&&
+						$event_single->start === $last_event->start
+					) {
+						$is_last_page = true;
+					}
+
+					++$event_count;
+					++$displayed_event_count;
+				}
+
+				// If we reached the events per page, break the loop.
+				if ( $displayed_event_count === $events_per_page ) {
+					break;
+				}
+			}
+
+			// If we reached the events per page, break the loop.
+			if ( $displayed_event_count === $events_per_page ) {
+				break;
+			}
+		}
+
+		// Set pagination flags based on displayed events count.
+		$this->has_previous_events = ( $page > 1 );
+		$this->has_upcoming_events = $event_count < $max_events_count && ! $is_last_page;
+
+		// If events to display is less than the events per page, there are no more events.
+		if ( count( $events_sequences ) <= $events_per_page ) {
+			$this->has_upcoming_events = false;
+		}
+
+		if (
+			$use_transient
+			&&
+			! empty( $events )
+			&&
+			empty( $upcoming_events_transient )
+		) {
+
+			/**
+			 * Transient expiration filter.
+			 *
+			 * @since 3.4.0
+			 *
+			 * @param int   $transient_expiration The transient expiration time.
+			 * @param array $attributes           The block attributes.
+			 */
+			$transient_expiration = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				'sugar_calendar_event_list_block_upcoming_events_transient_expiration',
+				24 * HOUR_IN_SECONDS,
+				$attributes
+			);
+
+			// Set the transient value.
+			$upcoming_events_transient                        = [];
+			$upcoming_events_transient['events']              = $events;
+			$upcoming_events_transient['has_previous_events'] = $this->has_previous_events;
+			$upcoming_events_transient['has_upcoming_events'] = $this->has_upcoming_events;
+
+			set_transient( $transient_key, $upcoming_events_transient, $transient_expiration );
+		}
+
+		return $events;
+	}
+
+	/**
+	 * The upcoming period based on the start and end events.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return DatePeriod
+	 */
+	public function get_upcoming_period() {
+
+		if ( ! is_null( $this->upcoming_period ) ) {
+			return $this->upcoming_period;
+		}
+
+		// Build the period-based events array.
+		$this->upcoming_period = new DatePeriod(
+			new DateTimeImmutable( $this->upcoming_start_period ),
+			new DateInterval( 'P1D' ),
+			( new DateTimeImmutable( $this->upcoming_end_period ) )->setTime( 23, 59, 59 )
+		);
+
+		return $this->upcoming_period;
 	}
 }
