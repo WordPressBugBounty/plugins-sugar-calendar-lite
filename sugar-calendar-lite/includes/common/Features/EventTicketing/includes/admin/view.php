@@ -27,7 +27,7 @@ function view( $order_id = 0 ) {
 
 	// Bail if no order
 	if ( empty( $order ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Transactions may be empty
@@ -57,7 +57,7 @@ function view( $order_id = 0 ) {
 	$tickets = Functions\get_order_tickets( $order->id ); ?>
 
 	<div class="wrap">
-		<h2><?php esc_html_e( 'Event Ticket Order Details', 'sugar-calendar' ); ?></h2>
+		<h2><?php esc_html_e( 'Event Ticket Order Details', 'sugar-calendar-lite' ); ?></h2>
 
 		<div id="sc-item-card-wrapper">
 
@@ -73,7 +73,7 @@ function view( $order_id = 0 ) {
 							<tbody>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Order ID:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Order ID:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<?php echo esc_html( $order->id ); ?>
@@ -81,7 +81,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Transaction ID:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Transaction ID:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<a href="<?php echo esc_url( $payment_url ); ?>" target="_blank"><?php echo esc_html( $transaction ); ?></a>
@@ -89,7 +89,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Purchase Date:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Purchase Date:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<?php echo esc_html( $order->date_created ); ?>
@@ -97,7 +97,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Customer:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Customer:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<?php echo esc_html( $order->first_name . ' ' . $order->last_name ) . ' (' . make_clickable( $order->email ) . ')'; ?>
@@ -105,7 +105,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Total:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Total:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<?php echo Functions\currency_filter( $order->total ); ?>
@@ -113,7 +113,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Status:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Status:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<select name="status" id="sc-et-status">
@@ -125,7 +125,7 @@ function view( $order_id = 0 ) {
 								</tr>
 								<tr>
 									<td class="row-title">
-										<label><?php esc_html_e( 'Event:', 'sugar-calendar' ); ?></label>
+										<label><?php esc_html_e( 'Event:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
 										<?php if ( ! empty( $event ) ) : ?>
@@ -156,12 +156,12 @@ function view( $order_id = 0 ) {
 
 						<input type="hidden" name="order_id" value="<?php echo absint( $order->id ); ?>" />
 
-						<input type="submit" name="sc_et_resend_receipt" class="sc-resend-order-receipt button" value="<?php esc_attr_e( 'Resend Email Receipt', 'sugar-calendar' ); ?>" />
+						<input type="submit" name="sc_et_resend_receipt" class="sc-resend-order-receipt button" value="<?php esc_attr_e( 'Resend Email Receipt', 'sugar-calendar-lite' ); ?>" />
 
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
 
-							<input type="submit" name="sc_et_delete_order" class="sc-delete-order button" value="<?php esc_attr_e( 'Delete Order', 'sugar-calendar' ); ?>" />
-							<input type="submit" name="sc_et_update_order" class="button-primary button" value="<?php esc_attr_e( 'Update Order', 'sugar-calendar' ); ?>" />
+							<input type="submit" name="sc_et_delete_order" class="sc-delete-order button" value="<?php esc_attr_e( 'Delete Order', 'sugar-calendar-lite' ); ?>" />
+							<input type="submit" name="sc_et_update_order" class="button-primary button" value="<?php esc_attr_e( 'Update Order', 'sugar-calendar-lite' ); ?>" />
 
 						<?php endif; ?>
 
@@ -171,16 +171,16 @@ function view( $order_id = 0 ) {
 
 			<div id="item-tables-wrapper" class="item-section">
 
-				<h3><?php esc_html_e( 'Tickets', 'sugar-calendar' ); ?></h3>
+				<h3><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></h3>
 
 				<?php do_action( 'sc_et_admin_order_before_tickets', $order ); ?>
 
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'ID', 'sugar-calendar' ); ?></th>
-							<th><?php esc_html_e( 'Code', 'sugar-calendar' ); ?></th>
-							<th><?php esc_html_e( 'Attendee', 'sugar-calendar' ); ?></th>
+							<th><?php esc_html_e( 'ID', 'sugar-calendar-lite' ); ?></th>
+							<th><?php esc_html_e( 'Code', 'sugar-calendar-lite' ); ?></th>
+							<th><?php esc_html_e( 'Attendee', 'sugar-calendar-lite' ); ?></th>
 						</tr>
 					</thead>
 
@@ -233,7 +233,7 @@ function view( $order_id = 0 ) {
 
 									<div class="row-actions">
 										<span class="print">
-											<a href="<?php echo esc_url( $print_url ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar' ); ?></a>
+											<a href="<?php echo esc_url( $print_url ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar-lite' ); ?></a>
 										</span>
 
 										<?php if ( ! empty( $attendee->email ) ) : ?>
@@ -241,7 +241,7 @@ function view( $order_id = 0 ) {
 											|
 
 											<span class="email">
-												<a href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Resend Email', 'sugar-calendar' ); ?></a>
+												<a href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Resend Email', 'sugar-calendar-lite' ); ?></a>
 											</span>
 
 										<?php endif; ?>
@@ -299,12 +299,12 @@ function update() {
 
 	// Bail if user cannot manage options
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have the necessary capabilities to modify orders.', 'sugar-calendar' ), esc_html__( 'Error', 'sugar-calendar' ), array( 'response' => 403 )  );
+		wp_die( esc_html__( 'You do not have the necessary capabilities to modify orders.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 )  );
 	}
 
 	// Bail if nonce fails
 	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Order ID
@@ -387,12 +387,12 @@ function delete() {
 
 	// Bail if user cannot manage options
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have the necessary capabilities to delete orders.', 'sugar-calendar' ), esc_html__( 'Error', 'sugar-calendar' ), array( 'response' => 403 )  );
+		wp_die( esc_html__( 'You do not have the necessary capabilities to delete orders.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 )  );
 	}
 
 	// Bail if nonce fails
 	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Get the order ID
@@ -449,7 +449,7 @@ function resend_receipt() {
 
 	// Bail if nonce fails
 	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Get order ID

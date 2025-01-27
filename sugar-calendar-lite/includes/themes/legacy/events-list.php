@@ -172,7 +172,7 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 
 			// Output all day
 			if ( $event->is_all_day() ) {
-				echo '<span class="sc_event_time">' . esc_html__( 'All-day', 'sugar-calendar' ) . '</span>';
+				echo '<span class="sc_event_time">' . esc_html__( 'All-day', 'sugar-calendar-lite' ) . '</span>';
 
 			// Output both
 			} elseif ( $end_time !== $start_time ) {
@@ -215,7 +215,7 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 
 		if ( ! empty( $show['link'] ) ) {
 			echo '<a href="' . get_permalink( $event_id ) . '" class="sc_event_link">';
-			echo esc_html__( 'Read More', 'sugar-calendar' );
+			echo esc_html__( 'Read More', 'sugar-calendar-lite' );
 			echo '</a>';
 		}
 

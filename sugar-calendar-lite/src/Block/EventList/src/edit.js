@@ -28,7 +28,9 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
-import Select from '../../../../node_modules/react-select';
+import Select from 'react-select';
+
+import { useVenues, hasFinishedGettingVenues, onChangeVenues } from './../../Common/assets/js/venue';
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -74,6 +76,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		const selectedCalendarIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
 		setAttributes({ calendars: selectedCalendarIds });
 	}
+
+	const // Request the venues.
+		venues = useVenues(),
+		isVenuesResolved = hasFinishedGettingVenues();
 
 	const onGroupEventsByWeek = ( groupEventsByWeek ) => {
 		let newAttributes = { groupEventsByWeek: groupEventsByWeek };
@@ -191,79 +197,93 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes( { linksColor: linksColor } );
 	}
 
+	const showCalendarFilterSection = hasFinishedGettingCalendars && calendars && calendars.length > 1;
+	const showVenuesFilterSection = isVenuesResolved && venues && venues.length > 0;
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Settings', 'sugar-calendar-event-list-block' ) }
-					initialOpen={ true }
-				>
 
-					{
-						hasFinishedGettingCalendars &&
-						calendars &&
-						calendars.length > 1 &&
-						<Heading
-							level={3}>
-							Calendars
-						</Heading>
-					}
+				{
+					( showCalendarFilterSection || showVenuesFilterSection ) &&
+					(
 
-					{
-						hasFinishedGettingCalendars &&
-						calendars &&
-						calendars.length > 1 &&
-						<Select
-							className="sugar-calendar-event-list-block__calendars"
-							classNamePrefix="sc-calendar-event-list-block-select"
-							isMulti
-							options={
-								calendars.map( ( calendar ) => {
-									return {
-										value: calendar.id,
-										label: calendar.name
-									};
-								} )
+						<PanelBody
+							title={ __( 'Settings', 'sugar-calendar-block' ) }
+							initialOpen={ true }
+						>
+							{
+								showCalendarFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Calendars', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__calendars"
+										classNamePrefix="sc-calendar-block-select"
+										isMulti
+										options={
+											calendars.map( ( calendar ) => {
+												return {
+													value: calendar.id,
+													label: calendar.name
+												};
+											} )
+										}
+										onChange={onChangeCalendars}
+										value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
+											const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
+											return {
+												value: calendar.id,
+												label: calendar.name
+											};
+										} ) : []}
+									/>
+								</>
 							}
-							onChange={onChangeCalendars}
-							value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
-								const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
-								return {
-									value: calendar.id,
-									label: calendar.name
-								};
-							} ) : []}
-						/>
-					}
 
-					<ToggleControl
-						label={ __( 'Group Events by Week', 'sugar-calendar-event-list-block' ) }
-						checked={ attributes.groupEventsByWeek }
-						onChange={ onGroupEventsByWeek }
-					/>
-
-					{ ! attributes.groupEventsByWeek && (
-						<>
-							<TextControl
-								label={ __( 'Events Per Page', 'sugar-calendar-event-list-block' ) }
-								type="text"
-								value={ attributes.eventsPerPage || '' }
-								onChange={ (value) => onEventsPerPage(parseInt(value, 10) ) }
-							/>
-
-							<TextControl
-								label={ __( 'Maximum Events To Show', 'sugar-calendar-event-list-block' ) }
-								type="text"
-								value={ attributes.maximumEventsToShow || '' }
-								onChange={ (value) => onMaximumEventsToShow(parseInt(value, 10) ) }
-							/>
-						</>
-					) }
-				</PanelBody>
+							{
+								showVenuesFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Venues', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__venues"
+										classNamePrefix="sc-venue-block-select"
+										isMulti
+										options={
+											venues.map((venue) => {
+												return {
+													value: venue.id,
+													label: venue.title.rendered,
+												};
+											})
+										}
+										onChange={(selectedOptions) => {
+											onChangeVenues(selectedOptions, setAttributes);
+										}}
+										value={attributes.venues ? attributes.venues.map((venueId) => {
+											const venue = venues.find((venue) => venue.id === venueId);
+											return venue
+												? {
+													value: venue.id,
+													label: venue.title.rendered,
+												}
+												: null;
+										}) : []}
+									/>
+								</>
+							}
+						</PanelBody>
+					)
+				}
 
 				<PanelBody
 					title={ __( 'Display', 'sugar-calendar-event-list-block' ) }
-					initialOpen={ false }
+					initialOpen={ true }
 				>
 
 					<ToggleGroupControl

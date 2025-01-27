@@ -117,7 +117,7 @@ abstract class Importer implements ImporterInterface {
 	 */
 	public function get_title() {
 
-		return __( 'Import', 'sugar-calendar' );
+		return __( 'Import', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -897,19 +897,19 @@ abstract class Importer implements ImporterInterface {
 
 		switch ( $context ) {
 			case 'calendars':
-				$label = __( 'Name', 'sugar-calendar' );
+				$label = __( 'Name', 'sugar-calendar-lite' );
 				break;
 
 			case 'orders':
-				$label = __( 'Payer', 'sugar-calendar' );
+				$label = __( 'Payer', 'sugar-calendar-lite' );
 				break;
 
 			case 'tickets':
-				$label = __( 'Attendee', 'sugar-calendar' );
+				$label = __( 'Attendee', 'sugar-calendar-lite' );
 				break;
 
 			default:
-				$label = __( 'Title', 'sugar-calendar' );
+				$label = __( 'Title', 'sugar-calendar-lite' );
 				break;
 		}
 

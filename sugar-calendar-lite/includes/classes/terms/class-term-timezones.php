@@ -79,9 +79,9 @@ final class Term_Timezones extends UI {
 
 		// Setup the labels
 		$this->labels = [
-			'singular'    => esc_html__( 'Time Zone', 'sugar-calendar' ),
-			'plural'      => esc_html__( 'Time Zones', 'sugar-calendar' ),
-			'description' => esc_html__( 'Assign calendars a time zone for events to inherit their settings from.', 'sugar-calendar' ),
+			'singular'    => esc_html__( 'Time Zone', 'sugar-calendar-lite' ),
+			'plural'      => esc_html__( 'Time Zones', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'Assign calendars a time zone for events to inherit their settings from.', 'sugar-calendar-lite' ),
 		];
 	}
 

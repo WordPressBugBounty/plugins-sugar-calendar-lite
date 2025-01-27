@@ -157,7 +157,7 @@ class Loader {
 			'SCEventListBlock',
 			[
 				'strings' => [
-					'no_events_criteria_based' => esc_html__( 'There are no events scheduled that match your criteria.', 'sugar-calendar' ),
+					'no_events_criteria_based' => esc_html__( 'There are no events scheduled that match your criteria.', 'sugar-calendar-lite' ),
 				],
 			]
 		);
@@ -201,7 +201,7 @@ class Loader {
 		if ( empty( $_POST['block'] ) ) {
 			wp_send_json_error(
 				[
-					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar' ),
+					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar-lite' ),
 				]
 			);
 		}

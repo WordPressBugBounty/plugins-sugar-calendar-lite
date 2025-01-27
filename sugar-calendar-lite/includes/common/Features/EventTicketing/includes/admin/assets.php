@@ -92,9 +92,9 @@ function localize() {
 		'sc-et-general',
 		'sc_event_ticket_vars',
 		[
-			'refund_notice'  => esc_html__( 'Updating this order will issue a refund through Stripe', 'sugar-calendar' ),
-			'delete_notice'  => esc_html__( "Are you sure you want to delete this order? Tickets associated with this order will also be deleted.\n\nThis action cannot be undone.", 'sugar-calendar' ),
-			'export_tickets' => esc_html__( 'This will export all tickets for the current filters. Do you want to continue?', 'sugar-calendar' ),
+			'refund_notice'  => esc_html__( 'Updating this order will issue a refund through Stripe', 'sugar-calendar-lite' ),
+			'delete_notice'  => esc_html__( "Are you sure you want to delete this order? Tickets associated with this order will also be deleted.\n\nThis action cannot be undone.", 'sugar-calendar-lite' ),
+			'export_tickets' => esc_html__( 'This will export all tickets for the current filters. Do you want to continue?', 'sugar-calendar-lite' ),
 		]
 	);
 }

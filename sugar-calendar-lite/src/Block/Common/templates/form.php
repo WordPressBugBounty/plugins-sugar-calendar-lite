@@ -15,4 +15,5 @@ use Sugar_Calendar\Options;
 	<input type="hidden" name="sc_search" value="" />
 	<input type="hidden" name="sc_visitor_tz_convert" value="<?php echo esc_attr( absint( Options::get( 'timezone_convert' ) ) ); ?>">
 	<input type="hidden" name="sc_calendars_filter" value="<?php echo esc_attr( implode( ',', $context->get_calendars() ) ); ?>" />
+	<input type="hidden" name="sc_venues_filter" value="<?php echo esc_attr( implode( ',', $context->get_venues() ) ); ?>" />
 </form>

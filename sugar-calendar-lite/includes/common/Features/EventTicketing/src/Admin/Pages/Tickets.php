@@ -92,7 +92,7 @@ class Tickets {
 	 */
 	public static function get_title() {
 
-		return esc_html__( 'Tickets', 'sugar-calendar' );
+		return esc_html__( 'Tickets', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -128,11 +128,11 @@ class Tickets {
 		// Initial tab array
 		$tabs = [
 			'tickets' => [
-				'name' => esc_html__( 'Tickets', 'sugar-calendar' ),
+				'name' => esc_html__( 'Tickets', 'sugar-calendar-lite' ),
 				'url'  => admin_url( 'admin.php?page=sc-event-ticketing' ),
 			],
 			'orders'  => [
-				'name' => esc_html__( 'Orders', 'sugar-calendar' ),
+				'name' => esc_html__( 'Orders', 'sugar-calendar-lite' ),
 				'url'  => admin_url( 'admin.php?page=sc-event-ticketing&tab=orders' ),
 			],
 		];

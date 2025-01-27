@@ -110,7 +110,7 @@ class Month extends Grid {
 
 			// Setup return value.
 			$retval = [
-				'week' => esc_html__( 'Week', 'sugar-calendar' ),
+				'week' => esc_html__( 'Week', 'sugar-calendar-lite' ),
 			];
 
 			// PHP day => day ID.
@@ -285,11 +285,11 @@ class Month extends Grid {
 				'small'  => '1 month',
 				'large'  => '1 year',
 				'labels' => [
-					'today'      => esc_html__( 'Today', 'sugar-calendar' ),
-					'next_small' => esc_html__( 'Next Month', 'sugar-calendar' ),
-					'next_large' => esc_html__( 'Next Year', 'sugar-calendar' ),
-					'prev_small' => esc_html__( 'Previous Month', 'sugar-calendar' ),
-					'prev_large' => esc_html__( 'Previous Year', 'sugar-calendar' ),
+					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
+					'next_small' => esc_html__( 'Next Month', 'sugar-calendar-lite' ),
+					'next_large' => esc_html__( 'Next Year', 'sugar-calendar-lite' ),
+					'prev_small' => esc_html__( 'Previous Month', 'sugar-calendar-lite' ),
+					'prev_large' => esc_html__( 'Previous Year', 'sugar-calendar-lite' ),
 				],
 			]
 		);

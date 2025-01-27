@@ -53,7 +53,7 @@ class List_Table extends \WP_List_Table {
 		$total_count = '&nbsp;<span class="count">(' . number_format_i18n( $this->total_count ) . ')</span>';
 
 		$views = array(
-			'all' => sprintf( '<a href="%s"%s>%s</a>', remove_query_arg( array( 'status', 'paged' ) ), $current === 'all' || $current === '' ? ' class="current"' : '', esc_html__( 'All','sugar-calendar' ) . $total_count )
+			'all' => sprintf( '<a href="%s"%s>%s</a>', remove_query_arg( array( 'status', 'paged' ) ), $current === 'all' || $current === '' ? ' class="current"' : '', esc_html__( 'All', 'sugar-calendar-lite' ) . $total_count )
 		);
 
 		return apply_filters( 'sc_event_tickets_list_table_views', $views );
@@ -74,7 +74,7 @@ class List_Table extends \WP_List_Table {
 			: '';
 
 		echo '<input type="hidden" name="event_id" value="' . esc_attr( $event_id ) . '"/>';
-		echo '<input type="submit" name="sc_et_export_tickets" class="button-secondary" id="sc-et-export-tickets" value="' . esc_html__( 'Export to CSV', 'sugar-calendar' ) . '"/>';
+		echo '<input type="submit" name="sc_et_export_tickets" class="button-secondary" id="sc-et-export-tickets" value="' . esc_html__( 'Export to CSV', 'sugar-calendar-lite' ) . '"/>';
 		echo wp_nonce_field( 'sc_et_export_nonce', 'sc_et_export_nonce' );
 	}
 
@@ -222,12 +222,12 @@ class List_Table extends \WP_List_Table {
 			$link = apply_filters( 'sc_et_tickets_list_table_order_link', $url, $item );
 
 			// Setup HTML.
-			$link  = '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'View or edit ticket', 'sugar-calendar' ) . '">';
+			$link  = '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'View or edit ticket', 'sugar-calendar-lite' ) . '">';
 			$link .= esc_html( $item->order_id );
 
 			// Refunded.
 			if ( $status === 'refunded' ) {
-				$link .= ' ' . esc_html__( '(Refunded)', 'sugar-calendar' );
+				$link .= ' ' . esc_html__( '(Refunded)', 'sugar-calendar-lite' );
 			}
 
 			// Close HTML.
@@ -276,7 +276,7 @@ class List_Table extends \WP_List_Table {
 		// Add row actions
 		$retval .= $this->row_actions(
 			array(
-				'email' => '<a href="' . esc_url( $url ) . '" title="' . esc_attr__( 'Email Ticket to attendee', 'sugar-calendar' ) . '">' . esc_html__( 'Send Email', 'sugar-calendar' ) . '</a>'
+				'email' => '<a href="' . esc_url( $url ) . '" title="' . esc_attr__( 'Email Ticket to attendee', 'sugar-calendar-lite' ) . '">' . esc_html__( 'Send Email', 'sugar-calendar-lite' ) . '</a>'
 			)
 		);
 
@@ -295,11 +295,11 @@ class List_Table extends \WP_List_Table {
 
 		// Columns
 		$columns = array(
-			'attendee' => esc_html__( 'Attendee',   'sugar-calendar' ),
-			'code'     => esc_html__( 'Code',       'sugar-calendar' ),
-			'id'       => esc_html__( 'Ticket ID',  'sugar-calendar' ),
-			'event'    => esc_html__( 'Event',      'sugar-calendar' ),
-			'order'    => esc_html__( 'Order Date', 'sugar-calendar' )
+			'attendee' => esc_html__( 'Attendee',   'sugar-calendar-lite' ),
+			'code'     => esc_html__( 'Code',       'sugar-calendar-lite' ),
+			'id'       => esc_html__( 'Ticket ID',  'sugar-calendar-lite' ),
+			'event'    => esc_html__( 'Event',      'sugar-calendar-lite' ),
+			'order'    => esc_html__( 'Order Date', 'sugar-calendar-lite' )
 		);
 
 		// Filter & return

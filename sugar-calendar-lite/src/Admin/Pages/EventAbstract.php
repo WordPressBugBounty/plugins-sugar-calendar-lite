@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\PageAbstract;
+use Sugar_Calendar\Admin\Pages\VenuesAbstract;
 use Sugar_Calendar\Helpers\WP;
 use WP_Post;
 
@@ -104,7 +105,7 @@ abstract class EventAbstract extends PageAbstract {
 
 		// Override if primary post type.
 		if ( sugar_calendar_get_event_post_type_id() === $post->post_type ) {
-			$title = esc_html__( 'Name this event', 'sugar-calendar' );
+			$title = esc_html__( 'Name this event', 'sugar-calendar-lite' );
 		}
 
 		// Return possibly modified title.
@@ -121,7 +122,7 @@ abstract class EventAbstract extends PageAbstract {
 	public function get_localized_scripts() {
 
 		return [
-			'notice_title_required' => esc_html__( 'Event name is required', 'sugar-calendar' ),
+			'notice_title_required' => esc_html__( 'Event name is required', 'sugar-calendar-lite' ),
 		];
 	}
 
@@ -140,6 +141,9 @@ abstract class EventAbstract extends PageAbstract {
 			[],
 			SC_PLUGIN_VERSION
 		);
+
+		// Enqueue venue styles.
+		VenuesAbstract::enqueue_assets();
 
 		wp_enqueue_script(
 			'sugar-calendar-admin-event',

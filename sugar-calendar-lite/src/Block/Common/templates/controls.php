@@ -60,7 +60,10 @@ if (
 			</button>
 
 			<div class="sugar-calendar-block__controls__left__pagination">
-				<button class="sugar-calendar-block__controls__left__pagination__prev">
+				<button
+					class="sugar-calendar-block__controls__left__pagination__prev"
+					aria-label="<?php echo esc_attr( $context->get_previous_pagination_display() ); ?>"
+				>
 					<svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M5.41406 10.6094C5.29688 10.7266 5.13281 10.7266 5.01562 10.6094L0.09375 5.71094C0 5.59375 0 5.42969 0.09375 5.3125L5.01562 0.414062C5.13281 0.296875 5.29688 0.296875 5.41406 0.414062L5.88281 0.859375C5.97656 0.976562 5.97656 1.16406 5.88281 1.25781L1.64062 5.5L5.88281 9.76562C5.97656 9.85938 5.97656 10.0469 5.88281 10.1641L5.41406 10.6094Z" fill="currentColor"/>
 					</svg>
@@ -70,7 +73,10 @@ if (
 					<?php echo esc_html( $context->get_current_pagination_display() ); ?>
 				</button>
 				<div class="sugar-calendar-block__controls__left__pagination__divider"></div>
-				<button class="sugar-calendar-block__controls__left__pagination__next">
+				<button
+					class="sugar-calendar-block__controls__left__pagination__next"
+					aria-label="<?php echo esc_attr( $context->get_next_pagination_display() ); ?>"
+				>
 					<svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M0.5625 0.414062C0.679688 0.296875 0.84375 0.296875 0.960938 0.414062L5.88281 5.3125C5.97656 5.42969 5.97656 5.59375 5.88281 5.71094L0.960938 10.6094C0.84375 10.7266 0.679688 10.7266 0.5625 10.6094L0.09375 10.1641C0 10.0469 0 9.85938 0.09375 9.76562L4.33594 5.5L0.09375 1.25781C0 1.16406 0 0.976562 0.09375 0.859375L0.5625 0.414062Z" fill="currentColor"/>
 					</svg>
@@ -83,7 +89,10 @@ if (
 
 		<?php if ( $should_show_filters ) : ?>
 			<div class="sugar-calendar-block__controls__right__settings">
-				<button class="sugar-calendar-block__controls__right__settings__btn sugar-calendar-block__controls__settings__btn">
+				<button
+					class="sugar-calendar-block__controls__right__settings__btn sugar-calendar-block__controls__settings__btn"
+					aria-label="<?php esc_attr_e( 'Filters', 'sugar-calendar-lite' ); ?>"
+				>
 					<svg width="14" height="13" viewBox="0 0 14 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 						<path d="M13.5625 1.71875C13.7812 1.71875 14 1.9375 14 2.15625V2.59375C14 2.83984 13.7812 3.03125 13.5625 3.03125H7.875V3.6875C7.875 3.93359 7.65625 4.125 7.4375 4.125H6.5625C6.31641 4.125 6.125 3.93359 6.125 3.6875V3.03125H0.4375C0.191406 3.03125 0 2.83984 0 2.59375V2.15625C0 1.9375 0.191406 1.71875 0.4375 1.71875H6.125V1.0625C6.125 0.84375 6.31641 0.625 6.5625 0.625H7.4375C7.65625 0.625 7.875 0.84375 7.875 1.0625V1.71875H13.5625ZM13.5625 10.4688C13.7812 10.4688 14 10.6875 14 10.9062V11.3438C14 11.5898 13.7812 11.7812 13.5625 11.7812H4.375V12.4375C4.375 12.6836 4.15625 12.875 3.9375 12.875H3.0625C2.81641 12.875 2.625 12.6836 2.625 12.4375V11.7812H0.4375C0.191406 11.7812 0 11.5898 0 11.3438V10.9062C0 10.6875 0.191406 10.4688 0.4375 10.4688H2.625V9.8125C2.625 9.59375 2.81641 9.375 3.0625 9.375H3.9375C4.15625 9.375 4.375 9.59375 4.375 9.8125V10.4688H13.5625ZM13.5625 6.09375C13.7812 6.09375 14 6.3125 14 6.53125V6.96875C14 7.21484 13.7812 7.40625 13.5625 7.40625H11.375V8.0625C11.375 8.30859 11.1562 8.5 10.9375 8.5H10.0625C9.81641 8.5 9.625 8.30859 9.625 8.0625V7.40625H0.4375C0.191406 7.40625 0 7.21484 0 6.96875V6.53125C0 6.3125 0.191406 6.09375 0.4375 6.09375H9.625V5.4375C9.625 5.21875 9.81641 5 10.0625 5H10.9375C11.1562 5 11.375 5.21875 11.375 5.4375V6.09375H13.5625Z" fill="currentColor"/>
 					</svg>
@@ -111,7 +120,7 @@ if (
 					class="sugar-calendar-block__controls__right__search__field"
 					type="text"
 					autocomplete="off"
-					placeholder="<?php esc_attr_e( 'Search Events', 'sugar-calendar' ); ?>"
+					placeholder="<?php esc_attr_e( 'Search Events', 'sugar-calendar-lite' ); ?>"
 				/>
 				<svg class="sugar-calendar-block__controls__right__search__clear" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.99994 10.8839L13.0935 13.9775L13.9774 13.0936L10.8838 10L13.9774 6.90641L13.0935 6.02253L9.99994 9.11612L6.90634 6.02252L6.02246 6.90641L9.11606 10L6.02247 13.0936L6.90635 13.9775L9.99994 10.8839Z" fill="currentColor"/>

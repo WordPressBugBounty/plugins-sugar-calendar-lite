@@ -280,10 +280,11 @@ class Base {
 	 * See: https://core.trac.wordpress.org/ticket/31556
 	 *
 	 * @since 1.0.0
+	 * @since 3.5.0 Change to public.
 	 *
 	 * @return bool|\wpdb Database interface, or False if not set
 	 */
-	protected function get_db() {
+	public function get_db() {
 
 		// Default database return value (might change)
 		$retval = false;

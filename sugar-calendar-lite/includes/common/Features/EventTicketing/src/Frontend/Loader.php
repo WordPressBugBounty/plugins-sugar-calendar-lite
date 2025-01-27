@@ -86,7 +86,7 @@ class Loader {
 			/*
 			 * translators: %1$s is the price of the ticket.
 			 */
-			__( 'Buy Tickets - %1$s', 'sugar-calendar' ),
+			__( 'Buy Tickets - %1$s', 'sugar-calendar-lite' ),
 			Functions\currency_filter( $price )
 		);
 

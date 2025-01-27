@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
+use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Common\Editor;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
@@ -15,18 +16,6 @@ use Sugar_Calendar\Options as PluginSettings;
  * @since 3.0.0
  */
 class SettingsGeneralTab extends Settings {
-
-	/**
-	 * Page slug.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @return string
-	 */
-	public static function get_slug() {
-
-		return 'sc-settings';
-	}
 
 	/**
 	 * Page tab slug.
@@ -49,7 +38,7 @@ class SettingsGeneralTab extends Settings {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'General', 'sugar-calendar' );
+		return esc_html__( 'General', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -88,7 +77,7 @@ class SettingsGeneralTab extends Settings {
 		// License heading.
 		UI::heading(
 			[
-				'title' => esc_html__( 'License', 'sugar-calendar' ),
+				'title' => esc_html__( 'License', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -103,7 +92,7 @@ class SettingsGeneralTab extends Settings {
 
 		UI::field_wrapper(
 			[
-				'label' => esc_html__( 'License Key', 'sugar-calendar' ),
+				'label' => esc_html__( 'License Key', 'sugar-calendar-lite' ),
 				'type'  => 'password',
 				'id'    => 'license-key',
 			],
@@ -113,7 +102,7 @@ class SettingsGeneralTab extends Settings {
 		// Display heading.
 		UI::heading(
 			[
-				'title' => esc_html__( 'Display', 'sugar-calendar' ),
+				'title' => esc_html__( 'Display', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -125,8 +114,8 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'number_of_events',
 				'name'        => 'number_of_events',
 				'value'       => absint( $events_max_num ),
-				'label'       => esc_html__( 'Maximum Events', 'sugar-calendar' ),
-				'description' => __( 'Number of events to include in any theme-side calendar. Default <strong>30</strong>. Use <strong>0</strong> for no limit.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Maximum Events', 'sugar-calendar-lite' ),
+				'description' => __( 'Number of events to include in any theme-side calendar. Default <strong>30</strong>. Use <strong>0</strong> for no limit.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -141,8 +130,8 @@ class SettingsGeneralTab extends Settings {
 				'name'        => 'start_of_week',
 				'options'     => array_map( fn( $day ) => $wp_locale->get_weekday( $day ), range( 0, 6 ) ),
 				'value'       => $start_of_week,
-				'label'       => esc_html__( 'Start of Week', 'sugar-calendar' ),
-				'description' => esc_html__( 'Select the first day of the week.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Start of Week', 'sugar-calendar-lite' ),
+				'description' => esc_html__( 'Select the first day of the week.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -157,7 +146,7 @@ class SettingsGeneralTab extends Settings {
 		$date_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'date_formats',
 			[
-				esc_html__( 'F j, Y', 'sugar-calendar' ),
+				'F j, Y',
 				'Y-m-d',
 				'm/d/Y',
 				'd/m/Y',
@@ -173,7 +162,7 @@ class SettingsGeneralTab extends Settings {
 				'name'    => 'date_format',
 				'formats' => $date_formats,
 				'value'   => $date_format,
-				'label'   => esc_html__( 'Date Format', 'sugar-calendar' ),
+				'label'   => esc_html__( 'Date Format', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -188,7 +177,7 @@ class SettingsGeneralTab extends Settings {
 		$time_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'time_formats',
 			[
-				esc_html__( 'g:i a', 'sugar-calendar' ),
+				esc_html__( 'g:i a', 'sugar-calendar-lite' ),
 				'g:i A',
 				'H:i',
 			]
@@ -202,7 +191,7 @@ class SettingsGeneralTab extends Settings {
 				'name'    => 'time_format',
 				'formats' => $time_formats,
 				'value'   => $time_format,
-				'label'   => esc_html__( 'Time Format', 'sugar-calendar' ),
+				'label'   => esc_html__( 'Time Format', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -217,10 +206,10 @@ class SettingsGeneralTab extends Settings {
 		$color_styles = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sc_day_color_styles',
 			[
-				'none'  => esc_html__( 'None', 'sugar-calendar' ),
-				'each'  => esc_html__( 'Each', 'sugar-calendar' ),
-				'first' => esc_html__( 'First', 'sugar-calendar' ),
-				'blend' => esc_html__( 'Blend', 'sugar-calendar' ),
+				'none'  => esc_html__( 'None', 'sugar-calendar-lite' ),
+				'each'  => esc_html__( 'Each', 'sugar-calendar-lite' ),
+				'first' => esc_html__( 'First', 'sugar-calendar-lite' ),
+				'blend' => esc_html__( 'Blend', 'sugar-calendar-lite' ),
 			]
 		);
 		$color_styles = array_unique( $color_styles );
@@ -232,8 +221,8 @@ class SettingsGeneralTab extends Settings {
 				'name'        => 'day_color_style',
 				'options'     => $color_styles,
 				'value'       => $color_style,
-				'label'       => esc_html__( 'Calendar Day Colors', 'sugar-calendar' ),
-				'description' => __( 'The theme-side Calendar Color styling strategy.<br><strong>None</strong> by default (no colors).<br><strong>Each</strong> uses a single color for each Event link.<br><strong>First</strong> uses the first color found for the background.<br><strong>Blend</strong> will use the average of all colors for the background.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Calendar Day Colors', 'sugar-calendar-lite' ),
+				'description' => __( 'The theme-side Calendar Color styling strategy.<br><strong>None</strong> by default (no colors).<br><strong>Each</strong> uses a single color for each Event link.<br><strong>First</strong> uses the first color found for the background.<br><strong>Blend</strong> will use the average of all colors for the background.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -243,19 +232,19 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'single_event_appearance_mode',
 				'name'        => 'single_event_appearance_mode',
 				'options'     => [
-					'light' => esc_html__( 'Light', 'sugar-calendar' ),
-					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+					'light' => esc_html__( 'Light', 'sugar-calendar-lite' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar-lite' ),
 				],
 				'value'       => Editor\get_single_event_appearance_mode(),
-				'label'       => esc_html__( 'Single Event Page Appearance', 'sugar-calendar' ),
-				'description' => __( 'Adjust the frontend display of event single page.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Single Event Page Appearance', 'sugar-calendar-lite' ),
+				'description' => __( 'Adjust the frontend display of event single page.', 'sugar-calendar-lite' ),
 			]
 		);
 
 		// Editing heading.
 		UI::heading(
 			[
-				'title' => esc_html__( 'Editing', 'sugar-calendar' ),
+				'title' => esc_html__( 'Editing', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -284,8 +273,8 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'editor_type',
 				'options'     => $editor_types,
 				'value'       => $type,
-				'label'       => esc_html__( 'Editor Type', 'sugar-calendar' ),
-				'description' => esc_html__( 'The interface to use when adding or editing Events.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Editor Type', 'sugar-calendar-lite' ),
+				'description' => esc_html__( 'The interface to use when adding or editing Events.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -295,8 +284,8 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'custom_fields',
 				'name'        => 'custom_fields',
 				'value'       => $fields,
-				'label'       => esc_html__( 'Enable Custom Fields', 'sugar-calendar' ),
-				'description' => __( 'Allow developers to extend post types that support <code>events</code>.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Enable Custom Fields', 'sugar-calendar-lite' ),
+				'description' => __( 'Allow developers to extend post types that support <code>events</code>.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -313,9 +302,9 @@ class SettingsGeneralTab extends Settings {
 			'name'             => $name,
 			'hide_empty'       => false,
 			'orderby'          => 'name',
-			'show_option_none' => esc_html__( '&mdash; No Default &mdash;', 'sugar-calendar' ),
-			'label'            => esc_html__( 'Default Event Calendar', 'sugar-calendar' ),
-			'description'      => esc_html__( 'When adding a new Event, this Calendar will be preselected.', 'sugar-calendar' ),
+			'show_option_none' => esc_html__( '&mdash; No Default &mdash;', 'sugar-calendar-lite' ),
+			'label'            => esc_html__( 'Default Event Calendar', 'sugar-calendar-lite' ),
+			'description'      => esc_html__( 'When adding a new Event, this Calendar will be preselected.', 'sugar-calendar-lite' ),
 		];
 
 		UI::calendar_dropdown_control( $args );
@@ -323,7 +312,7 @@ class SettingsGeneralTab extends Settings {
 		// Time Zone heading.
 		UI::heading(
 			[
-				'title' => esc_html__( 'Time Zone', 'sugar-calendar' ),
+				'title' => esc_html__( 'Time Zone', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -335,9 +324,9 @@ class SettingsGeneralTab extends Settings {
 
 		// Types.
 		$types = [
-			'off'    => esc_html__( 'Off', 'sugar-calendar' ),
-			'single' => esc_html__( 'Single', 'sugar-calendar' ),
-			'multi'  => esc_html__( 'Multi', 'sugar-calendar' ),
+			'off'    => esc_html__( 'Off', 'sugar-calendar-lite' ),
+			'single' => esc_html__( 'Single', 'sugar-calendar-lite' ),
+			'multi'  => esc_html__( 'Multi', 'sugar-calendar-lite' ),
 		];
 
 		UI::select_input(
@@ -346,8 +335,8 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'timezone_type',
 				'options'     => $types,
 				'value'       => $tztype,
-				'label'       => esc_html__( 'Time Zones', 'sugar-calendar' ),
-				'description' => __( '<strong>Off</strong> by default (Existing time zone data still appears).<br><strong>Single</strong> allows Events to have one time zone.<br><strong>Multi</strong> allows Events to have different start & end time zones.<br><strong>Single</strong> and <strong>Multi</strong> will enable time zones for Calendars.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Time Zones', 'sugar-calendar-lite' ),
+				'description' => __( '<strong>Off</strong> by default (Existing time zone data still appears).<br><strong>Single</strong> allows Events to have one time zone.<br><strong>Multi</strong> allows Events to have different start & end time zones.<br><strong>Single</strong> and <strong>Multi</strong> will enable time zones for Calendars.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -357,8 +346,8 @@ class SettingsGeneralTab extends Settings {
 				'name'        => 'timezone',
 				'id'          => 'timezone',
 				'current'     => $timezone,
-				'label'       => esc_html__( 'Default Time Zone', 'sugar-calendar' ),
-				'description' => __( 'When time zones are enabled, new Events will default to this. If you are unsure, leave empty or pick the time zone you are in.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Default Time Zone', 'sugar-calendar-lite' ),
+				'description' => __( 'When time zones are enabled, new Events will default to this. If you are unsure, leave empty or pick the time zone you are in.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -368,8 +357,8 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'timezone_convert',
 				'name'        => 'timezone_convert',
 				'value'       => $tzconvert,
-				'label'       => esc_html__( 'Visitor Conversion', 'sugar-calendar' ),
-				'description' => __( 'Attempts to update theme-side Event times according to visitor web browser location. Depends on client-side browser support. May not work for all visitors.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Visitor Conversion', 'sugar-calendar-lite' ),
+				'description' => __( 'Attempts to update theme-side Event times according to visitor web browser location. Depends on client-side browser support. May not work for all visitors.', 'sugar-calendar-lite' ),
 			]
 		);
 	}
@@ -386,13 +375,13 @@ class SettingsGeneralTab extends Settings {
 		ob_start();
 		?>
 
-        <p><?php esc_html_e( 'You\'re using Sugar Calendar Lite - no license needed. Enjoy!', 'sugar-calendar' ); ?> 🙂</p>
+        <p><?php esc_html_e( 'You\'re using Sugar Calendar Lite - no license needed. Enjoy!', 'sugar-calendar-lite' ); ?> 🙂</p>
 
         <p>
 			<?php
 			printf(
 				wp_kses( /* translators: %s - WPMailSMTP.com upgrade URL. */
-					__( 'To unlock more features, consider <strong><a href="%s" target="_blank" rel="noopener noreferrer" class="sugar-calendar-upgrade-modal">upgrading to PRO</a></strong>.', 'sugar-calendar' ),
+					__( 'To unlock more features, consider <strong><a href="%s" target="_blank" rel="noopener noreferrer" class="sugar-calendar-upgrade-modal">upgrading to PRO</a></strong>.', 'sugar-calendar-lite' ),
 					[
 						'a'      => [
 							'href'   => [],
@@ -419,7 +408,7 @@ class SettingsGeneralTab extends Settings {
 			<?php
 			printf(
 				wp_kses( /* Translators: %s - discount value 50% */
-					__( 'As a valued Sugar Calendar Lite user you receive <strong>%s off</strong>, automatically applied at checkout!', 'sugar-calendar' ),
+					__( 'As a valued Sugar Calendar Lite user you receive <strong>%s off</strong>, automatically applied at checkout!', 'sugar-calendar-lite' ),
 					[
 						'strong' => [],
 						'br'     => [],
@@ -436,19 +425,19 @@ class SettingsGeneralTab extends Settings {
             <div class="sugar-calendar-setting-license-key-wrapper">
                 <input type="password"
                        value=""
-                       placeholder="<?php esc_attr_e( 'Paste license key here', 'sugar-calendar' ); ?>"
+                       placeholder="<?php esc_attr_e( 'Paste license key here', 'sugar-calendar-lite' ); ?>"
                        id="sugar-calendar-setting-license-key"/>
             </div>
             <button type="button"
                     class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-secondary"
-                    id="sugar-calendar-setting-license-key-button"><?php esc_attr_e( 'Verify Key', 'sugar-calendar' ); ?></button>
+                    id="sugar-calendar-setting-license-key-button"><?php esc_attr_e( 'Verify Key', 'sugar-calendar-lite' ); ?></button>
         </div>
 
         <p class="desc">
 			<?php
 			echo wp_kses(
 				sprintf( /* translators: %1$s - Sugar Calendar account dashboard url; %2$s - pricing page url. */
-					__( 'Your license key can be found in your <a href="%1$s" target="_blank" rel="noopener noreferrer">Sugar Calendar Account Dashboard</a>. Don\'t have a license?  <a href="%2$s" target="_blank" rel="noopener noreferrer">Sign up today!</a>', 'sugar-calendar' ),
+					__( 'Your license key can be found in your <a href="%1$s" target="_blank" rel="noopener noreferrer">Sugar Calendar Account Dashboard</a>. Don\'t have a license?  <a href="%2$s" target="_blank" rel="noopener noreferrer">Sign up today!</a>', 'sugar-calendar-lite' ),
 					// phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
 					esc_url( Helpers::get_utm_url( 'https://sugarcalendar.com/account/', [ 'content' => 'License Key Account Dashboard Link', 'medium' => 'settings-general' ] ) ),
 					esc_url(
@@ -564,7 +553,7 @@ class SettingsGeneralTab extends Settings {
 			Options::update( $key, $value );
 		}
 
-		WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar' ), WP::ADMIN_NOTICE_SUCCESS );
+		WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar-lite' ), WP::ADMIN_NOTICE_SUCCESS );
 	}
 
 	/**

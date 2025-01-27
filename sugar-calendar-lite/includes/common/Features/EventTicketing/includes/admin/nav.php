@@ -38,8 +38,8 @@ function test_mode() {
 	}
 
 	// Output the link
-	?><a href="<?php echo esc_url( admin_url( 'admin.php?page=sc-settings&section=payments' ) ); ?>" class="page-title-action test-mode"><?php
-	esc_html_e( 'Test Mode: On', 'sugar-calendar' );
+	?><a href="<?php echo esc_url( admin_url( 'admin.php?page=sugarcalendar-settings&section=payments' ) ); ?>" class="page-title-action test-mode"><?php
+	esc_html_e( 'Test Mode: On', 'sugar-calendar-lite' );
 	?></a><?php
 }
 
@@ -56,7 +56,7 @@ function stripe_connect() {
 	}
 
 	// Output the link
-	?><a href="<?php echo esc_url( admin_url( 'admin.php?page=sc-settings&section=payments' ) ); ?>" class="page-title-action stripe"><?php
-	esc_html_e( 'Stripe: Disconnected', 'sugar-calendar' );
+	?><a href="<?php echo esc_url( admin_url( 'admin.php?page=sugarcalendar-settings&section=payments' ) ); ?>" class="page-title-action stripe"><?php
+	esc_html_e( 'Stripe: Disconnected', 'sugar-calendar-lite' );
 	?></a><?php
 }

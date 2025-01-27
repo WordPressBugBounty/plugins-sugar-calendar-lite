@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
+use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 
@@ -11,18 +12,6 @@ use Sugar_Calendar\Helpers\UI;
  * @since 3.0.0
  */
 class SettingsZapierTab extends Settings {
-
-	/**
-	 * Page slug.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @return string
-	 */
-	public static function get_slug() {
-
-		return 'sc-settings';
-	}
 
 	/**
 	 * Page tab slug.
@@ -45,7 +34,7 @@ class SettingsZapierTab extends Settings {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Zapier', 'sugar-calendar' );
+		return esc_html__( 'Zapier', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -74,13 +63,13 @@ class SettingsZapierTab extends Settings {
 
             <div class="sugar-calendar-admin-content">
 
-                <h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar' ); ?></h1>
+                <h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
 				<?php
 
 				UI::heading(
 					[
-						'title'       => esc_html__( 'Zapier', 'sugar-calendar' ),
-						'description' => esc_html__( 'Zapier lets you connect Sugar Calendar with thousands of the most popular apps, so you can automate your work and have more time for what matters most.', 'sugar-calendar' ),
+						'title'       => esc_html__( 'Zapier', 'sugar-calendar-lite' ),
+						'description' => esc_html__( 'Zapier lets you connect Sugar Calendar with thousands of the most popular apps, so you can automate your work and have more time for what matters most.', 'sugar-calendar-lite' ),
 						'class'       => 'sugar-calendar--pro-only',
 					]
 				);
@@ -90,12 +79,12 @@ class SettingsZapierTab extends Settings {
 					[
 						'url'           => $assets_url . 'zapier-settings.png',
 						'url_thumbnail' => $assets_url . 'zapier-settings-thumbnail.png',
-						'title'         => __( 'Zapier Settings', 'sugar-calendar' ),
+						'title'         => __( 'Zapier Settings', 'sugar-calendar-lite' ),
 					],
 					[
 						'url'           => $assets_url . 'zapier-zaps.png',
 						'url_thumbnail' => $assets_url . 'zapier-zaps-thumbnail.png',
-						'title'         => __( 'Sugar Calendar Triggers for Zapier', 'sugar-calendar' ),
+						'title'         => __( 'Sugar Calendar Triggers for Zapier', 'sugar-calendar-lite' ),
 					],
 				];
 				?>
@@ -116,21 +105,21 @@ class SettingsZapierTab extends Settings {
                 </div>
 
                 <div class="sugar-calendar-education-features">
-                    <h4><?php esc_html_e( 'Unlock These Awesome Zapier Features!', 'sugar-calendar' ); ?></h4>
+                    <h4><?php esc_html_e( 'Unlock These Awesome Zapier Features!', 'sugar-calendar-lite' ); ?></h4>
                     <ul>
-                        <li><?php esc_html_e( 'Automate Repetitive Tasks', 'sugar-calendar' ); ?></li>
-                        <li><?php esc_html_e( 'Integrate with 3000+ Other Apps', 'sugar-calendar' ); ?></li>
-                        <li><?php esc_html_e( 'Set It and Forget It', 'sugar-calendar' ); ?></li>
-                        <li><?php esc_html_e( 'Connect to Your Favorite Services', 'sugar-calendar' ); ?></li>
-                        <li><?php esc_html_e( 'No Code Necessary', 'sugar-calendar' ); ?></li>
-                        <li><?php esc_html_e( 'Build Custom Solutions', 'sugar-calendar' ); ?></li>
+                        <li><?php esc_html_e( 'Automate Repetitive Tasks', 'sugar-calendar-lite' ); ?></li>
+                        <li><?php esc_html_e( 'Integrate with 3000+ Other Apps', 'sugar-calendar-lite' ); ?></li>
+                        <li><?php esc_html_e( 'Set It and Forget It', 'sugar-calendar-lite' ); ?></li>
+                        <li><?php esc_html_e( 'Connect to Your Favorite Services', 'sugar-calendar-lite' ); ?></li>
+                        <li><?php esc_html_e( 'No Code Necessary', 'sugar-calendar-lite' ); ?></li>
+                        <li><?php esc_html_e( 'Build Custom Solutions', 'sugar-calendar-lite' ); ?></li>
                     </ul>
                 </div>
 
 				<?php
 				UI::button(
 					[
-						'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar' ),
+						'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
 						'size'   => 'lg',
 						'link'   => esc_url( Helpers::get_upgrade_link( 'zapier' ) ),
 						'target' => '_blank',

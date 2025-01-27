@@ -230,8 +230,8 @@ function sugar_calendar_admin_title( $admin_title = '', $title = '' ) {
 
 	// Event title page text
 	$pt    = sugar_calendar_get_admin_post_type();
-	$pre   = sugar_calendar_get_post_type_label( $pt, 'name', esc_html__( 'Events', 'sugar-calendar' ) );
-	$ugh   = __( 'Posts', 'sugar-calendar' );
+	$pre   = sugar_calendar_get_post_type_label( $pt, 'name', esc_html__( 'Events', 'sugar-calendar-lite' ) );
+	$ugh   = __( 'Posts', 'sugar-calendar-lite' );
 	$page  = get_admin_page_parent();
 	$event = 'edit.php?post_type=' . $pt;
 

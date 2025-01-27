@@ -253,6 +253,32 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get venue filter.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return array
+	 */
+	public function get_venues() {
+
+		$attributes = $this->get_attributes();
+		$venue_ids  = ! empty( $attributes['venues'] ) ? $attributes['venues'] : [];
+
+		if ( empty( $venues ) && ! empty( $attributes['venuesFilter'] ) ) {
+			$venue_ids = $attributes['venuesFilter'];
+		}
+
+		/**
+		 * Filter the venue IDs.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param array $venue_ids Venue IDs.
+		 */
+		return apply_filters( 'sugar_calendar_blocks_get_venues_filter', $venue_ids );
+	}
+
+	/**
 	 * Set the view.
 	 *
 	 * @since 3.0.0
@@ -603,6 +629,7 @@ abstract class AbstractBlock {
 	 *
 	 * @since 3.1.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
+	 * @since 3.5.0 Added support for filtering by venues.
 	 *
 	 * @return Event[]
 	 */
@@ -626,7 +653,9 @@ abstract class AbstractBlock {
 			$start_period_range,
 			$end_period_range,
 			array_map( 'absint', $this->get_calendars() ),
-			$this->get_search_term()
+			$this->get_search_term(),
+			null,
+			$this->get_venues()
 		);
 
 		$this->has_events_for_week = ! empty( $calendar_events );
@@ -832,4 +861,22 @@ abstract class AbstractBlock {
 	 * @return string
 	 */
 	abstract public function get_current_pagination_display();
+
+	/**
+	 * Get the next pagination text.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return string
+	 */
+	abstract public function get_next_pagination_display();
+
+	/**
+	 * Get the previous pagination text.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return string
+	 */
+	abstract public function get_previous_pagination_display();
 }

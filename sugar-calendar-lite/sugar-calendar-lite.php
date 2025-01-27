@@ -11,7 +11,7 @@
  * Domain Path:       /assets/languages
  * Requires PHP:      7.4
  * Requires at least: 5.9
- * Version:           3.4.0
+ * Version:           3.5.0
  */
 
 // Exit if accessed directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
 	 *
 	 * @since 3.0.0
 	 */
-	define( 'SC_PLUGIN_VERSION', '3.4.0' );
+	define( 'SC_PLUGIN_VERSION', '3.5.0' );
 }
 
 if ( ! defined( 'SC_PLUGIN_FILE' ) ) {
@@ -125,7 +125,7 @@ if ( ! function_exists( 'sugar_calendar_lite_deactivated_notice' ) ) {
 	 */
 	function sugar_calendar_lite_deactivated_notice() {
 
-		echo '<div class="notice notice-warning"><p>' . esc_html__( 'Sugar Calendar PRO version is activated. We de-activated the Sugar Calendar Lite version.', 'sugar-calendar' ) . '</p></div>';
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'Sugar Calendar PRO version is activated. We de-activated the Sugar Calendar Lite version.', 'sugar-calendar-lite' ) . '</p></div>';
 	}
 }
 

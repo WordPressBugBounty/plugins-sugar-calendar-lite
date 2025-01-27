@@ -26,7 +26,7 @@ final class Events_Table extends Table {
 	/**
 	 * @var string Database version
 	 */
-	protected $version = 201902040005;
+	protected $version = 201902040006;
 
 	/**
 	 * @var string Table schema
@@ -45,17 +45,19 @@ final class Events_Table extends Table {
 		'201901220001' => 201901220001,
 		'201902040004' => 201902040004,
 		'201902040005' => 201902040005,
+		'201902040006' => 201902040006,
 	);
 
 	/**
-	 * Setup the database schema
+	 * Setup the database schema.
 	 *
 	 * Note: title & content columns exist here mostly for easier searching, but
 	 *
-	 *
 	 * @since 2.0.0
+	 * @since 3.5.0 Added `venue_id` column.
 	 */
 	protected function set_schema() {
+
 		$this->schema = "id bigint(20) unsigned NOT NULL auto_increment,
 			object_id bigint(20) unsigned NOT NULL default '0',
 			object_type varchar(20) NOT NULL default '',
@@ -76,12 +78,14 @@ final class Events_Table extends Table {
 			date_created datetime NOT NULL default '0000-00-00 00:00:00',
 			date_modified datetime NOT NULL default '0000-00-00 00:00:00',
 			uuid varchar(100) NOT NULL default '',
+			venue_id bigint(20) unsigned NOT NULL default '0',
 			PRIMARY KEY (id),
 			KEY `object` (object_id,object_type,object_subtype),
 			KEY `event_status` (status),
 			KEY `event_times` (start,end,start_tz,end_tz),
 			KEY `event_recur` (recurrence),
-			KEY `event_recur_times` (recurrence_end,recurrence_end_tz)";
+			KEY `event_recur_times` (recurrence_end,recurrence_end_tz),
+			KEY `event_venue` (venue_id)";
 	}
 
 	/**
@@ -188,6 +192,33 @@ final class Events_Table extends Table {
 		}
 
 		// Return success/fail
+		return $this->is_success( true );
+	}
+
+	/**
+	 * Upgrade to version 201902040006.
+	 * - Add `venue_id` column for future use.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return bool True if upgrade was successful, false otherwise.
+	 */
+	protected function __201902040006() {
+
+		// Look for column.
+		$result = $this->column_exists( 'venue_id' );
+
+		// Maybe add column.
+		if ( $result === false ) {
+
+			$this->get_db()->query(
+				"ALTER TABLE {$this->table_name}
+				ADD COLUMN `venue_id` bigint(20) unsigned NOT NULL DEFAULT '0' AFTER `uuid`,
+				ADD INDEX `event_venue` (`venue_id`);"
+			);
+		}
+
+		// Return success/fail.
 		return $this->is_success( true );
 	}
 }

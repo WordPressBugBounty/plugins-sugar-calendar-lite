@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e
+class ComposerStaticInit7668392a096ddbef1d996e403f2405de
 {
     public static $prefixLengthsPsr4 = array (
         'S' => 
@@ -399,6 +399,8 @@ class ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e
         'Sugar_Calendar\\Admin\\Pages\\ToolsExportTab' => __DIR__ . '/../..' . '/src/Admin/Pages/ToolsExportTab.php',
         'Sugar_Calendar\\Admin\\Pages\\ToolsImportTab' => __DIR__ . '/../..' . '/src/Admin/Pages/ToolsImportTab.php',
         'Sugar_Calendar\\Admin\\Pages\\ToolsMigrateTab' => __DIR__ . '/../..' . '/src/Admin/Pages/ToolsMigrateTab.php',
+        'Sugar_Calendar\\Admin\\Pages\\Venues' => __DIR__ . '/../..' . '/src/Admin/Pages/Venues.php',
+        'Sugar_Calendar\\Admin\\Pages\\VenuesAbstract' => __DIR__ . '/../..' . '/src/Admin/Pages/VenuesAbstract.php',
         'Sugar_Calendar\\Admin\\Pages\\Welcome' => __DIR__ . '/../..' . '/src/Admin/Pages/Welcome.php',
         'Sugar_Calendar\\Admin\\PluginsInstallSkin' => __DIR__ . '/../..' . '/src/Admin/PluginsInstallSkin.php',
         'Sugar_Calendar\\Admin\\Tools\\Exporter' => __DIR__ . '/../..' . '/src/Admin/Tools/Exporter.php',
@@ -452,6 +454,8 @@ class ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e
         'Sugar_Calendar\\Pro\\License\\Updater' => __DIR__ . '/../..' . '/src/Pro/License/Updater.php',
         'Sugar_Calendar\\Pro\\Migrations\\LicenseKeyMigration' => __DIR__ . '/../..' . '/src/Pro/Migrations/LicenseKeyMigration.php',
         'Sugar_Calendar\\Pro\\Tasks\\LicenseCheckTask' => __DIR__ . '/../..' . '/src/Pro/Tasks/LicenseCheckTask.php',
+        'Sugar_Calendar\\Pro\\Translations\\Translations' => __DIR__ . '/../..' . '/src/Pro/Translations/Translations.php',
+        'Sugar_Calendar\\Pro\\Translations\\WPOrg' => __DIR__ . '/../..' . '/src/Pro/Translations/WPOrg.php',
         'Sugar_Calendar\\Shortcodes\\ModernShortcodes' => __DIR__ . '/../..' . '/src/Shortcodes/ModernShortcodes.php',
         'Sugar_Calendar\\Tasks\\Task' => __DIR__ . '/../..' . '/src/Tasks/Task.php',
         'Sugar_Calendar\\Tasks\\Tasks' => __DIR__ . '/../..' . '/src/Tasks/Tasks.php',
@@ -462,9 +466,9 @@ class ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit00ff784d6deedff01c2e4a9fd4cb825e::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$classMap;
 
         }, null, ClassLoader::class);
     }

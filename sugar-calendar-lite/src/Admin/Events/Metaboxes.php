@@ -314,6 +314,7 @@ class Metaboxes {
 	 *
 	 * @since 3.0.0
 	 * @since 3.1.0 Remove event ticketing education.
+	 * @since 3.5.0 Add event venue education.
 	 *
 	 * @param Event $box
 	 *
@@ -329,7 +330,7 @@ class Metaboxes {
 		$box->add_section(
 			[
 				'id'       => 'adv-recurrence',
-				'label'    => esc_html__( 'Recurrence', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Recurrence', 'sugar-calendar-lite' ),
 				'icon'     => 'controls-repeat',
 				'order'    => 20,
 				'callback' => [ $this, 'event_metabox_recurring_education' ],
@@ -340,10 +341,21 @@ class Metaboxes {
 		$box->add_section(
 			[
 				'id'       => 'url',
-				'label'    => esc_html__( 'Link', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Link', 'sugar-calendar-lite' ),
 				'icon'     => 'admin-links',
 				'order'    => 70,
 				'callback' => [ $this, 'event_metabox_link_education' ],
+			]
+		);
+
+		// Venue.
+		$box->add_section(
+			[
+				'id'       => 'venue',
+				'label'    => esc_html__( 'Venue', 'sugar-calendar' ),
+				'icon'     => 'location',
+				'order'    => 50,
+				'callback' => [ $this, 'event_metabox_venue_education' ],
 			]
 		);
 	}
@@ -359,47 +371,47 @@ class Metaboxes {
 
 		?>
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education">
-            <label for="recurrence"><?php esc_html_e( 'Repeat', 'sugar-calendar' ); ?></label>
+            <label for="recurrence"><?php esc_html_e( 'Repeat', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <select id="recurrence" class="recurrence" disabled>
-                    <option><?php esc_html_e( 'Never', 'sugar-calendar' ); ?></option>
+                    <option><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></option>
                 </select>
             </div>
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-interval repeat-advanced">
-            <label for="recurrence_interval"><?php esc_html_e( 'Every', 'sugar-calendar' ); ?></label>
+            <label for="recurrence_interval"><?php esc_html_e( 'Every', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <input type="number" min="1" max="999" disabled/>
             </div>
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-end-type repeat-advanced">
-            <label for="recurrence_end_type"><?php esc_html_e( 'Ends', 'sugar-calendar' ); ?></label>
+            <label for="recurrence_end_type"><?php esc_html_e( 'Ends', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
                     <input type="radio" id="recurrence_end_type_never" checked disabled/>
                     <label for="recurrence_end_type_never">
-                        <span class="end-repeat-label"><?php esc_html_e( 'Never', 'sugar-calendar' ); ?></span>
+                        <span class="end-repeat-label"><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></span>
                     </label>
                 </div>
 
                 <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
                     <input type="radio" id="recurrence_end_type_date" disabled/>
                     <label for="recurrence_end_type_date">
-                        <span class="end-repeat-label"><?php esc_html_e( 'On', 'sugar-calendar' ); ?></span>
+                        <span class="end-repeat-label"><?php esc_html_e( 'On', 'sugar-calendar-lite' ); ?></span>
                     </label>
-                    <input type="text" id="recurrence_end_date" placeholder="<?php esc_html_e( 'Date', 'sugar-calendar' ); ?>" disabled/>
+                    <input type="text" id="recurrence_end_date" placeholder="<?php esc_html_e( 'Date', 'sugar-calendar-lite' ); ?>" disabled/>
                 </div>
 
                 <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
                     <input type="radio" id="recurrence_end_type_count" disabled/>
                     <label for="recurrence_end_type_count">
-                        <span class="end-repeat-label"><?php esc_html_e( 'After', 'sugar-calendar' ); ?></span>
+                        <span class="end-repeat-label"><?php esc_html_e( 'After', 'sugar-calendar-lite' ); ?></span>
                     </label>
-                    <input type="number" min="1" max="999" id="recurrence_end_count" placeholder="<?php esc_html_e( '1', 'sugar-calendar' ); ?>" disabled/>
+                    <input type="number" min="1" max="999" id="recurrence_end_count" placeholder="1" disabled/>
                     <label for="recurrence_end_type_count">
-                        <span id="repeat-occurrence"><?php esc_html_e( 'time', 'sugar-calendar' ); ?></span>
+                        <span id="repeat-occurrence"><?php esc_html_e( 'time', 'sugar-calendar-lite' ); ?></span>
                     </label>
                 </div>
             </div>
@@ -412,8 +424,8 @@ class Metaboxes {
 					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
 						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 						Helpers::get_upgrade_link( [ 'medium' => 'lite-event-recurrence', 'content' => 'Upgrade to Sugar Calendar Pro' ] ),
-						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar' )
+						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -442,11 +454,11 @@ class Metaboxes {
 		?>
 
         <div class="sugar-calendar-metabox__field-row">
-            <p class="desc"><?php esc_html_e( 'Add a custom URL which will be displayed in the event details or redirect visitors to a different page.', 'sugar-calendar' ); ?></p>
+            <p class="desc"><?php esc_html_e( 'Add a custom URL which will be displayed in the event details or redirect visitors to a different page.', 'sugar-calendar-lite' ); ?></p>
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-redirect">
-            <label for="sc-event-url-redirect"><?php esc_html_e( 'Redirect', 'sugar-calendar' ); ?></label>
+            <label for="sc-event-url-redirect"><?php esc_html_e( 'Redirect', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
 				<?php
 				UI::toggle_control(
@@ -455,10 +467,10 @@ class Metaboxes {
 						'value'         => false,
 						'disabled'      => true,
 						'toggle_labels' => [
-							esc_html__( 'ON', 'sugar-calendar' ),
-							esc_html__( 'OFF', 'sugar-calendar' ),
+							esc_html__( 'ON', 'sugar-calendar-lite' ),
+							esc_html__( 'OFF', 'sugar-calendar-lite' ),
 						],
-						'description'   => esc_html__( 'Automatically send visitors here. The Event page on your site will be inaccessible.', 'sugar-calendar' ),
+						'description'   => esc_html__( 'Automatically send visitors here. The Event page on your site will be inaccessible.', 'sugar-calendar-lite' ),
 					],
 					true
 				);
@@ -467,29 +479,29 @@ class Metaboxes {
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url">
-            <label for="sc-event-url"><?php esc_html_e( 'URL', 'sugar-calendar' ); ?></label>
+            <label for="sc-event-url"><?php esc_html_e( 'URL', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <input type="text" id="sc-event-url" disabled/>
                 <p class="desc">
-					<?php esc_html_e( 'Paste the full URL starting with https://', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Paste the full URL starting with https://', 'sugar-calendar-lite' ); ?>
                 </p>
             </div>
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-target">
-            <label for="sc-event-url-target"><?php esc_html_e( 'Target', 'sugar-calendar' ); ?></label>
+            <label for="sc-event-url-target"><?php esc_html_e( 'Target', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <input type="checkbox" id="sc-event-url-target" disabled/>
-                <label for="sc-event-url-target"><?php esc_html_e( 'Open link in a new tab', 'sugar-calendar' ); ?></label>
+                <label for="sc-event-url-target"><?php esc_html_e( 'Open link in a new tab', 'sugar-calendar-lite' ); ?></label>
             </div>
         </div>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-text">
-            <label for="sc-event-url-text"><?php esc_html_e( 'Text', 'sugar-calendar' ); ?></label>
+            <label for="sc-event-url-text"><?php esc_html_e( 'Text', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <input type="text" id="sc-event-url-text" disabled/>
                 <p class="desc">
-					<?php esc_html_e( 'Use this text instead of showing the URL.', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Use this text instead of showing the URL.', 'sugar-calendar-lite' ); ?>
                 </p>
             </div>
         </div>
@@ -501,8 +513,8 @@ class Metaboxes {
 					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
 						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 						Helpers::get_upgrade_link( [ 'medium' => 'lite-event-link', 'content' => 'Upgrade to Sugar Calendar Pro' ] ),
-						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar' )
+						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -516,6 +528,106 @@ class Metaboxes {
             </p>
         </div>
 
+		<?php
+	}
+
+	/**
+	 * Event metabox venue section education.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return void
+	 */
+	public function event_metabox_venue_education() {
+
+		?>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--venue sugar-calendar-metabox__field-row--education">
+			<label for="venue"><?php esc_html_e( 'Venue', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<div id="sugar-calendar-setting-row-venue" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-setting-row-select">
+					<span class="sugar-calendar-setting-field choicesjs-select-wrap">
+						<div class="choices" data-type="select-one" tabindex="0" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
+							<div class="choices__inner">
+								<div class="choices__list choices__list--single">
+									<div class="choices__item choices__item--selectable" aria-selected="true">
+										<?php esc_html_e( 'Existing Venue', 'sugar-calendar-lite' ); ?>
+									</div>
+								</div>
+							</div>
+						</div>
+						<p class="desc"><?php esc_html_e( 'Select an existing venue or create a new one.', 'sugar-calendar-lite' ); ?></p>
+					</span>
+				</div>
+			</div>
+			<span id="venue-add-new"><?php esc_html_e( 'Add New Venue', 'sugar-calendar-lite' ); ?></span>
+			<div class="sugar-calendar-event-venue-summary">
+				<div class="sugar-calendar-event-venue-info-card active">
+					<div class="venue-info-card-display">
+						<h4>The Roxy</h4>
+						<p>9009 W Sunset Blvd</p>
+						<p>West Hollywood, CA, 90069</p>
+						<p>United States</p>
+						<p>310-278-9457</p>
+					</div>
+					<span id="venue-edit-open" aria-label="Edit Venue"></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--venue_show_map sugar-calendar-metabox__field-row--education">
+			<label for="recurrence"><?php esc_html_e( 'Show Map', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<div id="sugar-calendar-setting-row-show_map" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-setting-row-toggle">
+					<span class="sugar-calendar-setting-field">
+						<span class="sugar-calendar-toggle-control">
+							<label class="sugar-calendar-toggle-control-icon" for="sugar-calendar-setting-show_map"></label>
+							<label
+								class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off"
+								for="sugar-calendar-setting-show_map"
+								style="display:block;"
+							><?php esc_html_e( 'Off', 'sugar-calendar-lite' ); ?></label>
+						</span>
+						<p class="desc">
+							<?php
+								echo wp_sprintf(
+									esc_html__( 'You need to configure Google API in %s to enable this feature.', 'sugar-calendar-lite' ),
+									'<a href="#" target="_blank">' . esc_html__( 'settings', 'sugar-calendar-lite' ) . '</a>'
+								);
+							?>
+						</p>
+					</span>
+				</div>
+			</div>
+		</div>
+
+        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+            <p class="desc">
+				<?php
+				echo wp_kses(
+					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
+						esc_url(
+							Helpers::get_upgrade_link(
+								[
+									'medium'  => 'lite-event-venue',
+									'content' => 'Upgrade to Sugar Calendar Pro',
+								]
+							)
+						),
+						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+					),
+					[
+						'a' => [
+							'href'   => [],
+							'rel'    => [],
+							'target' => [],
+						],
+					]
+				);
+				?>
+            </p>
+        </div>
 		<?php
 	}
 }

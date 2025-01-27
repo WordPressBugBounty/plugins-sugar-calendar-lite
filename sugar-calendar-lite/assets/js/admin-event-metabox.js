@@ -89,12 +89,28 @@
 			// Set the end date to the start date if it is empty.
 			this.$startDate.on( 'change', () => {
 
-				const startDate = this.getDate( this.$startDate.val() );
+				const // Get start and end date time for comparison.
+					startDateTime = this.getEventDateTime(
+						this.$startDate,
+						this.$startTimeHour,
+						this.$startTimeMinute,
+						this.$startTimeAmPm,
+						this.$startTz
+					),
+					endDateTime = this.getEventDateTime(
+						this.$endDate,
+						this.$endTimeHour,
+						this.$endTimeMinute,
+						this.$endTimeAmPm,
+						this.$endTz
+					);
 
-				this.$endDate.datepicker( 'option', 'minDate', startDate );
-
-				if ( this.$endDate.val() === '' ) {
-					this.$endDate.datepicker( 'setDate', startDate );
+				if (
+					this.$endDate.val() === ''
+					||
+					endDateTime.isBefore( startDateTime )
+				) {
+					this.$endDate.datepicker( 'setDate', this.$startDate.val() );
 				}
 			} );
 
@@ -126,10 +142,27 @@
 			// Set the start date max date to the end date.
 			this.$endDate.on( 'change', () => {
 
-				this.$startDate.datepicker( 'option', 'maxDate', this.getDate( this.$endDate.val() ) );
+				const // Get start and end date time for comparison.
+					startDateTime = this.getEventDateTime(
+						this.$startDate,
+						this.$startTimeHour,
+						this.$startTimeMinute,
+						this.$startTimeAmPm,
+						this.$startTz
+					),
+					endDateTime = this.getEventDateTime(
+						this.$endDate,
+						this.$endTimeHour,
+						this.$endTimeMinute,
+						this.$endTimeAmPm,
+						this.$endTz
+					);
 
-				if ( this.$startDate.val() === '' ) {
-
+				if (
+					this.$startDate.val() === ''
+					||
+					endDateTime.isBefore( startDateTime )
+				) {
 					this.$startDate.datepicker( 'setDate', this.$endDate.val() );
 				}
 			} );
@@ -155,7 +188,6 @@
 			} );
 
 			// Setup start and end date range.
-			this.$startDate.datepicker( 'option', 'maxDate', this.getDate( this.$endDate.val() ) );
 			this.$endDate.datepicker( 'option', 'minDate', this.getDate( this.$startDate.val() ) );
 
 			// Validate dates for block editor. Disable the submit button if the dates are invalid.
@@ -431,7 +463,7 @@
 				// Show error message.
 				wp.data.dispatch( 'core/notices' ).createNotice(
 					'error',
-					wp.i18n.__( 'End date and time cannot be before the start date and time.', 'sugar-calendar' ),
+					wp.i18n.__( 'End date and time cannot be before the start date and time.', 'sugar-calendar-lite' ),
 					{ id: errorLockName, isDismissible: true }
 				);
 

@@ -3,7 +3,7 @@
 namespace Sugar_Calendar\Common\Features\GoogleMaps;
 
 use Sugar_Calendar\Common\Features\FeatureAbstract;
-use Sugar_Calendar\Options as PluginSettings;
+use Sugar_Calendar\Helpers;
 
 /**
  * Class Feature.
@@ -79,10 +79,10 @@ class Feature extends FeatureAbstract {
 		?>
 
         <tr class="sc_meta_box_row">
-            <td class="sc_meta_box_td" colspan="2" valign="top"><?php esc_html_e( 'Event Location', 'sugar-calendar' ); ?></td>
+            <td class="sc_meta_box_td" colspan="2" valign="top"><?php esc_html_e( 'Event Location', 'sugar-calendar-lite' ); ?></td>
             <td class="sc_meta_box_td" colspan="4">
                 <input type="text" class="regular-text" name="sc_map_address" value="<?php echo esc_attr( $this->get_address( $post->ID ) ); ?> "/>
-                <span class="description"><?php esc_html_e( 'Enter the event address.', 'sugar-calendar' ); ?></span>
+                <span class="description"><?php esc_html_e( 'Enter the event address.', 'sugar-calendar-lite' ); ?></span>
                 <br/>
                 <input type="hidden" name="sc_maps_meta_box_nonce" value="<?php echo wp_create_nonce( self::$sc_maps_meta_box_nonce ); ?>"/>
             </td>
@@ -145,27 +145,48 @@ class Feature extends FeatureAbstract {
 	 * Displays the event map.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Add $force_refresh parameter.
 	 *
-	 * @param int $event_id Event ID.
+	 * @param int  $event_id      Event ID.
+	 * @param bool $force_refresh Whether to force a refresh of the coordinates.
 	 */
-	public function show_map( $event_id = 0 ) {
+	public function show_map( $event_id = 0, $force_refresh = false ) {
 
 		if ( ! $this->get_api_key() ) {
 			return;
 		}
 
-		$address = $this->get_address( $event_id );
+		/**
+		 * Filter the `$coordinates` of the map for the event.
+		 *
+		 * This filter allows you to modify the coordinates of the map for the event.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param array|bool $coordinates Coordinates of the map for the event.
+		 * @param int        $event_id    Event ID.
+		 */
+		$coordinates = apply_filters(
+			'sugar_calendar_common_features_google_maps_feature_coordinates',
+			false,
+			$event_id
+		);
 
-		if ( empty( $address ) ) {
-			return;
+		if ( empty( $coordinates ) ) {
+			$address = $this->get_address( $event_id );
+
+			if ( empty( $address ) ) {
+				return;
+			}
+
+			$coordinates = $this->get_coordinates( $address, $force_refresh );
 		}
 
-		$coordinates = $this->get_coordinates( $address, true );
-
-		if ( is_string( $coordinates ) ) { ?>
-            <script type="text/javascript">
+		if ( is_string( $coordinates ) ) {
+			?>
+			<script type="text/javascript">
 				console.warn( '[SCGM]: <?php echo esc_js( $coordinates ); ?>' );
-            </script>
+			</script>
 			<?php
 		}
 
@@ -177,8 +198,8 @@ class Feature extends FeatureAbstract {
 
 		ob_start();
 		?>
-        <div class="sc_map_canvas" id="<?php echo esc_attr( $map_id ); ?>" style="width: 100%; height: 400px; margin-bottom: 1em; background-color: rgba(0,0,0,0.1)"></div>
-        <script type="text/javascript">
+		<div class="sc_map_canvas" id="<?php echo esc_attr( $map_id ); ?>" style="width: 100%; height: 400px; margin-bottom: 1em; background-color: rgba(0,0,0,0.1)"></div>
+		<script type="text/javascript">
 
 			/**
 			 * Unique function for this specific location
@@ -222,7 +243,7 @@ class Feature extends FeatureAbstract {
 			} else {
 				console.warn( '[SCGM]: Check your Google API Key' );
 			}
-        </script>
+		</script>
 		<?php
 		echo ob_get_clean();
 	}
@@ -231,12 +252,13 @@ class Feature extends FeatureAbstract {
 	 * Return the Google Maps API Key.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Change into static method.
 	 *
 	 * @return string
 	 */
 	public function get_api_key() {
 
-		return PluginSettings::get( 'maps_google_api_key', '' );
+		return Helpers::get_google_maps_api_key();
 	}
 
 	/**
@@ -264,16 +286,110 @@ class Feature extends FeatureAbstract {
 	}
 
 	/**
+	 * Verify the Google Maps API key.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $api_key                 API key.
+	 * @param string $default_location_string Default location string.
+	 *
+	 * @return array
+	 */
+	public function verify_api_key( $api_key, $default_location_string = 'New York, NY' ) {
+
+		$verification_response = [
+			'success' => false,
+			'code'    => null,
+			'message' => null,
+		];
+
+		// Escape the default location string.
+		$default_location_string = esc_attr( $default_location_string );
+
+		$url = add_query_arg(
+			[
+				'address' => urlencode( $default_location_string ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode
+				'sensor'  => 'false',
+				'key'     => $api_key,
+			],
+			'https://maps.googleapis.com/maps/api/geocode/json'
+		);
+
+		$response = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			$verification_response['code']    = 'wp_error';
+			$verification_response['message'] = esc_html__( 'An error occurred while connecting to Google Maps Services.', 'sugar-calendar-lite' );
+
+			return $verification_response;
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+
+		if ( is_wp_error( $data ) ) {
+			$verification_response['code']    = 'wp_error';
+			$verification_response['message'] = esc_html__( 'An error occurred while verifying your API key.', 'sugar-calendar-lite' );
+
+			return $verification_response;
+		}
+
+		if ( $response['response']['code'] !== 200 ) {
+			$verification_response['code']    = 'http_error';
+			$verification_response['message'] = esc_html__(
+				'Unable to contact Google API service.',
+				'sugar-calendar-lite'
+			);
+
+			return $verification_response;
+		}
+
+		$data = json_decode( $data );
+
+		if ( empty( $data ) ) {
+
+			$verification_response['code']    = 'empty_response';
+			$verification_response['message'] = esc_html__( 'Something went wrong while verifying your API key.', 'sugar-calendar-lite' );
+
+			return $verification_response;
+
+		} elseif ( isset( $data->status ) && $data->status !== 'OK' ) {
+
+			$verification_response['code']    = esc_html( $data->status );
+			$verification_response['message'] = esc_html( $data->error_message );
+
+			return $verification_response;
+		}
+
+		// If we get here, the API key is valid.
+		$verification_response['success'] = true;
+		$verification_response['code']    = 'api_key_valid';
+		$verification_response['message'] = esc_html__( 'API key verified.', 'sugar-calendar-lite' );
+
+		return $verification_response;
+	}
+
+	/**
 	 * Retrieve coordinates for an address.
 	 *
 	 * Coordinates are cached using transients and a hash of the address
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Add check for API key.
 	 *
 	 * @param string $address       Address to geocode.
 	 * @param bool   $force_refresh Whether to force a refresh of the coordinates.
+	 *
+	 * @return array|string An array of coordinates or a string error message.
 	 */
 	public function get_coordinates( $address, $force_refresh = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh, Generic.Metrics.NestingLevel.MaxExceeded
+
+		// Check for API key.
+		if ( empty( $this->get_api_key() ) ) {
+			return esc_html__(
+				'Google Maps API key is missing.',
+				'sugar-calendar-lite'
+			);
+		}
 
 		// Create the transient hash.
 		$address_hash = 'scgm_' . md5( $address );
@@ -309,35 +425,35 @@ class Feature extends FeatureAbstract {
 			if ( $response['response']['code'] !== 200 ) {
 				return esc_html__(
 					'Unable to contact Google API service.',
-					'sugar-calendar'
+					'sugar-calendar-lite'
 				);
 			}
 
 			$data = json_decode( $data );
 
-			if ( empty( $data ) || $data->status !== 'OK' ) {
+			if ( empty( $data ) ) {
+				return esc_html__( 'Something went wrong while retrieving your map.', 'sugar-calendar-lite' );
+			} elseif ( isset( $data->status ) && $data->status !== 'OK' ) {
 
 				switch ( $data->status ) {
 					// phpcs:disable WPForms.Formatting.Switch.RemoveEmptyLineBefore, WPForms.Formatting.Switch.AddEmptyLineBefore, WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 					case 'ZERO_RESULTS':
-						return esc_html__( 'No location found for the entered address.', 'sugar-calendar' );
+						return esc_html__( 'No location found for the entered address.', 'sugar-calendar-lite' );
 
 					case 'INVALID_REQUEST':
-						return esc_html__( 'Invalid request. Did you enter an address?', 'sugar-calendar' );
+						return esc_html__( 'Invalid request. Did you enter an address?', 'sugar-calendar-lite' );
 
 					case 'REQUEST_DENIED':
 						return sprintf(
 						/* translators: %s: error message. */
 							esc_html__(
 								'Request Denied. %s',
-								'sugar-calendar'
+								'sugar-calendar-lite'
 							),
 							esc_js( $data->error_message )
 						);
 					// phpcs:enable WPForms.Formatting.Switch.RemoveEmptyLineBefore, WPForms.Formatting.Switch.AddEmptyLineBefore, WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 				}
-
-				return esc_html__( 'Something went wrong while retrieving your map.', 'sugar-calendar' );
 			}
 
 			$coordinates = $data->results[0]->geometry->location;

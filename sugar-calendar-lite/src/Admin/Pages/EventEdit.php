@@ -30,7 +30,7 @@ class EventEdit extends EventAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Edit Event', 'sugar-calendar' );
+		return esc_html__( 'Edit Event', 'sugar-calendar-lite' );
 	}
 
 	/**

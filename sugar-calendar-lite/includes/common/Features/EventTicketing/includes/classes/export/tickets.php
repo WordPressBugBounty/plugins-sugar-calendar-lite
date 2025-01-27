@@ -41,25 +41,25 @@ class Tickets_Export extends CSV_Export {
 		$retval = array(
 
 			// Ticket
-			'id'                  => esc_html__( 'Ticket ID',           'sugar-calendar' ),
-			'code'                => esc_html__( 'Ticket Code',         'sugar-calendar' ),
+			'id'                  => esc_html__( 'Ticket ID',           'sugar-calendar-lite' ),
+			'code'                => esc_html__( 'Ticket Code',         'sugar-calendar-lite' ),
 
 			// Order
-			'order_id'            => esc_html__( 'Order ID',            'sugar-calendar' ),
+			'order_id'            => esc_html__( 'Order ID',            'sugar-calendar-lite' ),
 
 			// Event
-			'event_id'            => esc_html__( 'Event ID',            'sugar-calendar' ),
-			'event_name'          => esc_html__( 'Event Name',          'sugar-calendar' ),
-			'event_start_date'    => esc_html__( 'Event Start Date',    'sugar-calendar' ),
-			'event_start_time'    => esc_html__( 'Event Start Time',    'sugar-calendar' ),
-			'event_end_date'      => esc_html__( 'Event End Date',      'sugar-calendar' ),
-			'event_end_time'      => esc_html__( 'Event End Time',      'sugar-calendar' ),
+			'event_id'            => esc_html__( 'Event ID',            'sugar-calendar-lite' ),
+			'event_name'          => esc_html__( 'Event Name',          'sugar-calendar-lite' ),
+			'event_start_date'    => esc_html__( 'Event Start Date',    'sugar-calendar-lite' ),
+			'event_start_time'    => esc_html__( 'Event Start Time',    'sugar-calendar-lite' ),
+			'event_end_date'      => esc_html__( 'Event End Date',      'sugar-calendar-lite' ),
+			'event_end_time'      => esc_html__( 'Event End Time',      'sugar-calendar-lite' ),
 
 			// Attendee
-			'attendee_id'         => esc_html__( 'Attendee ID',         'sugar-calendar' ),
-			'attendee_first_name' => esc_html__( 'Attendee First Name', 'sugar-calendar' ),
-			'attendee_last_name'  => esc_html__( 'Attendee Last Name',  'sugar-calendar' ),
-			'attendee_email'      => esc_html__( 'Attendee Email',      'sugar-calendar' )
+			'attendee_id'         => esc_html__( 'Attendee ID',         'sugar-calendar-lite' ),
+			'attendee_first_name' => esc_html__( 'Attendee First Name', 'sugar-calendar-lite' ),
+			'attendee_last_name'  => esc_html__( 'Attendee Last Name',  'sugar-calendar-lite' ),
+			'attendee_email'      => esc_html__( 'Attendee Email',      'sugar-calendar-lite' )
 		);
 
 		// Return

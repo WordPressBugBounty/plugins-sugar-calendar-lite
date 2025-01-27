@@ -452,7 +452,7 @@ class Feature extends FeatureAbstract {
 			// Receipt Page.
 			$receipt_page = wp_insert_post(
 				[
-					'post_title'     => esc_html__( 'Ticket Receipt', 'sugar-calendar' ),
+					'post_title'     => esc_html__( 'Ticket Receipt', 'sugar-calendar-lite' ),
 					'post_content'   => '[sc_event_tickets_receipt]',
 					'post_status'    => 'publish',
 					'post_author'    => $author_id,
@@ -469,7 +469,7 @@ class Feature extends FeatureAbstract {
 			// Tickets Page.
 			$ticket_page = wp_insert_post(
 				[
-					'post_title'     => esc_html__( 'Ticket Details', 'sugar-calendar' ),
+					'post_title'     => esc_html__( 'Ticket Details', 'sugar-calendar-lite' ),
 					'post_content'   => '[sc_event_tickets_details]',
 					'post_status'    => 'publish',
 					'post_author'    => $author_id,

@@ -7,18 +7,19 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	/**
 	 * Add method to JS Array object that only adds unique items.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 *
+	 * @param {array} arr The array to add the item to.
 	 * @param {mixed} item The item to add in the array.
 	 *
 	 * @return {Array}
 	 */
-	Array.prototype.uniquePush = function( item ) {
-		if ( ! this.includes( item ) ) {
-			this.push( item );
+	function pushUnique( arr, item ) {
+		if ( ! arr.includes( item ) ) {
+			arr.push( item );
 		}
 
-		return this;
+		return arr;
 	}
 
 	/**
@@ -547,7 +548,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	CalendarBlock.prototype.initDatePicker = function() {
 
 		if ( this.$datePicker !== undefined ) {
-			this.$datePicker.datepicker( 'destroy' );
+			this.$datePicker.scbootdatepicker( 'destroy' );
 		}
 
 		let minViewMode = 0;
@@ -556,7 +557,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			minViewMode = 1;
 		}
 
-		this.$datePicker.datepicker({
+		this.$datePicker.scbootdatepicker({
 			minViewMode: minViewMode,
 			maxViewMode: 2,
 			templates: {
@@ -574,7 +575,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			$month = this.$formContainer.find( 'input[name="sc_month"]' ),
 			$day = this.$formContainer.find( 'input[name="sc_day"]' );
 
-		this.$datePicker.datepicker( 'update', new Date( $year.val(), $month.val() - 1, $day.val() ) );
+		this.$datePicker.scbootdatepicker( 'update', new Date( $year.val(), $month.val() - 1, $day.val() ) );
 
 		this.$datePicker.on( 'changeDate', ( e ) => {
 
@@ -649,6 +650,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Initialize the controls.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Add venue filter trigger.
 	 */
 	CalendarBlock.prototype.initControls = function() {
 
@@ -682,6 +684,10 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		// Calendars selector.
 		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__cal' )
+			.on( 'change', this.controlEvents.onSelectCalendar.bind( this.controlEvents ) );
+
+		// Venues selector.
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue' )
 			.on( 'change', this.controlEvents.onSelectCalendar.bind( this.controlEvents ) );
 
 		// Day selector.
@@ -753,6 +759,24 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Get the venue IDs that are checked.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getVenuesIds = function() {
+		let venueIds = [];
+
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue:checked' )
+			.each( function() {
+				venueIds.push( $( this ).val() );
+			});
+
+		return venueIds;
+	}
+
+	/**
 	 * Get the calendar IDs that are filtered from block settings.
 	 *
 	 * @since 3.2.0
@@ -776,6 +800,29 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Get the venue IDs that are filtered from block settings.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getVenuesFilter = function() {
+		const $venueFilters = this.$formContainer.find( 'input[name="sc_venues_filter"]' );
+
+		if ( $venueFilters.length <= 0 ) {
+			return [];
+		}
+
+		const venueFilters = $venueFilters.val();
+
+		if ( venueFilters.length <= 0 ) {
+			return [];
+		}
+
+		return venueFilters.split( ',' );
+	}
+
+	/**
 	 * Get the display mode.
 	 *
 	 * @since 3.0.0
@@ -790,6 +837,8 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Update the calendar block.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Add accessibility label for previous and next left control buttons.
+	 * @since 3.5.0 Add `venues` and `venuesFilter` parameters.
 	 *
 	 * @param {boolean} updateDisplay Whether the request is updating the display mode.
 	 * @param {string} action         The action to perform, e.g., next_day, previous_day, etc.
@@ -807,8 +856,11 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		let that = this;
 		let calendarBlock = {
 			id: this.id,
+			attributes: this.$mainContainer.data( 'attributes' ),
 			calendars: this.getCalendarIds(),
 			calendarsFilter: this.getCalendarsFilter(),
+			venues: this.getVenuesIds(),
+			venuesFilter: this.getVenuesFilter(),
 			day: parseInt( this.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.$formContainer.find( 'input[name="sc_year"]' ).val() ),
@@ -836,6 +888,14 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 					that.$formContainer.find( 'input[name="sc_day"]' ).val( response.data.date.day );
 					that.$formContainer.find( 'input[name="sc_month"]' ).val( response.data.date.month );
 					that.$formContainer.find( 'input[name="sc_year"]' ).val( response.data.date.year );
+
+					// Update the left control labels.
+					that.$mainContainer
+						.find( '.sugar-calendar-block__controls__left__pagination__prev' )
+						.attr( 'aria-label', response.data.control_labels.prev );
+					that.$mainContainer
+						.find( '.sugar-calendar-block__controls__left__pagination__next' )
+						.attr( 'aria-label', response.data.control_labels.next );
 
 					let navToCurrentLabel = '';
 
@@ -899,7 +959,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 					if ( response.data.is_update_display ) {
 						that.initDatePicker();
 					} else {
-						that.$datePicker.datepicker( 'update', new Date( response.data.date.year, response.data.date.month - 1, response.data.date.day ) );
+						that.$datePicker.scbootdatepicker( 'update', new Date( response.data.date.year, response.data.date.month - 1, response.data.date.day ) );
 					}
 
 					if ( typeof SCTimeZones !== 'undefined' ) {
@@ -1084,7 +1144,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 						$( time_of_day ).filter( $evt.data( 'daydiv' ) ).length > 0
 					) {
 						if ( should_return_events_ids ) {
-							event_ids_to_display.uniquePush( $evt.data( 'eventid' ) );
+							event_ids_to_display = pushUnique( event_ids_to_display, $evt.data( 'eventid' ) );
 						} else {
 							$evt.removeClass( 'sugar-calendar-block__calendar-month__cell-hide' );
 						}

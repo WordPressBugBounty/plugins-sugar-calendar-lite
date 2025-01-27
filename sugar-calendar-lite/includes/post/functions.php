@@ -131,7 +131,7 @@ function sugar_calendar_get_event_duration( $post = false ) {
 
 		// 1 day
 		if ( $event->start_date( 'd' ) === $event->end_date( 'd' ) ) {
-			$retval .= esc_html__( 'All Day', 'sugar-calendar' );
+			$retval .= esc_html__( 'All Day', 'sugar-calendar-lite' );
 
 			// More than 1 day
 		} else {

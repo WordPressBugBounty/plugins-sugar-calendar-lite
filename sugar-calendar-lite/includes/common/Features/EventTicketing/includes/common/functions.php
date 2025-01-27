@@ -143,19 +143,19 @@ function order_status_label( $status = '' ) {
 	switch ( strtolower( $status ) ) {
 
 		case 'all' :
-			$label = esc_html__( 'All','sugar-calendar' );
+			$label = esc_html__( 'All', 'sugar-calendar-lite' );
 			break;
 
 		case 'pending' :
-			$label = esc_html__( 'Pending', 'sugar-calendar' );
+			$label = esc_html__( 'Pending', 'sugar-calendar-lite' );
 			break;
 
 		case 'refunded' :
-			$label = esc_html__( 'Refunded', 'sugar-calendar' );
+			$label = esc_html__( 'Refunded', 'sugar-calendar-lite' );
 			break;
 
 		case 'paid' :
-			$label = esc_html__( 'Paid', 'sugar-calendar' );
+			$label = esc_html__( 'Paid', 'sugar-calendar-lite' );
 			break;
 
 		default :
@@ -551,60 +551,60 @@ function delete_discount( $discount_id = 0 ) {
 function get_currencies() {
 
 	$currencies = array(
-		'USD' => esc_html__( 'US Dollar', 'sugar-calendar' ),
-		'EUR' => esc_html__( 'Euro', 'sugar-calendar' ),
-		'ARS' => esc_html__( 'Argentine Peso', 'sugar-calendar' ),
-		'AUD' => esc_html__( 'Australian Dollar', 'sugar-calendar' ),
-		'BDT' => esc_html__( 'Bangladeshi Taka', 'sugar-calendar' ),
-		'BTC' => esc_html__( 'Bitcoin', 'sugar-calendar' ),
-		'BRL' => esc_html__( 'Brazilian Real', 'sugar-calendar' ),
-		'BGN' => esc_html__( 'Bulgarian Lev', 'sugar-calendar' ),
-		'CAD' => esc_html__( 'Canadian Dollar', 'sugar-calendar' ),
-		'CLP' => esc_html__( 'Chilean Peso', 'sugar-calendar' ),
-		'CNY' => esc_html__( 'Chinese Yuan', 'sugar-calendar' ),
-		'COP' => esc_html__( 'Colombian Peso', 'sugar-calendar' ),
-		'HRK' => esc_html__( 'Croatia Kuna', 'sugar-calendar' ),
-		'CZK' => esc_html__( 'Czech Koruna', 'sugar-calendar' ),
-		'DKK' => esc_html__( 'Danish Krone', 'sugar-calendar' ),
-		'DOP' => esc_html__( 'Dominican Peso', 'sugar-calendar' ),
-		'EGP' => esc_html__( 'Egyptian Pound', 'sugar-calendar' ),
-		'HKD' => esc_html__( 'Hong Kong Dollar', 'sugar-calendar' ),
-		'HUF' => esc_html__( 'Hungarian Forint', 'sugar-calendar' ),
-		'ISK' => esc_html__( 'Icelandic Krona', 'sugar-calendar' ),
-		'IDR' => esc_html__( 'Indonesia Rupiah', 'sugar-calendar' ),
-		'INR' => esc_html__( 'Indian Rupee', 'sugar-calendar' ),
-		'ILS' => esc_html__( 'Israeli Shekel', 'sugar-calendar' ),
-		'IRR' => esc_html__( 'Iranian Rial', 'sugar-calendar' ),
-		'JPY' => esc_html__( 'Japanese Yen', 'sugar-calendar' ),
-		'KES' => esc_html__( 'Kenyan Shilling', 'sugar-calendar' ),
-		'KZT' => esc_html__( 'Kazakhstani Tenge', 'sugar-calendar' ),
-		'KIP' => esc_html__( 'Lao Kip', 'sugar-calendar' ),
-		'MYR' => esc_html__( 'Malaysian Ringgit', 'sugar-calendar' ),
-		'MXN' => esc_html__( 'Mexican Peso', 'sugar-calendar' ),
-		'NPR' => esc_html__( 'Nepali Rupee', 'sugar-calendar' ),
-		'NGN' => esc_html__( 'Nigerian Naira', 'sugar-calendar' ),
-		'NOK' => esc_html__( 'Norwegian Krone', 'sugar-calendar' ),
-		'NZD' => esc_html__( 'New Zealand Dollar', 'sugar-calendar' ),
-		'PKR' => esc_html__( 'Pakistani Rupee', 'sugar-calendar' ),
-		'PYG' => esc_html__( 'Paraguayan Guaraní', 'sugar-calendar' ),
-		'PHP' => esc_html__( 'Philippine Peso', 'sugar-calendar' ),
-		'PLN' => esc_html__( 'Polish Zloty', 'sugar-calendar' ),
-		'GBP' => esc_html__( 'Pounds Sterling', 'sugar-calendar' ),
-		'RON' => esc_html__( 'Romanian Leu', 'sugar-calendar' ),
-		'RUB' => esc_html__( 'Russian Ruble', 'sugar-calendar' ),
-		'SAR' => esc_html__( 'Saudi Arabian Riyal', 'sugar-calendar' ),
-		'SGD' => esc_html__( 'Singapore Dollar', 'sugar-calendar' ),
-		'ZAR' => esc_html__( 'South African Rand', 'sugar-calendar' ),
-		'KRW' => esc_html__( 'South Korean Won', 'sugar-calendar' ),
-		'SEK' => esc_html__( 'Swedish Krona', 'sugar-calendar' ),
-		'CHF' => esc_html__( 'Swiss Franc', 'sugar-calendar' ),
-		'TWD' => esc_html__( 'Taiwan New Dollar', 'sugar-calendar' ),
-		'THB' => esc_html__( 'Thai Baht', 'sugar-calendar' ),
-		'TND' => esc_html__( 'Tunisian Dinar', 'sugar-calendar' ),
-		'TRY' => esc_html__( 'Turkish Lira', 'sugar-calendar' ),
-		'AED' => esc_html__( 'United Arab Emirates Dirham', 'sugar-calendar' ),
-		'UAH' => esc_html__( 'Ukrainian Hryvnia', 'sugar-calendar' ),
-		'VND' => esc_html__( 'Vietnamese Dong', 'sugar-calendar' ),
+		'USD' => esc_html__( 'US Dollar', 'sugar-calendar-lite' ),
+		'EUR' => esc_html__( 'Euro', 'sugar-calendar-lite' ),
+		'ARS' => esc_html__( 'Argentine Peso', 'sugar-calendar-lite' ),
+		'AUD' => esc_html__( 'Australian Dollar', 'sugar-calendar-lite' ),
+		'BDT' => esc_html__( 'Bangladeshi Taka', 'sugar-calendar-lite' ),
+		'BTC' => esc_html__( 'Bitcoin', 'sugar-calendar-lite' ),
+		'BRL' => esc_html__( 'Brazilian Real', 'sugar-calendar-lite' ),
+		'BGN' => esc_html__( 'Bulgarian Lev', 'sugar-calendar-lite' ),
+		'CAD' => esc_html__( 'Canadian Dollar', 'sugar-calendar-lite' ),
+		'CLP' => esc_html__( 'Chilean Peso', 'sugar-calendar-lite' ),
+		'CNY' => esc_html__( 'Chinese Yuan', 'sugar-calendar-lite' ),
+		'COP' => esc_html__( 'Colombian Peso', 'sugar-calendar-lite' ),
+		'HRK' => esc_html__( 'Croatia Kuna', 'sugar-calendar-lite' ),
+		'CZK' => esc_html__( 'Czech Koruna', 'sugar-calendar-lite' ),
+		'DKK' => esc_html__( 'Danish Krone', 'sugar-calendar-lite' ),
+		'DOP' => esc_html__( 'Dominican Peso', 'sugar-calendar-lite' ),
+		'EGP' => esc_html__( 'Egyptian Pound', 'sugar-calendar-lite' ),
+		'HKD' => esc_html__( 'Hong Kong Dollar', 'sugar-calendar-lite' ),
+		'HUF' => esc_html__( 'Hungarian Forint', 'sugar-calendar-lite' ),
+		'ISK' => esc_html__( 'Icelandic Krona', 'sugar-calendar-lite' ),
+		'IDR' => esc_html__( 'Indonesia Rupiah', 'sugar-calendar-lite' ),
+		'INR' => esc_html__( 'Indian Rupee', 'sugar-calendar-lite' ),
+		'ILS' => esc_html__( 'Israeli Shekel', 'sugar-calendar-lite' ),
+		'IRR' => esc_html__( 'Iranian Rial', 'sugar-calendar-lite' ),
+		'JPY' => esc_html__( 'Japanese Yen', 'sugar-calendar-lite' ),
+		'KES' => esc_html__( 'Kenyan Shilling', 'sugar-calendar-lite' ),
+		'KZT' => esc_html__( 'Kazakhstani Tenge', 'sugar-calendar-lite' ),
+		'KIP' => esc_html__( 'Lao Kip', 'sugar-calendar-lite' ),
+		'MYR' => esc_html__( 'Malaysian Ringgit', 'sugar-calendar-lite' ),
+		'MXN' => esc_html__( 'Mexican Peso', 'sugar-calendar-lite' ),
+		'NPR' => esc_html__( 'Nepali Rupee', 'sugar-calendar-lite' ),
+		'NGN' => esc_html__( 'Nigerian Naira', 'sugar-calendar-lite' ),
+		'NOK' => esc_html__( 'Norwegian Krone', 'sugar-calendar-lite' ),
+		'NZD' => esc_html__( 'New Zealand Dollar', 'sugar-calendar-lite' ),
+		'PKR' => esc_html__( 'Pakistani Rupee', 'sugar-calendar-lite' ),
+		'PYG' => esc_html__( 'Paraguayan Guaraní', 'sugar-calendar-lite' ),
+		'PHP' => esc_html__( 'Philippine Peso', 'sugar-calendar-lite' ),
+		'PLN' => esc_html__( 'Polish Zloty', 'sugar-calendar-lite' ),
+		'GBP' => esc_html__( 'Pounds Sterling', 'sugar-calendar-lite' ),
+		'RON' => esc_html__( 'Romanian Leu', 'sugar-calendar-lite' ),
+		'RUB' => esc_html__( 'Russian Ruble', 'sugar-calendar-lite' ),
+		'SAR' => esc_html__( 'Saudi Arabian Riyal', 'sugar-calendar-lite' ),
+		'SGD' => esc_html__( 'Singapore Dollar', 'sugar-calendar-lite' ),
+		'ZAR' => esc_html__( 'South African Rand', 'sugar-calendar-lite' ),
+		'KRW' => esc_html__( 'South Korean Won', 'sugar-calendar-lite' ),
+		'SEK' => esc_html__( 'Swedish Krona', 'sugar-calendar-lite' ),
+		'CHF' => esc_html__( 'Swiss Franc', 'sugar-calendar-lite' ),
+		'TWD' => esc_html__( 'Taiwan New Dollar', 'sugar-calendar-lite' ),
+		'THB' => esc_html__( 'Thai Baht', 'sugar-calendar-lite' ),
+		'TND' => esc_html__( 'Tunisian Dinar', 'sugar-calendar-lite' ),
+		'TRY' => esc_html__( 'Turkish Lira', 'sugar-calendar-lite' ),
+		'AED' => esc_html__( 'United Arab Emirates Dirham', 'sugar-calendar-lite' ),
+		'UAH' => esc_html__( 'Ukrainian Hryvnia', 'sugar-calendar-lite' ),
+		'VND' => esc_html__( 'Vietnamese Dong', 'sugar-calendar-lite' ),
 	);
 
 	/**
@@ -1096,7 +1096,7 @@ function send_order_receipt_email( $order_id = 0 ) {
 	$emails              = new \Sugar_Calendar\AddOn\Ticketing\Emails;
 	$emails->object_id   = $order_id;
 	$emails->object_type = 'order';
-	$emails->heading     = esc_html__( 'Order Receipt', 'sugar-calendar' );
+	$emails->heading     = esc_html__( 'Order Receipt', 'sugar-calendar-lite' );
 
 	return $emails->send(
 		$order->email,
@@ -1133,7 +1133,7 @@ function send_ticket_email( $ticket_id = 0 ) {
 	$emails              = new \Sugar_Calendar\AddOn\Ticketing\Emails;
 	$emails->object_id   = $ticket_id;
 	$emails->object_type = 'ticket';
-	$emails->heading     = esc_html__( 'Event Ticket', 'sugar-calendar' );
+	$emails->heading     = esc_html__( 'Event Ticket', 'sugar-calendar-lite' );
 
 	return $emails->send(
 		$attendee->email,
@@ -1282,8 +1282,8 @@ function get_email_tag_tickets( $order_id = 0 ) {
 			}
 
 			$retval .= '<div>';
-				$retval .= '<a href="' . wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'print', 'ticket_code' => $ticket->code ), $home ), $ticket->code ) . '">' . esc_html__( 'Print', 'sugar-calendar' ) . '</a>';
-				$retval .= '&nbsp;|&nbsp;<a href="' . add_query_arg( array( 'order_id' => $order_id, 'ticket_code' => $ticket->code ), $link ) . '">' . esc_html__( 'View', 'sugar-calendar' ) . '</a>';
+				$retval .= '<a href="' . wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'print', 'ticket_code' => $ticket->code ), $home ), $ticket->code ) . '">' . esc_html__( 'Print', 'sugar-calendar-lite' ) . '</a>';
+				$retval .= '&nbsp;|&nbsp;<a href="' . add_query_arg( array( 'order_id' => $order_id, 'ticket_code' => $ticket->code ), $link ) . '">' . esc_html__( 'View', 'sugar-calendar-lite' ) . '</a>';
 			$retval .= '</div>';
 		$retval .= '</li>';
 	}

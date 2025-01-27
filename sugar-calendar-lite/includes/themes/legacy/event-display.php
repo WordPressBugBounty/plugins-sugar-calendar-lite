@@ -131,7 +131,7 @@ function sc_add_date_time_details( $post_id = 0 ) {
 
 		<div class="sc_event_date"><?php
 
-			esc_html_e( 'Date:', 'sugar-calendar' );
+			esc_html_e( 'Date:', 'sugar-calendar-lite' );
 
 			echo ' ' . $start_date; // Contains HTML - do not escape
 
@@ -144,7 +144,7 @@ function sc_add_date_time_details( $post_id = 0 ) {
 
 		// Set to all-day and noop the end time
 		if ( ! empty( $all_day ) ) :
-			$start_time = esc_html__( 'All-day', 'sugar-calendar' );
+			$start_time = esc_html__( 'All-day', 'sugar-calendar-lite' );
 			$end_time   = false;
 		endif;
 
@@ -177,7 +177,7 @@ function sc_add_date_time_details( $post_id = 0 ) {
 		?><div class="sc_event_time">
 			<span class="sc_event_start_time"><?php
 
-				esc_html_e( 'Time:', 'sugar-calendar' ); ?>
+				esc_html_e( 'Time:', 'sugar-calendar-lite' ); ?>
 
 				<time datetime="<?php echo esc_attr( $dt ); ?>" title="<?php echo esc_attr( $dt ); ?>" data-timezone="<?php echo esc_attr( $tz ); ?>"><?php
 
@@ -220,7 +220,7 @@ function sc_add_date_time_details( $post_id = 0 ) {
 
 				<span class="sc_event_time_sep"><?php
 
-					esc_html_e( 'to', 'sugar-calendar' );
+					esc_html_e( 'to', 'sugar-calendar-lite' );
 
 				?></span>
 
@@ -258,7 +258,7 @@ function sc_add_location_details( $post_id = 0 ) {
 
 		<div class="sc_event_location"><?php
 
-			echo esc_html__( 'Location:', 'sugar-calendar' ) . ' ' . esc_html( $location );
+			echo esc_html__( 'Location:', 'sugar-calendar-lite' ) . ' ' . esc_html( $location );
 
 		?></div>
 

@@ -37,39 +37,39 @@ function updated_messages( $messages = array() ) {
 	// Preview post link
 	$preview_post_link_html = sprintf( ' <a target="_blank" href="%1$s">%2$s</a>',
 		esc_url( $preview_url ),
-		esc_html__( 'Preview event', 'sugar-calendar' )
+		esc_html__( 'Preview event', 'sugar-calendar-lite' )
 	);
 
 	// Scheduled post preview link
 	$scheduled_post_link_html = sprintf( ' <a target="_blank" href="%1$s">%2$s</a>',
 		esc_url( $permalink ),
-		esc_html__( 'Preview event', 'sugar-calendar' )
+		esc_html__( 'Preview event', 'sugar-calendar-lite' )
 	);
 
 	// View post link
 	$view_post_link_html = sprintf( ' <a href="%1$s">%2$s</a>',
 		esc_url( $permalink ),
-		esc_html__( 'View event', 'sugar-calendar' )
+		esc_html__( 'View event', 'sugar-calendar-lite' )
 	);
 
 	// Scheduled (uses WordPress site locale & timezone)
-	$format         = esc_html_x( 'M j, Y @ H:i', 'Date formatting', 'sugar-calendar' );
+	$format         = 'M j, Y @ H:i';
 	$timestamp      = strtotime( $post->post_date );
 	$scheduled_date = date_i18n( $format, $timestamp );
 
 	// Add post type to messages array
 	$messages[ sugar_calendar_get_event_post_type_id() ] = array(
 		0  => '', // Unused. Messages start at index 1.
-		1  => esc_html__( 'Event updated.', 'sugar-calendar' ) . $view_post_link_html,
-		4  => esc_html__( 'Event updated.', 'sugar-calendar' ),
+		1  => esc_html__( 'Event updated.', 'sugar-calendar-lite' ) . $view_post_link_html,
+		4  => esc_html__( 'Event updated.', 'sugar-calendar-lite' ),
 		5  => isset( $_GET['revision'] )
-			? sprintf( esc_html__( 'Event restored to revision from %s.', 'sugar-calendar' ), wp_post_revision_title( (int) $_GET['revision'], false ) )
+			? sprintf( esc_html__( 'Event restored to revision from %s.', 'sugar-calendar-lite' ), wp_post_revision_title( (int) $_GET['revision'], false ) )
 			: false,
-		6  => esc_html__( 'Event created.', 'sugar-calendar' ) . $view_post_link_html,
-		7  => esc_html__( 'Event saved.', 'sugar-calendar' ),
-		8  => esc_html__( 'Event submitted.', 'sugar-calendar' ) . $preview_post_link_html,
-		9  => sprintf( esc_html__( 'Event scheduled for: %s.', 'sugar-calendar' ), '<strong>' . $scheduled_date . '</strong>' ) . $scheduled_post_link_html,
-		10 => esc_html__( 'Event draft updated.', 'sugar-calendar' ) . $preview_post_link_html,
+		6  => esc_html__( 'Event created.', 'sugar-calendar-lite' ) . $view_post_link_html,
+		7  => esc_html__( 'Event saved.', 'sugar-calendar-lite' ),
+		8  => esc_html__( 'Event submitted.', 'sugar-calendar-lite' ) . $preview_post_link_html,
+		9  => sprintf( esc_html__( 'Event scheduled for: %s.', 'sugar-calendar-lite' ), '<strong>' . $scheduled_date . '</strong>' ) . $scheduled_post_link_html,
+		10 => esc_html__( 'Event draft updated.', 'sugar-calendar-lite' ) . $preview_post_link_html,
 	);
 
 	// Return

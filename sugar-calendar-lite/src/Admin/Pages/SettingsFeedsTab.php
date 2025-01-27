@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
+use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 
@@ -11,18 +12,6 @@ use Sugar_Calendar\Helpers\UI;
  * @since 3.0.0
  */
 class SettingsFeedsTab extends Settings {
-
-	/**
-	 * Page slug.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @return string
-	 */
-	public static function get_slug() {
-
-		return 'sc-settings';
-	}
 
 	/**
 	 * Page tab slug.
@@ -45,7 +34,7 @@ class SettingsFeedsTab extends Settings {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Feeds', 'sugar-calendar' );
+		return esc_html__( 'Feeds', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -74,24 +63,24 @@ class SettingsFeedsTab extends Settings {
 
             <div class="sugar-calendar-admin-content">
 
-                <h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar' ); ?></h1>
+                <h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
 				<?php
 
 				UI::heading(
 					[
-						'title'       => esc_html__( 'Available Feeds', 'sugar-calendar' ),
-						'description' => esc_html__( 'Select the feeds to show on Calendars, Event Archives, and Single Events. (WebCal and Direct are not used for Single Events).', 'sugar-calendar' ),
+						'title'       => esc_html__( 'Available Feeds', 'sugar-calendar-lite' ),
+						'description' => esc_html__( 'Select the feeds to show on Calendars, Event Archives, and Single Events. (WebCal and Direct are not used for Single Events).', 'sugar-calendar-lite' ),
 						'class'       => 'sugar-calendar--pro-only',
 					]
 				);
 
 				$feeds = [
-					'google'    => esc_html__( 'Google Calendar', 'sugar-calendar' ),
-					'microsoft' => esc_html__( 'Microsoft Outlook', 'sugar-calendar' ),
-					'apple'     => esc_html__( 'Apple Calendar', 'sugar-calendar' ),
-					'webcal'    => esc_html__( 'WebCal', 'sugar-calendar' ),
-					'download'  => esc_html__( 'Download', 'sugar-calendar' ),
-					'direct'    => esc_html__( 'Direct', 'sugar-calendar' ),
+					'google'    => esc_html__( 'Google Calendar', 'sugar-calendar-lite' ),
+					'microsoft' => esc_html__( 'Microsoft Outlook', 'sugar-calendar-lite' ),
+					'apple'     => esc_html__( 'Apple Calendar', 'sugar-calendar-lite' ),
+					'webcal'    => esc_html__( 'WebCal', 'sugar-calendar-lite' ),
+					'download'  => esc_html__( 'Download', 'sugar-calendar-lite' ),
+					'direct'    => esc_html__( 'Direct', 'sugar-calendar-lite' ),
 				];
 
 				ob_start();
@@ -128,7 +117,7 @@ class SettingsFeedsTab extends Settings {
 					<?php
 					UI::button(
 						[
-							'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar' ),
+							'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
 							'size'   => 'lg',
 							'link'   => esc_url( Helpers::get_upgrade_link( [ 'medium' => 'settings-feeds', 'content' => 'Upgrade to Sugar Calendar Pro' ] ) ),
 							'target' => '_blank',

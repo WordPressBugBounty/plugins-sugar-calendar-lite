@@ -147,9 +147,9 @@ class Block extends AbstractBlock {
 	public function get_display_options() {
 
 		return [
-			'list'  => esc_html__( 'List', 'sugar-calendar' ),
-			'grid'  => esc_html__( 'Grid', 'sugar-calendar' ),
-			'plain' => esc_html__( 'Plain', 'sugar-calendar' ),
+			'list'  => esc_html__( 'List', 'sugar-calendar-lite' ),
+			'grid'  => esc_html__( 'Grid', 'sugar-calendar-lite' ),
+			'plain' => esc_html__( 'Plain', 'sugar-calendar-lite' ),
 		];
 	}
 
@@ -239,7 +239,31 @@ class Block extends AbstractBlock {
 	 */
 	public function get_current_pagination_display() {
 
-		return __( 'This Week', 'sugar-calendar' );
+		return __( 'This Week', 'sugar-calendar-lite' );
+	}
+
+	/**
+	 * Get the next pagination text.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return string
+	 */
+	public function get_next_pagination_display() {
+
+		return __( 'Next Week', 'sugar-calendar-lite' );
+	}
+
+	/**
+	 * Get the previous pagination text.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return string
+	 */
+	public function get_previous_pagination_display() {
+
+		return __( 'Previous Week', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -360,10 +384,10 @@ class Block extends AbstractBlock {
 			||
 			! $this->should_group_events_by_week()
 		) {
-			return __( 'There are no events scheduled that match your criteria.', 'sugar-calendar' );
+			return __( 'There are no events scheduled that match your criteria.', 'sugar-calendar-lite' );
 		}
 
-		return __( 'There are no events scheduled this week.', 'sugar-calendar' );
+		return __( 'There are no events scheduled this week.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -466,6 +490,10 @@ class Block extends AbstractBlock {
 			$calendar_slugs = implode( ',', $calendar_slugs_array );
 		}
 
+		// List of venues.
+		$venues    = $this->get_venues();
+		$venue_ids = ! empty( $venues ) ? implode( ',', $venues ) : '';
+
 		// Search term if any.
 		$search_term = $this->get_search_term();
 
@@ -499,13 +527,14 @@ class Block extends AbstractBlock {
 		 * Whether to use transient for upcoming events.
 		 *
 		 * @since 3.4.0
+		 * @since 3.5.0 Add multiday grouping.
 		 *
 		 * @param bool  $use_transient Whether to use transient for upcoming events.
 		 * @param array $attributes    The block attributes.
 		 */
 		$use_transient = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_event_list_block_upcoming_events_use_transient',
-			true,
+			false,
 			$attributes
 		);
 
@@ -550,6 +579,7 @@ class Block extends AbstractBlock {
 		$events_list = Helpers::get_upcoming_events_list_with_recurring(
 			$max_number_of_events,
 			$calendar_slugs,
+			$venue_ids,
 			$search_term
 		);
 
@@ -579,6 +609,7 @@ class Block extends AbstractBlock {
 		$displayed_event_count = 0;
 		$last_event            = null;
 		$is_last_page          = false;
+		$multi_day_event_ids   = [];
 
 		$offset = ( $page - 1 ) * $events_per_page;
 
@@ -611,6 +642,24 @@ class Block extends AbstractBlock {
 
 			// Loop event singles.
 			foreach ( $event_singles as $event_single ) {
+
+				// Check if it's a multi-day event and has already been added.
+				if (
+					$event_single->is_multi()
+					&&
+					in_array(
+						$event_single->id,
+						$multi_day_event_ids,
+						true
+					)
+				) {
+					continue;
+				}
+
+				// Mark multi-day event as added.
+				if ( $event_single->is_multi() ) {
+					$multi_day_event_ids[] = $event_single->id;
+				}
 
 				if ( $event_count < $offset ) {
 

@@ -97,7 +97,7 @@ function get_subsection( $section = 'main', $subsection = '' ) {
 	// Default
 	$default = array(
 		get_main_section_id() => array(
-			'name' => esc_html__( 'General', 'sugar-calendar' ),
+			'name' => esc_html__( 'General', 'sugar-calendar-lite' ),
 		),
 	);
 

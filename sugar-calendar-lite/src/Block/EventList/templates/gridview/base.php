@@ -50,7 +50,17 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 				class="sugar-calendar-event-list-block__gridview__event">
 				<div class="sugar-calendar-event-list-block__gridview__event__body">
 					<?php
-					$event_image = get_the_post_thumbnail_url( $event->object_id );
+					$event_image = get_the_post_thumbnail_url(
+						$event->object_id,
+						/**
+						 * Filter the size of the event image in the Event List block (grid view).
+						 *
+						 * @since 3.5.0
+						 *
+						 * @param string $size Image size. Accepts any registered image size name, or an array of width and height values in pixels (in that order).
+						 */
+						apply_filters( 'sugar_calendar_block_list_gridview_image_size', 'medium' )
+					);
 
 					if ( $event_view->should_display_featured_image() && $event_image ) {
 						?>

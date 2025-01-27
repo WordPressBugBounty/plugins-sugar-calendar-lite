@@ -93,8 +93,8 @@ final class Requirements_Check {
 		$this->file = $main_file;
 		$this->base = plugin_basename( $this->file );
 
-		// Always load translations
-		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		// Always load translations.
+		add_action( 'init', [ $this, 'load_textdomain' ] );
 
 		// Load or quit
 		$this->met()
@@ -179,6 +179,8 @@ final class Requirements_Check {
 		// Add the cron jobs
 		sugar_calendar_cron_hook( $this->is_network_wide() );
 
+		set_transient( 'sugar_calendar_just_activated', true, 60 );
+
 		// Add transient to trigger redirect to the Welcome page.
 		set_transient( 'sugar_calendar_activation_redirect', true, 30 );
 	}
@@ -223,7 +225,7 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_text() {
-		esc_html_e( 'This plugin is not fully active.', 'sugar-calendar' );
+		esc_html_e( 'This plugin is not fully active.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -233,7 +235,7 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_description_text() {
-		return esc_html__( 'Requires %s (%s), but (%s) is installed.', 'sugar-calendar' );
+		return esc_html__( 'Requires %s (%s), but (%s) is installed.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -243,7 +245,7 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_missing_text() {
-		return esc_html__( 'Requires %s (%s), but it appears to be missing.', 'sugar-calendar' );
+		return esc_html__( 'Requires %s (%s), but it appears to be missing.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -253,7 +255,7 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_link() {
-		return esc_html__( 'Requirements', 'sugar-calendar' );
+		return esc_html__( 'Requirements', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -263,7 +265,7 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_label() {
-		return esc_html__( 'Sugar Calendar Requirements', 'sugar-calendar' );
+		return esc_html__( 'Sugar Calendar Requirements', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -556,9 +558,11 @@ final class Requirements_Check {
 	 * Plugin specific text-domain loader.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return void
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'sugar-calendar' );
+
+		load_plugin_textdomain( 'sugar-calendar-lite' );
 	}
 }

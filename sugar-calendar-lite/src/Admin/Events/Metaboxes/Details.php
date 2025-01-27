@@ -32,7 +32,7 @@ class Details implements MetaboxInterface {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'Details', 'sugar-calendar' );
+		return esc_html__( 'Details', 'sugar-calendar-lite' );
 	}
 
 	/**

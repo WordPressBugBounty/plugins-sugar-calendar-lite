@@ -138,7 +138,7 @@ class Events {
 
 			// Add an error notice.
 			WP::add_admin_notice(
-				__( 'Event name is required.', 'sugar-calendar' ),
+				__( 'Event name is required.', 'sugar-calendar-lite' ),
 				WP::ADMIN_NOTICE_ERROR
 			);
 		}

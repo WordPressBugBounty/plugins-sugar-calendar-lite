@@ -25,17 +25,17 @@ function register_page() {
 	// Add an invisible upgrades page
 	add_submenu_page(
 		null,
-		esc_html__( 'Sugar Calendar Upgrade', 'sugar-calendar' ),
-		esc_html__( 'Sugar Calendar Upgrade', 'sugar-calendar' ),
+		esc_html__( 'Sugar Calendar Upgrade', 'sugar-calendar-lite' ),
+		esc_html__( 'Sugar Calendar Upgrade', 'sugar-calendar-lite' ),
 		'manage_options',
 		'sc-upgrades',
 		'Sugar_Calendar\\Admin\\Upgrades\\page'
 	);
 
 	// Labels
-	$menu_name    = sugar_calendar_get_post_type_label( $post_type, 'menu_name', esc_html__( 'Calendar', 'sugar-calendar' ) );
-	$submenu_name = sugar_calendar_get_post_type_label( $post_type, 'submenu_name', esc_html__( 'Calendar', 'sugar-calendar' ) );
-	$add_new      = sugar_calendar_get_post_type_label( $post_type, 'add_new', esc_html__( 'Add New', 'sugar-calendar' ) );
+	$menu_name    = sugar_calendar_get_post_type_label( $post_type, 'menu_name', esc_html__( 'Calendar', 'sugar-calendar-lite' ) );
+	$submenu_name = sugar_calendar_get_post_type_label( $post_type, 'submenu_name', esc_html__( 'Calendar', 'sugar-calendar-lite' ) );
+	$add_new      = sugar_calendar_get_post_type_label( $post_type, 'add_new', esc_html__( 'Add New', 'sugar-calendar-lite' ) );
 
 	// Default hooks array
 	$hooks = array();
@@ -98,7 +98,7 @@ function register_page() {
 function add_pointers() {
 
 	wp_localize_script( 'wp-pointer', 'wpPointerL10n', array(
-		'dismiss' => esc_html__( 'Close', 'sugar-calendar' ),
+		'dismiss' => esc_html__( 'Close', 'sugar-calendar-lite' ),
 	) );
 }
 

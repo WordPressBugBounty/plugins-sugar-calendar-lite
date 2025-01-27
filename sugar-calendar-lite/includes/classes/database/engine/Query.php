@@ -426,13 +426,12 @@ class Query extends Base {
 	 * Set default query vars based on columns.
 	 *
 	 * @since 1.0.0
+	 * @since 3.5.0 Used a fixed string instead of a dynamic as the query var default.
 	 */
 	private function set_query_var_defaults() {
 
 		// Default query variable value
-		$this->query_var_default_value = function_exists( 'random_bytes' )
-			? $this->apply_prefix( bin2hex( random_bytes( 18 ) ) )
-			: $this->apply_prefix( uniqid( '_', true ) );
+		$this->query_var_default_value = $this->apply_prefix( md5( 'sugar_calendar' ) );
 
 		// Get the primary column name
 		$primary = $this->get_primary_column_name();
@@ -722,10 +721,11 @@ class Query extends Base {
 	 * Return the literal table name (with prefix) from the database interface.
 	 *
 	 * @since 1.0.0
+	 * @since 3.5.0 Changed to public.
 	 *
 	 * @return string
 	 */
-	private function get_table_name() {
+	public function get_table_name() {
 		return $this->get_db()->{$this->table_name};
 	}
 

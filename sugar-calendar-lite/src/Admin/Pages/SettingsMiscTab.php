@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
+use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
@@ -12,18 +13,6 @@ use Sugar_Calendar\Options;
  * @since 3.0.0
  */
 class SettingsMiscTab extends Settings {
-
-	/**
-	 * Page slug.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @return string
-	 */
-	public static function get_slug() {
-
-		return 'sc-settings';
-	}
 
 	/**
 	 * Page tab slug.
@@ -46,7 +35,7 @@ class SettingsMiscTab extends Settings {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Misc', 'sugar-calendar' );
+		return esc_html__( 'Misc', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -72,7 +61,7 @@ class SettingsMiscTab extends Settings {
 
 		UI::heading(
 			[
-				'title' => esc_html__( 'Miscellaneous', 'sugar-calendar' ),
+				'title' => esc_html__( 'Miscellaneous', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -84,8 +73,8 @@ class SettingsMiscTab extends Settings {
 				'id'          => 'hide_announcements',
 				'name'        => 'hide_announcements',
 				'value'       => $hide_announcements,
-				'label'       => esc_html__( 'Hide Announcements', 'sugar-calendar' ),
-				'description' => __( 'Hide plugin announcements and update details.', 'sugar-calendar' ),
+				'label'       => esc_html__( 'Hide Announcements', 'sugar-calendar-lite' ),
+				'description' => __( 'Hide plugin announcements and update details.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -106,8 +95,8 @@ class SettingsMiscTab extends Settings {
 					'id'          => 'allow_usage_tracking',
 					'name'        => 'allow_usage_tracking',
 					'value'       => $allow_usage_tracking,
-					'label'       => esc_html__( 'Allow Usage Tracking', 'sugar-calendar' ),
-					'description' => __( 'By allowing us to track usage data we can better help you because we know with which WordPress configurations, themes and plugins we should test.', 'sugar-calendar' ),
+					'label'       => esc_html__( 'Allow Usage Tracking', 'sugar-calendar-lite' ),
+					'description' => __( 'By allowing us to track usage data we can better help you because we know with which WordPress configurations, themes and plugins we should test.', 'sugar-calendar-lite' ),
 				]
 			);
 		}
@@ -140,6 +129,6 @@ class SettingsMiscTab extends Settings {
 			Options::update( $key, $value );
 		}
 
-		WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar' ), WP::ADMIN_NOTICE_SUCCESS );
+		WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar-lite' ), WP::ADMIN_NOTICE_SUCCESS );
 	}
 }

@@ -41,9 +41,9 @@ class UI {
 		<div id="sugar-calendar-header" class="sugar-calendar-header">
 			<img class="sugar-calendar-header-logo"
 				src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
-				alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar' ); ?>"/>
+				alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar-lite' ); ?>"/>
 			<a href="<?php echo esc_url( Helpers::get_utm_url( 'https://sugarcalendar.com/docs/', [ 'content' => 'Help' ] ) ); ?>" target="_blank" id="sugar-calendar-header-help">
-				<?php esc_html_e( 'Help', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?>
 			</a>
 		</div>
 		<?php
@@ -428,7 +428,7 @@ class UI {
                    id="<?php echo esc_attr( $id ); ?>_custom"
                    value="custom" <?php checked( $custom_checked ); ?>
                    data-custom-option/>
-            <label for="<?php echo esc_attr( $id ); ?>_custom"><?php esc_html_e( 'Custom', 'sugar-calendar' ); ?></label>
+            <label for="<?php echo esc_attr( $id ); ?>_custom"><?php esc_html_e( 'Custom', 'sugar-calendar-lite' ); ?></label>
             <input type="text"
                    name="<?php echo esc_attr( $name ); ?>"
                    id="<?php echo esc_attr( $id ); ?>_custom_format"
@@ -438,7 +438,7 @@ class UI {
         </span>
 
         <p class="desc">
-            <strong><?php esc_html_e( 'Looks Like:', 'sugar-calendar' ); ?></strong>
+            <strong><?php esc_html_e( 'Looks Like:', 'sugar-calendar-lite' ); ?></strong>
             <span data-format-example><?php echo esc_html( $looks_like ); ?></span>
             <span class="spinner" data-spinner></span>
         </p>
@@ -469,8 +469,8 @@ class UI {
 				'disabled'      => false,
 				'description'   => '',
 				'toggle_labels' => [
-					esc_html__( 'On', 'sugar-calendar' ),
-					esc_html__( 'Off', 'sugar-calendar' ),
+					esc_html__( 'On', 'sugar-calendar-lite' ),
+					esc_html__( 'Off', 'sugar-calendar-lite' ),
 				],
 			]
 		);

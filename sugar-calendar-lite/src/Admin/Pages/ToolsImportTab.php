@@ -53,7 +53,7 @@ class ToolsImportTab extends Tools {
 			) {
 				$this->attempt_perform_import( sanitize_text_field( wp_unslash( $_POST['import_src'] ) ) );
 			} else {
-				wp_die( esc_html__( 'Invalid request.', 'sugar-calendar' ) );
+				wp_die( esc_html__( 'Invalid request.', 'sugar-calendar-lite' ) );
 			}
 		}
 	}
@@ -73,7 +73,7 @@ class ToolsImportTab extends Tools {
 			wp_die(
 				sprintf(
 					/* translators: %s: import source. */
-					esc_html__( 'Importer not found for: %s', 'sugar-calendar' ),
+					esc_html__( 'Importer not found for: %s', 'sugar-calendar-lite' ),
 					esc_html( $import_src )
 				)
 			);
@@ -103,7 +103,7 @@ class ToolsImportTab extends Tools {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Import', 'sugar-calendar' );
+		return esc_html__( 'Import', 'sugar-calendar-lite' );
 	}
 
 	/**

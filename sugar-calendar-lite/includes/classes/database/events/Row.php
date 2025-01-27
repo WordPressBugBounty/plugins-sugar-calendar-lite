@@ -621,7 +621,7 @@ final class Event extends Row {
 		}
 
 		if ( $this->is_all_day() ) {
-			return esc_html__( 'All-day', 'sugar-calendar' );
+			return esc_html__( 'All-day', 'sugar-calendar-lite' );
 		}
 
 		$time_format = Options::get( 'time_format' );

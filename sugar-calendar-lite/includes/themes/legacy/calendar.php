@@ -103,11 +103,11 @@ function sc_get_events_calendar( $size = 'large', $category = null, $type = 'mon
 	$args = apply_filters( 'sc_calendar_dropdown_categories_args', array(
 		'name'             => $tax,
 		'id'               => $tax,
-		'show_option_all'  => __( 'All Calendars', 'sugar-calendar' ),
+		'show_option_all'  => __( 'All Calendars', 'sugar-calendar-lite' ),
 		'selected'         => $category,
 		'value_field'      => 'slug',
 		'taxonomy'         => $tax,
-		'show_option_none' => __( 'No Calendars', 'sugar-calendar' ),
+		'show_option_none' => __( 'No Calendars', 'sugar-calendar-lite' ),
 	) );
 
 	// Validate type
@@ -156,7 +156,7 @@ function sc_get_events_calendar( $size = 'large', $category = null, $type = 'mon
 			// Output filter form
 			?><form id="sc_event_select" class="sc_events_form" method="POST" action="#sc_events_calendar_<?php echo uniqid(); ?>">
 
-				<label for="sc_month" style="display:none"><?php esc_html_e( 'Month', 'sugar-calendar' ); ?></label>
+				<label for="sc_month" style="display:none"><?php esc_html_e( 'Month', 'sugar-calendar-lite' ); ?></label>
 				<select class="sc_month" name="sc_month" id="sc_month"><?php
 
 					foreach ( $months as $key => $month ) : ?>
@@ -167,7 +167,7 @@ function sc_get_events_calendar( $size = 'large', $category = null, $type = 'mon
 
 				?></select>
 
-				<label for="sc_year" style="display:none"><?php esc_html_e( 'Year', 'sugar-calendar' ); ?></label>
+				<label for="sc_year" style="display:none"><?php esc_html_e( 'Year', 'sugar-calendar-lite' ); ?></label>
 				<select class="sc_year" name="sc_year" id="sc_year"><?php
 
 					foreach ( $years as $year ) : ?>
@@ -178,10 +178,10 @@ function sc_get_events_calendar( $size = 'large', $category = null, $type = 'mon
 
 				?></select>
 
-				<label for="<?php echo esc_attr( $tax ); ?>" style="display:none"><?php esc_html_e( 'Calendar', 'sugar-calendar' ); ?></label>
+				<label for="<?php echo esc_attr( $tax ); ?>" style="display:none"><?php esc_html_e( 'Calendar', 'sugar-calendar-lite' ); ?></label>
 				<?php wp_dropdown_categories( $args ); ?>
 
-				<input type="submit" id="sc_submit" class="sc_calendar_submit" value="<?php esc_attr_e( 'Go', 'sugar-calendar' ); ?>">
+				<input type="submit" id="sc_submit" class="sc_calendar_submit" value="<?php esc_attr_e( 'Go', 'sugar-calendar-lite' ); ?>">
 				<input type="hidden" name="action" value="sc_load_calendar">
 				<input type="hidden" name="category" value="<?php echo is_null( $category ) ? 0 : esc_attr( $category ); ?>">
 				<input type="hidden" name="type" value="<?php echo esc_attr( $type ); ?>">
@@ -261,7 +261,7 @@ function sc_calendar_next_prev( $display_month, $display_year, $size = 'large', 
 			<input type="hidden" name="sc_month" value="<?php echo absint( $prev_month ); ?>">
 			<input type="hidden" name="sc_year" value="<?php echo absint( $prev_year ); ?>">
 			<input type="hidden" name="sc_current_month" value="<?php echo absint( $display_month ); ?>">
-			<input type="submit" class="sc_calendar_submit" name="sc_prev" value="<?php echo esc_html_x( 'Previous', 'Previous month', 'sugar-calendar' ); ?>">
+			<input type="submit" class="sc_calendar_submit" name="sc_prev" value="<?php echo esc_html_x( 'Previous', 'Previous month', 'sugar-calendar-lite' ); ?>">
 			<input name="sc_nonce" type="hidden" value="<?php echo wp_create_nonce('sc_calendar_nonce'); ?>">
 			<input type="hidden" name="action" value="sc_load_calendar">
 			<input type="hidden" name="action_2" value="prev_month">
@@ -273,7 +273,7 @@ function sc_calendar_next_prev( $display_month, $display_year, $size = 'large', 
 			<input type="hidden" name="sc_month" class="month" value="<?php echo absint( $next_month ); ?>">
 			<input type="hidden" name="sc_year" class="year" value="<?php echo absint( $next_year ); ?>">
 			<input type="hidden" name="sc_current_month" value="<?php echo absint( $display_month ); ?>">
-			<input type="submit" class="sc_calendar_submit" name="sc_next" value="<?php echo esc_html_x( 'Next', 'Next month', 'sugar-calendar' ); ?>">
+			<input type="submit" class="sc_calendar_submit" name="sc_next" value="<?php echo esc_html_x( 'Next', 'Next month', 'sugar-calendar-lite' ); ?>">
 			<input name="sc_nonce" type="hidden" value="<?php echo wp_create_nonce('sc_calendar_nonce') ?>">
 			<input type="hidden" name="action" value="sc_load_calendar">
 			<input type="hidden" name="action_2" value="next_month">
@@ -332,7 +332,7 @@ function sc_get_next_prev( $display_time, $size = 'large', $category = null, $ty
 
 	<div id="sc_event_nav_wrap">
 		<form id="sc_event_nav_prev" class="sc_events_form" method="POST" action="#sc_events_calendar_<?php echo uniqid(); ?>">
-			<input type="submit" class="sc_calendar_submit" name="sc_prev" value="<?php _e('Previous', 'sugar-calendar'); ?>">
+			<input type="submit" class="sc_calendar_submit" name="sc_prev" value="<?php _e('Previous', 'sugar-calendar-lite' ); ?>">
 			<input type="hidden" name="sc_nonce" value="<?php echo wp_create_nonce('sc_calendar_nonce'); ?>">
 			<input type="hidden" name="display_time" value="<?php echo esc_attr( $prev_display_time ); ?>">
 			<input type="hidden" name="type" value="<?php echo esc_attr( $prev_display_time ); ?>">
@@ -346,7 +346,7 @@ function sc_get_next_prev( $display_time, $size = 'large', $category = null, $ty
 			<input type="hidden" name="sc_visitor_tz" value="">
 		</form>
 		<form id="sc_event_nav_next" class="sc_events_form" method="POST" action="#sc_events_calendar_<?php echo uniqid(); ?>">
-			<input type="submit" class="sc_calendar_submit" name="sc_next" value="<?php _e('Next', 'sugar-calendar'); ?>">
+			<input type="submit" class="sc_calendar_submit" name="sc_next" value="<?php _e('Next', 'sugar-calendar-lite' ); ?>">
 			<input type="hidden" name="sc_nonce" value="<?php echo wp_create_nonce('sc_calendar_nonce') ?>">
 			<input type="hidden" name="display_time" value="<?php echo esc_attr( $next_display_time ); ?>">
 			<input type="hidden" name="action" value="sc_load_calendar">

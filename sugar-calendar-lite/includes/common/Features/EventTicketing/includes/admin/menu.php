@@ -42,7 +42,7 @@ function tickets_page() {
 	$wp_list_table->set_help_tabs(); ?>
 
     <div class="wrap">
-        <h1 class="wp-heading-inline"><?php esc_html_e( 'Event Ticket Orders', 'sugar-calendar' ); ?></h1>
+        <h1 class="wp-heading-inline"><?php esc_html_e( 'Event Ticket Orders', 'sugar-calendar-lite' ); ?></h1>
 
 		<?php \Sugar_Calendar\AddOn\Ticketing\Admin\Nav\display(); ?>
 

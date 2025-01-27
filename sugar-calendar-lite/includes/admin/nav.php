@@ -22,7 +22,7 @@ function display() {
 
 	// Get the post type & labels
 	$post_type = sugar_calendar_get_event_post_type_id();
-	$name      = sugar_calendar_get_post_type_label( $post_type, 'name', esc_html__( 'Events', 'sugar-calendar' ) );
+	$name      = sugar_calendar_get_post_type_label( $post_type, 'name', esc_html__( 'Events', 'sugar-calendar-lite' ) );
 
 	// Initial tab array
 	$tabs = array(
@@ -136,7 +136,7 @@ function add_new() {
 	}
 
 	// Default "Add New" text
-	$text = sprintf( esc_html__( 'Add %s', 'sugar-calendar' ), $name );
+	$text = sprintf( esc_html__( 'Add %s', 'sugar-calendar-lite' ), $name );
 
 	?><a href="<?php echo esc_url( $url ); ?>" class="page-title-action">
 	<?php echo esc_html( $text ); ?>

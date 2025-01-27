@@ -18,7 +18,7 @@
 		gap: $spacing-md;
 	}
 
-	&__left {
+	.sugar-calendar-block__controls__left {
 		align-items: center;
 		display: flex;
 		gap: $spacing-md;
@@ -117,7 +117,7 @@
 		}
 	}
 
-	&__right {
+	.sugar-calendar-block__controls__right {
 		align-items: center;
 		align-self: stretch;
 		display: flex;

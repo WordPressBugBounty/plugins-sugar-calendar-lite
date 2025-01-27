@@ -91,7 +91,7 @@ function preferences() {
 	 * @param string[] $default_date_formats Array of default date formats.
 	 */
 	$date_formats = array_unique( apply_filters( 'date_formats', array(
-		esc_html__( 'F j, Y', 'sugar-calendar' ),
+		'F j, Y',
 		'Y-m-d',
 		'm/d/Y',
 		'd/m/Y',
@@ -107,7 +107,7 @@ function preferences() {
 	 * @param string[] $default_time_formats Array of default time formats.
 	 */
 	$time_formats = array_unique( apply_filters( 'time_formats', array(
-		esc_html__( 'g:i a', 'sugar-calendar' ),
+		esc_html__( 'g:i a', 'sugar-calendar-lite' ),
 		'g:i A',
 		'H:i'
 	) ) );
@@ -123,7 +123,7 @@ function preferences() {
 		<tbody>
 			<tr valign="top">
 				<th scope="row" valign="top">
-					<label for="events_max_num"><?php esc_html_e( 'Maximum Events', 'sugar-calendar' ); ?></label>
+					<label for="events_max_num"><?php esc_html_e( 'Maximum Events', 'sugar-calendar-lite' ); ?></label>
 				</th>
 				<td>
 					<input type="number" step="1" min="1" max="999" class="code" name="events_max_num" id="events_max_num" maxlength="3" value="<?php echo absint( $sc_events_max_num ); ?>">
@@ -132,7 +132,7 @@ function preferences() {
 
 			<tr valign="top">
 				<th scope="row" valign="top">
-					<label for="start_of_week"><?php esc_html_e( 'Start of Week', 'sugar-calendar' ); ?></label>
+					<label for="start_of_week"><?php esc_html_e( 'Start of Week', 'sugar-calendar-lite' ); ?></label>
 				</th>
 				<td>
 					<select id="sc_start_of_week" name="start_of_week">
@@ -145,14 +145,14 @@ function preferences() {
 						<option value="6" <?php selected( $sc_start_of_week, 6 ); ?>><?php echo esc_html( $wp_locale->get_weekday( 6 ) ); ?></option>
 					</select>
 					<p class="description">
-						<?php esc_html_e( 'Select the first day of the week', 'sugar-calendar' ); ?>
+						<?php esc_html_e( 'Select the first day of the week', 'sugar-calendar-lite' ); ?>
 					</p>
 				</td>
 			</tr>
 
 			<tr valign="top" class="sc-date-time-prefs">
 				<th scope="row" valign="top">
-					<label for="date_format"><?php esc_html_e( 'Date Format', 'sugar-calendar' ); ?></label>
+					<label for="date_format"><?php esc_html_e( 'Date Format', 'sugar-calendar-lite' ); ?></label>
 				</th>
 				<td>
 					<?php foreach ( $date_formats as $key => $format ) :
@@ -179,19 +179,19 @@ function preferences() {
 
 					<label>
 						<input type="radio" name="date_format" id="sc_date_format_custom_radio" value="<?php echo esc_attr( $sc_date_format ); ?>" <?php checked( $custom_date_checked ); ?> />
-						<span class="date-time-text date-time-custom-text"><?php esc_html_e( 'Custom:', 'sugar-calendar' ); ?>
-							<span class="screen-reader-text"><?php esc_html_e( 'enter a custom date format in the following field', 'sugar-calendar' ); ?></span>
+						<span class="date-time-text date-time-custom-text"><?php esc_html_e( 'Custom:', 'sugar-calendar-lite' ); ?>
+							<span class="screen-reader-text"><?php esc_html_e( 'enter a custom date format in the following field', 'sugar-calendar-lite' ); ?></span>
 						</span>
 					</label>
 
-					<label for="sc_date_format_custom" class="screen-reader-text"><?php esc_html_e( 'Custom date format:', 'sugar-calendar' ); ?></label>
+					<label for="sc_date_format_custom" class="screen-reader-text"><?php esc_html_e( 'Custom date format:', 'sugar-calendar-lite' ); ?></label>
 					<input type="text" name="date_format_custom" id="sc_date_format_custom" value="<?php echo esc_attr( $sc_date_format ); ?>" class="small-text" />
 				</td>
 			</tr>
 
 			<tr valign="top" class="sc-date-time-prefs">
 				<th scope="row" valign="top">
-					<label for="time_format"><?php esc_html_e( 'Time Format', 'sugar-calendar' ); ?></label>
+					<label for="time_format"><?php esc_html_e( 'Time Format', 'sugar-calendar-lite' ); ?></label>
 				</th>
 				<td>
 					<?php foreach ( $time_formats as $key => $format ) :
@@ -218,12 +218,12 @@ function preferences() {
 
 					<label>
 						<input type="radio" name="time_format" id="sc_time_format_custom_radio" value="<?php echo esc_attr( $sc_time_format ); ?>" <?php checked( $custom_time_checked ); ?> />
-						<span class="date-time-text date-time-custom-text"><?php esc_html_e( 'Custom:', 'sugar-calendar' ); ?>
-							<span class="screen-reader-text"><?php esc_html_e( 'enter a custom time format in the following field', 'sugar-calendar' ); ?></span>
+						<span class="date-time-text date-time-custom-text"><?php esc_html_e( 'Custom:', 'sugar-calendar-lite' ); ?>
+							<span class="screen-reader-text"><?php esc_html_e( 'enter a custom time format in the following field', 'sugar-calendar-lite' ); ?></span>
 						</span>
 					</label>
 
-					<label for="sc_time_format_custom" class="screen-reader-text"><?php esc_html_e( 'Custom time format:', 'sugar-calendar' ); ?></label>
+					<label for="sc_time_format_custom" class="screen-reader-text"><?php esc_html_e( 'Custom time format:', 'sugar-calendar-lite' ); ?></label>
 					<input type="text" name="time_format_custom" id="sc_time_format_custom" value="<?php echo esc_attr( $sc_time_format ); ?>" class="small-text" />
 				</td>
 			</tr>
@@ -232,14 +232,14 @@ function preferences() {
 
 				<tr valign="top">
 					<th scope="row" valign="top">
-						<label for="timezone"><?php esc_html_e( 'Time Zone', 'sugar-calendar' ); ?></label>
+						<label for="timezone"><?php esc_html_e( 'Time Zone', 'sugar-calendar-lite' ); ?></label>
 					</th>
 					<td>
 						<?php sugar_calendar_timezone_dropdown( array(
 							'id'      => 'sc_timezone',
 							'name'    => 'timezone',
 							'class'   => '',
-							'none'    => esc_html__( 'Floating', 'sugar-calendar' ),
+							'none'    => esc_html__( 'Floating', 'sugar-calendar-lite' ),
 							'current' => $sc_timezone
 						) ); ?>
 					</td>
@@ -254,7 +254,7 @@ function preferences() {
 
 		// Submit button
 		submit_button(
-			esc_html__( 'Update', 'sugar-calendar' ),
+			esc_html__( 'Update', 'sugar-calendar-lite' ),
 			'primary',
 			'screen-options-apply',
 			false
@@ -266,7 +266,7 @@ function preferences() {
 
 		<a class="button secondary" href="<?php echo esc_url( $reset_url ); ?>"><?php
 
-			esc_html_e( 'Reset to Defaults', 'sugar-calendar' );
+			esc_html_e( 'Reset to Defaults', 'sugar-calendar-lite' );
 
 		?></a>
 	</p>

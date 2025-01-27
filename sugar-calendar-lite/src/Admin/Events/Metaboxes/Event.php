@@ -62,7 +62,7 @@ class Event implements MetaboxInterface {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'Event', 'sugar-calendar' );
+		return esc_html__( 'Event', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -110,8 +110,8 @@ class Event implements MetaboxInterface {
 	 */
 	public function __construct( $post ) {
 
-		$this->setup_sections();
 		$this->setup_post( $post );
+		$this->setup_sections();
 
 		$this->hooks();
 	}
@@ -139,7 +139,7 @@ class Event implements MetaboxInterface {
 		$this->add_section(
 			[
 				'id'       => 'duration',
-				'label'    => esc_html__( 'Duration', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Duration', 'sugar-calendar-lite' ),
 				'icon'     => 'clock',
 				'order'    => 10,
 				'callback' => [ $this, 'section_duration' ],
@@ -150,7 +150,7 @@ class Event implements MetaboxInterface {
 		$this->add_section(
 			[
 				'id'       => 'location',
-				'label'    => esc_html__( 'Location', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Location', 'sugar-calendar-lite' ),
 				'icon'     => 'location',
 				'order'    => 50,
 				'callback' => [ $this, 'section_location' ],
@@ -164,7 +164,7 @@ class Event implements MetaboxInterface {
 			$this->add_section(
 				[
 					'id'       => 'legacy',
-					'label'    => esc_html__( 'Other', 'sugar-calendar' ),
+					'label'    => esc_html__( 'Other', 'sugar-calendar-lite' ),
 					'icon'     => 'admin-settings',
 					'order'    => 200,
 					'callback' => [ $this, 'section_legacy' ],
@@ -208,6 +208,34 @@ class Event implements MetaboxInterface {
 		$this->sections[ $section->id ] = $section;
 
 		// Always resort after adding.
+		$this->sort_sections();
+	}
+
+	/**
+	 * Remove a section.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $section_id Section ID.
+	 *
+	 * @return void
+	 */
+	public function remove_section( $section_id = '' ) {
+
+		// Bail if empty.
+		if ( empty( $section_id ) ) {
+			return;
+		}
+
+		// Check if the section exists.
+		if ( ! isset( $this->sections[ $section_id ] ) ) {
+			return;
+		}
+
+		// Unset the section.
+		unset( $this->sections[ $section_id ] );
+
+		// Always resort after removing.
 		$this->sort_sections();
 	}
 
@@ -638,7 +666,7 @@ class Event implements MetaboxInterface {
 		?>
 
         <div class="sugar-calendar-metabox__field-row">
-            <label for="all_day"><?php esc_html_e( 'All Day', 'sugar-calendar' ); ?></label>
+            <label for="all_day"><?php esc_html_e( 'All Day', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
 				<?php
 				UI::toggle_control(
@@ -647,8 +675,8 @@ class Event implements MetaboxInterface {
 						'id'            => 'all_day',
 						'value'         => $all_day,
 						'toggle_labels' => [
-							esc_html__( 'YES', 'sugar-calendar' ),
-							esc_html__( 'NO', 'sugar-calendar' ),
+							esc_html__( 'YES', 'sugar-calendar-lite' ),
+							esc_html__( 'NO', 'sugar-calendar-lite' ),
 						],
 					],
 					true
@@ -657,7 +685,7 @@ class Event implements MetaboxInterface {
             </div>
         </div>
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--start_date">
-            <label for="start_date"><?php esc_html_e( 'Start', 'sugar-calendar' ); ?></label>
+            <label for="start_date"><?php esc_html_e( 'Start', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <div class="event-date">
                     <input type="text"
@@ -669,7 +697,7 @@ class Event implements MetaboxInterface {
                            data-datepicker/>
                 </div>
                 <div class="event-time"<?php echo $hidden; ?>>
-                    <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar' ); ?></span>
+                    <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar-lite' ); ?></span>
 
 					<?php
 					// Start Hour.
@@ -704,8 +732,8 @@ class Event implements MetaboxInterface {
 
                         <select id="start_time_am_pm" name="start_time_am_pm" class="sc-select-chosen sc-time">
                             <option value="">&nbsp;</option>
-                            <option value="am" <?php selected( $am_pm, 'am' ); ?>><?php esc_html_e( 'AM', 'sugar-calendar' ); ?></option>
-                            <option value="pm" <?php selected( $am_pm, 'pm' ); ?>><?php esc_html_e( 'PM', 'sugar-calendar' ); ?></option>
+                            <option value="am" <?php selected( $am_pm, 'am' ); ?>><?php esc_html_e( 'AM', 'sugar-calendar-lite' ); ?></option>
+                            <option value="pm" <?php selected( $am_pm, 'pm' ); ?>><?php esc_html_e( 'PM', 'sugar-calendar-lite' ); ?></option>
                         </select>
 
 					<?php endif; ?>
@@ -734,7 +762,7 @@ class Event implements MetaboxInterface {
             </div>
         </div>
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--end_date">
-            <label for="end_date"><?php esc_html_e( 'End', 'sugar-calendar' ); ?></label>
+            <label for="end_date"><?php esc_html_e( 'End', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <div class="event-date">
                     <input type="text"
@@ -746,7 +774,7 @@ class Event implements MetaboxInterface {
                            data-datepicker/>
                 </div>
                 <div class="event-time"<?php echo $hidden; ?>>
-                    <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar' ); ?></span>
+                    <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar-lite' ); ?></span>
 
 					<?php
 					// End Hour.
@@ -781,8 +809,8 @@ class Event implements MetaboxInterface {
 
                         <select id="end_time_am_pm" name="end_time_am_pm" class="sc-select-chosen sc-time">
                             <option value="">&nbsp;</option>
-                            <option value="am" <?php selected( $end_am_pm, 'am' ); ?>><?php esc_html_e( 'AM', 'sugar-calendar' ); ?></option>
-                            <option value="pm" <?php selected( $end_am_pm, 'pm' ); ?>><?php esc_html_e( 'PM', 'sugar-calendar' ); ?></option>
+                            <option value="am" <?php selected( $end_am_pm, 'am' ); ?>><?php esc_html_e( 'AM', 'sugar-calendar-lite' ); ?></option>
+                            <option value="pm" <?php selected( $end_am_pm, 'pm' ); ?>><?php esc_html_e( 'PM', 'sugar-calendar-lite' ); ?></option>
                         </select>
 
 					<?php endif; ?>
@@ -817,7 +845,7 @@ class Event implements MetaboxInterface {
 			?>
 
             <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--time-zone"<?php echo $hidden; ?>>
-                <label for="start_tz"><?php esc_html_e( 'Time Zone', 'sugar-calendar' ); ?></label>
+                <label for="start_tz"><?php esc_html_e( 'Time Zone', 'sugar-calendar-lite' ); ?></label>
                 <div class="sugar-calendar-metabox__field">
 					<?php
 					UI::timezone_dropdown_control(
@@ -842,6 +870,7 @@ class Event implements MetaboxInterface {
 	 * Output the event location meta-box section.
 	 *
 	 * @since  2.0.0
+	 * @since 3.5.0 Added the venue education.
 	 *
 	 * @param Event $event The event object.
 	 */
@@ -860,12 +889,43 @@ class Event implements MetaboxInterface {
 		?>
 
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--location">
-            <label for="location"><?php esc_html_e( 'Address', 'sugar-calendar' ); ?></label>
+            <label for="location"><?php esc_html_e( 'Address', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
                 <textarea name="location"
                           id="location"><?php echo esc_textarea( $location ); ?></textarea>
             </div>
         </div>
+
+		<?php if ( ! sugar_calendar()->is_pro() ) : ?>
+			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+				<p class="desc">
+					<?php
+					echo wp_kses(
+						sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
+							'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s.',
+							esc_url(
+								Helpers\Helpers::get_upgrade_link(
+									[
+										'medium'  => 'lite-event-location',
+										'content' => 'Upgrade to Sugar Calendar Pro',
+									]
+								)
+							),
+							esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+							esc_html__( 'to manage venues for your events', 'sugar-calendar-lite' )
+						),
+						[
+							'a' => [
+								'href'   => [],
+								'rel'    => [],
+								'target' => [],
+							],
+						]
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
 
 		<?php
 

@@ -38,7 +38,7 @@ class ListWidget extends Widget_Base {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'Events List', 'sugar-calendar' );
+		return esc_html__( 'Events List', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -115,7 +115,7 @@ class ListWidget extends Widget_Base {
 		$this->start_controls_section(
 			'section_sugar_calendar_events_list',
 			[
-				'label' => esc_html__( 'Events List', 'sugar-calendar' ),
+				'label' => esc_html__( 'Events List', 'sugar-calendar-lite' ),
 				'tab'   => Controls_Manager::TAB_CONTENT,
 			]
 		);
@@ -123,7 +123,7 @@ class ListWidget extends Widget_Base {
 		$this->add_control(
 			'section_title_settings',
 			[
-				'label' => __( 'Settings', 'sugar-calendar' ),
+				'label' => __( 'Settings', 'sugar-calendar-lite' ),
 				'type'  => Controls_Manager::HEADING,
 			]
 		);
@@ -132,7 +132,7 @@ class ListWidget extends Widget_Base {
 			'calendars',
 			[
 				'default'  => [],
-				'label'    => esc_html__( 'Calendars', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Calendars', 'sugar-calendar-lite' ),
 				'multiple' => true,
 				'options'  => get_terms(
 					[
@@ -145,11 +145,23 @@ class ListWidget extends Widget_Base {
 			]
 		);
 
+		/**
+		 * Extend the Elementor Event List widget controls.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param Widget_Base $this Current widget instance.
+		 */
+		do_action(
+			'sugar_calendar_integrations_elementor_list_widget_register_controls_section_settings',
+			$this
+		);
+
 		$this->add_control(
 			'group_events_by_week',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Group events by week', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Group events by week', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 			]
@@ -159,7 +171,7 @@ class ListWidget extends Widget_Base {
 			'events_per_page',
 			[
 				'default'    => 10,
-				'label'      => esc_html__( 'Events per page', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Events per page', 'sugar-calendar-lite' ),
 				'show_label' => true,
 				'type'       => Controls_Manager::NUMBER,
 				'min'        => 1,
@@ -175,7 +187,7 @@ class ListWidget extends Widget_Base {
 			'maximum_events_to_show',
 			[
 				'default'    => 10,
-				'label'      => esc_html__( 'Max events to show', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Max events to show', 'sugar-calendar-lite' ),
 				'show_label' => true,
 				'type'       => Controls_Manager::NUMBER,
 				'min'        => 1,
@@ -190,7 +202,7 @@ class ListWidget extends Widget_Base {
 		$this->add_control(
 			'section_title_display',
 			[
-				'label'     => __( 'Display', 'sugar-calendar' ),
+				'label'     => __( 'Display', 'sugar-calendar-lite' ),
 				'type'      => Controls_Manager::HEADING,
 				'separator' => 'before',
 			]
@@ -200,11 +212,11 @@ class ListWidget extends Widget_Base {
 			'display_mode',
 			[
 				'default'    => 'list',
-				'label'      => esc_html__( 'Display Type', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Display Type', 'sugar-calendar-lite' ),
 				'options'    => [
-					'list'  => esc_html__( 'List', 'sugar-calendar' ),
-					'grid'  => esc_html__( 'Grid', 'sugar-calendar' ),
-					'plain' => esc_html__( 'Plain', 'sugar-calendar' ),
+					'list'  => esc_html__( 'List', 'sugar-calendar-lite' ),
+					'grid'  => esc_html__( 'Grid', 'sugar-calendar-lite' ),
+					'plain' => esc_html__( 'Plain', 'sugar-calendar-lite' ),
 				],
 				'show_label' => true,
 				'type'       => Controls_Manager::SELECT,
@@ -215,7 +227,7 @@ class ListWidget extends Widget_Base {
 			'show_block_header',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Block Header', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Block Header', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -228,7 +240,7 @@ class ListWidget extends Widget_Base {
 			'allow_users_to_change_display',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Allow Users to Change Display', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Allow Users to Change Display', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -242,7 +254,7 @@ class ListWidget extends Widget_Base {
 			'show_filters',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Filters', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Filters', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -256,7 +268,7 @@ class ListWidget extends Widget_Base {
 			'show_search',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Search', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Search', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -270,7 +282,7 @@ class ListWidget extends Widget_Base {
 			'show_date_cards',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Date Cards', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Date Cards', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -283,7 +295,7 @@ class ListWidget extends Widget_Base {
 			'show_descriptions',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Descriptions', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Descriptions', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 			]
@@ -293,7 +305,7 @@ class ListWidget extends Widget_Base {
 			'show_featured_images',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Show Featured Images', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Show Featured Images', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
 				'condition'    => [
@@ -306,10 +318,10 @@ class ListWidget extends Widget_Base {
 			'image_position',
 			[
 				'default'    => 'right',
-				'label'      => esc_html__( 'Image position', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Image position', 'sugar-calendar-lite' ),
 				'options'    => [
-					'left'  => esc_html__( 'Left', 'sugar-calendar' ),
-					'right' => esc_html__( 'Right', 'sugar-calendar' ),
+					'left'  => esc_html__( 'Left', 'sugar-calendar-lite' ),
+					'right' => esc_html__( 'Right', 'sugar-calendar-lite' ),
 				],
 				'show_label' => true,
 				'type'       => Controls_Manager::SELECT,
@@ -323,7 +335,7 @@ class ListWidget extends Widget_Base {
 		$this->add_control(
 			'section_title_styles',
 			[
-				'label'     => __( 'Styles', 'sugar-calendar' ),
+				'label'     => __( 'Styles', 'sugar-calendar-lite' ),
 				'type'      => Controls_Manager::HEADING,
 				'separator' => 'before',
 			]
@@ -333,10 +345,10 @@ class ListWidget extends Widget_Base {
 			'appearance',
 			[
 				'default'    => 'light',
-				'label'      => esc_html__( 'Appearance', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Appearance', 'sugar-calendar-lite' ),
 				'options'    => [
-					'light' => esc_html__( 'Light', 'sugar-calendar' ),
-					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+					'light' => esc_html__( 'Light', 'sugar-calendar-lite' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar-lite' ),
 				],
 				'show_label' => true,
 				'type'       => Controls_Manager::SELECT,
@@ -348,7 +360,7 @@ class ListWidget extends Widget_Base {
 			[
 				'alpha'   => false,
 				'default' => '#5685BD',
-				'label'   => esc_html__( 'Accent Color', 'sugar-calendar' ),
+				'label'   => esc_html__( 'Accent Color', 'sugar-calendar-lite' ),
 				'type'    => Controls_Manager::COLOR,
 			]
 		);
@@ -358,7 +370,7 @@ class ListWidget extends Widget_Base {
 			[
 				'alpha'   => false,
 				'default' => '#000000D9',
-				'label'   => esc_html__( 'Links Color', 'sugar-calendar' ),
+				'label'   => esc_html__( 'Links Color', 'sugar-calendar-lite' ),
 				'type'    => Controls_Manager::COLOR,
 			]
 		);
@@ -411,6 +423,20 @@ class ListWidget extends Widget_Base {
 			'linksColor'             => ! empty( $links_color ) ? $links_color : '#000000D9',
 			'should_not_load_events' => false,
 		];
+
+		/**
+		 * Extend the Elementor Event List widget controls.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param array       $attr Event list block attributes.
+		 * @param Widget_Base $this Current widget instance.
+		 */
+		$attr = apply_filters(
+			'sugar_calendar_integrations_elementor_list_widget_render_attributes',
+			$attr,
+			$this
+		);
 
 		$block = new Block( $attr );
 

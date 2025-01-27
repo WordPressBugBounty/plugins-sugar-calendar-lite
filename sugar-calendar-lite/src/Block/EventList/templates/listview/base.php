@@ -45,7 +45,17 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 			$event_view = new EventView( $event, $context->get_block() );
 
 			// Get the event featured image.
-			$event_image = get_the_post_thumbnail_url( $event->object_id );
+			$event_image = get_the_post_thumbnail_url(
+				$event->object_id,
+				/**
+				 * Filter the size of the event image in the Event List block (list view).
+				 *
+				 * @since 3.5.0
+				 *
+				 * @param string $size Image size. Accepts any registered image size name, or an array of width and height values in pixels (in that order).
+				 */
+				apply_filters( 'sugar_calendar_block_list_listview_image_size', 'medium' )
+			);
 
 			// Get image display position.
 			$image_display_position = $event_view->get_image_display_position();

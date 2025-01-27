@@ -208,7 +208,7 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$( '#sc-event-ticketing-cancel' ).on( 'click', function () {
-		$( '#sc-event-ticketing-modal .spinner-border' ).hide();
+		$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
 	});
 
 	$( '#sc-event-ticketing-purchase' ).on( 'click', function () {
@@ -221,7 +221,7 @@ jQuery( document ).ready( function( $ ) {
 
 		let form = $( this );
 
-		$( '#sc-event-ticketing-modal .spinner-border' ).show();
+		$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).show();
 
 		$( '.sc-et-error', form ).remove();
 
@@ -248,7 +248,7 @@ jQuery( document ).ready( function( $ ) {
 				} else {
 
 					// Validation failed, display errors
-					$( '#sc-event-ticketing-modal .spinner-border' ).hide();
+					$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
 
 					$.each( response.data.errors, function( index, error ) {
 						$( '<div class="sc-et-error alert alert-danger" role="alert">' + error.msg + '</div>' ).insertAfter( error.selector );

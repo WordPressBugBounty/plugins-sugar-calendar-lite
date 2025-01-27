@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin\Events\Tables;
 
+use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Helpers\WP;
 
 /**
@@ -75,6 +76,51 @@ class Basic extends Base {
 
 		// Add admin notice.
 		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
+
+		// Prevent checkbox to be hidden.
+		add_filter( 'hidden_columns', [ $this, 'manage_hidden_columns' ], 10, 2 );
+	}
+
+	/**
+	 * Prevent checkbox to be hidden.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param array     $hidden Hidden columns.
+	 * @param WP_Screen $screen Screen object.
+	 *
+	 * @return array
+	 */
+	public function manage_hidden_columns( $hidden, $screen ) {
+
+		// Handle the first load of the list when the filters was saved.
+		if (
+			! empty( $_POST['_wpnonce'] ) &&
+			! empty( $_POST['sugar-calendar']['columns'] ) &&
+			wp_verify_nonce( $_POST['_wpnonce'], Area::SLUG )
+		) {
+			// Get the columns that was recently hidden.
+			$hidden = array_diff( array_keys( $this->get_columns() ), $_POST['sugar-calendar']['columns'] );
+
+			// Remove "cb" in the column since we always want to show this.
+			$search_cb = array_search( 'cb', $hidden, true );
+
+			if ( $search_cb !== false ) {
+				unset( $hidden[ $search_cb ] );
+			}
+
+			return $hidden;
+		}
+
+		// If screen parent_base is not sugar-calendar, return hidden.
+		if ( $screen->parent_base !== 'sugar-calendar' ) {
+			return $hidden;
+		}
+
+		// Remove cb from hidden.
+		$hidden = array_diff( $hidden, [ 'cb' ] );
+
+		return $hidden;
 	}
 
 	/**
@@ -92,7 +138,7 @@ class Basic extends Base {
 			// Use _n to print admin notice.
 			WP::add_admin_notice(
 				/* translators: %s: Number of events trashed. */
-				sprintf( _n( '%s event moved to the Trash.', '%s events moved to the Trash.', $is_trashed_event, 'sugar-calendar' ), $is_trashed_event ),
+				sprintf( _n( '%s event moved to the Trash.', '%s events moved to the Trash.', $is_trashed_event, 'sugar-calendar-lite' ), $is_trashed_event ),
 				WP::ADMIN_NOTICE_SUCCESS,
 				true
 			);
@@ -106,7 +152,7 @@ class Basic extends Base {
 			WP::add_admin_notice(
 				sprintf(
 					/* translators: %s: Number of events deleted. */
-					_n( '%s event permanently deleted.', '%s events permanently deleted.', $is_deleted_event, 'sugar-calendar' ),
+					_n( '%s event permanently deleted.', '%s events permanently deleted.', $is_deleted_event, 'sugar-calendar-lite' ),
 					$is_deleted_event
 				),
 				WP::ADMIN_NOTICE_SUCCESS,
@@ -122,7 +168,7 @@ class Basic extends Base {
 			WP::add_admin_notice(
 				sprintf(
 					/* translators: %s: Number of events restored. */
-					_n( '%s event restored.', '%s events restored.', $is_restored_event, 'sugar-calendar' ),
+					_n( '%s event restored.', '%s events restored.', $is_restored_event, 'sugar-calendar-lite' ),
 					$is_restored_event
 				),
 				WP::ADMIN_NOTICE_SUCCESS,
@@ -295,15 +341,15 @@ class Basic extends Base {
 		// Default columns.
 		$columns = [
 			'cb'       => '<input type="checkbox">',
-			'title'    => esc_html_x( 'Title', 'Noun', 'sugar-calendar' ),
-			'start'    => esc_html_x( 'Start', 'Noun', 'sugar-calendar' ),
-			'end'      => esc_html_x( 'End', 'Noun', 'sugar-calendar' ),
-			'duration' => esc_html_x( 'Duration', 'Noun', 'sugar-calendar' ),
+			'title'    => esc_html_x( 'Title', 'Noun', 'sugar-calendar-lite' ),
+			'start'    => esc_html_x( 'Start', 'Noun', 'sugar-calendar-lite' ),
+			'end'      => esc_html_x( 'End', 'Noun', 'sugar-calendar-lite' ),
+			'duration' => esc_html_x( 'Duration', 'Noun', 'sugar-calendar-lite' ),
 		];
 
 		// Repeat column.
 		if ( has_filter( 'sugar_calendar_get_recurring_date_query_args' ) ) {
-			$columns['repeat'] = esc_html_x( 'Repeats', 'Noun', 'sugar-calendar' );
+			$columns['repeat'] = esc_html_x( 'Repeats', 'Noun', 'sugar-calendar-lite' );
 		}
 
 		// Return columns.
@@ -374,13 +420,13 @@ class Basic extends Base {
 		// Actions in trash status.
 		if ( $this->get_request_var( 'status' ) === 'trash' ) {
 
-			$actions['restore'] = esc_html__( 'Restore', 'sugar-calendar' );
-			$actions['delete']  = esc_html__( 'Delete Permanently', 'sugar-calendar' );
+			$actions['restore'] = esc_html__( 'Restore', 'sugar-calendar-lite' );
+			$actions['delete']  = esc_html__( 'Delete Permanently', 'sugar-calendar-lite' );
 
 		} else {
 
 			// Default actions.
-			$actions['trash'] = esc_html__( 'Move to Trash', 'sugar-calendar' );
+			$actions['trash'] = esc_html__( 'Move to Trash', 'sugar-calendar-lite' );
 		}
 
 		return $actions;
@@ -731,7 +777,7 @@ class Basic extends Base {
 
 		// Duration.
 		if ( $item->is_all_day() ) {
-			$retval = esc_html__( 'All Day', 'sugar-calendar' );
+			$retval = esc_html__( 'All Day', 'sugar-calendar-lite' );
 
 			// Maybe add duration if multiple all-day days.
 			if ( $item->is_multi() ) {
@@ -817,11 +863,11 @@ class Basic extends Base {
 				'small'  => '1 year',
 				'large'  => '10 years',
 				'labels' => [
-					'today'      => esc_html__( 'Today', 'sugar-calendar' ),
-					'next_small' => esc_html__( 'Next Month', 'sugar-calendar' ),
-					'next_large' => esc_html__( 'Next Year', 'sugar-calendar' ),
-					'prev_small' => esc_html__( 'Previous Month', 'sugar-calendar' ),
-					'prev_large' => esc_html__( 'Previous Year', 'sugar-calendar' ),
+					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
+					'next_small' => esc_html__( 'Next Month', 'sugar-calendar-lite' ),
+					'next_large' => esc_html__( 'Next Year', 'sugar-calendar-lite' ),
+					'prev_small' => esc_html__( 'Previous Month', 'sugar-calendar-lite' ),
+					'prev_large' => esc_html__( 'Previous Year', 'sugar-calendar-lite' ),
 				],
 			]
 		);
@@ -864,7 +910,7 @@ class Basic extends Base {
         <tr>
             <td colspan="<?php echo absint( $count ); ?>">
 
-				<?php esc_html_e( 'No events found.', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'No events found.', 'sugar-calendar-lite' ); ?>
 
             </td>
         </tr>

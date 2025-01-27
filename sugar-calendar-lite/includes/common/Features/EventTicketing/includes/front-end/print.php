@@ -45,12 +45,12 @@ function output() {
 
 	// Bail if no ticket with that code
 	if ( empty( $ticket ) ) {
-		wp_die( esc_html__( 'That ticket could not be found.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'That ticket could not be found.', 'sugar-calendar-lite' ) );
 	}
 
 	// Bail if nonce failed
 	if ( ! wp_verify_nonce( $_GET[ '_wpnonce' ], $ticket->code ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Get event
@@ -58,7 +58,7 @@ function output() {
 
 	// Bail if no event
 	if ( empty( $event ) ) {
-		wp_die( esc_html__( 'That event could not be found.', 'sugar-calendar' ) );
+		wp_die( esc_html__( 'That event could not be found.', 'sugar-calendar-lite' ) );
 	}
 
 	$start_date = $event->format_date( sc_get_date_format(), $event->start );
@@ -76,12 +76,12 @@ function output() {
 	<body onload="window.print()">
 		<div id="main">
 			<h1><?php echo esc_html( $event->title ); ?></h1>
-			<h2><?php printf( esc_html__( '%s at %s', 'sugar-calendar' ), $start_date, $start_time ); ?></h2>
+			<h2><?php printf( esc_html__( '%s at %s', 'sugar-calendar-lite' ), $start_date, $start_time ); ?></h2>
 			<table>
 				<tr>
-					<th><?php esc_html_e( 'Ticket #', 'sugar-calendar' ); ?></th>
-					<th><?php esc_html_e( 'Purchaser', 'sugar-calendar' ); ?></th>
-					<th><?php esc_html_e( 'Code', 'sugar-calendar' ); ?></th>
+					<th><?php esc_html_e( 'Ticket #', 'sugar-calendar-lite' ); ?></th>
+					<th><?php esc_html_e( 'Purchaser', 'sugar-calendar-lite' ); ?></th>
+					<th><?php esc_html_e( 'Code', 'sugar-calendar-lite' ); ?></th>
 				</tr>
 				<tr>
 					<td><?php echo esc_html( $ticket->id ); ?></td>
@@ -89,7 +89,7 @@ function output() {
 					<td><?php echo esc_html( $ticket->code ); ?></td>
 				</tr>
 				<tr>
-					<th colspan="2"><?php esc_html_e( 'Location', 'sugar-calendar' ); ?></th>
+					<th colspan="2"><?php esc_html_e( 'Location', 'sugar-calendar-lite' ); ?></th>
 					<th></th>
 				</tr>
 				<tr>
@@ -98,14 +98,14 @@ function output() {
 				</tr>
 				<?php if ( ! empty( $attendee ) ) : ?>
 					<tr>
-						<th colspan="2"><?php esc_html_e( 'Attendee', 'sugar-calendar' ); ?></th>
+						<th colspan="2"><?php esc_html_e( 'Attendee', 'sugar-calendar-lite' ); ?></th>
 					</tr>
 					<tr>
 						<td colspan="2"><?php echo esc_html( $attendee->first_name . ' ' . $attendee->last_name ); ?></td>
 					</tr>
 				<?php endif; ?>
 				<tr>
-					<th colspan="3"><?php esc_html_e( 'URL', 'sugar-calendar' ); ?></th>
+					<th colspan="3"><?php esc_html_e( 'URL', 'sugar-calendar-lite' ); ?></th>
 				</tr>
 				<tr>
 					<td colspan="3"><?php echo get_permalink( $event->object_id ); ?></td>

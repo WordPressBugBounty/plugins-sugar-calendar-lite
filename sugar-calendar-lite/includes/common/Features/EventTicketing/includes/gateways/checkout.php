@@ -151,19 +151,19 @@ class Checkout {
 		$available = get_event_meta( $event_id, 'ticket_quantity', true );
 
 		if ( empty( $_POST['first_name'] ) ) {
-			$this->add_error( 'missing_first_name', esc_html__( 'Please enter your first name.', 'sugar-calendar' ), '#sc-event-ticketing-first-name' );
+			$this->add_error( 'missing_first_name', esc_html__( 'Please enter your first name.', 'sugar-calendar-lite' ), '#sc-event-ticketing-first-name' );
 		}
 
 		if ( empty( $_POST['last_name'] ) ) {
-			$this->add_error( 'missing_last_name', esc_html__( 'Please enter your last name.', 'sugar-calendar' ), '#sc-event-ticketing-last-name' );
+			$this->add_error( 'missing_last_name', esc_html__( 'Please enter your last name.', 'sugar-calendar-lite' ), '#sc-event-ticketing-last-name' );
 		}
 
 		if ( empty( $_POST['email'] ) || ! is_email( $_POST['email'] ) ) {
-			$this->add_error( 'missing_email', esc_html__( 'Please enter a valid email address.', 'sugar-calendar' ), '#sc-event-ticketing-email' );
+			$this->add_error( 'missing_email', esc_html__( 'Please enter a valid email address.', 'sugar-calendar-lite' ), '#sc-event-ticketing-email' );
 		}
 
 		if ( $qty > $available ) {
-			$this->add_error( 'insufficient_quantity', sprintf( esc_html__( 'Only %d tickets are available. Please reduce your purchase quantity.', 'sugar-calendar' ), $available ), '#sc-event-ticketing-modal-attendee-fieldset' );
+			$this->add_error( 'insufficient_quantity', sprintf( esc_html__( 'Only %d tickets are available. Please reduce your purchase quantity.', 'sugar-calendar-lite' ), $available ), '#sc-event-ticketing-modal-attendee-fieldset' );
 		}
 	}
 
@@ -174,7 +174,7 @@ class Checkout {
 			: false;
 
 		if ( empty( $gateway ) || ! array_key_exists( $gateway, $this->gateways ) || ! class_exists( $this->gateways[ $gateway ] ) ) {
-			$this->add_error( 'unregistered_gateway', esc_html__( 'The gateway you have selected does not exist.', 'sugar-calendar' ) );
+			$this->add_error( 'unregistered_gateway', esc_html__( 'The gateway you have selected does not exist.', 'sugar-calendar-lite' ) );
 		}
 
 		$this->gateway = $gateway;

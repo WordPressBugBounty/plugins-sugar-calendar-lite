@@ -73,9 +73,9 @@ final class Term_Colors extends UI {
 
 		// Setup the labels
 		$this->labels = [
-			'singular'    => esc_html__( 'Color', 'sugar-calendar' ),
-			'plural'      => esc_html__( 'Colors', 'sugar-calendar' ),
-			'description' => esc_html__( 'Assign calendars a custom color to visually separate them from each-other.', 'sugar-calendar' ),
+			'singular'    => esc_html__( 'Color', 'sugar-calendar-lite' ),
+			'plural'      => esc_html__( 'Colors', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'Assign calendars a custom color to visually separate them from each-other.', 'sugar-calendar-lite' ),
 		];
 	}
 

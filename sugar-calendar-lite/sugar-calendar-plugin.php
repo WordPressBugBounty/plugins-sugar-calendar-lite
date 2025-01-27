@@ -518,6 +518,7 @@ final class Plugin {
 	 * Register hooks.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Add the `perform_post_upgrade` hook.
 	 */
 	public function hooks() {
 
@@ -530,6 +531,9 @@ final class Plugin {
 		add_action( 'plugins_loaded', [ $this, 'get_migrations' ] );
 		add_action( 'plugins_loaded', [ $this, 'get_usage_tracking' ] );
 		add_action( 'plugins_loaded', [ $this, 'get_notifications' ] );
+
+		// Priority is 99 so it runs after the main upgrade routine.
+		add_action( 'init', [ $this, 'perform_post_upgrade' ], 99 );
 	}
 
 	/**
@@ -570,10 +574,10 @@ final class Plugin {
 
 		// Create a new calendar.
 		$calendar = wp_insert_term(
-			esc_html__( 'My Calendar', 'sugar-calendar' ),
+			esc_html__( 'My Calendar', 'sugar-calendar-lite' ),
 			sugar_calendar_get_calendar_taxonomy_id(),
 			[
-				'description' => esc_html__( 'The default calendar events will be added to.', 'sugar-calendar' ),
+				'description' => esc_html__( 'The default calendar events will be added to.', 'sugar-calendar-lite' ),
 			]
 		);
 
@@ -643,6 +647,37 @@ final class Plugin {
 		}
 
 		return $notifications;
+	}
+
+	/**
+	 * Perform post-upgrade tasks.
+	 *
+	 * @since 3.5.0
+	 */
+	public function perform_post_upgrade() {
+
+		// Get the plugin version before the upgrade.
+		$old_sugar_calendar_version = get_option( 'sugar_calendar_version', false );
+
+		// Bail if the plugin is already at the latest version.
+		if (
+			! empty( $old_sugar_calendar_version )
+			&&
+			version_compare( $old_sugar_calendar_version, SC_PLUGIN_VERSION, '>=' )
+		) {
+			// Nothing to do here since we are already at the latest version.
+			return;
+		}
+
+		/**
+		 * Post upgrade action.
+		 *
+		 * @since 3.5.0
+		 */
+		do_action( 'sugar_calendar_post_upgrade' );
+
+		// Set the plugin version to the current version.
+		update_option( 'sugar_calendar_version', SC_PLUGIN_VERSION, true );
 	}
 
 	/**

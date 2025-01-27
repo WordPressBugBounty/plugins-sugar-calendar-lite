@@ -9,13 +9,13 @@ use Sugar_Calendar\Block\EventList\EventListView;
 // Label for groupped events.
 if ( $context->should_group_events_by_week() ) {
 
-	$previous_button_label = __( 'Previous Week', 'sugar-calendar' );
-	$next_button_label     = __( 'Next Week', 'sugar-calendar' );
+	$previous_button_label = __( 'Previous Week', 'sugar-calendar-lite' );
+	$next_button_label     = __( 'Next Week', 'sugar-calendar-lite' );
 
 } else {
 
-	$previous_button_label = __( 'Previous', 'sugar-calendar' );
-	$next_button_label     = __( 'Next', 'sugar-calendar' );
+	$previous_button_label = __( 'Previous', 'sugar-calendar-lite' );
+	$next_button_label     = __( 'Next', 'sugar-calendar-lite' );
 }
 
 ?>

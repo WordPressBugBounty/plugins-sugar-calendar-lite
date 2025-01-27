@@ -57,6 +57,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 *
 	 * @since 3.0.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
+	 * @since 3.5.0 Added support for filter by venues.
 	 *
 	 * @return array
 	 *
@@ -115,7 +116,9 @@ class Month implements InterfaceBaseView, InterfaceView {
 				$start_period_range,
 				$end_period_range,
 				! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [],
-				$this->block->get_search_term()
+				$this->block->get_search_term(),
+				null,
+				$this->block->get_venues()
 			);
 		}
 

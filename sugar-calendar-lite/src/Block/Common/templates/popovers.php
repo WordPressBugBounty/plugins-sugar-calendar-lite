@@ -22,7 +22,7 @@
 			?>
 			<div class="sugar-calendar-block__popover__calendar_selector__container__calendars">
 				<div class="sugar-calendar-block__popover__calendar_selector__container__heading">
-					<?php esc_html_e( 'Calendars', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Calendars', 'sugar-calendar-lite' ); ?>
 				</div>
 				<div class="sugar-calendar-block__popover__calendar_selector__container__options">
 				<?php
@@ -53,6 +53,15 @@
 			<?php
 		}
 
+		/**
+		 * Fires after the calendars filter in the calendar selector popover.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param Sugar_Calendar\Block\Calendar\CalendarView\Block $context The block context.
+		 */
+		do_action( 'sugar_calendar_block_popover_additional_filters', $context );
+
 		$container_days_style = '';
 
 		if ( $context->get_display_mode() === 'day' ) {
@@ -62,7 +71,7 @@
 
 		<div style="<?php echo esc_attr( $container_days_style ); ?>" class="sugar-calendar-block__popover__calendar_selector__container__days">
 			<div class="sugar-calendar-block__popover__calendar_selector__container__heading">
-				<?php esc_html_e( 'Days of the Week', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Days of the Week', 'sugar-calendar-lite' ); ?>
 			</div>
 			<div class="sugar-calendar-block__popover__calendar_selector__container__options">
 				<?php
@@ -91,16 +100,16 @@
 
 		<div class="sugar-calendar-block__popover__calendar_selector__container__time">
 			<div class="sugar-calendar-block__popover__calendar_selector__container__heading">
-				<?php esc_html_e( 'Time of Day', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Time of Day', 'sugar-calendar-lite' ); ?>
 			</div>
 			<div class="sugar-calendar-block__popover__calendar_selector__container__options">
 				<?php
 				$time_of_day = [
-					'all_day'   => esc_html__( 'All Day', 'sugar-calendar' ),
-					'morning'   => esc_html__( 'Morning', 'sugar-calendar' ),
-					'afternoon' => esc_html__( 'Afternoon', 'sugar-calendar' ),
-					'evening'   => esc_html__( 'Evening', 'sugar-calendar' ),
-					'night'     => esc_html__( 'Night', 'sugar-calendar' ),
+					'all_day'   => esc_html__( 'All Day', 'sugar-calendar-lite' ),
+					'morning'   => esc_html__( 'Morning', 'sugar-calendar-lite' ),
+					'afternoon' => esc_html__( 'Afternoon', 'sugar-calendar-lite' ),
+					'evening'   => esc_html__( 'Evening', 'sugar-calendar-lite' ),
+					'night'     => esc_html__( 'Night', 'sugar-calendar-lite' ),
 				];
 
 				foreach ( $time_of_day as $tod_key => $tod_val ) {

@@ -32,7 +32,7 @@ class EventNew extends EventAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Add New Event', 'sugar-calendar' );
+		return esc_html__( 'Add New Event', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class EventNew extends EventAbstract {
 	 */
 	public static function get_title() {
 
-		return esc_html__( 'Add New', 'sugar-calendar' );
+		return esc_html__( 'Add New', 'sugar-calendar-lite' );
 	}
 
 	/**

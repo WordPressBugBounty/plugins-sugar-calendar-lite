@@ -102,7 +102,7 @@ class ToolsMigrateTab extends Tools {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Migrate', 'sugar-calendar' );
+		return esc_html__( 'Migrate', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -118,6 +118,6 @@ class ToolsMigrateTab extends Tools {
 			return;
 		}
 
-		esc_html_e( 'No migration available.', 'sugar-calendar' );
+		esc_html_e( 'No migration available.', 'sugar-calendar-lite' );
 	}
 }

@@ -135,10 +135,10 @@ function localize() {
 	wp_localize_script( 'sugar_calendar_admin_settings', 'sc_vars', array(
 		'ajax_url'          => Plugin::instance()->get_admin()->ajax_url(),
 		'license_nonce'     => wp_create_nonce( 'sc_license_nonce' ),
-		'label_btn_clicked' => esc_html__( 'Verifying', 'sugar-calendar' ),
-		'label_btn_default' => esc_html__( 'Verify', 'sugar-calendar' ),
-		'label_feedback'    => esc_html__( 'Verifying...', 'sugar-calendar' ),
-		'feedback_empty'    => esc_html__( 'Please enter a valid license key.', 'sugar-calendar' ),
+		'label_btn_clicked' => esc_html__( 'Verifying', 'sugar-calendar-lite' ),
+		'label_btn_default' => esc_html__( 'Verify', 'sugar-calendar-lite' ),
+		'label_feedback'    => esc_html__( 'Verifying...', 'sugar-calendar-lite' ),
+		'feedback_empty'    => esc_html__( 'Please enter a valid license key.', 'sugar-calendar-lite' ),
 	) );
 
 	// User preferences

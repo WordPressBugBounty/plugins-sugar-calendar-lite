@@ -60,6 +60,7 @@ class Day implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
+	 * @since 3.5.0 Added support for filtering by venues.
 	 *
 	 * @return \Sugar_Calendar\Event[]
 	 */
@@ -98,7 +99,9 @@ class Day implements InterfaceBaseView {
 			$start_range,
 			$end_range,
 			! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [],
-			$this->block->get_search_term()
+			$this->block->get_search_term(),
+			null,
+			$this->block->get_venues()
 		);
 
 		if ( ! empty( $events ) && $this->get_block()->get_visitor_timezone() ) {

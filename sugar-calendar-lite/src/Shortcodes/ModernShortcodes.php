@@ -44,6 +44,16 @@ class ModernShortcodes {
 						'default'         => '',
 						'type'            => 'string',
 					],
+					'calendars'                 => [
+						'block_attribute' => 'calendars',
+						'default'         => [],
+						'type'            => 'array_int',
+					],
+					'venues'                    => [
+						'block_attribute' => 'venues',
+						'default'         => [],
+						'type'            => 'array_int',
+					],
 					'display'                   => [
 						'block_attribute' => 'display',
 						'default'         => 'month',
@@ -54,18 +64,23 @@ class ModernShortcodes {
 							'day',
 						],
 					],
-					'accent_color'              => [
-						'block_attribute' => 'accentColor',
-						'default'         => '#5685BD',
-						'type'            => 'string',
-					],
-					'calendars'                 => [
-						'block_attribute' => 'calendars',
-						'default'         => [],
-						'type'            => 'array_int',
+					'show_block_header'         => [
+						'block_attribute' => 'showBlockHeader',
+						'default'         => true,
+						'type'            => 'boolean',
 					],
 					'allow_user_change_display' => [
 						'block_attribute' => 'allowUserChangeDisplay',
+						'default'         => true,
+						'type'            => 'boolean',
+					],
+					'show_filters'              => [
+						'block_attribute' => 'showFilters',
+						'default'         => true,
+						'type'            => 'boolean',
+					],
+					'show_search'               => [
+						'block_attribute' => 'showSearch',
 						'default'         => true,
 						'type'            => 'boolean',
 					],
@@ -77,6 +92,11 @@ class ModernShortcodes {
 							'light',
 							'dark',
 						],
+					],
+					'accent_color'              => [
+						'block_attribute' => 'accentColor',
+						'default'         => '#5685BD',
+						'type'            => 'string',
 					],
 				],
 			],
@@ -99,6 +119,11 @@ class ModernShortcodes {
 					],
 					'calendars'                 => [
 						'block_attribute' => 'calendars',
+						'default'         => [],
+						'type'            => 'array_int',
+					],
+					'venues'                    => [
+						'block_attribute' => 'venues',
 						'default'         => [],
 						'type'            => 'array_int',
 					],
@@ -578,6 +603,7 @@ class ModernShortcodes {
 	 * Apply additional logic to Sugar Calendar Events List shortcode attributes.
 	 *
 	 * @since 3.4.0
+	 * @since 3.5.0 Updated so that `eventsPerPage` is never greater than `maximumEventsToShow`.
 	 *
 	 * @param array $block_attributes     Block attributes.
 	 * @param array $shortcode_attributes Shortcode attributes.
@@ -600,18 +626,11 @@ class ModernShortcodes {
 
 		// If group events by week is used and set to false.
 		if (
-			isset( $shortcode_attributes['group_events_by_week'] )
-			&&
-			! $block_attributes['groupEventsByWeek']
+			isset( $shortcode_attributes['group_events_by_week'] ) &&
+			! $block_attributes['groupEventsByWeek'] &&
+			$block_attributes['maximumEventsToShow'] < $block_attributes['eventsPerPage']
 		) {
-
-			// If max events to show is lower than events per page,
-			// set it to the same value as events per page.
-			if (
-				$block_attributes['maximumEventsToShow'] < $block_attributes['eventsPerPage']
-			) {
-				$block_attributes['maximumEventsToShow'] = $block_attributes['eventsPerPage'];
-			}
+			$block_attributes['eventsPerPage'] = $block_attributes['maximumEventsToShow'];
 		}
 
 		return $block_attributes;

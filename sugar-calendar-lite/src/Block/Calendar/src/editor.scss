@@ -6,11 +6,13 @@
 
 .sugar-calendar-block {
 
-	&__calendars {
+	&__calendars,
+	&__venues {
 		margin-bottom: 24px;
 		z-index: 99;
 
-		.sc-calendar-block-select {
+		.sc-calendar-block-select,
+		.sc-venue-block-select {
 
 			&__control {
 				border-color: inherit;
@@ -61,6 +63,10 @@
 				}
 			}
 		}
+	}
+
+	&__venues {
+		z-index: 90;
 	}
 
 	&__colors {

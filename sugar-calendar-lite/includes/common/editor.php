@@ -60,14 +60,14 @@ function registered() {
 		// Block Editor
 		array(
 			'id'       => 'block',
-			'label'    => esc_html__( 'Block Editor', 'sugar-calendar' ),
+			'label'    => esc_html__( 'Block Editor', 'sugar-calendar-lite' ),
 			'disabled' => ! function_exists( 'register_block_type' )
 		),
 
 		// Classic Editor
 		array(
 			'id'       => 'classic',
-			'label'    => esc_html__( 'Classic Editor', 'sugar-calendar' ),
+			'label'    => esc_html__( 'Classic Editor', 'sugar-calendar-lite' ),
 			'disabled' => false
 		),
 	) );

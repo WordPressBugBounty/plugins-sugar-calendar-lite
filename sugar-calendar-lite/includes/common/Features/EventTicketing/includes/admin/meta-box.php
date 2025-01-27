@@ -16,7 +16,7 @@ function metabox( $metabox ) {
 
 	$metabox->add_section( [
 		'id'       => 'tickets',
-		'label'    => esc_html__( 'Tickets', 'sugar-calendar' ),
+		'label'    => esc_html__( 'Tickets', 'sugar-calendar-lite' ),
 		'icon'     => 'tickets-alt',
 		'order'    => 80,
 		'callback' => __NAMESPACE__ . '\\metabox_section',
@@ -38,11 +38,11 @@ function metabox_section( $event = null ) {
 	ob_start(); ?>
 
     <div class="sugar-calendar-metabox__field-row">
-        <p class="desc"><?php esc_html_e( 'Configure the setting below to enable and sell tickets for this event.', 'sugar-calendar' ); ?></p>
+        <p class="desc"><?php esc_html_e( 'Configure the setting below to enable and sell tickets for this event.', 'sugar-calendar-lite' ); ?></p>
     </div>
 
     <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--enable_tickets">
-        <label for="enable_tickets"><?php esc_html_e( 'Ticket Sales', 'sugar-calendar' ); ?></label>
+        <label for="enable_tickets"><?php esc_html_e( 'Ticket Sales', 'sugar-calendar-lite' ); ?></label>
         <div class="sugar-calendar-metabox__field">
 			<?php
 			UI::toggle_control(
@@ -51,8 +51,8 @@ function metabox_section( $event = null ) {
 					'name'          => 'enable_tickets',
 					'value'         => $enabled,
 					'toggle_labels' => [
-						esc_html__( 'ON', 'sugar-calendar' ),
-						esc_html__( 'OFF', 'sugar-calendar' ),
+						esc_html__( 'ON', 'sugar-calendar-lite' ),
+						esc_html__( 'OFF', 'sugar-calendar-lite' ),
 					],
 				],
 				true
@@ -62,14 +62,14 @@ function metabox_section( $event = null ) {
     </div>
 
     <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--ticket_price">
-        <label for="ticket_price"><?php esc_html_e( 'Ticket Price', 'sugar-calendar' ); ?></label>
+        <label for="ticket_price"><?php esc_html_e( 'Ticket Price', 'sugar-calendar-lite' ); ?></label>
         <div class="sugar-calendar-metabox__field">
             <input name="ticket_price" id="ticket_price" type="text" inputmode="numeric" autocomplete="off" placeholder="0.00" pattern="^[0-9]{1,18}([,.][0-9]{1,9})?$" data-lpignore="true" value="<?php echo esc_attr( $price ); ?>"/>
         </div>
     </div>
 
     <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--ticket_quantity">
-        <label for="ticket_quantity"><?php esc_html_e( 'Capacity', 'sugar-calendar' ); ?></label>
+        <label for="ticket_quantity"><?php esc_html_e( 'Capacity', 'sugar-calendar-lite' ); ?></label>
         <div class="sugar-calendar-metabox__field">
             <input name="ticket_quantity" id="ticket_quantity" type="number" inputmode="numeric" autocomplete="off" min="0" step="1" placeholder="0" pattern="[0-9]" data-lpignore="true" value="<?php echo esc_attr( $quantity ); ?>"/>
         </div>

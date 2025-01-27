@@ -2,6 +2,9 @@
 
 namespace Sugar_Calendar;
 
+use Sugar_Calendar\Options;
+use Sugar_Calendar\Plugin;
+
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
  *
@@ -85,6 +88,7 @@ class Helpers {
 	 * Clean the incoming data.
 	 *
 	 * @since 3.1.0
+	 * @since 3.5.0 Add 'venues` and 'venuesFilter' to the expected data.
 	 *
 	 * @param array $incoming_data Data needed to be cleaned.
 	 *
@@ -101,7 +105,15 @@ class Helpers {
 				'default' => [],
 				'type'    => 'array',
 			],
+			'venues'             => [
+				'default' => [],
+				'type'    => 'array',
+			],
 			'calendarsFilter'    => [
+				'default' => [],
+				'type'    => 'array',
+			],
+			'venuesFilter'       => [
 				'default' => [],
 				'type'    => 'array',
 			],
@@ -259,6 +271,11 @@ class Helpers {
 				'default' => '',
 			],
 			[
+				'name'    => 'venues',
+				'type'    => 'array_int',
+				'default' => [],
+			],
+			[
 				'name' => 'groupEventsByWeek',
 				'type' => 'boolean',
 			],
@@ -329,6 +346,11 @@ class Helpers {
 				$sanitized_attributes[ $attr['name'] ] = ! empty( $attributes[ $attr['name'] ] )
 					? absint( $attributes[ $attr['name'] ] )
 					: $attr['default'];
+			} elseif ( $attr['type'] === 'array_int' ) {
+
+				$sanitized_attributes[ $attr['name'] ] = ! empty( $attributes[ $attr['name'] ] )
+					? array_map( 'absint', $attributes[ $attr['name'] ] )
+					: $attr['default'];
 			}
 		}
 
@@ -347,10 +369,10 @@ class Helpers {
 	public static function get_event_datetime_label( $event ) {
 
 		if ( $event->is_multi() ) {
-			return __( 'Date/Time:', 'sugar-calendar' );
+			return __( 'Date/Time:', 'sugar-calendar-lite' );
 		}
 
-		return __( 'Date:', 'sugar-calendar' );
+		return __( 'Date:', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -376,7 +398,7 @@ class Helpers {
 		if ( $event->is_all_day() ) {
 			return sprintf(
 				/* translators: 1: start date, 2: end date. */
-				esc_html__( '%1$s - %2$s', 'sugar-calendar' ),
+				esc_html__( '%1$s - %2$s', 'sugar-calendar-lite' ),
 				$start_date,
 				$end_date
 			);
@@ -406,7 +428,7 @@ class Helpers {
 	public static function get_event_datetime( $event, $date_or_time = 'date' ) {
 
 		if ( $date_or_time === 'time' && $event->is_all_day() ) {
-			return esc_html__( 'All Day', 'sugar-calendar' );
+			return esc_html__( 'All Day', 'sugar-calendar-lite' );
 		}
 
 		$format = 'date_format';
@@ -622,9 +644,11 @@ class Helpers {
 	 * @since 3.3.0
 	 * @since 3.4.0 Added support for the 'search' parameter.
 	 * @since 3.4.0 Use `$wpdb->prefix` instead of hardcoding 'wp_'.
+	 * @since 3.5.0 Added support for the 'venues' parameter.
 	 *
 	 * @param int    $number   The number of events to get.
 	 * @param string $category The categories separated by comma.
+	 * @param string $venues   The venue ids separated by comma.
 	 * @param string $search   The search keyword for the event title.
 	 *
 	 * @return Event[]
@@ -632,6 +656,7 @@ class Helpers {
 	public static function get_upcoming_events_list_with_recurring( // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 		$number = 5,
 		$category = '',
+		$venues = '',
 		$search = ''
 	) {
 
@@ -719,13 +744,17 @@ class Helpers {
 			return [];
 		}
 
-		return sugar_calendar_get_events(
-			[
-				'id__in'  => wp_list_pluck( $event_ids, 'id' ),
-				'orderby' => 'start',
-				'order'   => 'ASC',
-			]
-		);
+		$sugar_calendar_events_args = [
+			'id__in'  => wp_list_pluck( $event_ids, 'id' ),
+			'orderby' => 'start',
+			'order'   => 'ASC',
+		];
+
+		if ( ! empty( $venues ) ) {
+			$sugar_calendar_events_args['venue_id'] = explode( ',', $venues );
+		}
+
+		return sugar_calendar_get_events( $sugar_calendar_events_args );
 	}
 
 	/**
@@ -997,18 +1026,65 @@ class Helpers {
 	 */
 	public static function get_no_events_message_for_legacy_event_list( $display = 'all' ) {
 
-		$no_events_message = __( 'There are no events to display.', 'sugar-calendar' );
+		$no_events_message = __( 'There are no events to display.', 'sugar-calendar-lite' );
 
 		switch ( $display ) {
 			case 'upcoming':
-				$no_events_message = __( 'There are no upcoming events to display.', 'sugar-calendar' );
+				$no_events_message = __( 'There are no upcoming events to display.', 'sugar-calendar-lite' );
 				break;
 
 			case 'past':
-				$no_events_message = __( 'There are no past events to display.', 'sugar-calendar' );
+				$no_events_message = __( 'There are no past events to display.', 'sugar-calendar-lite' );
 				break;
 		}
 
 		return $no_events_message;
+	}
+
+	/**
+	 * Get coordinates from an address using Google Maps API.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $address       Address to geocode.
+	 * @param bool   $force_refresh Whether to force a refresh of the coordinates.
+	 *
+	 * @return array|false
+	 */
+	public static function get_coordinates_from_address( $address, $force_refresh = false ) {
+
+		$features            = Plugin::instance()->get_common_features();
+		$feature_google_maps = $features->get_feature( 'GoogleMaps' );
+
+		return $feature_google_maps->get_coordinates( $address, $force_refresh );
+	}
+
+	/**
+	 * Verify the Google Maps API key.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $api_key The API key to verify.
+	 *
+	 * @return array
+	 */
+	public static function verify_google_maps_api_key( $api_key ) {
+
+		$features            = Plugin::instance()->get_common_features();
+		$feature_google_maps = $features->get_feature( 'GoogleMaps' );
+
+		return $feature_google_maps->verify_api_key( $api_key );
+	}
+
+	/**
+	 * Return the Google Maps API Key from options.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @return string
+	 */
+	public static function get_google_maps_api_key() {
+
+		return Options::get( 'maps_google_api_key', '' );
 	}
 }

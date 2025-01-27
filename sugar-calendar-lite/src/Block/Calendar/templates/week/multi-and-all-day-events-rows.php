@@ -6,8 +6,8 @@ use Sugar_Calendar\Block\Calendar\CalendarView\Week;
  * @var Week\Week $context
  */
 $multi_and_all_day_events = [
-	'all_day'   => __( 'All Day', 'sugar-calendar' ),
-	'multi_day' => __( 'Multi-day', 'sugar-calendar' ),
+	'all_day'   => __( 'All Day', 'sugar-calendar-lite' ),
+	'multi_day' => __( 'Multi-day', 'sugar-calendar-lite' ),
 ];
 
 foreach ( $multi_and_all_day_events as $key => $label ) {

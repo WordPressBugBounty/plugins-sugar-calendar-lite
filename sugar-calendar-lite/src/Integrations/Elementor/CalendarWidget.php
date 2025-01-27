@@ -35,7 +35,7 @@ class CalendarWidget extends Widget_Base {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'Events Calendar', 'sugar-calendar' );
+		return esc_html__( 'Events Calendar', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -112,8 +112,16 @@ class CalendarWidget extends Widget_Base {
 		$this->start_controls_section(
 			'section_sugar_calendar_events_calendar',
 			[
-				'label' => esc_html__( 'Events Calendar', 'sugar-calendar' ),
+				'label' => esc_html__( 'Events Calendar', 'sugar-calendar-lite' ),
 				'tab'   => Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		$this->add_control(
+			'section_title_settings',
+			[
+				'label' => __( 'Settings', 'sugar-calendar-lite' ),
+				'type'  => Controls_Manager::HEADING,
 			]
 		);
 
@@ -121,7 +129,7 @@ class CalendarWidget extends Widget_Base {
 			'calendars',
 			[
 				'default'  => [],
-				'label'    => esc_html__( 'Calendars', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Calendars', 'sugar-calendar-lite' ),
 				'multiple' => true,
 				'options'  => get_terms(
 					[
@@ -134,15 +142,36 @@ class CalendarWidget extends Widget_Base {
 			]
 		);
 
+		/**
+		 * Extend the Elementor Event Calendar widget controls.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param Widget_Base $this Current widget instance.
+		 */
+		do_action(
+			'sugar_calendar_integrations_elementor_calendar_widget_register_controls_section_settings',
+			$this
+		);
+
+		$this->add_control(
+			'section_title_display',
+			[
+				'label'     => __( 'Display', 'sugar-calendar-lite' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			]
+		);
+
 		$this->add_control(
 			'display_mode',
 			[
 				'default'    => 'month',
-				'label'      => esc_html__( 'Display', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Display Type', 'sugar-calendar-lite' ),
 				'options'    => [
-					'month' => esc_html__( 'Month', 'sugar-calendar' ),
-					'week'  => esc_html__( 'Week', 'sugar-calendar' ),
-					'day'   => esc_html__( 'Day', 'sugar-calendar' ),
+					'month' => esc_html__( 'Month', 'sugar-calendar-lite' ),
+					'week'  => esc_html__( 'Week', 'sugar-calendar-lite' ),
+					'day'   => esc_html__( 'Day', 'sugar-calendar-lite' ),
 				],
 				'show_label' => true,
 				'type'       => Controls_Manager::SELECT,
@@ -150,16 +179,15 @@ class CalendarWidget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'appearance',
+			'show_block_header',
 			[
-				'default'    => 'light',
-				'label'      => esc_html__( 'Appearance', 'sugar-calendar' ),
-				'options'    => [
-					'light' => esc_html__( 'Light', 'sugar-calendar' ),
-					'dark'  => esc_html__( 'Dark', 'sugar-calendar' ),
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Block Header', 'sugar-calendar-lite' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!' => 'plain',
 				],
-				'show_label' => true,
-				'type'       => Controls_Manager::SELECT,
 			]
 		);
 
@@ -167,9 +195,64 @@ class CalendarWidget extends Widget_Base {
 			'allow_users_to_change_display',
 			[
 				'default'      => 'yes',
-				'label'        => esc_html__( 'Allow Users to Change Display', 'sugar-calendar' ),
+				'label'        => esc_html__( 'Allow Users to Change Display', 'sugar-calendar-lite' ),
 				'return_value' => 'yes',
 				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_filters',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Filters', 'sugar-calendar-lite' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'show_search',
+			[
+				'default'      => 'yes',
+				'label'        => esc_html__( 'Show Search', 'sugar-calendar-lite' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+				'condition'    => [
+					'display_mode!'     => 'plain',
+					'show_block_header' => 'yes',
+				],
+			]
+		);
+
+		$this->add_control(
+			'section_title_styles',
+			[
+				'label'     => __( 'Styles', 'sugar-calendar-lite' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			]
+		);
+
+		$this->add_control(
+			'appearance',
+			[
+				'default'    => 'light',
+				'label'      => esc_html__( 'Appearance', 'sugar-calendar-lite' ),
+				'options'    => [
+					'light' => esc_html__( 'Light', 'sugar-calendar-lite' ),
+					'dark'  => esc_html__( 'Dark', 'sugar-calendar-lite' ),
+				],
+				'show_label' => true,
+				'type'       => Controls_Manager::SELECT,
 			]
 		);
 
@@ -178,7 +261,7 @@ class CalendarWidget extends Widget_Base {
 			[
 				'alpha'   => false,
 				'default' => '#5685BD',
-				'label'   => esc_html__( 'Accent Color', 'sugar-calendar' ),
+				'label'   => esc_html__( 'Accent Color', 'sugar-calendar-lite' ),
 				'type'    => Controls_Manager::COLOR,
 			]
 		);
@@ -194,7 +277,10 @@ class CalendarWidget extends Widget_Base {
 	protected function render() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$display                       = $this->get_settings_for_display( 'display_mode' );
-		$allow_users_to_change_display = $this->get_settings_for_display( 'allow_users_to_change_display' );
+		$show_block_header             = $this->get_settings_for_display( 'show_block_header' );
+		$allow_users_to_change_display = $show_block_header === 'yes' ? $this->get_settings_for_display( 'allow_users_to_change_display' ) : '';
+		$show_filters                  = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_filters' ) : '';
+		$show_search                   = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_search' ) : '';
 		$accent_color                  = $this->get_settings_for_display( 'accent_color' );
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
 		$appearance                    = $this->get_settings_for_display( 'appearance' );
@@ -205,13 +291,27 @@ class CalendarWidget extends Widget_Base {
 			'accentColor'            => ! empty( $accent_color ) ? $accent_color : '#5685BD',
 			'calendars'              => ! empty( $calendars ) ? array_map( 'absint', $calendars ) : [],
 			'groupEventsByWeek'      => true,
-			'showBlockHeader'        => true,
-			'showFilters'            => true,
-			'showSearch'             => true,
+			'showBlockHeader'        => ! empty( $show_block_header ) && $show_block_header === 'yes',
 			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
+			'showFilters'            => ! empty( $show_filters ) && $show_filters === 'yes',
+			'showSearch'             => ! empty( $show_search ) && $show_search === 'yes',
 			'appearance'             => ! empty( $appearance ) ? $appearance : 'light',
 			'should_not_load_events' => false,
 		];
+
+		/**
+		 * Extend the Elementor Event Calendar widget controls.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param array       $attr Event calendar block attributes.
+		 * @param Widget_Base $this Current widget instance.
+		 */
+		$attr = apply_filters(
+			'sugar_calendar_integrations_elementor_calendar_widget_render_attributes',
+			$attr,
+			$this
+		);
 
 		$block = new CalendarView\Block( $attr );
 

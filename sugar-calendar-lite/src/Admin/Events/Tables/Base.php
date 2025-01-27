@@ -366,8 +366,8 @@ class Base extends WP_List_Table {
 		$r = wp_parse_args(
 			$args,
 			[
-				'plural'   => sugar_calendar_get_post_type_label( $pt, 'name', esc_html__( 'Events', 'sugar-calendar' ) ),
-				'singular' => sugar_calendar_get_post_type_label( $pt, 'singular_name', esc_html__( 'Event', 'sugar-calendar' ) ),
+				'plural'   => sugar_calendar_get_post_type_label( $pt, 'name', esc_html__( 'Events', 'sugar-calendar-lite' ) ),
+				'singular' => sugar_calendar_get_post_type_label( $pt, 'singular_name', esc_html__( 'Event', 'sugar-calendar-lite' ) ),
 			]
 		);
 
@@ -431,10 +431,10 @@ class Base extends WP_List_Table {
 	protected function init_modes() {
 
 		$this->modes = [
-			'month' => esc_html__( 'Month', 'sugar-calendar' ),
-			'week'  => esc_html__( 'Week', 'sugar-calendar' ),
-			'day'   => esc_html__( 'Day', 'sugar-calendar' ),
-			'list'  => esc_html__( 'List', 'sugar-calendar' ),
+			'month' => esc_html__( 'Month', 'sugar-calendar-lite' ),
+			'week'  => esc_html__( 'Week', 'sugar-calendar-lite' ),
+			'day'   => esc_html__( 'Day', 'sugar-calendar-lite' ),
+			'list'  => esc_html__( 'List', 'sugar-calendar-lite' ),
 		];
 	}
 
@@ -1438,7 +1438,7 @@ class Base extends WP_List_Table {
 				'All <span class="count">(%s)</span>',
 				$event_counts['total'],
 				'List table: all statuses (excluding trash)',
-				'sugar-calendar'
+				'sugar-calendar-lite'
 			),
 			number_format_i18n( $event_counts['total'] )
 		);
@@ -1701,10 +1701,10 @@ class Base extends WP_List_Table {
 
 		$title = ! empty( $event->title )
 			? apply_filters( 'the_title', $event->title, $event->object_id ) // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
-			: esc_html__( '(No title)', 'sugar-calendar' );
+			: esc_html__( '(No title)', 'sugar-calendar-lite' );
 
 		if ( $event->status === 'draft' ) {
-			$title .= ' &mdash; ' . esc_html__( 'Draft', 'sugar-calendar' );
+			$title .= ' &mdash; ' . esc_html__( 'Draft', 'sugar-calendar-lite' );
 		}
 
 		return $title;
@@ -2122,12 +2122,12 @@ class Base extends WP_List_Table {
 
 			// Maybe add restore link.
 			if ( $this->current_user_can_delete( $event ) ) {
-				$links['restore'] = $this->get_event_restore_link( $event, esc_html__( 'Restore', 'sugar-calendar' ) );
+				$links['restore'] = $this->get_event_restore_link( $event, esc_html__( 'Restore', 'sugar-calendar-lite' ) );
 			}
 
 			// Maybe add delete link.
 			if ( $this->current_user_can_delete( $event ) ) {
-				$links['delete'] = $this->get_event_delete_link( $event, esc_html__( 'Delete Permanently', 'sugar-calendar' ) );
+				$links['delete'] = $this->get_event_delete_link( $event, esc_html__( 'Delete Permanently', 'sugar-calendar-lite' ) );
 			}
 
 			// Not trashed, so offer to Edit or View.
@@ -2135,17 +2135,17 @@ class Base extends WP_List_Table {
 
 			// Maybe add edit & copy links.
 			if ( $this->current_user_can_edit( $event ) ) {
-				$links['edit'] = $this->get_event_edit_link( $event, esc_html_x( 'Edit', 'verb', 'sugar-calendar' ) );
+				$links['edit'] = $this->get_event_edit_link( $event, esc_html_x( 'Edit', 'verb', 'sugar-calendar-lite' ) );
 			}
 
 			// Maybe add delete link.
 			if ( $this->current_user_can_delete( $event ) ) {
-				$links['delete'] = $this->get_event_delete_link( $event, esc_html_x( 'Trash', 'verb', 'sugar-calendar' ) );
+				$links['delete'] = $this->get_event_delete_link( $event, esc_html_x( 'Trash', 'verb', 'sugar-calendar-lite' ) );
 			}
 
 			// Add view link.
 			if ( $this->current_user_can_view( $event ) ) {
-				$links['view'] = $this->get_event_view_link( $event, esc_html_x( 'View', 'verb', 'sugar-calendar' ) );
+				$links['view'] = $this->get_event_view_link( $event, esc_html_x( 'View', 'verb', 'sugar-calendar-lite' ) );
 			}
 		}
 
@@ -2443,8 +2443,8 @@ class Base extends WP_List_Table {
 
 		// Special case for password protected events.
 		if ( ! empty( $event->post_password ) ) {
-			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar' ) . '</strong>';
-			$pointer_text['details']       = '<span>' . esc_html__( 'Password protected', 'sugar-calendar' ) . '</span>';
+			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar-lite' ) . '</strong>';
+			$pointer_text['details']       = '<span>' . esc_html__( 'Password protected', 'sugar-calendar-lite' ) . '</span>';
 
 			// Post is not protected.
 		} elseif ( ! empty( $event->content ) ) {
@@ -2453,7 +2453,7 @@ class Base extends WP_List_Table {
 			$content = wp_trim_words( $event->content, 25 );
 
 			// Title.
-			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar' ) . '</strong>';
+			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar-lite' ) . '</strong>';
 
 			// Texturize.
 			$pointer_text['details'] = '<span>' . esc_html( $content ) . '</span>';
@@ -2501,7 +2501,7 @@ class Base extends WP_List_Table {
 			// Maybe show the original date, time, and zone.
 			if ( ! empty( $this->timezone ) && ( $this->timezone !== $event->start_tz ) ) {
 				$to = sprintf( /* translators: %1$s - Datetime; %2$s - Timezone. */
-					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar' ),
+					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar-lite' ),
 					sugar_calendar_format_date_i18n( $tf, $event->start, $event->start_tz ),
 					sugar_calendar_format_timezone( $event->start_tz, true )
 				);
@@ -2521,7 +2521,7 @@ class Base extends WP_List_Table {
 			// Maybe show the original date, time, and zone.
 			if ( ! empty( $this->timezone ) && ( $this->timezone !== $event->end_tz ) ) {
 				$to = sprintf( /* translators: %1$s - Datetime; %2$s - Timezone. */
-					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar' ),
+					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar-lite' ),
 					sugar_calendar_format_date_i18n( $tf, $event->end, $event->end_tz ),
 					sugar_calendar_format_timezone( $event->end_tz, true )
 				);
@@ -2551,29 +2551,29 @@ class Base extends WP_List_Table {
 
 				// Yearly.
 				if ( $event->recurrence === 'yearly' ) {
-					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['start']       = '<span>' . esc_html( $start ) . '</span>';
-					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['end']         = '<span>' . esc_html( $end ) . '</span>';
 
 					// Monthly.
 				} elseif ( $event->recurrence === 'monthly' ) {
-					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['start']       = '<span>' . esc_html( $start ) . '</span>';
-					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['end']         = '<span>' . esc_html( $end ) . '</span>';
 
 					// No recurrence.
 				} else {
-					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['start']       = '<span>' . esc_html( $start ) . '</span>';
-					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+					$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 					$pointer_dates['end']         = '<span>' . esc_html( $end ) . '</span>';
 				}
 
 				// Single all-day.
 			} else {
-				$pointer_dates['all_day_title'] = '<strong>' . esc_html__( 'All Day', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['all_day_title'] = '<strong>' . esc_html__( 'All Day', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['all_day']       = '<span>' . esc_html( $start ) . '</span>';
 			}
 
@@ -2586,16 +2586,16 @@ class Base extends WP_List_Table {
 
 			// Yearly.
 			if ( $event->recurrence === 'yearly' ) {
-				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['start']       = '<span>' . esc_html( $start ) . '</span>';
-				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['end']         = '<span>' . esc_html( $end ) . '</span>';
 
 				// Monthly.
 			} elseif ( $event->recurrence === 'monthly' ) {
-				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['start']       = '<span>' . esc_html( $start ) . '</span>';
-				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['end']         = '<span>' . esc_html( $end ) . '</span>';
 
 				// No recurrence.
@@ -2620,9 +2620,9 @@ class Base extends WP_List_Table {
 					}
 				}
 
-				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['start']       = '<span>' . wp_kses( $start, [ 'span' => [ 'class' ] ] ) . '</span>';
-				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['end_title']   = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['end']         = '<span>' . wp_kses( $end, [ 'span' => [ 'class' ] ] ) . '</span>';
 			}
 
@@ -2639,7 +2639,7 @@ class Base extends WP_List_Table {
 					$start .= $stz;
 				}
 
-				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['start_title'] = '<strong>' . esc_html__( 'Start', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['start']       = '<span>' . $start . '</span>';
 			}
 
@@ -2652,7 +2652,7 @@ class Base extends WP_List_Table {
 					$end .= $etz;
 				}
 
-				$pointer_dates['end_title'] = '<strong>' . esc_html__( 'End', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['end_title'] = '<strong>' . esc_html__( 'End', 'sugar-calendar-lite' ) . '</strong>';
 				$pointer_dates['end']       = '<span>' . $end . '</span>';
 			}
 		}
@@ -2663,7 +2663,7 @@ class Base extends WP_List_Table {
 
 			// Interval is known.
 			if ( isset( $intervals[ $event->recurrence ] ) ) {
-				$pointer_dates['recurrence'] = '<strong>' . esc_html_x( 'Repeats', 'Noun', 'sugar-calendar' ) . '</strong>';
+				$pointer_dates['recurrence'] = '<strong>' . esc_html_x( 'Repeats', 'Noun', 'sugar-calendar-lite' ) . '</strong>';
 
 				// No end.
 				if ( empty( $event->recurrence_end ) ) {
@@ -2682,7 +2682,7 @@ class Base extends WP_List_Table {
 					}
 
 					$recurring = sprintf( /* translators: %1$s - Recurrence; %2$s - Start date; %3$s - End date. */
-						esc_html_x( '%1$s from %2$s until %3$s', 'Weekly from December 1, 2030 until December 31, 2030', 'sugar-calendar' ),
+						esc_html_x( '%1$s from %2$s until %3$s', 'Weekly from December 1, 2030 until December 31, 2030', 'sugar-calendar-lite' ),
 						$intervals[ $event->recurrence ],
 						$recurring_start,
 						$this->get_event_date( $event->recurrence_end, $event->recurrence_end_tz )
@@ -2693,7 +2693,7 @@ class Base extends WP_List_Table {
 					// Recurrence goes forever.
 				} elseif ( ! $event->is_empty_date( $event->end ) && ( $event->start === $event->end ) ) {
 					$recurring = sprintf( /* translators: %1$s - Recurrence; %2$s - Start date. */
-						esc_html_x( '%1$s starting %2$s', 'Weekly forever, starting May 15, 1980', 'sugar-calendar' ),
+						esc_html_x( '%1$s starting %2$s', 'Weekly forever, starting May 15, 1980', 'sugar-calendar-lite' ),
 						$intervals[ $event->recurrence ],
 						$this->get_event_date( $event->start, $event->start_tz )
 					);
@@ -2702,7 +2702,7 @@ class Base extends WP_List_Table {
 
 				} else {
 					$recurring = sprintf( /* translators: %s - Recurrence. */
-						esc_html_x( '%s', 'Weekly forever', 'sugar-calendar' ), // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
+						esc_html_x( '%s', 'Weekly forever', 'sugar-calendar-lite' ), // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
 						$intervals[ $event->recurrence ]
 					);
 
@@ -2745,7 +2745,7 @@ class Base extends WP_List_Table {
 			$location = preg_replace( '/[\r\n]+/', '<br>', $event->location );
 
 			// Title.
-			$pointer_meta['location_title'] = '<strong>' . esc_html__( 'Location', 'sugar-calendar' ) . '</strong>';
+			$pointer_meta['location_title'] = '<strong>' . esc_html__( 'Location', 'sugar-calendar-lite' ) . '</strong>';
 
 			// Location though kses, only allow breaks.
 			$pointer_meta['location'] = '<span>' . $location . '</span>';
@@ -3131,9 +3131,9 @@ class Base extends WP_List_Table {
 		?>
 
         <p class="search-box">
-            <label for="event-search-input" class="screen-reader-text"><?php esc_html_e( 'Search', 'sugar-calendar' ); ?></label>
+            <label for="event-search-input" class="screen-reader-text"><?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?></label>
             <input type="search" id="event-search-input" class="search" name="s" value="<?php _admin_search_query(); ?>">
-            <input type="submit" id="search-submit" class="button" value="<?php esc_html_e( 'Search', 'sugar-calendar' ); ?>">
+            <input type="submit" id="search-submit" class="button" value="<?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?>">
         </p>
 
 		<?php
@@ -3174,11 +3174,16 @@ class Base extends WP_List_Table {
                     <input type="hidden" name="cy" value="<?php echo esc_attr( $this->get_year() ); ?>"/>
 
                     <fieldset>
-                        <legend><?php esc_html_e( 'Columns', 'sugar-calendar' ); ?></legend>
+                        <legend><?php esc_html_e( 'Columns', 'sugar-calendar-lite' ); ?></legend>
 						<?php
 						[ $columns, $hidden ] = $this->get_column_info();
 
 						foreach ( $columns as $column_key => $column_display_name ) :
+
+							// Skip if column is cb (checkbox).
+							if ( $column_key === 'cb' ) {
+								continue;
+							}
 							?>
 
                             <label>
@@ -3195,7 +3200,7 @@ class Base extends WP_List_Table {
 
                     </fieldset>
                     <fieldset>
-                        <legend><?php esc_html_e( 'Start of Week', 'sugar-calendar' ); ?></legend>
+                        <legend><?php esc_html_e( 'Start of Week', 'sugar-calendar-lite' ); ?></legend>
                         <select name="sugar-calendar[start_of_week]">
 
 							<?php foreach ( range( 0, 6 ) as $week_day ) : ?>
@@ -3207,11 +3212,11 @@ class Base extends WP_List_Table {
                         </select>
                     </fieldset>
                     <fieldset>
-                        <legend><?php esc_html_e( 'Maximum Events', 'sugar-calendar' ); ?></legend>
+                        <legend><?php esc_html_e( 'Maximum Events', 'sugar-calendar-lite' ); ?></legend>
                         <input type="number" step="1" min="1" max="999" class="code" name="sugar-calendar[events_max_num]" maxlength="3" value="<?php echo absint( $events_max_num ); ?>">
                     </fieldset>
                     <p class="submit">
-                        <button type="submit" name="sugar-calendar-submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar' ); ?></button>
+                        <button type="submit" name="sugar-calendar-submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar-lite' ); ?></button>
                     </p>
                 </form>
             </div>
@@ -3660,7 +3665,7 @@ class Base extends WP_List_Table {
             <label class="screen-reader-text" for="<?php echo esc_attr( $tax->name ); ?>">
 				<?php
 				sprintf( /* translators: %s taxonomy label. */
-					esc_html__( 'Filter by %s', 'sugar-calendar' ),
+					esc_html__( 'Filter by %s', 'sugar-calendar-lite' ),
 					$tax->labels->name
 				);
 				?>
@@ -3730,7 +3735,7 @@ class Base extends WP_List_Table {
 			if ( $this->get_mode() !== 'list' ) :
 				?>
 
-                <label for="cm" class="screen-reader-text"><?php esc_html_e( 'Switch to this month', 'sugar-calendar' ); ?></label>
+                <label for="cm" class="screen-reader-text"><?php esc_html_e( 'Switch to this month', 'sugar-calendar-lite' ); ?></label>
                 <select name="cm" id="cm">
 
 					<?php for ( $month_index = 1; $month_index <= 12; $month_index++ ) : ?>
@@ -3750,7 +3755,7 @@ class Base extends WP_List_Table {
 			if ( $this->get_mode() === 'day' ) :
 				?>
 
-                <label for="cd" class="screen-reader-text"><?php esc_html_e( 'Set the day', 'sugar-calendar' ); ?></label>
+                <label for="cd" class="screen-reader-text"><?php esc_html_e( 'Set the day', 'sugar-calendar-lite' ); ?></label>
                 <input type="number" name="cd" id="cd" value="<?php echo (int) $this->day; ?>" size="2">
 
 			<?php
@@ -3768,12 +3773,12 @@ class Base extends WP_List_Table {
 			if ( $this->get_mode() === 'list' ) :
 				?>
 
-                <label for="cystart" class="screen-reader-text"><?php esc_html_e( 'Set the first year', 'sugar-calendar' ); ?></label>
+                <label for="cystart" class="screen-reader-text"><?php esc_html_e( 'Set the first year', 'sugar-calendar-lite' ); ?></label>
                 <input type="number" name="cystart" id="cystart" value="<?php echo (int) $this->get_start_year(); ?>">
 
-                <span><?php esc_html_e( 'to', 'sugar-calendar' ); ?></span>
+                <span><?php esc_html_e( 'to', 'sugar-calendar-lite' ); ?></span>
 
-                <label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the last year', 'sugar-calendar' ); ?></label>
+                <label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the last year', 'sugar-calendar-lite' ); ?></label>
                 <input type="number" name="cy" id="cy" value="<?php echo (int) $this->get_year(); ?>">
 
 			<?php
@@ -3782,7 +3787,7 @@ class Base extends WP_List_Table {
 			else :
 				?>
 
-                <label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the year', 'sugar-calendar' ); ?></label>
+                <label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the year', 'sugar-calendar-lite' ); ?></label>
                 <input type="number" name="cy" id="cy" value="<?php echo (int) $this->year; ?>">
 
 			<?php endif; ?>
@@ -3807,11 +3812,11 @@ class Base extends WP_List_Table {
 			endif;
 
 			// Output the "View" button.
-			submit_button( esc_html_x( 'View', 'verb', 'sugar-calendar' ), 'action', '', false, [ 'id' => 'doaction' ] );
+			submit_button( esc_html_x( 'View', 'verb', 'sugar-calendar-lite' ), 'action', '', false, [ 'id' => 'doaction' ] );
 
 			// Maybe output an "Empty Trash" button.
 			if ( ( $this->get_status() === 'trash' ) && current_user_can( get_post_type_object( $this->get_primary_post_type() )->cap->edit_others_posts ) && $this->has_items() ) :
-				submit_button( esc_html__( 'Empty Trash', 'sugar-calendar' ), 'apply', 'delete_all_trashed_events', false );
+				submit_button( esc_html__( 'Empty Trash', 'sugar-calendar-lite' ), 'apply', 'delete_all_trashed_events', false );
 			endif;
 
 			// Nonce for event actions.
@@ -3857,11 +3862,11 @@ class Base extends WP_List_Table {
 				'small'  => '1 month',
 				'large'  => '1 year',
 				'labels' => [
-					'today'      => esc_html__( 'Today', 'sugar-calendar' ),
-					'next_small' => esc_html__( 'Next month', 'sugar-calendar' ),
-					'next_large' => esc_html__( 'Next year', 'sugar-calendar' ),
-					'prev_small' => esc_html__( 'Previous month', 'sugar-calendar' ),
-					'prev_large' => esc_html__( 'Previous year', 'sugar-calendar' ),
+					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
+					'next_small' => esc_html__( 'Next month', 'sugar-calendar-lite' ),
+					'next_large' => esc_html__( 'Next year', 'sugar-calendar-lite' ),
+					'prev_small' => esc_html__( 'Previous month', 'sugar-calendar-lite' ),
+					'prev_large' => esc_html__( 'Previous year', 'sugar-calendar-lite' ),
 				],
 			]
 		);

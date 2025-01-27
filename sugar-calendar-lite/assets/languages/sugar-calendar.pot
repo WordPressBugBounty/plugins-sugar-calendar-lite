@@ -1,22 +1,21 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar 3.4.0\n"
+"Project-Id-Version: Sugar Calendar 3.5.0\n"
 "Report-Msgid-Bugs-To: https://sugarcalendar.com/support/\n"
 "Last-Translator: Sugar Calendar <support@sugarcalendar.com>\n"
 "Language-Team: Sugar Calendar <support@sugarcalendar.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-13T15:38:22+00:00\n"
+"POT-Creation-Date: 2025-01-24T12:19:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: sugar-calendar\n"
 
 #. Plugin Name of the plugin
 #. Author of the plugin
-#: src/Admin/Area.php:165
-#: src/Admin/Area.php:166
-#: src/Block/Calendar/Loader.php:368
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-entry-mapper.php:30
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:36
 msgid "Sugar Calendar"
 msgstr ""
 
@@ -29,4214 +28,2103 @@ msgstr ""
 msgid "A calendar with a sweet disposition."
 msgstr ""
 
-#: includes/admin/assets.php:138
-msgid "Verifying"
-msgstr ""
-
-#: includes/admin/assets.php:139
-msgid "Verify"
-msgstr ""
-
-#: includes/admin/assets.php:140
-msgid "Verifying..."
-msgstr ""
-
-#: includes/admin/assets.php:141
-msgid "Please enter a valid license key."
-msgstr ""
-
-#: includes/admin/general.php:233
-#: includes/admin/help.php:34
-#: includes/admin/nav.php:25
-#: src/Admin/Events/Tables/Base.php:369
-#: src/Admin/Pages/Calendars.php:361
-#: src/Admin/Pages/Events.php:44
-#: src/Admin/Pages/Events.php:112
-#: src/Admin/Pages/Events.php:139
-#: src/Admin/Pages/ToolsExportTab.php:141
-msgid "Events"
-msgstr ""
-
-#: includes/admin/general.php:234
-msgid "Posts"
-msgstr ""
-
-#: includes/admin/help.php:27
-msgid "Event Views"
-msgstr ""
-
-#: includes/admin/help.php:29
-msgid "This is a calendar that lays out your content chronologically."
-msgstr ""
-
-#: includes/admin/help.php:30
-msgid "View events in month, week, day, and list modes."
-msgstr ""
-
-#: includes/admin/help.php:31
-msgid "Clicking an event shows a snapshot of the event for that period."
-msgstr ""
-
-#: includes/admin/help.php:32
-msgid "Events have icons and styling that helps differentiate them."
-msgstr ""
-
-#: includes/admin/help.php:35
-msgid "Most events are single-day, only for a few hours."
-msgstr ""
-
-#: includes/admin/help.php:36
-msgid "Location data can be attached."
-msgstr ""
-
-#: includes/admin/help.php:37
-msgid "Some events span multiple days, or have intervals."
-msgstr ""
-
-#: includes/admin/help.php:38
-msgid "Organize events using specific calendars."
-msgstr ""
-
-#: includes/admin/help.php:43
-#: includes/admin/help.php:499
-msgid "&mdash; Month"
-msgstr ""
-
-#: includes/admin/help.php:45
-msgid "This is a traditional monthly calendar."
-msgstr ""
-
-#: includes/admin/help.php:46
-#: includes/admin/help.php:63
-msgid "Events are listed chronologically in each day."
-msgstr ""
-
-#: includes/admin/help.php:47
-#: includes/admin/help.php:98
-msgid "Events may span several days."
-msgstr ""
-
-#: includes/admin/help.php:48
-msgid "All-day events appear towards the top."
-msgstr ""
-
-#: includes/admin/help.php:50
-#: includes/admin/help.php:67
-#: includes/admin/help.php:84
-#: includes/admin/help.php:101
-msgid "Navigation"
-msgstr ""
-
-#: includes/admin/help.php:51
-#: includes/admin/help.php:68
-#: includes/admin/help.php:85
-#: includes/admin/help.php:102
-msgid "Filter specific events via the filter-bar."
-msgstr ""
-
-#: includes/admin/help.php:52
-msgid "Paginate through years with double-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:53
-msgid "Paginate through months with single-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:54
-#: includes/admin/help.php:71
-#: includes/admin/help.php:88
-msgid "Return to today with the double-colon button."
-msgstr ""
-
-#: includes/admin/help.php:60
-msgid "&mdash; Week"
-msgstr ""
-
-#: includes/admin/help.php:62
-msgid "This is a traditional weekly calendar view."
-msgstr ""
-
-#: includes/admin/help.php:64
-msgid "Events spanning more than 1 day are omitted."
-msgstr ""
-
-#: includes/admin/help.php:65
-#: includes/admin/help.php:82
-msgid "All-day events appear in the top row."
-msgstr ""
-
-#: includes/admin/help.php:69
-msgid "Paginate through months with double-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:70
-msgid "Paginate through weeks with single-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:77
-msgid "&mdash; Day"
-msgstr ""
-
-#: includes/admin/help.php:79
-msgid "This is a traditional daily calendar view."
-msgstr ""
-
-#: includes/admin/help.php:80
-msgid "Events are listed chronologically for the day."
-msgstr ""
-
-#: includes/admin/help.php:81
-msgid "Events spanning more than 1 day are shown."
-msgstr ""
-
-#: includes/admin/help.php:86
-msgid "Paginate through weeks with double-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:87
-msgid "Paginate through days with single-arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:94
-msgid "&mdash; List"
-msgstr ""
-
-#: includes/admin/help.php:96
-msgid "This is a traditional list view."
-msgstr ""
-
-#: includes/admin/help.php:97
-msgid "Events are listed chronologically by their start."
-msgstr ""
-
-#: includes/admin/help.php:99
-msgid "All-day events are listed as such."
-msgstr ""
-
-#: includes/admin/help.php:103
-msgid "Paginate through events with arrow buttons."
-msgstr ""
-
-#: includes/admin/help.php:104
-msgid "Sort events by clicking column headings."
-msgstr ""
-
-#: includes/admin/help.php:105
-msgid "Switch views using the filter-bar icons."
-msgstr ""
-
-#: includes/admin/help.php:110
-#: includes/admin/help.php:572
-msgid "Regular Event"
-msgstr ""
-
-#: includes/admin/help.php:111
-#: includes/admin/help.php:573
-msgid "Has Location"
-msgstr ""
-
-#: includes/admin/help.php:112
-#: includes/admin/help.php:574
-#: includes/post/functions.php:134
-#: src/Admin/Events/Metaboxes/Event.php:641
-#: src/Admin/Events/Tables/Base.php:2576
-#: src/Admin/Events/Tables/Basic.php:734
-#: src/Admin/Events/Tables/Day.php:214
-#: src/Admin/Events/Tables/Week.php:295
-#: src/Block/Calendar/templates/week/multi-and-all-day-events-rows.php:9
-#: src/Block/Common/templates/popovers.php:99
-#: src/Helpers.php:409
-msgid "All Day"
-msgstr ""
-
-#: includes/admin/help.php:113
-#: includes/admin/help.php:575
-msgid "Recurring"
-msgstr ""
-
-#: includes/admin/help.php:114
-#: includes/admin/help.php:576
-msgid "Trashed"
-msgstr ""
-
-#: includes/admin/help.php:115
-#: includes/admin/help.php:577
-msgid "Private"
-msgstr ""
-
-#: includes/admin/help.php:116
-#: includes/admin/help.php:578
-msgid "Protected"
-msgstr ""
-
-#: includes/admin/help.php:133
-#: src/Admin/Events/Tables/Base.php:436
-#: src/Block/Calendar/CalendarView/Block.php:92
-#: src/Integrations/Elementor/CalendarWidget.php:145
-msgid "Day"
-msgstr ""
-
-#: includes/admin/help.php:140
-msgid "Day of the month, 2 digits with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:141
-msgid "<code>01</code> to <code>31</code>"
-msgstr ""
-
-#: includes/admin/help.php:146
-msgid "A textual representation of a day, three letters"
-msgstr ""
-
-#: includes/admin/help.php:147
-msgid "<code>Mon</code> through <code>Sun</code>"
-msgstr ""
-
-#: includes/admin/help.php:152
-msgid "Day of the month without leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:153
-msgid "<code>1</code> to <code>31</code>"
-msgstr ""
-
-#: includes/admin/help.php:158
-msgid "A full textual representation of the day of the week"
-msgstr ""
-
-#: includes/admin/help.php:159
-msgid "<code>Sunday</code> through <code>Saturday</code>"
-msgstr ""
-
-#: includes/admin/help.php:164
-msgid "ISO-8601 numeric representation of the day of the week"
-msgstr ""
-
-#: includes/admin/help.php:165
-msgid "<code>1</code> (Mon) through <code>7</code> (Sun)"
-msgstr ""
-
-#: includes/admin/help.php:170
-msgid "English ordinal suffix for the day of the month, 2 characters"
-msgstr ""
-
-#: includes/admin/help.php:171
-msgid "<code>st</code>, <code>nd</code>, <code>rd</code> or <code>th</code> <br>(Works well with <code>j</code>)"
-msgstr ""
-
-#: includes/admin/help.php:176
-msgid "Numeric representation of the day of the week"
-msgstr ""
-
-#: includes/admin/help.php:177
-msgid "<code>0</code> (Sun) through <code>6</code> (Sat)"
-msgstr ""
-
-#: includes/admin/help.php:182
-msgid "The day of the year (starting from 0)"
-msgstr ""
-
-#: includes/admin/help.php:183
-msgid "<code>0</code> through <code>365</code>"
-msgstr ""
-
-#: includes/admin/help.php:189
-#: src/Admin/Events/Tables/Base.php:435
-#: src/Admin/Events/Tables/Month.php:113
-#: src/Block/Calendar/CalendarView/Block.php:91
-#: src/Integrations/Elementor/CalendarWidget.php:144
-msgid "Week"
-msgstr ""
-
-#: includes/admin/help.php:196
-msgid "ISO-8601 week number of year, weeks starting on Monday"
-msgstr ""
-
-#: includes/admin/help.php:197
-msgid "<code>42</code> (the 42nd week in the year)"
-msgstr ""
-
-#: includes/admin/help.php:213
-#: includes/themes/legacy/calendar.php:159
-#: src/Admin/Events/Tables/Base.php:434
-#: src/Block/Calendar/CalendarView/Block.php:90
-#: src/Integrations/Elementor/CalendarWidget.php:143
-msgid "Month"
-msgstr ""
-
-#: includes/admin/help.php:220
-msgid "A full textual representation of a month, such as January or March"
-msgstr ""
-
-#: includes/admin/help.php:221
-msgid "<code>January</code> through <code>December</code>"
-msgstr ""
-
-#: includes/admin/help.php:226
-msgid "Numeric representation of a month, with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:227
-#: includes/admin/help.php:341
-msgid "<code>01</code> through <code>12</code>"
-msgstr ""
-
-#: includes/admin/help.php:232
-msgid "A short textual representation of a month, three letters"
-msgstr ""
-
-#: includes/admin/help.php:233
-msgid "<code>Jan</code> through <code>Dec</code>"
-msgstr ""
-
-#: includes/admin/help.php:238
-msgid "Numeric representation of a month, without leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:239
-#: includes/admin/help.php:329
-msgid "<code>1</code> through <code>12</code>"
-msgstr ""
-
-#: includes/admin/help.php:244
-msgid "Number of days in the given month"
-msgstr ""
-
-#: includes/admin/help.php:245
-msgid "<code>28</code> through <code>31</code>"
-msgstr ""
-
-#: includes/admin/help.php:261
-#: includes/themes/legacy/calendar.php:170
-msgid "Year"
-msgstr ""
-
-#: includes/admin/help.php:268
-msgid "Whether it is a leap year"
-msgstr ""
-
-#: includes/admin/help.php:269
-msgid "<code>1</code> if it is a leap year, <code>0</code> otherwise."
-msgstr ""
-
-#: includes/admin/help.php:274
-msgid "ISO-8601 week-numbering year.<br>Same as <code>Y</code> except if the week is for an adjacent year, year is used."
-msgstr ""
-
-#: includes/admin/help.php:275
-#: includes/admin/help.php:281
-msgid "<code>1999</code> or <code>2003</code>"
-msgstr ""
-
-#: includes/admin/help.php:280
-msgid "A full numeric representation of a year, 4 digits"
-msgstr ""
-
-#: includes/admin/help.php:286
-msgid "A two digit representation of a year"
-msgstr ""
-
-#: includes/admin/help.php:287
-msgid "<code>99</code> or <code>03</code>"
-msgstr ""
-
-#: includes/admin/help.php:303
-msgid "Time"
-msgstr ""
-
-#: includes/admin/help.php:310
-msgid "Lowercase Ante meridiem and Post meridiem"
-msgstr ""
-
-#: includes/admin/help.php:311
-msgid "<code>am</code> or <code>pm</code>"
-msgstr ""
-
-#: includes/admin/help.php:316
-msgid "Uppercase Ante meridiem and Post meridiem"
-msgstr ""
-
-#: includes/admin/help.php:317
-msgid "<code>AM</code> or <code>PM</code>"
-msgstr ""
-
-#: includes/admin/help.php:322
-msgid "Swatch Internet time"
-msgstr ""
-
-#: includes/admin/help.php:323
-msgid "<code>000</code> through <code>999</code>"
-msgstr ""
-
-#: includes/admin/help.php:328
-msgid "12-hour format of an hour without leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:334
-msgid "24-hour format of an hour without leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:335
-msgid "<code>0</code> through <code>23</code>"
-msgstr ""
-
-#: includes/admin/help.php:340
-msgid "12-hour format of an hour with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:346
-msgid "24-hour format of an hour with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:347
-msgid "<code>00</code> through <code>23</code>"
-msgstr ""
-
-#: includes/admin/help.php:352
-msgid "Minutes with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:353
-msgid "<code>00</code> to <code>59</code>"
-msgstr ""
-
-#: includes/admin/help.php:358
-msgid "Seconds with leading zeros"
-msgstr ""
-
-#: includes/admin/help.php:359
-msgid "<code>00</code> through <code>59</code>"
-msgstr ""
-
-#: includes/admin/help.php:364
-msgid "Microseconds"
-msgstr ""
-
-#: includes/admin/help.php:370
-msgid "Milliseconds"
-msgstr ""
-
-#: includes/admin/help.php:387
-#: includes/admin/screen-options.php:235
-#: includes/classes/terms/class-term-timezones.php:82
-#: src/Admin/Events/Metaboxes/Event.php:820
-#: src/Admin/Pages/SettingsGeneralTab.php:326
-msgid "Time Zone"
-msgstr ""
-
-#: includes/admin/help.php:394
-msgid "Time zone identifier"
-msgstr ""
-
-#: includes/admin/help.php:400
-msgid "Whether or not the date is in daylight saving time"
-msgstr ""
-
-#: includes/admin/help.php:401
-msgid "<code>1</code> if Daylight Saving Time, <code>0</code> otherwise."
-msgstr ""
-
-#: includes/admin/help.php:406
-msgid "Difference to Greenwich time (GMT) without colon between hours and minutes"
-msgstr ""
-
-#: includes/admin/help.php:412
-msgid "Difference to Greenwich time (GMT) with colon between hours and minutes"
-msgstr ""
-
-#: includes/admin/help.php:418
-msgid "Time zone abbreviation"
-msgstr ""
-
-#: includes/admin/help.php:424
-msgid "Time zone offset in seconds.<br>West of UTC is negative.<br>East of UTC is positive."
-msgstr ""
-
-#: includes/admin/help.php:425
-msgid "<code>-43200</code> through <code>50400</code>"
-msgstr ""
-
-#: includes/admin/help.php:441
-msgid "Full Date/Time"
-msgstr ""
-
-#: includes/admin/help.php:448
-msgid "<a href=\"https://www.iso.org/iso-8601-date-and-time-format.html\">ISO-8601</a> formatted date"
-msgstr ""
-
-#: includes/admin/help.php:449
-msgid "2004-02-12T15:19:21+00:00"
-msgstr ""
-
-#: includes/admin/help.php:454
-msgid "<a href=\"http://www.faqs.org/rfcs/rfc2822\">RFC 2822</a> formatted date"
-msgstr ""
-
-#: includes/admin/help.php:455
-msgid "Thu, 21 Dec 2000 16:01:07 +0200"
-msgstr ""
-
-#: includes/admin/help.php:460
-msgid "Seconds since the Unix Epoch<br>(January 1 1970 00:00:00 GMT)"
-msgstr ""
-
-#: includes/admin/help.php:474
-msgid "Date Formatting"
-msgstr ""
-
-#: includes/admin/help.php:476
-msgid "Date output can be customized to suit your needs."
-msgstr ""
-
-#: includes/admin/help.php:477
-#: includes/admin/help.php:516
-msgid "Clicking on rows will append the code to the custom box."
-msgstr ""
-
-#: includes/admin/help.php:478
-#: includes/admin/help.php:517
-msgid "Popular formats are pre-populated."
-msgstr ""
-
-#: includes/admin/help.php:479
-#: includes/admin/help.php:518
-msgid "Format values are single characters."
-msgstr ""
-
-#: includes/admin/help.php:480
-#: includes/admin/help.php:519
-msgid "Just about any result can be achieved."
-msgstr ""
-
-#: includes/admin/help.php:482
-#: includes/admin/help.php:521
-#: includes/admin/help.php:555
-msgid "Ranges"
-msgstr ""
-
-#: includes/admin/help.php:483
-msgid "Days can be represented as numbers or words."
-msgstr ""
-
-#: includes/admin/help.php:484
-msgid "Week number is useful in month view calendars."
-msgstr ""
-
-#: includes/admin/help.php:485
-msgid "Months can be represented as numbers or words."
-msgstr ""
-
-#: includes/admin/help.php:486
-msgid "Years can be 2 or 4 digits, and more."
-msgstr ""
-
-#: includes/admin/help.php:492
-msgid "&mdash; Day & Week"
-msgstr ""
-
-#: includes/admin/help.php:506
-msgid "&mdash; Year"
-msgstr ""
-
-#: includes/admin/help.php:513
-msgid "Time Formatting"
-msgstr ""
-
-#: includes/admin/help.php:515
-msgid "Time output can be customized to suit your needs."
-msgstr ""
-
-#: includes/admin/help.php:522
-msgid "Times can be represented with or without leading zeros."
-msgstr ""
-
-#: includes/admin/help.php:523
-msgid "12 or 24 hour times, with or without meridiems."
-msgstr ""
-
-#: includes/admin/help.php:524
-msgid "Minutes and seconds always have leading zeros."
-msgstr ""
-
-#: includes/admin/help.php:525
-msgid "Micro and Milli seconds provide extra precision."
-msgstr ""
-
-#: includes/admin/help.php:532
-msgid "&mdash; Time"
-msgstr ""
-
-#: includes/admin/help.php:539
-msgid "&mdash; Time zone"
-msgstr ""
-
-#: includes/admin/help.php:546
-msgid "&mdash; Full"
-msgstr ""
-
-#: includes/admin/help.php:553
-#: includes/classes/terms/class-term-timezones.php:83
-#: src/Admin/Pages/SettingsGeneralTab.php:349
-msgid "Time Zones"
-msgstr ""
-
-#: includes/admin/help.php:556
-msgid "Adds time zone support to Events and Calendars."
-msgstr ""
-
-#: includes/admin/help.php:557
-msgid "\"Off\" is the default value. Leave off if you are unsure."
-msgstr ""
-
-#: includes/admin/help.php:558
-msgid "\"Single\" means Event Start & End are the same."
-msgstr ""
-
-#: includes/admin/help.php:559
-msgid "\"Multi\" means Event Start & End can be different."
-msgstr ""
-
-#: includes/admin/help.php:560
-#: src/Admin/Pages/SettingsGeneralTab.php:360
-msgid "Default Time Zone"
-msgstr ""
-
-#: includes/admin/help.php:561
-msgid "What to use when nothing else is specified."
-msgstr ""
-
-#: includes/admin/help.php:562
-msgid "Categorized by region. Ordered alphabetically"
-msgstr ""
-
-#: includes/admin/help.php:563
-msgid "\"UTC\" should only be used if location is not available."
-msgstr ""
-
-#: includes/admin/help.php:564
-msgid "\"Floating\" means \"no time zone\" or relative to the user."
-msgstr ""
-
-#: includes/admin/help.php:565
-#: src/Admin/Pages/SettingsGeneralTab.php:371
-msgid "Visitor Conversion"
-msgstr ""
-
-#: includes/admin/help.php:566
-msgid "Enable this to make times relative to the site visitor."
-msgstr ""
-
-#: includes/admin/help.php:567
-msgid "Relies on browser support. May not always be accurate."
-msgstr ""
-
-#: includes/admin/menu.php:28
-#: includes/admin/menu.php:29
-msgid "Sugar Calendar Upgrade"
-msgstr ""
-
-#: includes/admin/menu.php:36
-#: includes/admin/menu.php:37
-#: includes/post/taxonomies.php:43
-#: includes/themes/legacy/calendar.php:181
-msgid "Calendar"
-msgstr ""
-
-#: includes/admin/menu.php:38
-#: src/Admin/Pages/EventNew.php:47
-msgid "Add New"
-msgstr ""
-
-#: includes/admin/menu.php:101
-msgid "Close"
-msgstr ""
-
-#: includes/admin/meta-boxes.php:195
-msgid "Clear"
-msgstr ""
-
-#: includes/admin/nav.php:139
-msgid "Add %s"
-msgstr ""
-
-#: includes/admin/posts.php:40
-#: includes/admin/posts.php:46
-msgid "Preview event"
-msgstr ""
-
-#: includes/admin/posts.php:52
-msgid "View event"
-msgstr ""
-
-#: includes/admin/posts.php:56
-msgctxt "Date formatting"
-msgid "M j, Y @ H:i"
-msgstr ""
-
-#: includes/admin/posts.php:63
-#: includes/admin/posts.php:64
-#: includes/post/types.php:93
-msgid "Event updated."
-msgstr ""
-
-#: includes/admin/posts.php:66
-msgid "Event restored to revision from %s."
-msgstr ""
-
-#: includes/admin/posts.php:68
-msgid "Event created."
-msgstr ""
-
-#: includes/admin/posts.php:69
-msgid "Event saved."
-msgstr ""
-
-#: includes/admin/posts.php:70
-msgid "Event submitted."
-msgstr ""
-
-#: includes/admin/posts.php:71
-msgid "Event scheduled for: %s."
-msgstr ""
-
-#: includes/admin/posts.php:72
-msgid "Event draft updated."
-msgstr ""
-
-#: includes/admin/screen-options.php:94
-#: src/Admin/Pages/SettingsGeneralTab.php:160
-msgid "F j, Y"
-msgstr ""
-
-#: includes/admin/screen-options.php:110
-#: src/Admin/Pages/SettingsGeneralTab.php:191
-msgid "g:i a"
-msgstr ""
-
-#: includes/admin/screen-options.php:126
-#: src/Admin/Events/Tables/Base.php:3210
-#: src/Admin/Pages/SettingsGeneralTab.php:128
-msgid "Maximum Events"
-msgstr ""
-
-#: includes/admin/screen-options.php:135
-#: src/Admin/Events/Tables/Base.php:3198
-#: src/Admin/Pages/SettingsGeneralTab.php:144
-msgid "Start of Week"
-msgstr ""
-
-#: includes/admin/screen-options.php:148
-msgid "Select the first day of the week"
-msgstr ""
-
-#: includes/admin/screen-options.php:155
-#: src/Admin/Pages/SettingsGeneralTab.php:176
-msgid "Date Format"
-msgstr ""
-
-#: includes/admin/screen-options.php:182
-#: includes/admin/screen-options.php:221
-msgid "Custom:"
-msgstr ""
-
-#: includes/admin/screen-options.php:183
-msgid "enter a custom date format in the following field"
-msgstr ""
-
-#: includes/admin/screen-options.php:187
-msgid "Custom date format:"
-msgstr ""
-
-#: includes/admin/screen-options.php:194
-#: src/Admin/Pages/SettingsGeneralTab.php:205
-msgid "Time Format"
-msgstr ""
-
-#: includes/admin/screen-options.php:222
-msgid "enter a custom time format in the following field"
-msgstr ""
-
-#: includes/admin/screen-options.php:226
-msgid "Custom time format:"
-msgstr ""
-
-#: includes/admin/screen-options.php:242
-#: includes/common/time-zones.php:286
-#: includes/common/time-zones.php:860
-msgid "Floating"
-msgstr ""
-
-#: includes/admin/screen-options.php:257
-msgid "Update"
-msgstr ""
-
-#: includes/admin/screen-options.php:269
-msgid "Reset to Defaults"
-msgstr ""
-
-#: includes/admin/settings.php:100
-#: src/Admin/Pages/SettingsGeneralTab.php:52
-msgid "General"
-msgstr ""
-
-#: includes/admin/upgrades.php:40
-msgid "Sugar Calendar Upgrades"
-msgstr ""
-
-#: includes/admin/upgrades.php:44
-msgid "The upgrade process has begun. Please be patient. You will be redirected when it is finished."
-msgstr ""
-
-#: includes/admin/upgrades.php:47
-msgid "Step %d of %d..."
-msgstr ""
-
-#: includes/admin/upgrades.php:129
-msgid "Sugar Calendar needs to upgrade the events database. Click <a href=\"%s\">here</a> to start."
-msgstr ""
-
-#: includes/admin/upgrades.php:136
-msgid "Sugar Calendar needs to perform an upgrade. Click <a href=\"%s\">here</a> to start."
-msgstr ""
-
-#: includes/classes/database/events/Row.php:624
-#: includes/themes/legacy/event-display.php:147
-#: includes/themes/legacy/events-list.php:175
-msgid "All-day"
-msgstr ""
-
-#: includes/classes/terms/class-term-colors.php:76
-msgid "Color"
-msgstr ""
-
-#: includes/classes/terms/class-term-colors.php:77
-msgid "Colors"
-msgstr ""
-
-#: includes/classes/terms/class-term-colors.php:78
-msgid "Assign calendars a custom color to visually separate them from each-other."
-msgstr ""
-
-#: includes/classes/terms/class-term-timezones.php:84
-msgid "Assign calendars a time zone for events to inherit their settings from."
-msgstr ""
-
-#: includes/common/editor.php:63
-msgid "Block Editor"
-msgstr ""
-
-#: includes/common/editor.php:70
-msgid "Classic Editor"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/Feature.php:455
-msgid "Ticket Receipt"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/Feature.php:472
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:401
-msgid "Ticket Details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/assets.php:95
-msgid "Updating this order will issue a refund through Stripe"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/assets.php:96
-msgid ""
-"Are you sure you want to delete this order? Tickets associated with this order will also be deleted.\n"
-"\n"
-"This action cannot be undone."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/assets.php:97
-msgid "This will export all tickets for the current filters. Do you want to continue?"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/menu.php:45
-msgid "Event Ticket Orders"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:19
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:346
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:103
-#: includes/common/Features/EventTicketing/includes/admin/view.php:174
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:96
-#: includes/common/Features/EventTicketing/src/Admin/Area.php:39
-#: includes/common/Features/EventTicketing/src/Admin/Area.php:40
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:102
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:280
-#: includes/common/Features/EventTicketing/src/Admin/Pages/Tickets.php:95
-#: includes/common/Features/EventTicketing/src/Admin/Pages/Tickets.php:131
-#: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:36
-msgid "Tickets"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:41
-msgid "Configure the setting below to enable and sell tickets for this event."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:45
-msgid "Ticket Sales"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:54
-#: includes/pro/Features/EventUrls/Admin/Meta.php:63
-#: src/Admin/Events/Metaboxes.php:458
-msgid "ON"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:55
-#: includes/pro/Features/EventUrls/Admin/Meta.php:64
-#: src/Admin/Events/Metaboxes.php:459
-msgid "OFF"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:65
-msgid "Ticket Price"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/meta-box.php:72
-msgid "Capacity"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/nav.php:42
-msgid "Test Mode: On"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/nav.php:60
-msgid "Stripe: Disconnected"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:37
-msgid "Order successfully refunded."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:38
-msgid "Order not refunded."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:44
-msgid "Order successfully updated."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:45
-msgid "Order not updated."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:51
-msgid "Order successfully deleted."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:52
-msgid "Order not deleted."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:58
-msgid "Ticket successfully emailed."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:59
-msgid "Ticket not emailed."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:65
-msgid "Receipt successfully resent."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/notices.php:66
-msgid "Receipt not resent."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:326
-msgid "Edit order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:326
-msgid "Edit"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:345
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:211
-msgid "Total"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:347
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:76
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:217
-msgid "Status"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:348
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:205
-msgid "Customer"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:349
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:48
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:189
-msgid "Order ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:350
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:301
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:88
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:227
-#: src/Admin/Events/Metaboxes/Event.php:65
-#: src/Admin/Events/Tables/Base.php:370
-#: src/Admin/Pages/Event.php:37
-msgid "Event"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:351
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:302
-msgid "Order Date"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:91
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:130
-msgid "Payments"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:138
-msgid "Emails"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:166
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:180
-msgid "Currency"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:181
-msgid "Choose your currency. Note that some payment gateways have currency restrictions."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:188
-msgid "Before ($10)"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:189
-msgid "After (10$)"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:198
-msgid "Currency Symbol Position"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:199
-msgid "Choose the location of the currency symbol."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:207
-msgid "The symbol to separate thousandths. Usually"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:208
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:226
-msgid "or"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:216
-msgid "Thousands Separator"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:225
-msgid "The symbol to separate decimal points. Usually"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:234
-msgid "Decimal Separator"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:241
-msgid "Stripe"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:244
-msgid "Easily collect credit card payments with Stripe. For getting started and more information, see our"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:254
-msgid "Stripe documentation"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:262
-msgid "While in test mode no live payments are processed. Be sure to enable Test Mode in your"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:264
-msgid "Stripe Dashboard"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:270
-msgid "Note: Test Mode is currently enabled via the"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:271
-msgid "constant"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:281
-msgid "Test Mode"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:289
-msgid "Connection Status"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:297
-msgid "The page customers are sent to after completing their ticket purchase"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:298
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:412
-msgid "This page must contain the"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:299
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:413
-msgid "shortcode"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:307
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:407
-msgid "No pages found"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:317
-msgid "Payment Success Page"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:343
-msgctxt "current value for sandbox mode"
-msgid "test"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:344
-msgctxt "current value for sandbox mode"
-msgid "live"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:358
-msgid "Connect with"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:365
-msgid "Securely connect to Stripe with just a few clicks to begin accepting payments!"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:367
-msgid "Learn more"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:368
-msgid "about connecting with Stripe"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:380
-msgid "Your Stripe account is connected in %s mode."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:381
-msgid "Reconnect"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:382
-msgid "Disconnect"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:411
-msgid "The page where customer will view the details of their ticket purchases"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:427
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:729
-msgid "Ticket Details Page"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:434
-msgid "Email Sender"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:447
-msgid "From Email Address"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:448
-msgid "The email address notifications are sent from."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:461
-msgid "From Email Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:462
-msgid "The person/business name email notifications are sent from."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:468
-msgid "Order Receipt Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:480
-msgid "Ticket Purchase Receipt"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:481
-msgid "Order Receipt Subject"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:482
-msgid "The subject line of emailed order receipts."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:489
-msgid "Order Receipt Message"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:498
-msgid "Ticket Receipt Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:510
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:511
-msgid "Ticket Email Subject"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:512
-msgid "The subject line used when emailing a ticket to an attendee."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:519
-msgid "Ticket Email Message"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:538
-msgid "The full message included in the emailed order receipts. The following dynamic placeholders can be used:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:563
-msgid "The message sent when emailing a ticket to an attendee. The following dynamic placeholders can be used:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:616
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:632
 msgid "There was an error getting your Stripe credentials. Please <a href=\"%s\">try again</a>. If you continue to have this problem, please contact support."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:724
-msgid "Ticket Receipt Page"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:800
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:881
-#: src/Admin/Pages/SettingsGeneralTab.php:567
-#: src/Admin/Pages/SettingsMapsTab.php:120
-#: src/Admin/Pages/SettingsMiscTab.php:143
-msgid "Settings saved."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:822
-msgid "Nonce verification failed."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:838
-msgid "No options were set."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:883
-msgid "Settings not saved."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:56
-#: includes/common/Features/EventTicketing/includes/common/functions.php:146
-#: includes/themes/legacy/widgets.php:172
-#: includes/themes/legacy/widgets.php:399
-msgid "All"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:77
-msgid "Export to CSV"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:225
-msgid "View or edit ticket"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:230
-msgid "(Refunded)"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:279
-msgid "Email Ticket to attendee"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:279
-msgid "Send Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:298
-#: includes/common/Features/EventTicketing/includes/admin/view.php:183
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:187
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:101
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:291
-#: src/Admin/Tools/Importers/Importer.php:908
-msgid "Attendee"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:299
-#: includes/common/Features/EventTicketing/includes/admin/view.php:182
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:172
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:84
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:290
-msgid "Code"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:300
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:44
-msgid "Ticket ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:30
-#: includes/common/Features/EventTicketing/includes/admin/view.php:307
-#: includes/common/Features/EventTicketing/includes/admin/view.php:395
-#: includes/common/Features/EventTicketing/includes/admin/view.php:452
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:53
-msgid "This URL has expired. Please refresh and try again."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:60
-msgid "Event Ticket Order Details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:76
-msgid "Order ID:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:84
-msgid "Transaction ID:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:92
-msgid "Purchase Date:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:100
-msgid "Customer:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:108
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:275
-msgid "Total:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:116
-msgid "Status:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:128
-msgid "Event:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:159
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:265
-msgid "Resend Email Receipt"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:163
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:272
-msgid "Delete Order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:164
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:258
-msgid "Update Order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:181
-#: includes/common/Features/EventTicketing/includes/classes/utilities/csv-export.php:79
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:289
-msgid "ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:236
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1285
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:115
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:344
-msgid "Print"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:244
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:352
-msgid "Resend Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:302
-msgid "You do not have the necessary capabilities to modify orders."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:302
-#: includes/common/Features/EventTicketing/includes/admin/view.php:390
-#: includes/common/Features/EventTicketing/includes/classes/utilities/csv-export.php:223
-#: src/Admin/Tools/Importers/SugarCalendar.php:183
-#: src/Admin/Tools/Importers/SugarCalendar.php:194
-#: src/Admin/Tools/Importers/SugarCalendar.php:220
-msgid "Error"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/admin/view.php:390
-msgid "You do not have the necessary capabilities to delete orders."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:216
-msgid "Default Template"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:217
-msgid "No template, plain text only"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:322
-msgid "You cannot send emails with sc_Emails until init/admin_init has been reached"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:460
-msgid "The display name of the customer"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:466
-msgid "The email address of the customer"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:472
-msgid "The ID number of the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:478
-msgid "The total purchase amount of the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:484
-msgid "The purchase date of the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:490
-msgid "URL to view the receipt in the browser"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:496
-msgid "Outputs a list of tickets in the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:502
-msgid "The ID number of the event associated with the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:508
-msgid "The title of the event associated with the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:514
-msgid "The URL of the event details page"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:520
-msgid "The date of the event associated with the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:526
-msgid "The start time of the event associated with the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:532
-msgid "The end time of the event associated with the order"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:538
-msgid "The ticket ID number"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:544
-msgid "The ticket code"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:550
-msgid "The URL to the ticket details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:556
-msgid "The name of the attendee assigned to a ticket, if provided"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/emails/class-emails.php:562
-msgid "The email of the attendee assigned to a ticket, if provided"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:45
-msgid "Ticket Code"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:51
-msgid "Event ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:52
-msgid "Event Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:53
-msgid "Event Start Date"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:54
-msgid "Event Start Time"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:55
-msgid "Event End Date"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:56
-msgid "Event End Time"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:59
-msgid "Attendee ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:60
-msgid "Attendee First Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:61
-msgid "Attendee Last Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/export/tickets.php:62
-msgid "Attendee Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/utilities/csv-export.php:80
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:56
-#: src/Admin/Events/Metaboxes.php:392
-msgid "Date"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/classes/utilities/csv-export.php:223
-msgid "You do not have permission to export data."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:150
-msgid "Pending"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:154
-msgid "Refunded"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:158
-msgid "Paid"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:554
-msgid "US Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:555
-msgid "Euro"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:556
-msgid "Argentine Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:557
-msgid "Australian Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:558
-msgid "Bangladeshi Taka"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:559
-msgid "Bitcoin"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:560
-msgid "Brazilian Real"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:561
-msgid "Bulgarian Lev"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:562
-msgid "Canadian Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:563
-msgid "Chilean Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:564
-msgid "Chinese Yuan"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:565
-msgid "Colombian Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:566
-msgid "Croatia Kuna"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:567
-msgid "Czech Koruna"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:568
-msgid "Danish Krone"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:569
-msgid "Dominican Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:570
-msgid "Egyptian Pound"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:571
-msgid "Hong Kong Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:572
-msgid "Hungarian Forint"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:573
-msgid "Icelandic Krona"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:574
-msgid "Indonesia Rupiah"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:575
-msgid "Indian Rupee"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:576
-msgid "Israeli Shekel"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:577
-msgid "Iranian Rial"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:578
-msgid "Japanese Yen"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:579
-msgid "Kenyan Shilling"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:580
-msgid "Kazakhstani Tenge"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:581
-msgid "Lao Kip"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:582
-msgid "Malaysian Ringgit"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:583
-msgid "Mexican Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:584
-msgid "Nepali Rupee"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:585
-msgid "Nigerian Naira"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:586
-msgid "Norwegian Krone"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:587
-msgid "New Zealand Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:588
-msgid "Pakistani Rupee"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:589
-msgid "Paraguayan Guaraní"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:590
-msgid "Philippine Peso"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:591
-msgid "Polish Zloty"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:592
-msgid "Pounds Sterling"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:593
-msgid "Romanian Leu"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:594
-msgid "Russian Ruble"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:595
-msgid "Saudi Arabian Riyal"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:596
-msgid "Singapore Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:597
-msgid "South African Rand"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:598
-msgid "South Korean Won"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:599
-msgid "Swedish Krona"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:600
-msgid "Swiss Franc"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:601
-msgid "Taiwan New Dollar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:602
-msgid "Thai Baht"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:603
-msgid "Tunisian Dinar"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:604
-msgid "Turkish Lira"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:605
-msgid "United Arab Emirates Dirham"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:606
-msgid "Ukrainian Hryvnia"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:607
-msgid "Vietnamese Dong"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1099
-msgid "Order Receipt"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1136
-msgid "Event Ticket"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/functions.php:1286
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:116
-msgid "View"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:19
-msgid "No  order ID was specified."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:23
-msgid "No purchaser email was specified."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:32
-msgid "The specified email does not match the email on the requested order."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:41
-msgid "Ticket emailed successfully."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:54
-msgid "Order #"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:55
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:171
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:83
-msgid "Purchaser"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:64
-msgid "Amount"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:70
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:193
-msgid "Transaction ID"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:82
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:180
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:92
-#: src/Admin/Events/Metaboxes/Event.php:153
-#: src/Admin/Events/Tables/Base.php:2748
-msgid "Location"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:92
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:167
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:79
-msgid "%s at %s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:93
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:197
-msgid "View event details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:104
-msgid "Ticket ID: %d"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:105
-msgid "Ticket Code: %s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:109
-msgid "For: %s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:110
-msgid "Send via Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:140
-msgid "No order ID was specified."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:144
-msgid "No ticket code was specified."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:170
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:82
-msgid "Ticket #"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/common/shortcodes.php:194
-msgid "Event Details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/assets.php:145
-msgid "You have reached the maximum number of tickets available to be purchased. No more tickets are available."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:24
-#: src/Helpers.php:350
-msgid "Date/Time:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:49
-#: includes/themes/legacy/event-display.php:134
-#: src/Helpers.php:353
-msgid "Date:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:54
-#: includes/themes/legacy/event-display.php:180
-#: src/Frontend/Loader.php:181
-msgid "Time:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:126
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:45
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:151
-msgid "Event Tickets"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:139
-msgid "Billing Details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:143
-msgid "First Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:144
-msgid "Your first name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:147
-msgid "Last Name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:148
-msgid "Your last name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:153
-msgid "Email Address"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:154
-msgid "Enter email address"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:159
-msgid "Attendee Information"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:160
-msgid "Enter the name and email of all attendees (optional)."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:160
-msgid "Copy from Billing Details."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:165
-msgid "Attendee 1"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:167
-msgid "First name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:168
-msgid "Last name"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:169
-msgid "Email"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:190
-msgid "Payment Card"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:208
-msgid "Event Summary"
-msgstr ""
-
-#. translators: %s: Event name.
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:214
-msgid "<span>Event:</span> %s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:241
-msgid "Order Summary"
-msgstr ""
-
-#. translators: %s: Tickets quantity.
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:247
-msgid "<span>Tickets:</span> %s"
-msgstr ""
-
-#. translators: %s: Ticket Price.
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:264
-msgid "<span>Ticket Price:</span> <strong>%s</strong>"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:278
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:289
-msgid "Loading..."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:290
-#: src/Admin/Tools/Importers.php:156
-msgid "Cancel"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/modal.php:291
-msgid "Purchase"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:48
-msgid "That ticket could not be found."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:61
-msgid "That event could not be found."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/print.php:108
-#: src/Admin/Events/Metaboxes.php:470
-msgid "URL"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:53
-msgid "This event has past so tickets are no longer available."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:60
-msgid "Qty"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:62
-msgid "Quantity"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:65
-msgid "%s per ticket"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:73
-msgid "Sold Out"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:77
-msgid "%d available"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/front-end/singular.php:97
-msgid "Add to Cart"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/checkout.php:154
-msgid "Please enter your first name."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/checkout.php:158
-msgid "Please enter your last name."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/checkout.php:162
-msgid "Please enter a valid email address."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/checkout.php:166
-msgid "Only %d tickets are available. Please reduce your purchase quantity."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/checkout.php:177
-msgid "The gateway you have selected does not exist."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:78
-msgid "No event found for this request."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:101
-msgid "No Stripe API key found."
-msgstr ""
-
-#. translators: %1$s: Event title, %2$s: Event date.
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:154
-msgid "Event ticket for %1$s on %2$s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:85
-#: src/Admin/Pages/CalendarEdit.php:75
-msgid "You attempted to edit an item that does not exist. Perhaps it was deleted?"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:107
-msgid "Back to All Orders"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:164
-msgid "Edit Ticket"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:182
-msgid "Order Details"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:199
-msgid "Purchase Date"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:36
-#: includes/common/Features/EventTicketing/src/Admin/Pages/Tickets.php:135
-msgid "Orders"
-msgstr ""
-
-#. translators: %1$s is the price of the ticket.
-#: includes/common/Features/EventTicketing/src/Frontend/Loader.php:89
-msgid "Buy Tickets - %1$s"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Helpers/UI.php:47
-#: src/Helpers/UI.php:46
-msgid "Help"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Helpers/UI.php:431
-#: src/Helpers/UI.php:431
-msgid "Custom"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Helpers/UI.php:441
-#: src/Helpers/UI.php:441
-msgid "Looks Like:"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Helpers/UI.php:472
-#: src/Admin/Events/Metaboxes.php:390
-#: src/Helpers/UI.php:472
-msgid "On"
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Helpers/UI.php:473
-#: src/Admin/Pages/SettingsGeneralTab.php:338
-#: src/Helpers/UI.php:473
-msgid "Off"
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:82
-msgid "Event Location"
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:85
-msgid "Enter the event address."
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:310
-msgid "Unable to contact Google API service."
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:323
-msgid "No location found for the entered address."
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:326
-msgid "Invalid request. Did you enter an address?"
-msgstr ""
-
-#. translators: %s: error message.
-#: includes/common/Features/GoogleMaps/Feature.php:331
-msgid "Request Denied. %s"
-msgstr ""
-
-#: includes/common/Features/GoogleMaps/Feature.php:340
-msgid "Something went wrong while retrieving your map."
-msgstr ""
-
-#: includes/common/time-zones.php:200
-msgctxt "Plus"
-msgid "+"
-msgstr ""
-
-#: includes/common/time-zones.php:201
-msgctxt "Minus"
-msgid "-"
-msgstr ""
-
-#: includes/common/time-zones.php:205
-#: includes/common/time.php:198
-#: includes/common/time.php:232
-msgid "%s hour"
-msgid_plural "%s hours"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time-zones.php:937
-msgid "Default"
-msgstr ""
-
-#: includes/common/time-zones.php:944
-#: includes/common/time-zones.php:945
-msgid "UTC"
-msgstr ""
-
-#: includes/common/time-zones.php:994
-msgid "UTC Manual Offsets"
-msgstr ""
-
-#: includes/common/time.php:186
-msgid "%s year"
-msgid_plural "%s years"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:189
-#: includes/common/time.php:223
-msgid "%s month"
-msgid_plural "%s months"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:192
-#: includes/common/time.php:226
-msgid "%s week"
-msgid_plural "%s weeks"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:195
-#: includes/common/time.php:229
-msgid "%s day"
-msgid_plural "%s days"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:201
-#: includes/common/time.php:235
-msgid "%s minute"
-msgid_plural "%s minutes"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:204
-#: includes/common/time.php:238
-msgid "%s second"
-msgid_plural "%s seconds"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/common/time.php:219
-msgctxt "Separator in time since"
-msgid ","
-msgstr ""
-
-#: includes/common/time.php:274
-msgid "Daily"
-msgstr ""
-
-#: includes/common/time.php:275
-msgid "Weekly"
-msgstr ""
-
-#: includes/common/time.php:276
-msgid "Monthly"
-msgstr ""
-
-#: includes/common/time.php:277
-msgid "Yearly"
-msgstr ""
-
-#: includes/post/taxonomies.php:42
-#: src/Admin/Pages/Calendars.php:40
-#: src/Admin/Pages/Calendars.php:138
-#: src/Admin/Pages/ToolsExportTab.php:143
-#: src/Block/Common/templates/popovers.php:25
-#: src/Integrations/Elementor/CalendarWidget.php:124
-#: src/Integrations/Elementor/ListWidget.php:135
-msgid "Calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:44
-#: src/Admin/Events/Tables/Base.php:3134
-#: src/Admin/Events/Tables/Base.php:3136
-msgid "Search"
-msgstr ""
-
-#: includes/post/taxonomies.php:45
-msgid "Popular Calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:46
-#: includes/themes/legacy/calendar.php:106
-#: includes/themes/legacy/widgets.php:415
-msgid "All Calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:47
-#: src/Admin/Pages/CalendarAbstract.php:282
-msgid "Parent Calendar"
-msgstr ""
-
-#: includes/post/taxonomies.php:48
-msgid "Parent Calendar:"
-msgstr ""
-
-#: includes/post/taxonomies.php:49
-#: src/Admin/Pages/CalendarEdit.php:36
-msgid "Edit Calendar"
-msgstr ""
-
-#: includes/post/taxonomies.php:50
-msgid "View Calendar"
-msgstr ""
-
-#: includes/post/taxonomies.php:51
-#: src/Admin/Pages/CalendarEdit.php:146
-msgid "Update Calendar"
-msgstr ""
-
-#: includes/post/taxonomies.php:52
-#: src/Admin/Pages/CalendarNew.php:46
-#: src/Admin/Pages/CalendarNew.php:148
-msgid "Add New Calendar"
-msgstr ""
-
-#: includes/post/taxonomies.php:53
-msgid "New Calendar Name"
-msgstr ""
-
-#: includes/post/taxonomies.php:54
-msgid "Separate calendars with commas"
-msgstr ""
-
-#: includes/post/taxonomies.php:55
-msgid "Add or remove calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:56
-msgid "Choose from the most used calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:57
-#: includes/themes/legacy/calendar.php:110
-msgid "No Calendars"
-msgstr ""
-
-#: includes/post/taxonomies.php:58
-msgid "No calendars found"
-msgstr ""
-
-#: includes/post/taxonomies.php:59
-msgid "Calendars list navigation"
-msgstr ""
-
-#: includes/post/taxonomies.php:60
-msgid "Calendars list"
-msgstr ""
-
-#: includes/post/taxonomies.php:61
-msgid "&larr; Back to Calendars"
-msgstr ""
-
-#: includes/post/types.php:61
-msgctxt "post type general name"
-msgid "Events"
-msgstr ""
-
-#: includes/post/types.php:62
-msgctxt "post type singular name"
-msgid "Event"
-msgstr ""
-
-#: includes/post/types.php:63
-#: includes/post/types.php:64
-msgctxt "post type menu name"
-msgid "Calendar"
-msgstr ""
-
-#: includes/post/types.php:65
-msgctxt "add new from admin bar"
-msgid "Event"
-msgstr ""
-
-#: includes/post/types.php:66
-msgctxt "event"
-msgid "Add New"
-msgstr ""
-
-#: includes/post/types.php:67
-#: src/Admin/Pages/Event.php:71
-#: src/Admin/Pages/EventNew.php:35
-#: src/Admin/Pages/Events.php:117
-msgid "Add New Event"
-msgstr ""
-
-#: includes/post/types.php:68
-#: src/Admin/Pages/Event.php:73
-#: src/Admin/Pages/EventEdit.php:33
-msgid "Edit Event"
-msgstr ""
-
-#: includes/post/types.php:69
-msgid "New Event"
-msgstr ""
-
-#: includes/post/types.php:70
-msgid "View Event"
-msgstr ""
-
-#: includes/post/types.php:71
-msgid "View Events"
-msgstr ""
-
-#: includes/post/types.php:72
-#: src/Block/Common/templates/controls.php:114
-msgid "Search Events"
-msgstr ""
-
-#: includes/post/types.php:73
-msgid "Search events..."
-msgstr ""
-
-#: includes/post/types.php:74
-#: src/Admin/Events/Tables/Basic.php:867
-msgid "No events found."
-msgstr ""
-
-#: includes/post/types.php:75
-msgid "No events found in trash."
-msgstr ""
-
-#: includes/post/types.php:76
-msgid "Parent Event:"
-msgstr ""
-
-#: includes/post/types.php:77
-msgid "All Events"
-msgstr ""
-
-#: includes/post/types.php:78
-msgid "Event Archives"
-msgstr ""
-
-#: includes/post/types.php:79
-msgid "Event Attributes"
-msgstr ""
-
-#: includes/post/types.php:80
-msgid "Insert Into Event"
-msgstr ""
-
-#: includes/post/types.php:81
-msgid "Uploaded to this event"
-msgstr ""
-
-#: includes/post/types.php:82
-msgid "Featured Image"
-msgstr ""
-
-#: includes/post/types.php:83
-msgid "Set featured image"
-msgstr ""
-
-#: includes/post/types.php:84
-msgid "Remove featured image"
-msgstr ""
-
-#: includes/post/types.php:85
-msgid "Use as featured image"
-msgstr ""
-
-#: includes/post/types.php:86
-msgid "Filter event list"
-msgstr ""
-
-#: includes/post/types.php:87
-msgid "Events list navigation"
-msgstr ""
-
-#: includes/post/types.php:88
-msgid "Events list"
-msgstr ""
-
-#: includes/post/types.php:89
-msgid "Event created"
-msgstr ""
-
-#: includes/post/types.php:90
-msgid "Private event created."
-msgstr ""
-
-#: includes/post/types.php:91
-msgid "Event reverted to draft."
-msgstr ""
-
-#: includes/post/types.php:92
-msgid "Event scheduled."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:152
-msgctxt "verb"
-msgid "Duplicate"
-msgstr ""
-
-#: includes/pro/Pro.php:169
-msgid "Install Sugar Calendar Event Ticketing addon"
-msgstr ""
-
-#: includes/pro/Pro.php:170
-#: src/Admin/Events/Metaboxes.php:416
-#: src/Admin/Events/Metaboxes.php:505
-msgid "to access this feature and a lot more!"
-msgstr ""
-
-#: includes/themes/legacy/calendar.php:184
-msgid "Go"
-msgstr ""
-
-#: includes/themes/legacy/calendar.php:264
-msgctxt "Previous month"
-msgid "Previous"
-msgstr ""
-
-#: includes/themes/legacy/calendar.php:276
-msgctxt "Next month"
-msgid "Next"
-msgstr ""
-
-#: includes/themes/legacy/calendar.php:335
-#: src/Block/EventList/templates/base.php:17
-msgid "Previous"
-msgstr ""
-
-#: includes/themes/legacy/calendar.php:349
-#: src/Block/EventList/templates/base.php:18
-msgid "Next"
-msgstr ""
-
-#: includes/themes/legacy/event-display.php:223
-#: src/Admin/Events/Tables/Base.php:3774
-msgid "to"
-msgstr ""
-
-#: includes/themes/legacy/event-display.php:261
-#: src/Frontend/Loader.php:216
-msgid "Location:"
-msgstr ""
-
-#: includes/themes/legacy/events-list.php:218
-msgid "Read More"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1620
-msgid "Starts %s then every %s until %s"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1634
-msgid "Starts %s then every month on the %s until %s"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1648
-msgid "Starts %s then every year on the %s of %s until %s"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1668
-msgid "Starts %s then every %s"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1681
-msgid "Starts %s then every month on the %s"
-msgstr ""
-
-#: includes/themes/legacy/functions.php:1694
-msgid "Starts %s then every year on the %s of %s"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:50
-msgid "(Sugar Calendar) Event Calendar"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:52
-msgid "Displays a monthly event calendar widget."
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:159
-#: includes/themes/legacy/widgets.php:392
-#: includes/themes/legacy/widgets.php:549
-#: includes/themes/legacy/widgets.php:724
-msgid "Title:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:163
-msgid "Size:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:165
-msgid "Small"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:166
-msgid "Large"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:170
-#: includes/themes/legacy/widgets.php:413
-#: src/Frontend/Loader.php:252
-msgid "Calendar:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:183
-msgid "Default Month & Year:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:186
-msgid "Leave empty for current"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:208
-msgid "(Sugar Calendar) Event List"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:210
-msgid "Displays all/upcoming/past events as a list."
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:397
-msgid "Time Period:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:400
-msgid "Upcoming"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:401
-msgid "Past"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:405
-#: includes/themes/legacy/widgets.php:684
-msgid "Order:"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:407
-msgid "Default for Period"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:408
-msgid "Oldest First"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:409
-msgid "Newest First"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:426
-msgid "Number to show"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:430
-msgid "Show widget title"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:434
-msgctxt "Start & end if available"
-msgid "Show event dates"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:438
-msgctxt "Start & end if available"
-msgid "Show event times"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:442
-msgid "Show event categories"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:464
-msgid "(Sugar Calendar) Calendar List"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:466
-msgid "Display all of the available calendars as a list."
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:572
-msgid "(Sugar Calendar) Event Filters"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:574
-msgid "Event Archive only. Controls for filtering how to list events."
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:677
-msgid "Upcoming events"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:678
-msgid "In-progress events"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:679
-msgid "Past events"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:680
-msgid "All events"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:685
-msgid "Newest first"
-msgstr ""
-
-#: includes/themes/legacy/widgets.php:687
-msgid "Oldest first"
-msgstr ""
-
-#: requirements-check.php:226
-msgid "This plugin is not fully active."
-msgstr ""
-
-#: requirements-check.php:236
-msgid "Requires %s (%s), but (%s) is installed."
-msgstr ""
-
-#: requirements-check.php:246
-msgid "Requires %s (%s), but it appears to be missing."
-msgstr ""
-
-#: requirements-check.php:256
-msgid "Requirements"
-msgstr ""
-
-#: requirements-check.php:266
-msgid "Sugar Calendar Requirements"
-msgstr ""
-
-#: src/Admin/Area.php:264
-#: src/Admin/Area.php:265
-msgid "Upgrade to Pro"
-msgstr ""
-
-#. translators: %s - SugarCalendar.com Upgrade page URL.
-#: src/Admin/Education.php:167
-msgid "<strong>You’re using Sugar Calendar Lite</strong>. To unlock more features consider <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">upgrading to Pro</a> for 50%% off."
-msgstr ""
-
-#: src/Admin/Education.php:179
-#: src/Admin/Education.php:252
-#: src/Admin/Education.php:349
-#: src/Admin/Education.php:402
-msgid "Dismiss this message."
-msgstr ""
-
-#: src/Admin/Education.php:213
-#: src/Admin/Pages/Welcome.php:119
-#: src/Admin/Pages/Welcome.php:122
-msgid "Recurring Events"
-msgstr ""
-
-#: src/Admin/Education.php:215
-msgid "Create recurring events"
-msgstr ""
-
-#: src/Admin/Education.php:216
-msgid "Daily, weekly, monthly, and yearly frequency"
-msgstr ""
-
-#: src/Admin/Education.php:217
-msgid "Dynamic intervals"
-msgstr ""
-
-#: src/Admin/Education.php:218
-msgid "Ending on a date or number of occurrences"
-msgstr ""
-
-#: src/Admin/Education.php:224
-#: src/Admin/Pages/Welcome.php:173
-#: src/Admin/Pages/Welcome.php:176
-msgid "Event Ticketing"
-msgstr ""
-
-#: src/Admin/Education.php:226
-msgid "Sell tickets for your events"
-msgstr ""
-
-#: src/Admin/Education.php:227
-msgid "One page checkout for quick purchases"
-msgstr ""
-
-#: src/Admin/Education.php:228
-msgid "Stripe integration"
-msgstr ""
-
-#: src/Admin/Education.php:229
-msgid "WooCommerce integration"
-msgstr ""
-
-#: src/Admin/Education.php:230
-msgid "Simple order management"
-msgstr ""
-
-#: src/Admin/Education.php:236
-msgid "And more..."
-msgstr ""
-
-#: src/Admin/Education.php:238
-msgid "Frontend event submissions"
-msgstr ""
-
-#: src/Admin/Education.php:239
-msgid "Zapier integration"
-msgstr ""
-
-#: src/Admin/Education.php:240
-msgid "Calendar feeds (Google, Outlook, Apple, ...)"
-msgstr ""
-
-#: src/Admin/Education.php:241
-msgid "Event duplication"
-msgstr ""
-
-#: src/Admin/Education.php:242
-msgid "Premium support"
-msgstr ""
-
-#: src/Admin/Education.php:255
-msgid "Take Your Events to the Next Level"
-msgstr ""
-
-#. translators: %s - SugarCalendar.com Upgrade page URL.
-#: src/Admin/Education.php:260
-msgid "Elevate your event management with Sugar Calendar Pro. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Upgrade today</a> and start leveraging advanced features to streamline and enhance your event management."
-msgstr ""
-
-#: src/Admin/Education.php:302
-#: src/Admin/Events/Metaboxes.php:415
-#: src/Admin/Events/Metaboxes.php:504
-#: src/Admin/Pages/SettingsFeedsTab.php:131
-#: src/Admin/Pages/SettingsZapierTab.php:133
-msgid "Upgrade to Sugar Calendar Pro"
-msgstr ""
-
-#: src/Admin/Education.php:354
-msgid "Easily Add New Events to Your Calendar"
-msgstr ""
-
-#: src/Admin/Education.php:355
-msgid "Simply click the “Add New Event” button up top or on the desired date on the calendar to create a new event. Make your event recurring, add ticket sales, and more!"
-msgstr ""
-
-#. translators: %s - SugarCalendar.com documentation page URL.
-#: src/Admin/Education.php:360
-#: src/Admin/Education.php:413
-msgid "Need more help? <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Read our Documentation</a>"
-msgstr ""
-
-#: src/Admin/Education.php:407
-msgid "Event Management Made Easy"
-msgstr ""
-
-#: src/Admin/Education.php:408
-msgid "If you have multiple event types, you may want more than one calendar so you can easily categorize your events. Otherwise, you should be fine using the default calendar which we’ve set up for you."
-msgstr ""
-
-#: src/Admin/Events/Events.php:141
-msgid "Event name is required."
-msgstr ""
-
-#: src/Admin/Events/Metaboxes.php:332
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:173
+#: includes/pro/Features/AdvancedRecurring/Common/Functions.php:150
 msgid "Recurrence"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:343
-msgid "Link"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:360
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:20
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:34
+#: src/Pro/Helpers.php:34
+msgid "Daily"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:362
-msgid "Repeat"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:361
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:568
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:800
+msgid "day"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:365
-#: src/Admin/Events/Metaboxes.php:383
-msgid "Never"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:362
+msgid "days"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:371
-msgid "Every"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:365
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:21
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:38
+#: src/Pro/Helpers.php:38
+msgid "Weekly"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:378
-msgid "Ends"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:366
+msgid "week"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:398
-msgid "After"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:367
+msgid "weeks"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:400
-msgid "1"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:370
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:22
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:42
+#: src/Pro/Helpers.php:42
+msgid "Monthly"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:402
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:371
+msgid "month"
+msgstr ""
+
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:372
+msgid "months"
+msgstr ""
+
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:375
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:23
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:46
+#: src/Pro/Helpers.php:46
+msgid "Yearly"
+msgstr ""
+
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:376
+msgid "year"
+msgstr ""
+
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:377
+msgid "years"
+msgstr ""
+
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:479
 msgid "time"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:445
-msgid "Add a custom URL which will be displayed in the event details or redirect visitors to a different page."
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:480
+msgid "times"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:449
-msgid "Redirect"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:503
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:980
+msgid "In"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:461
-msgid "Automatically send visitors here. The Event page on your site will be inaccessible."
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:504
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:930
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1061
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:66
+msgid "On"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:474
-msgid "Paste the full URL starting with https://"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:505
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1006
+msgid "Or on the"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:480
-msgid "Target"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:506
+msgid "And the"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:483
-msgid "Open link in a new tab"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:507
+msgid "On these days"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:488
-msgid "Text"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:508
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:956
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1006
+msgid "On the"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:492
-msgid "Use this text instead of showing the URL."
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:531
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:756
+msgid "first"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Details.php:35
-#: src/Admin/Events/Tables/Base.php:2446
-#: src/Admin/Events/Tables/Base.php:2456
-msgid "Details"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:532
+msgid "second"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:142
-msgid "Duration"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:533
+msgid "third"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:167
-msgid "Other"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:534
+msgid "fourth"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:650
-msgid "YES"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:535
+msgid "fifth"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:651
-msgid "NO"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:536
+msgid "last"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:660
-#: src/Admin/Events/Tables/Base.php:2554
-#: src/Admin/Events/Tables/Base.php:2561
-#: src/Admin/Events/Tables/Base.php:2568
-#: src/Admin/Events/Tables/Base.php:2589
-#: src/Admin/Events/Tables/Base.php:2596
-#: src/Admin/Events/Tables/Base.php:2623
-#: src/Admin/Events/Tables/Base.php:2642
-msgid "Start"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:569
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:801
+msgid "weekday"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:672
-#: src/Admin/Events/Metaboxes/Event.php:749
-msgid "at"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:570
+msgid "weekend"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:707
-#: src/Admin/Events/Metaboxes/Event.php:784
-msgid "AM"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:758
+msgid "Number"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:708
-#: src/Admin/Events/Metaboxes/Event.php:785
-msgid "PM"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:775
+msgid "Position"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:737
-#: src/Admin/Events/Tables/Base.php:2556
-#: src/Admin/Events/Tables/Base.php:2563
-#: src/Admin/Events/Tables/Base.php:2570
-#: src/Admin/Events/Tables/Base.php:2591
-#: src/Admin/Events/Tables/Base.php:2598
-#: src/Admin/Events/Tables/Base.php:2625
-#: src/Admin/Events/Tables/Base.php:2655
-msgid "End"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:782
+msgid "Day"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes/Event.php:863
-msgid "Address"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:799
+msgid "Type"
 msgstr ""
 
-#: src/Admin/Events/Tables/Base.php:437
-#: src/Block/EventList/EventListView/Block.php:150
-#: src/Integrations/Elementor/ListWidget.php:205
-msgid "List"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:802
+msgid "weekend day"
 msgstr ""
 
-#. translators: %s - Item count.
-#: src/Admin/Events/Tables/Base.php:1436
-msgctxt "List table: all statuses (excluding trash)"
-msgid "All <span class=\"count\">(%s)</span>"
-msgid_plural "All <span class=\"count\">(%s)</span>"
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/Admin/Events/Tables/Base.php:1704
-msgid "(No title)"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:1707
-msgid "Draft"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2125
-#: src/Admin/Events/Tables/Basic.php:377
-msgid "Restore"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2130
-#: src/Admin/Events/Tables/Basic.php:378
-msgid "Delete Permanently"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2138
-msgctxt "verb"
-msgid "Edit"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2143
-msgctxt "verb"
-msgid "Trash"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2148
-#: src/Admin/Events/Tables/Base.php:3810
-msgctxt "verb"
-msgid "View"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2447
-msgid "Password protected"
-msgstr ""
-
-#. translators: %1$s - Datetime; %2$s - Timezone.
-#: src/Admin/Events/Tables/Base.php:2504
-#: src/Admin/Events/Tables/Base.php:2524
-msgctxt "Time Time Zone"
-msgid "%1$s %2$s"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:2666
-#: src/Admin/Events/Tables/Basic.php:306
-msgctxt "Noun"
-msgid "Repeats"
-msgstr ""
-
-#. translators: %1$s - Recurrence; %2$s - Start date; %3$s - End date.
-#: src/Admin/Events/Tables/Base.php:2685
-msgctxt "Weekly from December 1, 2030 until December 31, 2030"
-msgid "%1$s from %2$s until %3$s"
-msgstr ""
-
-#. translators: %1$s - Recurrence; %2$s - Start date.
-#: src/Admin/Events/Tables/Base.php:2696
-msgctxt "Weekly forever, starting May 15, 1980"
-msgid "%1$s starting %2$s"
-msgstr ""
-
-#. translators: %s - Recurrence.
-#: src/Admin/Events/Tables/Base.php:2705
-msgctxt "Weekly forever"
-msgid "%s"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3177
-msgid "Columns"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3214
-msgid "Save Options"
-msgstr ""
-
-#. translators: %s taxonomy label.
-#: src/Admin/Events/Tables/Base.php:3663
-msgid "Filter by %s"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3733
-msgid "Switch to this month"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3753
-msgid "Set the day"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3771
-msgid "Set the first year"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3776
-msgid "Set the last year"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3785
-msgid "Set the year"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3814
-msgid "Empty Trash"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3860
-#: src/Admin/Events/Tables/Basic.php:820
-#: src/Admin/Events/Tables/Day.php:110
-#: src/Admin/Events/Tables/Month.php:288
-#: src/Admin/Events/Tables/Week.php:145
-#: src/Block/Calendar/CalendarView/Block.php:107
-#: src/Block/Calendar/Loader.php:110
-msgid "Today"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3861
-msgid "Next month"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3862
-msgid "Next year"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3863
-msgid "Previous month"
-msgstr ""
-
-#: src/Admin/Events/Tables/Base.php:3864
-msgid "Previous year"
-msgstr ""
-
-#. translators: %s: Number of events trashed.
-#: src/Admin/Events/Tables/Basic.php:95
-msgid "%s event moved to the Trash."
-msgid_plural "%s events moved to the Trash."
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: Number of events deleted.
-#: src/Admin/Events/Tables/Basic.php:109
-msgid "%s event permanently deleted."
-msgid_plural "%s events permanently deleted."
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: Number of events restored.
-#: src/Admin/Events/Tables/Basic.php:125
-msgid "%s event restored."
-msgid_plural "%s events restored."
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/Admin/Events/Tables/Basic.php:298
-msgctxt "Noun"
-msgid "Title"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:299
-msgctxt "Noun"
-msgid "Start"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:300
-msgctxt "Noun"
-msgid "End"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:301
-msgctxt "Noun"
-msgid "Duration"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:383
-msgid "Move to Trash"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:821
-#: src/Admin/Events/Tables/Month.php:289
-#: src/Admin/Events/Tables/Week.php:147
-msgid "Next Month"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:822
-#: src/Admin/Events/Tables/Month.php:290
-msgid "Next Year"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:823
-#: src/Admin/Events/Tables/Month.php:291
-#: src/Admin/Events/Tables/Week.php:149
-msgid "Previous Month"
-msgstr ""
-
-#: src/Admin/Events/Tables/Basic.php:824
-#: src/Admin/Events/Tables/Month.php:292
-msgid "Previous Year"
-msgstr ""
-
-#. translators: %s - week number.
-#: src/Admin/Events/Tables/Day.php:83
-#: src/Admin/Events/Tables/Week.php:81
-msgctxt "Week number"
-msgid "Week %s"
-msgstr ""
-
-#: src/Admin/Events/Tables/Day.php:111
-msgid "Tomorrow"
-msgstr ""
-
-#: src/Admin/Events/Tables/Day.php:112
-#: src/Admin/Events/Tables/Week.php:146
-#: src/Block/EventList/templates/base.php:13
-msgid "Next Week"
-msgstr ""
-
-#: src/Admin/Events/Tables/Day.php:113
-msgid "Yesterday"
-msgstr ""
-
-#: src/Admin/Events/Tables/Day.php:114
-#: src/Admin/Events/Tables/Week.php:148
-#: src/Block/EventList/templates/base.php:12
-msgid "Previous Week"
-msgstr ""
-
-#: src/Admin/Events/Tables/Day.php:218
-#: src/Admin/Events/Tables/Week.php:299
-msgid "Multiple Days"
-msgstr ""
-
-#: src/Admin/Notifications.php:514
-msgid "Notifications"
-msgstr ""
-
-#: src/Admin/Notifications.php:518
-msgid "Dismiss this message"
-msgstr ""
-
-#: src/Admin/Notifications.php:523
-msgid "Previous message"
-msgstr ""
-
-#: src/Admin/Notifications.php:527
-msgid "Next message"
-msgstr ""
-
-#: src/Admin/Notifications.php:607
-msgid "Watch Video"
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:159
-msgid "Calendar added."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:160
-msgid "Calendar deleted."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:161
-msgid "Calendar updated."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:162
-msgid "Calendar not added."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:163
-msgid "Calendar not updated."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:164
-msgid "Calendars deleted."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:204
-msgid "Options"
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:263
-msgid "Slug"
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:272
-msgid "The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens."
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:296
-#: src/Admin/Pages/SettingsGeneralTab.php:220
-msgid "None"
-msgstr ""
-
-#: src/Admin/Pages/CalendarAbstract.php:307
-msgid "Description"
-msgstr ""
-
-#: src/Admin/Pages/CalendarEdit.php:111
-#: src/Admin/Pages/CalendarNew.php:112
-msgid "Name this Calendar"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:868
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:285
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:175
+msgid "Repeat"
 msgstr ""
 
-#: src/Admin/Pages/Calendars.php:143
-msgid "Add Calendar"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:871
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1054
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-field-mapper.php:121
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:19
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:30
+msgid "Never"
 msgstr ""
 
-#: src/Admin/Pages/Event.php:94
-#: src/Admin/Pages/EventAbstract.php:107
-msgid "Name this event"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:903
+msgid "Every"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:124
-msgid "Event name is required"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1049
+msgid "Ending"
 msgstr ""
 
-#: src/Admin/Pages/Settings.php:58
-#: src/Admin/Pages/Settings.php:114
-#: src/Admin/Pages/SettingsFeedsTab.php:77
-#: src/Admin/Pages/SettingsZapierTab.php:77
-#: src/Integrations/Elementor/ListWidget.php:126
-msgid "Settings"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1063
+msgid "Date"
 msgstr ""
 
-#: src/Admin/Pages/Settings.php:123
-msgid "Save Settings"
+#: includes/pro/Features/AdvancedRecurring/Admin/Meta.php:1069
+msgid "After"
 msgstr ""
 
-#: src/Admin/Pages/SettingsFeedsTab.php:48
+#: includes/pro/Features/CalendarFeeds/Admin/Loader.php:64
+#: includes/pro/Features/CalendarFeeds/Common/Menu.php:60
+#: includes/pro/Features/CalendarFeeds/Common/TermFeeds.php:81
+#: includes/pro/Features/CalendarFeeds/Common/TermFeeds.php:82
+#: src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php:42
 msgid "Feeds"
 msgstr ""
 
-#: src/Admin/Pages/SettingsFeedsTab.php:82
-msgid "Available Feeds"
+#: includes/pro/Features/CalendarFeeds/Admin/Loader.php:143
+msgid "Close"
 msgstr ""
 
-#: src/Admin/Pages/SettingsFeedsTab.php:83
-msgid "Select the feeds to show on Calendars, Event Archives, and Single Events. (WebCal and Direct are not used for Single Events)."
-msgstr ""
-
-#: src/Admin/Pages/SettingsFeedsTab.php:89
-msgid "Google Calendar"
-msgstr ""
-
-#: src/Admin/Pages/SettingsFeedsTab.php:90
-msgid "Microsoft Outlook"
-msgstr ""
-
-#: src/Admin/Pages/SettingsFeedsTab.php:91
-msgid "Apple Calendar"
-msgstr ""
-
-#: src/Admin/Pages/SettingsFeedsTab.php:92
-msgid "WebCal"
-msgstr ""
-
-#: src/Admin/Pages/SettingsFeedsTab.php:93
+#: includes/pro/Features/CalendarFeeds/Common/Menu.php:61
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:80
 msgid "Download"
 msgstr ""
 
-#: src/Admin/Pages/SettingsFeedsTab.php:94
+#: includes/pro/Features/CalendarFeeds/Common/Menu.php:164
+msgid "Copy"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Menu.php:165
+msgid "Visit"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Rewrite.php:143
+msgid "Events"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:60
+msgid "Google Calendar"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:65
+msgid "Microsoft Outlook"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:70
+msgid "Apple Calendar"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:75
+msgid "WebCal"
+msgstr ""
+
+#: includes/pro/Features/CalendarFeeds/Common/Settings.php:85
 msgid "Direct"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:91
-msgid "License"
+#: includes/pro/Features/CalendarFeeds/FrontEnd/Singular.php:45
+msgid "Add to Calendar: "
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:106
-msgid "License Key"
+#: includes/pro/Features/DuplicateEvent/Feature.php:42
+msgid "Invalid item ID."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:116
-#: src/Integrations/Elementor/CalendarWidget.php:141
-#: src/Integrations/Elementor/ListWidget.php:193
-msgid "Display"
+#: includes/pro/Features/DuplicateEvent/Feature.php:47
+#: includes/pro/Features/DuplicateEvent/Feature.php:67
+msgid "Sorry, this item cannot be copied."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:129
-msgid "Number of events to include in any theme-side calendar. Default <strong>30</strong>. Use <strong>0</strong> for no limit."
+#: includes/pro/Features/DuplicateEvent/Feature.php:59
+msgid "The item you are trying to copy no longer exists."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:145
-msgid "Select the first day of the week."
+#: includes/pro/Features/DuplicateEvent/Feature.php:72
+msgid "Sorry, you are not allowed to copy this item."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:221
-msgid "Each"
+#: includes/pro/Features/DuplicateEvent/Feature.php:80
+msgid "This post does not have event data."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:222
-msgid "First"
+#: includes/pro/Features/DuplicateEvent/Feature.php:87
+msgctxt "noun"
+msgid "Copy"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:223
-msgid "Blend"
+#: includes/pro/Features/DuplicateEvent/Feature.php:100
+#: includes/pro/Features/DuplicateEvent/Feature.php:115
+msgid "Error copying the item."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:235
-msgid "Calendar Day Colors"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:25
+msgid "Link"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:236
-msgid "The theme-side Calendar Color styling strategy.<br><strong>None</strong> by default (no colors).<br><strong>Each</strong> uses a single color for each Event link.<br><strong>First</strong> uses the first color found for the background.<br><strong>Blend</strong> will use the average of all colors for the background."
+#: includes/pro/Features/EventUrls/Admin/Meta.php:50
+msgid "Add a custom URL which will be displayed in the event details or redirect visitors to a different page."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:246
-#: src/Integrations/Elementor/CalendarWidget.php:158
-#: src/Integrations/Elementor/ListWidget.php:338
-msgid "Light"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:54
+msgid "Redirect"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:247
-#: src/Integrations/Elementor/CalendarWidget.php:159
-#: src/Integrations/Elementor/ListWidget.php:339
-msgid "Dark"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:66
+msgid "Automatically send visitors here. The Event page on your site will be inaccessible."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:250
-msgid "Single Event Page Appearance"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:75
+msgid "URL"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:251
-msgid "Adjust the frontend display of event single page."
+#: includes/pro/Features/EventUrls/Admin/Meta.php:79
+msgid "Paste the full URL starting with https://"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:258
-msgid "Editing"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:85
+msgid "Target"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:287
-msgid "Editor Type"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:88
+msgid "Open link in a new tab"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:288
-msgid "The interface to use when adding or editing Events."
+#: includes/pro/Features/EventUrls/Admin/Meta.php:93
+msgid "Text"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:298
-msgid "Enable Custom Fields"
+#: includes/pro/Features/EventUrls/Admin/Meta.php:97
+msgid "Use this text instead of showing the URL."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:299
-msgid "Allow developers to extend post types that support <code>events</code>."
+#: includes/pro/Features/EventUrls/FrontEnd/Singular.php:51
+msgid "URL:"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:316
-msgid "&mdash; No Default &mdash;"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-actions.php:31
+msgid "Sugar Calendar Event"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:317
-msgid "Default Event Calendar"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-entry-mapper.php:35
+msgid "Event"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:318
-msgid "When adding a new Event, this Calendar will be preselected."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-entry-mapper.php:39
+msgid "Edit"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:339
-msgid "Single"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-entry-mapper.php:42
+msgid "View"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:340
-msgid "Multi"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-field-mapper.php:123
+msgid "Other"
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:350
-msgid "<strong>Off</strong> by default (Existing time zone data still appears).<br><strong>Single</strong> allows Events to have one time zone.<br><strong>Multi</strong> allows Events to have different start & end time zones.<br><strong>Single</strong> and <strong>Multi</strong> will enable time zones for Calendars."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:129
+msgid "Start time is not proper."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:361
-msgid "When time zones are enabled, new Events will default to this. If you are unsure, leave empty or pick the time zone you are in."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:131
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-validator.php:35
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:233
+msgid "Start date is not proper."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:372
-msgid "Attempts to update theme-side Event times according to visitor web browser location. Depends on client-side browser support. May not work for all visitors."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:156
+msgid "End time is not proper."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:389
-msgid "You're using Sugar Calendar Lite - no license needed. Enjoy!"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:159
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-validator.php:42
+msgid "End Time less than start time."
 msgstr ""
 
-#. translators: %s - WPMailSMTP.com upgrade URL.
-#: src/Admin/Pages/SettingsGeneralTab.php:395
-msgid "To unlock more features, consider <strong><a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"sugar-calendar-upgrade-modal\">upgrading to PRO</a></strong>."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:161
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-validator.php:45
+msgid "End Date less than start Date."
 msgstr ""
 
-#. Translators: %s - discount value 50%
-#: src/Admin/Pages/SettingsGeneralTab.php:422
-msgid "As a valued Sugar Calendar Lite user you receive <strong>%s off</strong>, automatically applied at checkout!"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:192
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-validator.php:51
+msgid "Repeat end date less than start Date/End date."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:439
-msgid "Paste license key here"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/formidable-form/class-fes-frm-validator.php:219
+msgid "File type is Invalid. Supports Image files only."
 msgstr ""
 
-#: src/Admin/Pages/SettingsGeneralTab.php:444
-msgid "Verify Key"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:118
+msgid "Sugar Calendar Settings"
 msgstr ""
 
-#. translators: %1$s - Sugar Calendar account dashboard url; %2$s - pricing page url.
-#: src/Admin/Pages/SettingsGeneralTab.php:451
-msgid "Your license key can be found in your <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sugar Calendar Account Dashboard</a>. Don't have a license?  <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sign up today!</a>"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:121
+msgid "Enable Sugar Calendar Event creation."
 msgstr ""
 
-#: src/Admin/Pages/SettingsMapsTab.php:50
-msgid "Maps"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:124
+msgid "This will allow adding Sugar calendar event creation using current form. You can link Event details mapping with corresponding fields"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMapsTab.php:85
-msgid "Google Maps"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:127
+msgid "Check this to Enable Event creation"
 msgstr ""
 
-#. translators: %1$s - Google Maps API Key link url; %1$s - Documentation link url.
-#: src/Admin/Pages/SettingsMapsTab.php:87
-msgid "In order to display maps with pins and dynamic views, you’ll need to obtain and enter your own <a href=\"%1$s\" target=\"_blank\">Google Maps API Key</a>.<br>If you need help, please refer to <a href=\"%2$s\" target=\"_blank\">our documentation</a>."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:134
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:76
+msgid "Event Title"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMapsTab.php:101
-msgid "API Key"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:142
+msgid "Set as Event Title"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:49
-msgid "Misc"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:143
+msgid "Select Post Fields - Title field. It will be used as Event Title."
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:75
-msgid "Miscellaneous"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:148
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:88
+msgid "Event Description"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:87
-msgid "Hide Announcements"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:156
+msgid "Set as Event Description"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:88
-msgid "Hide plugin announcements and update details."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:157
+msgid "Select Post Fields - Body field. It will be used as Event Description."
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:109
-msgid "Allow Usage Tracking"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:162
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:100
+msgid "Event Status"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:110
-msgid "By allowing us to track usage data we can better help you because we know with which WordPress configurations, themes and plugins we should test."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:167
+msgid "Set as Event Status"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:48
-#: src/Admin/Pages/SettingsZapierTab.php:82
-msgid "Zapier"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:168
+msgid "This will control Event status after form submission."
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:83
-msgid "Zapier lets you connect Sugar Calendar with thousands of the most popular apps, so you can automate your work and have more time for what matters most."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:172
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:103
+msgid "Draft"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:93
-msgid "Zapier Settings"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:176
+msgid "Pending"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:98
-msgid "Sugar Calendar Triggers for Zapier"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:180
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:104
+msgid "Automatically Publish"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:119
-msgid "Unlock These Awesome Zapier Features!"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:187
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:115
+msgid "Event Featured Image"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:121
-msgid "Automate Repetitive Tasks"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:195
+msgid "Set as Event Featured Image"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:122
-msgid "Integrate with 3000+ Other Apps"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:196
+msgid "Select Post Fields - Post Image field. It will be used as Event Featured Image."
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:123
-msgid "Set It and Forget It"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:201
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:127
+msgid "Calendar"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:124
-msgid "Connect to Your Favorite Services"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:209
+msgid "Populate with Calendars"
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:125
-msgid "No Code Necessary"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:210
+msgid "Set Drop Down or Radio Buttons field here. This will populate the field with Calendar terms."
 msgstr ""
 
-#: src/Admin/Pages/SettingsZapierTab.php:126
-msgid "Build Custom Solutions"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:215
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:139
+msgid "All Day"
 msgstr ""
 
-#: src/Admin/Pages/Tools.php:111
-#: src/Admin/Pages/Tools.php:138
-msgid "Tools"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:223
+msgid "Populate with All Day values"
 msgstr ""
 
-#: src/Admin/Pages/Tools.php:212
-msgid "Importer not found."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:224
+msgid "Set Drop Down or Radio Buttons field here. This will populate the field with All Day options."
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:68
-#: src/Admin/Pages/ToolsImportTab.php:56
-#: src/Admin/Tools/Importers.php:85
-#: src/Admin/Tools/Importers.php:194
-#: src/Block/Calendar/Loader.php:242
-#: src/Block/Calendar/Loader.php:252
-#: src/Block/Calendar/Loader.php:301
-#: src/Block/EventList/Loader.php:204
-msgid "Invalid request."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:229
+msgid "Start Date"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:78
-msgid "Please select the data you want to export."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:237
+msgid "Set as Start Date"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:124
-#: src/Admin/Pages/ToolsExportTab.php:136
-#: src/Admin/Pages/ToolsExportTab.php:170
-msgid "Export"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:238
+msgid "Set date field here. It will be used as Event Start Date."
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:142
-msgid "Custom Fields"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:243
+msgid "Start Time"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:144
-msgid "Tickets, Orders and Attendees"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:251
+msgid "Set as Start Time"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:148
-msgid "Select the Sugar Calendar data that you would like to export."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:252
+msgid "Set time field here. It will be used as Event start time if applicable."
 msgstr ""
 
-#. translators: %s: import source.
-#: src/Admin/Pages/ToolsImportTab.php:76
-msgid "Importer not found for: %s"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:257
+msgid "End Date"
 msgstr ""
 
-#: src/Admin/Pages/ToolsImportTab.php:106
-#: src/Admin/Tools/Importers/Importer.php:120
-#: src/Admin/Tools/Importers/SugarCalendar.php:67
-msgid "Import"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:265
+msgid "Set as End Date"
 msgstr ""
 
-#: src/Admin/Pages/ToolsMigrateTab.php:105
-msgid "Migrate"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:266
+msgid "Set date field here. It will be used as Event End Date."
 msgstr ""
 
-#: src/Admin/Pages/ToolsMigrateTab.php:121
-msgid "No migration available."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:271
+msgid "End Time"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:40
-#: src/Admin/Pages/Welcome.php:93
-msgid "Welcome to Sugar Calendar"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:279
+msgid "Set as End Time"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:94
-msgid "Most event calendar plugins are either way too simple, or extremely overly complex and bloated. Sugar Calendar is designed to be simple, light-weight, and provide just the major features you need for event management."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:280
+msgid "Set time field here. It will be used as Event end time if applicable."
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:96
-msgid "Create Your First Event"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:293
+msgid "Populate with Repeat values"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:97
-msgid "Read the Full Guide"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:294
+msgid "Set Drop Down or Radio Buttons field here. This will populate the field with Repeat options."
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:101
-msgid "Calendar Illustration"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:299
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:187
+msgid "End Repeat"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:105
-msgid "Simple And Powerful Features"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:307
+msgid "Set as End Repeat Date"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:106
-msgid "Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:308
+msgid "Set date field here. It will be used as Event End Repeat date if applicable."
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:110
-#: src/Admin/Pages/Welcome.php:113
-msgid "Event Management"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:313
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:199
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:445
+msgid "Location"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:114
-msgid "Sugar Calendar is designed to be simple, light weight, and provide just the major features you need for event management."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:321
+msgid "Set as Location field."
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:123
-msgid "Create events that recur automatically on a daily, weekly, monthly, and yearly basis. You can even set a date to end recurrence."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-addon.php:322
+msgid "Set Address, Single Line Text, or Paragraph text field here. It will be used as Event Location."
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:128
-#: src/Admin/Pages/Welcome.php:131
-msgid "Translation-Ready"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/gravity-form/class-fes-gf-meta-creator.php:44
+msgid "Edit event"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:132
-msgid "Sugar Calendar is fully localized and ready for your language. It has been translated in eight languages and is ready for more!"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:44
+msgid "Frontend Event Submission"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:137
-#: src/Admin/Pages/Welcome.php:140
-msgid "Start And End Times"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:115
+msgid "Event Submitted By WP Forms. "
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:141
-msgid "All events can be assigned a starting and end time. Both start and end dates are optional, support all-day or specific-duration events."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:128
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:157
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:187
+msgid "View Form Entry"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:146
-#: src/Admin/Pages/Welcome.php:149
-msgid "Single And Multi-Day Events"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:129
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:158
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:188
+msgid "View Entry"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:150
-msgid "Events can be set to occur on a specific day or over multiple days."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:143
+msgid "Event Submitted By Formidable Forms. "
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:155
-#: src/Admin/Pages/Welcome.php:158
-msgid "Event Categories"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:172
+msgid "Event Submitted By Gravity Forms. "
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:159
-msgid "Assign events to specific categories and then display calendars for just categories or even display a master calendar with all categories."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:201
+msgid "Event Submitted By Ninja Forms. "
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:164
-#: src/Admin/Pages/Welcome.php:167
-msgid "Event Time Zones"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:215
+msgid "Check Submissions"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:168
-msgid "Assign specific time zones to events and calendars and display event date and times in viewers' local time zones."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/Loader.php:216
+msgid "View All submissions"
 msgstr ""
 
-#: src/Admin/Pages/Welcome.php:177
-msgid "Easily sell tickets to events through Stripe or WooCommerce with the Event Ticketing addon."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:53
+msgid "Event Submissions"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:145
-msgid "Complete"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:62
+msgid "Enable Sugar Calendar Event creation"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:146
-msgid "In progress"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:65
+msgid "Off"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:147
-msgid "Migration in Progress..."
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:79
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:91
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:118
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:130
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:142
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:154
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:166
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:178
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:190
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:202
+msgid "--- Select Field ---"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:148
-msgid "Migration Complete!"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:105
+msgid "Pending Review"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:149
-msgid "Events migrated:"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:151
+msgid "Start Date and Time"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:150
-msgid "Tickets migrated:"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:163
+msgid "End Date and Time"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:151
-msgid "Orders migrated:"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:237
+msgid "End Date Time should not be less than Start Date time."
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:152
-msgid "Attendees migrated:"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-addon.php:241
+msgid "Recurrence end date should not be less than start Date/End date."
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:153
-msgid "An error occurred during the migration "
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-field-mapper.php:92
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:68
+msgid "No"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:154
-#: src/Connect.php:58
-msgid "Heads up!"
-msgstr ""
-
-#: src/Admin/Tools/Importers.php:155
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-field-mapper.php:97
+#: includes/pro/Features/FrontendEventSubmissions/Common/Functions.php:64
 msgid "Yes"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:157
-msgid "Are you sure you want to import the recurring events as normal non-recurring events?"
+#: includes/pro/Features/FrontendEventSubmissions/Admin/wpforms/class-fes-wpf-field-mapper.php:162
+msgid "---Select Calendar---"
 msgstr ""
 
-#: src/Admin/Tools/Importers.php:208
-msgid "Invalid importer."
-msgstr ""
-
-#: src/Admin/Tools/Importers/Importer.php:900
-msgid "Name"
-msgstr ""
-
-#: src/Admin/Tools/Importers/Importer.php:904
-msgid "Payer"
-msgstr ""
-
-#: src/Admin/Tools/Importers/Importer.php:912
-msgid "Title"
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:38
-#: src/Admin/Tools/Importers/SugarCalendar.php:81
-msgid "Select a Sugar Calendar JSON file to import."
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:53
-msgid "Choose File"
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:56
-msgid "No file chosen"
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:86
-msgid "Import Completed!"
-msgstr ""
-
-#. translators: %1$s: number of imported items, %2$s: item type.
-#: src/Admin/Tools/Importers/SugarCalendar.php:103
-msgid "%1$s imported: %2$s"
-msgstr ""
-
-#. translators: %s: Sugar Calendar Pro pricing page URL.
-#: src/Admin/Tools/Importers/SugarCalendar.php:136
-msgid "If you are importing recurring events, please <a target=\"_blank\" href=\"%1$s\">upgrade to Sugar Calendar Pro</a>. If you import recurring events on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?"
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:182
-msgid "Please upload a valid .json Sugar Calendar export file."
-msgstr ""
-
-#: src/Admin/Tools/Importers/SugarCalendar.php:193
-msgid "The unfiltered HTML permissions are required to import."
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:100
-msgid "Migrate From The Events Calendar"
-msgstr ""
-
-#. translators: %s: Sugar Calendar to TEC migration admin page.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:196
-msgid "Sugar Calendar to The Events Calendar migration was not completed. Please complete the migration <a href=\"%s\">here</a>."
-msgstr ""
-
-#. translators: %s: Sugar Calendar to TEC migration admin page.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:212
-msgid "Sugar Calendar has detected The Events Calendar events on this site. Migrate them to Sugar Calendar with our <a href=\"%s\">1-click migration tool</a>."
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:230
-msgid "Dismiss this notice."
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:268
-msgid "You have no The Events Calendar events to import."
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:280
-msgid "The previous migration was not completed. Click the button below to continue the migration."
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:281
-msgid "Continue Migration"
-msgstr ""
-
-#. translators: %s: A sentence describing the number of items per context to be imported.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:287
-msgid "There are %s defined in The Events Calendar. You can import them to Sugar Calendar with just one click!"
-msgstr ""
-
-#: src/Admin/Tools/Importers/TheEventCalendar.php:294
-msgid "Migrate Events"
-msgstr ""
-
-#. translators: %s: Sugar Calendar Pro pricing page URL.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:307
-msgid "The Events Calendar migration contains recurring events. Please <a target=\"_blank\" href=\"%1$s\">upgrade to Sugar Calendar Pro</a>, to successfully import recurring events. If you want to proceed with this migration on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?"
-msgstr ""
-
-#. translators: %s: Number of TEC events to import.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:394
-msgid "%s event"
-msgid_plural "%s events"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: Number of TEC orders to import.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:410
-msgid "%s order"
-msgid_plural "%s orders"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: Number of TEC tickets to import.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:426
-msgid "%s ticket"
-msgid_plural "%s tickets"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %s: Number of TEC attendees to import.
-#: src/Admin/Tools/Importers/TheEventCalendar.php:438
-msgid "%s attendee"
-msgid_plural "%s attendees"
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/Block/Calendar/CalendarView/Block.php:111
-#: src/Block/Calendar/Loader.php:109
-#: src/Block/EventList/EventListView/Block.php:242
-#: src/Block/Loader.php:102
-msgid "This Week"
-msgstr ""
-
-#: src/Block/Calendar/CalendarView/Block.php:115
-#: src/Block/Calendar/Loader.php:108
-msgid "This Month"
-msgstr ""
-
-#. translators: %s: Month name and the date. E.g January 1.
-#: src/Block/Calendar/Loader.php:105
-msgid "Events on %s"
-msgstr ""
-
-#: src/Block/Calendar/templates/day/all-day-events-row.php:11
-msgid "ALL-DAY"
-msgstr ""
-
-#: src/Block/Calendar/templates/week/multi-and-all-day-events-rows.php:10
-msgid "Multi-day"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:65
-msgid "Days of the Week"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:94
-msgid "Time of Day"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:100
-msgid "Morning"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:101
-msgid "Afternoon"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:102
-msgid "Evening"
-msgstr ""
-
-#: src/Block/Common/templates/popovers.php:103
-msgid "Night"
-msgstr ""
-
-#: src/Block/EventList/EventListView/Block.php:151
-#: src/Integrations/Elementor/ListWidget.php:206
-msgid "Grid"
-msgstr ""
-
-#: src/Block/EventList/EventListView/Block.php:152
-#: src/Integrations/Elementor/ListWidget.php:207
-msgid "Plain"
-msgstr ""
-
-#: src/Block/EventList/EventListView/Block.php:363
-#: src/Block/EventList/Loader.php:160
-msgid "There are no events scheduled that match your criteria."
-msgstr ""
-
-#: src/Block/EventList/EventListView/Block.php:366
-msgid "There are no events scheduled this week."
-msgstr ""
-
-#: src/Connect.php:56
-msgid "Activate"
-msgstr ""
-
-#: src/Connect.php:57
-msgid "Almost Done"
-msgstr ""
-
-#: src/Connect.php:59
+#: includes/pro/Features/Loader.php:141
 msgid "Continue"
 msgstr ""
 
-#: src/Connect.php:60
-msgid "Unfortunately there was a server connection error."
+#: includes/pro/Features/Loader.php:142
+msgid "Heads up!"
 msgstr ""
 
-#: src/Connect.php:117
-msgid "You are not allowed to install plugins."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:59
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:132
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:419
+#: src/Admin/Events/Metaboxes.php:355
+msgid "Venue"
 msgstr ""
 
-#: src/Connect.php:128
-msgid "Please enter your license key to connect."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:80
+#: includes/pro/Features/Venues/Feature.php:236
+msgid "Select a venue"
 msgstr ""
 
-#: src/Connect.php:136
-msgid "Only the Lite version can be upgraded."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:83
+msgid "Search an existing venue or create a new one."
 msgstr ""
 
-#: src/Connect.php:151
-msgid "Sugar Calendar Pro was already installed, but was not active. We activated it for you."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:97
+msgid "Unavailable"
 msgstr ""
 
-#: src/Connect.php:162
-msgid "There was an error while generating an upgrade URL. Please try again."
+#. translators: %s: status label.
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:107
+msgid "This venue is currently in the \"%s\" status."
 msgstr ""
 
-#: src/Connect.php:177
-msgid "There was an error while installing an upgrade. Please download the plugin from sugarcalendar.com and install it manually."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:138
+#: includes/pro/Features/Venues/Common/PostType.php:82
+msgid "Add New Venue"
 msgstr ""
 
-#: src/Connect.php:209
-#: src/Connect.php:217
-#: src/Connect.php:296
-msgid "Plugin installed & activated."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:170
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:126
+msgid "You need to configure Google API in %s to enable this feature."
 msgstr ""
 
-#: src/Connect.php:230
-msgid "There was an error while installing the upgrade. Please check file system permissions and try again. Also, you can download the plugin from sugarcalendar.com and install it manually."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:174
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:127
+msgid "settings"
 msgstr ""
 
-#: src/Connect.php:263
-msgid "There was an error while installing the upgrade. Please try again."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:179
+#: includes/pro/Features/Venues/Common/Meta.php:97
+msgid "Show Map"
 msgstr ""
 
-#: src/Connect.php:300
-msgid "Pro version installed but needs to be activated on the Plugins page."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:191
+msgid "Save This Venue"
 msgstr ""
 
-#. translators: 1: start date, 2: end date.
-#: src/Helpers.php:379
-msgid "%1$s - %2$s"
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:194
+msgid "Cancel"
 msgstr ""
 
-#: src/Helpers.php:1000
-msgid "There are no events to display."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:237
+#: includes/pro/Features/Venues/Common/PostType.php:83
+msgid "Edit Venue"
 msgstr ""
 
-#: src/Helpers.php:1004
-msgid "There are no upcoming events to display."
+#: includes/pro/Features/Venues/Admin/Metabox/Event.php:351
+msgid "Error saving venue."
 msgstr ""
 
-#: src/Helpers.php:1008
-msgid "There are no past events to display."
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:24
+msgid "Venue Details"
 msgstr ""
 
-#: src/Helpers/UI.php:44
-msgid "Sugar Calendar Logo"
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:34
+msgid "Description"
 msgstr ""
 
-#: src/Integrations/Elementor/CalendarWidget.php:38
-#: src/Integrations/Elementor/CalendarWidget.php:115
-msgid "Events Calendar"
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:63
+msgid "Name the venue in the input above and fill out the venue details below. You can also define a feature image on the right and provide additional venue information in the description box below."
 msgstr ""
 
-#: src/Integrations/Elementor/CalendarWidget.php:156
-#: src/Integrations/Elementor/ListWidget.php:336
-msgid "Appearance"
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:92
+msgid "Venue Name"
 msgstr ""
 
-#: src/Integrations/Elementor/CalendarWidget.php:170
-#: src/Integrations/Elementor/ListWidget.php:231
-msgid "Allow Users to Change Display"
+#: includes/pro/Features/Venues/Admin/Metabox/Venue.php:138
+msgid "Select a Country"
 msgstr ""
 
-#: src/Integrations/Elementor/CalendarWidget.php:181
-#: src/Integrations/Elementor/ListWidget.php:351
-msgid "Accent Color"
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:107
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:133
+#: includes/pro/Features/Venues/Common/Functions.php:92
+#: includes/pro/Features/Venues/Common/Meta.php:25
+msgid "Address"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:41
-#: src/Integrations/Elementor/ListWidget.php:118
-msgid "Events List"
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:108
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:139
+msgid "Author"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:152
-msgid "Group events by week"
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:109
+#: includes/pro/Features/Venues/Admin/Pages/VenuesList.php:145
+msgid "Last Modified"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:162
-msgid "Events per page"
+#: includes/pro/Features/Venues/Common/Functions.php:101
+#: includes/pro/Features/Venues/Common/Meta.php:34
+msgid "Address 2"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:178
-msgid "Max events to show"
+#: includes/pro/Features/Venues/Common/Functions.php:110
+#: includes/pro/Features/Venues/Common/Meta.php:43
+msgid "City"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:203
-msgid "Display Type"
+#: includes/pro/Features/Venues/Common/Functions.php:119
+msgid "State"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:218
-msgid "Show Block Header"
+#: includes/pro/Features/Venues/Common/Functions.php:128
+#: includes/pro/Features/Venues/Common/Meta.php:61
+msgid "Country"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:245
-msgid "Show Filters"
+#: includes/pro/Features/Venues/Common/Functions.php:137
+#: includes/pro/Features/Venues/Common/Meta.php:70
+msgid "Postal Code"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:259
-msgid "Show Search"
+#: includes/pro/Features/Venues/Common/Functions.php:146
+#: includes/pro/Features/Venues/Common/Meta.php:79
+msgid "Phone"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:273
-msgid "Show Date Cards"
+#: includes/pro/Features/Venues/Common/Functions.php:155
+#: includes/pro/Features/Venues/Common/Meta.php:88
+msgid "Website"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:286
-msgid "Show Descriptions"
+#: includes/pro/Features/Venues/Common/Functions.php:356
+msgid "Venue:"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:296
-msgid "Show Featured Images"
+#: includes/pro/Features/Venues/Common/Functions.php:365
+msgid "Location:"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:309
-msgid "Image position"
+#: includes/pro/Features/Venues/Common/Functions.php:373
+msgid "More info"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:311
-msgid "Left"
+#: includes/pro/Features/Venues/Common/Helpers.php:28
+msgid "Afghanistan"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:312
-msgid "Right"
+#: includes/pro/Features/Venues/Common/Helpers.php:29
+msgid "Åland Islands"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:326
-msgid "Styles"
+#: includes/pro/Features/Venues/Common/Helpers.php:30
+msgid "Albania"
 msgstr ""
 
-#: src/Integrations/Elementor/ListWidget.php:361
-msgid "Links Color"
+#: includes/pro/Features/Venues/Common/Helpers.php:31
+msgid "Algeria"
 msgstr ""
 
-#. translators: %1$s - the DB option name, %2$s - Sugar Calendar, %3$s - error message.
-#: src/Migrations/MigrationAbstract.php:156
-msgid "There was an error while upgrading the %1$s database. Please contact %2$s support with this information: %3$s."
+#: includes/pro/Features/Venues/Common/Helpers.php:32
+msgid "American Samoa"
 msgstr ""
 
-#: sugar-calendar-plugin.php:573
-msgid "My Calendar"
+#: includes/pro/Features/Venues/Common/Helpers.php:33
+msgid "Andorra"
 msgstr ""
 
-#: sugar-calendar-plugin.php:576
-msgid "The default calendar events will be added to."
+#: includes/pro/Features/Venues/Common/Helpers.php:34
+msgid "Angola"
 msgstr ""
 
-#: sugar-calendar.php:128
-msgid "Sugar Calendar PRO version is activated. We de-activated the Sugar Calendar Lite version."
+#: includes/pro/Features/Venues/Common/Helpers.php:35
+msgid "Anguilla"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:434
-msgid "End date and time cannot be before the start date and time."
+#: includes/pro/Features/Venues/Common/Helpers.php:36
+msgid "Antarctica"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:37
+msgid "Antigua and Barbuda"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:38
+msgid "Argentina"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:39
+msgid "Armenia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:40
+msgid "Aruba"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:41
+msgid "Australia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:42
+msgid "Austria"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:43
+msgid "Azerbaijan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:44
+msgid "Bahamas"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:45
+msgid "Bahrain"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:46
+msgid "Bangladesh"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:47
+msgid "Barbados"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:48
+msgid "Belarus"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:49
+msgid "Belgium"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:50
+msgid "Belau"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:51
+msgid "Belize"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:52
+msgid "Benin"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:53
+msgid "Bermuda"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:54
+msgid "Bhutan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:55
+msgid "Bolivia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:56
+msgid "Bonaire, Saint Eustatius and Saba"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:57
+msgid "Bosnia and Herzegovina"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:58
+msgid "Botswana"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:59
+msgid "Bouvet Island"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:60
+msgid "Brazil"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:61
+msgid "British Indian Ocean Territory"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:62
+msgid "Brunei"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:63
+msgid "Bulgaria"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:64
+msgid "Burkina Faso"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:65
+msgid "Burundi"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:66
+msgid "Cambodia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:67
+msgid "Cameroon"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:68
+msgid "Canada"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:69
+msgid "Cape Verde"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:70
+msgid "Cayman Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:71
+msgid "Central African Republic"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:72
+msgid "Chad"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:73
+msgid "Chile"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:74
+msgid "China"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:75
+msgid "Christmas Island"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:76
+msgid "Cocos (Keeling) Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:77
+msgid "Colombia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:78
+msgid "Comoros"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:79
+msgid "Congo (Brazzaville)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:80
+msgid "Congo (Kinshasa)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:81
+msgid "Cook Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:82
+msgid "Costa Rica"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:83
+msgid "Croatia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:84
+msgid "Cuba"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:85
+msgid "Cura&ccedil;ao"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:86
+msgid "Cyprus"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:87
+msgid "Czech Republic"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:88
+msgid "Denmark"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:89
+msgid "Djibouti"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:90
+msgid "Dominica"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:91
+msgid "Dominican Republic"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:92
+msgid "Ecuador"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:93
+msgid "Egypt"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:94
+msgid "El Salvador"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:95
+msgid "Equatorial Guinea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:96
+msgid "Eritrea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:97
+msgid "Estonia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:98
+msgid "Ethiopia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:99
+msgid "Falkland Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:100
+msgid "Faroe Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:101
+msgid "Fiji"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:102
+msgid "Finland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:103
+msgid "France"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:104
+msgid "French Guiana"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:105
+msgid "French Polynesia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:106
+msgid "French Southern Territories"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:107
+msgid "Gabon"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:108
+msgid "Gambia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:109
+msgid "Georgia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:110
+msgid "Germany"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:111
+msgid "Ghana"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:112
+msgid "Gibraltar"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:113
+msgid "Greece"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:114
+msgid "Greenland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:115
+msgid "Grenada"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:116
+msgid "Guadeloupe"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:117
+msgid "Guam"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:118
+msgid "Guatemala"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:119
+msgid "Guernsey"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:120
+msgid "Guinea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:121
+msgid "Guinea-Bissau"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:122
+msgid "Guyana"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:123
+msgid "Haiti"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:124
+msgid "Heard Island and McDonald Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:125
+msgid "Honduras"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:126
+msgid "Hong Kong"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:127
+msgid "Hungary"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:128
+msgid "Iceland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:129
+msgid "India"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:130
+msgid "Indonesia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:131
+msgid "Iran"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:132
+msgid "Iraq"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:133
+msgid "Ireland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:134
+msgid "Isle of Man"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:135
+msgid "Israel"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:136
+msgid "Italy"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:137
+msgid "Ivory Coast"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:138
+msgid "Jamaica"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:139
+msgid "Japan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:140
+msgid "Jersey"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:141
+msgid "Jordan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:142
+msgid "Kazakhstan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:143
+msgid "Kenya"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:144
+msgid "Kiribati"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:145
+msgid "Kuwait"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:146
+msgid "Kyrgyzstan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:147
+msgid "Laos"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:148
+msgid "Latvia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:149
+msgid "Lebanon"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:150
+msgid "Lesotho"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:151
+msgid "Liberia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:152
+msgid "Libya"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:153
+msgid "Liechtenstein"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:154
+msgid "Lithuania"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:155
+msgid "Luxembourg"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:156
+msgid "Macao"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:157
+msgid "North Macedonia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:158
+msgid "Madagascar"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:159
+msgid "Malawi"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:160
+msgid "Malaysia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:161
+msgid "Maldives"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:162
+msgid "Mali"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:163
+msgid "Malta"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:164
+msgid "Marshall Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:165
+msgid "Martinique"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:166
+msgid "Mauritania"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:167
+msgid "Mauritius"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:168
+msgid "Mayotte"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:169
+msgid "Mexico"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:170
+msgid "Micronesia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:171
+msgid "Moldova"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:172
+msgid "Monaco"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:173
+msgid "Mongolia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:174
+msgid "Montenegro"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:175
+msgid "Montserrat"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:176
+msgid "Morocco"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:177
+msgid "Mozambique"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:178
+msgid "Myanmar"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:179
+msgid "Namibia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:180
+msgid "Nauru"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:181
+msgid "Nepal"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:182
+msgid "Netherlands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:183
+msgid "New Caledonia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:184
+msgid "New Zealand"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:185
+msgid "Nicaragua"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:186
+msgid "Niger"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:187
+msgid "Nigeria"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:188
+msgid "Niue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:189
+msgid "Norfolk Island"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:190
+msgid "Northern Mariana Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:191
+msgid "North Korea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:192
+msgid "Norway"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:193
+msgid "Oman"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:194
+msgid "Pakistan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:195
+msgid "Palestinian Territory"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:196
+msgid "Panama"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:197
+msgid "Papua New Guinea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:198
+msgid "Paraguay"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:199
+msgid "Peru"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:200
+msgid "Philippines"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:201
+msgid "Pitcairn"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:202
+msgid "Poland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:203
+msgid "Portugal"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:204
+msgid "Puerto Rico"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:205
+msgid "Qatar"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:206
+msgid "Reunion"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:207
+msgid "Romania"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:208
+msgid "Russia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:209
+msgid "Rwanda"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:210
+msgid "Saint Barth&eacute;lemy"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:211
+msgid "Saint Helena"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:212
+msgid "Saint Kitts and Nevis"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:213
+msgid "Saint Lucia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:214
+msgid "Saint Martin (French part)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:215
+msgid "Saint Martin (Dutch part)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:216
+msgid "Saint Pierre and Miquelon"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:217
+msgid "Saint Vincent and the Grenadines"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:218
+msgid "San Marino"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:219
+msgid "S&atilde;o Tom&eacute; and Pr&iacute;ncipe"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:220
+msgid "Saudi Arabia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:221
+msgid "Senegal"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:222
+msgid "Serbia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:223
+msgid "Seychelles"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:224
+msgid "Sierra Leone"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:225
+msgid "Singapore"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:226
+msgid "Slovakia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:227
+msgid "Slovenia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:228
+msgid "Solomon Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:229
+msgid "Somalia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:230
+msgid "South Africa"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:231
+msgid "South Georgia/Sandwich Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:232
+msgid "South Korea"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:233
+msgid "South Sudan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:234
+msgid "Spain"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:235
+msgid "Sri Lanka"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:236
+msgid "Sudan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:237
+msgid "Suriname"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:238
+msgid "Svalbard and Jan Mayen"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:239
+msgid "Eswatini"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:240
+msgid "Sweden"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:241
+msgid "Switzerland"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:242
+msgid "Syria"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:243
+msgid "Taiwan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:244
+msgid "Tajikistan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:245
+msgid "Tanzania"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:246
+msgid "Thailand"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:247
+msgid "Timor-Leste"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:248
+msgid "Togo"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:249
+msgid "Tokelau"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:250
+msgid "Tonga"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:251
+msgid "Trinidad and Tobago"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:252
+msgid "Tunisia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:253
+msgid "Turkey"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:254
+msgid "Turkmenistan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:255
+msgid "Turks and Caicos Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:256
+msgid "Tuvalu"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:257
+msgid "Uganda"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:258
+msgid "Ukraine"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:259
+msgid "United Arab Emirates"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:260
+msgid "United Kingdom (UK)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:261
+msgid "United States (US)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:262
+msgid "United States (US) Minor Outlying Islands"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:263
+msgid "Uruguay"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:264
+msgid "Uzbekistan"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:265
+msgid "Vanuatu"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:266
+msgid "Vatican"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:267
+msgid "Venezuela"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:268
+msgid "Vietnam"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:269
+msgid "Virgin Islands (British)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:270
+msgid "Virgin Islands (US)"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:271
+msgid "Wallis and Futuna"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:272
+msgid "Western Sahara"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:273
+msgid "Samoa"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:274
+msgid "Yemen"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:275
+msgid "Zambia"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Helpers.php:276
+msgid "Zimbabwe"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/Meta.php:52
+msgid "State/Province"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:76
+msgctxt "post type general name"
+msgid "Venues"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:77
+msgctxt "post type singular name"
+msgid "Venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:78
+#: includes/pro/Features/Venues/Common/PostType.php:79
+msgctxt "post type menu name"
+msgid "Venues"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:80
+msgctxt "add new from admin bar"
+msgid "Venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:81
+msgctxt "venue"
+msgid "Add New"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:84
+msgid "New Venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:85
+msgid "View Venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:86
+msgid "View Venues"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:87
+msgid "Search Venues"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:88
+msgid "Search venues..."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:89
+msgid "No venues found."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:90
+msgid "No venues found in trash."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:91
+msgid "Parent Venue:"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:92
+#: includes/pro/Features/Venues/FrontEnd/Blocks.php:41
+#: includes/pro/Features/Venues/Integrations/Elementor/Widget.php:40
+msgid "Venues"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:93
+msgid "Venue Archives"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:94
+msgid "Venue Attributes"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:95
+msgid "Insert Into Venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:96
+msgid "Uploaded to this venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:97
+msgid "Featured Image"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:98
+msgid "Set featured image"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:99
+msgid "Remove featured image"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:100
+msgid "Use as featured image"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:101
+msgid "Filter venue list"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:102
+msgid "Venues list navigation"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:103
+msgid "Venues list"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:104
+msgid "Venue created"
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:105
+msgid "Private venue created."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:106
+msgid "Venue reverted to draft."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:107
+msgid "Venue scheduled."
+msgstr ""
+
+#: includes/pro/Features/Venues/Common/PostType.php:108
+msgid "Venue updated."
+msgstr ""
+
+#: includes/pro/Features/Venues/Feature.php:235
+msgid "Select an existing venue"
+msgstr ""
+
+#: includes/pro/Features/Venues/Feature.php:237
+msgid "Select venue"
+msgstr ""
+
+#: includes/pro/Pro.php:210
+msgid "Inactive &mdash; You are already using Sugar Calendar"
+msgstr ""
+
+#: src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php:68
+msgid "Available Feeds"
+msgstr ""
+
+#: src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php:69
+msgid "Select the feeds to show on Calendars, Event Archives, and Single Events. (WebCal and Direct are not used for Single Events)."
+msgstr ""
+
+#: src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php:137
+msgid "Settings saved."
+msgstr ""
+
+#: src/Pro/Frontend/Loader.php:78
+msgid "Recurrence:"
+msgstr ""
+
+#: src/Pro/Frontend/Loader.php:118
+msgid "Link:"
+msgstr ""
+
+#: src/Pro/Frontend/Loader.php:199
+msgid "Add to Calendar"
+msgstr ""
+
+#. translators: 1: Recurrence type, 2: Start date.
+#: src/Pro/Helpers.php:58
+msgid "%1$s from %2$s"
+msgstr ""
+
+#. translators: 1: Recurrence type, 2: Start date, 3: Recurrence End date.
+#: src/Pro/Helpers.php:65
+msgid "%1$s from %2$s until %3$s"
+msgstr ""
+
+#: src/Pro/License/License.php:143
+msgid "Renew License"
+msgstr ""
+
+#: src/Pro/License/License.php:151
+msgid "Verify Key"
+msgstr ""
+
+#: src/Pro/License/License.php:157
+msgid "Remove Key"
+msgstr ""
+
+#. translators: %1$s - Sugar Calendar account dashboard url; %2$s - pricing page url.
+#: src/Pro/License/License.php:170
+msgid "Your license key can be found in your <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sugar Calendar Account Dashboard</a>. Don't have a license?  <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sign up today!</a>"
+msgstr ""
+
+#. translators: $s - license type.
+#: src/Pro/License/License.php:185
+msgid "Your license key level is %s."
+msgstr ""
+
+#: src/Pro/License/License.php:190
+#: src/Pro/License/License.php:207
+msgid "If your license has been upgraded or is incorrect, then please <a href=\"#\" id=\"sugar-calendar-setting-license-key-refresh\">force a refresh</a>."
+msgstr ""
+
+#: src/Pro/License/License.php:200
+msgid "<strong>Your license has expired.</strong> An active license is needed to access some of the Pro features, plugin updates (including security improvements), and our world class support!"
+msgstr ""
+
+#: src/Pro/License/License.php:217
+msgid "<strong>Your license key has been disabled.</strong> Please use a different key to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:224
+msgid "<strong>Your license key is invalid.</strong> The key no longer exists or the user associated with the key has been deleted. Please use a different key to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:264
+msgid "Something went wrong. Please try again later."
+msgstr ""
+
+#: src/Pro/License/License.php:315
+msgid "There was an error connecting to the remote key API. Please try again later."
+msgstr ""
+
+#: src/Pro/License/License.php:337
+msgid "Congratulations! This site is now receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:391
+#: src/Pro/License/License.php:506
+#: src/Pro/License/License.php:797
+msgid "There was an error connecting to the remote server. Please try again later."
+msgstr ""
+
+#: src/Pro/License/License.php:414
+#: src/Pro/License/License.php:739
+msgid "Your license key for Sugar Calendar Pro is invalid. The key no longer exists or the user associated with the key has been deleted. Please use a different key to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:431
+msgid "Your license key for Sugar Calendar Pro has expired. Please renew your license key on SugarCalendar.com to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:448
+#: src/Pro/License/License.php:730
+msgid "Your license key for Sugar Calendar Pro has been disabled. Please use a different key to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:469
+msgid "Your key has been refreshed successfully."
+msgstr ""
+
+#: src/Pro/License/License.php:529
+msgid "You have deactivated the key from this site successfully."
+msgstr ""
+
+#. translators: %s - plugin settings page URL.
+#: src/Pro/License/License.php:686
+#: src/Pro/License/License.php:781
+msgid "Please <a href=\"%s\">enter and activate</a> your license key for Sugar Calendar Pro to enable automatic updates."
+msgstr ""
+
+#. translators: %s - SugarCalendar.com login page URL.
+#: src/Pro/License/License.php:709
+#: src/Pro/License/License.php:805
+msgid "Your license key for Sugar Calendar Pro has expired. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Please click here to renew your license key and continue receiving automatic updates.</a>"
+msgstr ""
+
+#. translators: %s - plugin settings page URL.
+#: src/Pro/License/License.php:823
+msgid "Your license key for Sugar Calendar Pro has been disabled. Please <a href=\"%s\">enter and activate</a> a different key for Sugar Calendar Pro to continue receiving automatic updates."
+msgstr ""
+
+#. translators: %s - plugin settings page URL.
+#: src/Pro/License/License.php:839
+msgid "Your license key for Sugar Calendar Pro is invalid. Please <a href=\"%s\">enter and activate</a> a different key for Sugar Calendar Pro to continue receiving automatic updates."
+msgstr ""
+
+#: src/Pro/License/License.php:854
+msgid "Your Sugar Calendar Pro license is active and valid."
 msgstr ""

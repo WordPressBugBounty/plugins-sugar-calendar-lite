@@ -35,7 +35,7 @@ class SugarCalendar extends Importer {
 		}
 		?>
 		<p>
-			<?php esc_html_e( 'Select a Sugar Calendar JSON file to import.', 'sugar-calendar' ); ?>
+			<?php esc_html_e( 'Select a Sugar Calendar JSON file to import.', 'sugar-calendar-lite' ); ?>
 		</p>
 
 		<?php
@@ -50,10 +50,10 @@ class SugarCalendar extends Importer {
 					<input type="file" name="file" id="sc-admin-tools-form-import" class="inputfile" accept=".json" />
 					<label for="sc-admin-tools-form-import">
 						<span id="sc-admin-tools-form-import-file-btn">
-							<?php esc_html_e( 'Choose File', 'sugar-calendar' ); ?>
+							<?php esc_html_e( 'Choose File', 'sugar-calendar-lite' ); ?>
 						</span>
 						<span id="sc-admin-tools-form-import-file-info">
-							<?php esc_html_e( 'No file chosen', 'sugar-calendar' ); ?>
+							<?php esc_html_e( 'No file chosen', 'sugar-calendar-lite' ); ?>
 						</span>
 					</label>
 				</div>
@@ -64,7 +64,7 @@ class SugarCalendar extends Importer {
 			<div class="sc-admin-tools-divider"></div>
 			<button id="sc-admin-tools-sc-import-btn" name="submit-import"
 					class="sc-admin-tools-disabled sc-admin-tools-sc-import-btn-disabled sugar-calendar-btn sugar-calendar-btn-primary sugar-calendar-btn-md">
-				<span class="sc-admin-tools-sc-import-btn__text"><?php esc_html_e( 'Import', 'sugar-calendar' ); ?></span>
+				<span class="sc-admin-tools-sc-import-btn__text"><?php esc_html_e( 'Import', 'sugar-calendar-lite' ); ?></span>
 			</button>
 		</form>
 		<?php
@@ -78,12 +78,12 @@ class SugarCalendar extends Importer {
 	private function display_finished_import_summary() {
 		?>
 		<p>
-			<?php esc_html_e( 'Select a Sugar Calendar JSON file to import.', 'sugar-calendar' ); ?>
+			<?php esc_html_e( 'Select a Sugar Calendar JSON file to import.', 'sugar-calendar-lite' ); ?>
 		</p>
 		<div class="sc-admin-tools-divider"></div>
 		<div class="sc-admin-tools-import-summary">
 			<p>
-				<span class="sc-admin-tools-import-summary__title"><?php esc_html_e( 'Import Completed!', 'sugar-calendar' ); ?></span>
+				<span class="sc-admin-tools-import-summary__title"><?php esc_html_e( 'Import Completed!', 'sugar-calendar-lite' ); ?></span>
 			</p>
 			<div class="sc-admin-tools-import-summary__wrap">
 				<?php
@@ -100,7 +100,7 @@ class SugarCalendar extends Importer {
 							<?php
 							printf(
 								/* translators: %1$s: number of imported items, %2$s: item type. */
-								esc_html__( '%1$s imported: %2$s', 'sugar-calendar' ),
+								esc_html__( '%1$s imported: %2$s', 'sugar-calendar-lite' ),
 								esc_html( ucfirst( $context ) ),
 								absint( $this->importer_data[ $context ] )
 							);
@@ -135,7 +135,7 @@ class SugarCalendar extends Importer {
 						/* translators: %s: Sugar Calendar Pro pricing page URL. */
 						__(
 							'If you are importing recurring events, please <a target="_blank" href="%1$s">upgrade to Sugar Calendar Pro</a>. If you import recurring events on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?',
-							'sugar-calendar'
+							'sugar-calendar-lite'
 						),
 						esc_url(
 							Helpers\Helpers::get_utm_url(
@@ -179,8 +179,8 @@ class SugarCalendar extends Importer {
 
 		if ( $ext !== 'json' ) {
 			wp_die(
-				esc_html__( 'Please upload a valid .json Sugar Calendar export file.', 'sugar-calendar' ),
-				esc_html__( 'Error', 'sugar-calendar' ),
+				esc_html__( 'Please upload a valid .json Sugar Calendar export file.', 'sugar-calendar-lite' ),
+				esc_html__( 'Error', 'sugar-calendar-lite' ),
 				[
 					'response' => 400,
 				]
@@ -190,8 +190,8 @@ class SugarCalendar extends Importer {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		if ( ! current_user_can( 'unfiltered_html' ) ) {
 			wp_die(
-				esc_html__( 'The unfiltered HTML permissions are required to import.', 'sugar-calendar' ),
-				esc_html__( 'Error', 'sugar-calendar' ),
+				esc_html__( 'The unfiltered HTML permissions are required to import.', 'sugar-calendar-lite' ),
+				esc_html__( 'Error', 'sugar-calendar-lite' ),
 				[
 					'response' => 400,
 				]
@@ -217,7 +217,7 @@ class SugarCalendar extends Importer {
 		if ( empty( $data ) ) {
 			wp_die(
 				esc_html( json_last_error_msg() ),
-				esc_html__( 'Error', 'sugar-calendar' ),
+				esc_html__( 'Error', 'sugar-calendar-lite' ),
 				[
 					'response' => 400,
 				]

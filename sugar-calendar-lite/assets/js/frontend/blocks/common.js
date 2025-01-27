@@ -105,6 +105,7 @@ SugarCalendarBlocks.init();
  * Block Controls.
  *
  * @since 3.1.0
+ * @since 3.5.0 Added the trigger for filter by venue.
  */
 SugarCalendarBlocks.Controls = SugarCalendarBlocks.Controls || function( $blockContainer ) {
 
@@ -136,6 +137,10 @@ SugarCalendarBlocks.Controls = SugarCalendarBlocks.Controls || function( $blockC
 	// Calendar Selector.
 	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__cal' )
 		.on( 'click', this.onSelectCalendar.bind( this ) );
+
+	// Venue Selector.
+	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue' )
+		.on( 'click', this.onSelectVenue.bind( this ) );
 
 	// Day Selector.
 	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__day' )
@@ -232,6 +237,24 @@ SugarCalendarBlocks.Controls.prototype.getCalendarIds = function() {
 }
 
 /**
+ * Get the venue IDs that are checked.
+ *
+ * @since 3.5.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getVenueIds = function() {
+	let venueIds = [];
+
+	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue:checked' )
+		.each( function() {
+			venueIds.push( jQuery( this ).val() );
+		});
+
+	return venueIds;
+}
+
+/**
  * Get the calendar IDs that are filtered from block settings.
  *
  * @since 3.2.0
@@ -252,6 +275,29 @@ SugarCalendarBlocks.Controls.prototype.getCalendarsFilter = function() {
 	}
 
 	return calendarFilters.split( ',' );
+}
+
+/**
+ * Get the venue IDs that are filtered from block settings.
+ *
+ * @since 3.5.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getVenuesFilter = function() {
+	const $venueFilters = this.$formContainer.find( 'input[name="sc_venues_filter"]' );
+
+	if ( $venueFilters.length <= 0 ) {
+		return [];
+	}
+
+	const venueFilters = $venueFilters.val();
+
+	if ( venueFilters.length <= 0 ) {
+		return [];
+	}
+
+	return venueFilters.split( ',' );
 }
 
 /**
@@ -335,6 +381,17 @@ SugarCalendarBlocks.Controls.prototype.goToCurrent = function() {
  * @since 3.1.0
  */
 SugarCalendarBlocks.Controls.prototype.onSelectCalendar = function() {
+
+	// Trigger the update block.
+	this.update( {} );
+}
+
+/**
+ * Event callback for selecting a venue to display.
+ *
+ * @since 3.5.0
+ */
+SugarCalendarBlocks.Controls.prototype.onSelectVenue = function() {
 
 	// Trigger the update block.
 	this.update( {} );
@@ -435,10 +492,10 @@ SugarCalendarBlocks.Controls.prototype.filterDisplayedEvents = function() {
 SugarCalendarBlocks.Controls.prototype.initDatePicker = function() {
 
 	if ( this.$datePicker !== undefined ) {
-		this.$datePicker.datepicker( 'destroy' );
+		this.$datePicker.scbootdatepicker( 'destroy' );
 	}
 
-	this.$datePicker.datepicker({
+	this.$datePicker.scbootdatepicker({
 		minViewMode: 0,
 		maxViewMode: 2,
 		templates: {
@@ -457,7 +514,7 @@ SugarCalendarBlocks.Controls.prototype.initDatePicker = function() {
 		$day = this.$formContainer.find( 'input[name="sc_day"]' ),
 		that = this;
 
-	this.$datePicker.datepicker( 'update', new Date( $year.val(), $month.val() - 1, $day.val() ) );
+	this.$datePicker.scbootdatepicker( 'update', new Date( $year.val(), $month.val() - 1, $day.val() ) );
 
 	this.$datePicker.on( 'changeDate', ( e ) => {
 
@@ -482,7 +539,7 @@ SugarCalendarBlocks.Controls.prototype.updateDate = function( newDate ) {
 	this.$formContainer.find( 'input[name="sc_month"]' ).val( newDate.month );
 	this.$formContainer.find( 'input[name="sc_day"]' ).val( newDate.day );
 
-	this.$datePicker.datepicker( 'update', new Date( newDate.year, newDate.month - 1, newDate.day ) );
+	this.$datePicker.scbootdatepicker( 'update', new Date( newDate.year, newDate.month - 1, newDate.day ) );
 }
 
 /**

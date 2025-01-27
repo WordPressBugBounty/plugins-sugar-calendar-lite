@@ -34,36 +34,36 @@ function notices() {
 		// Refund
 		case 'order-refund' :
 			$notice_text = ( 'updated' === $notice_type )
-				? esc_html__( 'Order successfully refunded.', 'sugar-calendar' )
-				: esc_html__( 'Order not refunded.', 'sugar-calendar' );
+				? esc_html__( 'Order successfully refunded.', 'sugar-calendar-lite' )
+				: esc_html__( 'Order not refunded.', 'sugar-calendar-lite' );
 			break;
 
 		// Update
 		case 'order-update' :
 			$notice_text = ( 'updated' === $notice_type )
-				? esc_html__( 'Order successfully updated.', 'sugar-calendar' )
-				: esc_html__( 'Order not updated.', 'sugar-calendar' );
+				? esc_html__( 'Order successfully updated.', 'sugar-calendar-lite' )
+				: esc_html__( 'Order not updated.', 'sugar-calendar-lite' );
 			break;
 
 		// Delete
 		case 'order-delete' :
 			$notice_text = ( 'updated' === $notice_type )
-				? esc_html__( 'Order successfully deleted.', 'sugar-calendar' )
-				: esc_html__( 'Order not deleted.', 'sugar-calendar' );
+				? esc_html__( 'Order successfully deleted.', 'sugar-calendar-lite' )
+				: esc_html__( 'Order not deleted.', 'sugar-calendar-lite' );
 			break;
 
 		// Email
 		case 'email-send' :
 			$notice_text = ( 'updated' === $notice_type )
-				? esc_html__( 'Ticket successfully emailed.', 'sugar-calendar' )
-				: esc_html__( 'Ticket not emailed.', 'sugar-calendar' );
+				? esc_html__( 'Ticket successfully emailed.', 'sugar-calendar-lite' )
+				: esc_html__( 'Ticket not emailed.', 'sugar-calendar-lite' );
 			break;
 
 		// Resend email
 		case 'email-resend' :
 			$notice_text = ( 'updated' === $notice_type )
-				? esc_html__( 'Receipt successfully resent.', 'sugar-calendar' )
-				: esc_html__( 'Receipt not resent.', 'sugar-calendar' );
+				? esc_html__( 'Receipt successfully resent.', 'sugar-calendar-lite' )
+				: esc_html__( 'Receipt not resent.', 'sugar-calendar-lite' );
 			break;
 	}
 

@@ -34,7 +34,7 @@ class Event extends PageAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Event', 'sugar-calendar' );
+		return esc_html__( 'Event', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -68,9 +68,9 @@ class Event extends PageAbstract {
         <div class="sugar-calendar-admin-subheader">
             <h4>
 				<?php if ( $pagenow === 'post-new.php' ) : ?>
-					<?php esc_html_e( 'Add New Event', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Add New Event', 'sugar-calendar-lite' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'Edit Event', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Edit Event', 'sugar-calendar-lite' ); ?>
 				<?php endif; ?>
             </h4>
         </div>
@@ -91,7 +91,7 @@ class Event extends PageAbstract {
 
 		// Override if primary post type.
 		if ( sugar_calendar_get_event_post_type_id() === $post->post_type ) {
-			$title = esc_html__( 'Name this event', 'sugar-calendar' );
+			$title = esc_html__( 'Name this event', 'sugar-calendar-lite' );
 		}
 
 		// Return possibly modified title.

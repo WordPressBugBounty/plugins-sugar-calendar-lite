@@ -183,25 +183,25 @@ function sugar_calendar_human_diff_time( $older_date, $newer_date = false ) {
 	// Set output var
 	switch ( $seconds ) {
 		case YEAR_IN_SECONDS :
-			$output = sprintf( _n( '%s year', '%s years', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s year', '%s years', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		case 30 * DAY_IN_SECONDS :
-			$output = sprintf( _n( '%s month', '%s months', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s month', '%s months', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		case WEEK_IN_SECONDS :
-			$output = sprintf( _n( '%s week', '%s weeks', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s week', '%s weeks', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		case DAY_IN_SECONDS :
-			$output = sprintf( _n( '%s day', '%s days', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s day', '%s days', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		case HOUR_IN_SECONDS :
-			$output = sprintf( _n( '%s hour', '%s hours', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s hour', '%s hours', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		case MINUTE_IN_SECONDS :
-			$output = sprintf( _n( '%s minute', '%s minutes', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s minute', '%s minutes', $count, 'sugar-calendar-lite' ), $count );
 			break;
 		default:
-			$output = sprintf( _n( '%s second', '%s seconds', $count, 'sugar-calendar' ), $count );
+			$output = sprintf( _n( '%s second', '%s seconds', $count, 'sugar-calendar-lite' ), $count );
 	}
 
 	// Step two: the second chunk
@@ -216,26 +216,26 @@ function sugar_calendar_human_diff_time( $older_date, $newer_date = false ) {
 
 		// Add to output var
 		if ( 0 != $count2 ) {
-			$output .= esc_html_x( ',', 'Separator in time since', 'sugar-calendar' ) . ' ';
+			$output .= esc_html_x( ',', 'Separator in time since', 'sugar-calendar-lite' ) . ' ';
 
 			switch ( $seconds2 ) {
 				case 30 * DAY_IN_SECONDS :
-					$output .= sprintf( _n( '%s month', '%s months', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s month', '%s months', $count2, 'sugar-calendar-lite' ), $count2 );
 					break;
 				case WEEK_IN_SECONDS :
-					$output .= sprintf( _n( '%s week', '%s weeks', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s week', '%s weeks', $count2, 'sugar-calendar-lite' ), $count2 );
 					break;
 				case DAY_IN_SECONDS :
-					$output .= sprintf( _n( '%s day', '%s days', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s day', '%s days', $count2, 'sugar-calendar-lite' ), $count2 );
 					break;
 				case HOUR_IN_SECONDS :
-					$output .= sprintf( _n( '%s hour', '%s hours', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s hour', '%s hours', $count2, 'sugar-calendar-lite' ), $count2 );
 					break;
 				case MINUTE_IN_SECONDS :
-					$output .= sprintf( _n( '%s minute', '%s minutes', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s minute', '%s minutes', $count2, 'sugar-calendar-lite' ), $count2 );
 					break;
 				default:
-					$output .= sprintf( _n( '%s second', '%s seconds', $count2, 'sugar-calendar' ), $count2 );
+					$output .= sprintf( _n( '%s second', '%s seconds', $count2, 'sugar-calendar-lite' ), $count2 );
 			}
 		}
 	}
@@ -271,10 +271,10 @@ function sugar_calendar_get_recurrence_types() {
 	// Store statically to avoid thrashing gettext
 	if ( null === $retval ) {
 		$retval = apply_filters( 'sugar_calendar_get_recurrence_types', [
-			'daily'   => esc_html__( 'Daily', 'sugar-calendar' ),
-			'weekly'  => esc_html__( 'Weekly', 'sugar-calendar' ),
-			'monthly' => esc_html__( 'Monthly', 'sugar-calendar' ),
-			'yearly'  => esc_html__( 'Yearly', 'sugar-calendar' ),
+			'daily'   => esc_html__( 'Daily', 'sugar-calendar-lite' ),
+			'weekly'  => esc_html__( 'Weekly', 'sugar-calendar-lite' ),
+			'monthly' => esc_html__( 'Monthly', 'sugar-calendar-lite' ),
+			'yearly'  => esc_html__( 'Yearly', 'sugar-calendar-lite' ),
 		] );
 	}
 
@@ -406,7 +406,7 @@ function sugar_calendar_time_dropdown( $args = [] ) {
 
 	// Parse the arguments
 	$r = wp_parse_args( $args, [
-		'first'       => esc_html( 'Select One', 'sugar-calendar' ),
+		'first'       => esc_html( 'Select One', 'sugar-calendar-lite' ),
 		'placeholder' => '&nbsp;',
 		'id'          => '',
 		'name'        => '',

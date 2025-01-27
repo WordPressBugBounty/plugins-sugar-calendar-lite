@@ -64,7 +64,9 @@
 			padding: 12px 15px 0 15px;
 		}
 
-		&__days, &__time {
+		&__days,
+		&__time,
+		&__venues {
 			border-top: 1px solid $cell-border-color;
 			padding: 12px 15px 0 15px;
 		}

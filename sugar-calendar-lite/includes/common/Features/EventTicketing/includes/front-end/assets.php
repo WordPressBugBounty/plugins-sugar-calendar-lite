@@ -26,7 +26,7 @@ function register() {
 
 	wp_register_style(
 		'sc-et-bootstrap',
-		Assets\get_url( 'css' ) . "/frontend/bootstrap{$min}.css",
+		Assets\get_url( 'css' ) . "/frontend/et-bootstrap{$min}.css",
 		[],
 		SC_PLUGIN_VERSION
 	);
@@ -142,7 +142,7 @@ function localize() {
 			'ajaxurl'           => admin_url( 'admin-ajax.php' ),
 			'test_mode'         => Functions\is_sandbox(),
 			'publishable_key'   => Functions\get_stripe_publishable_key(),
-			'qty_limit_reached' => esc_html__( 'You have reached the maximum number of tickets available to be purchased. No more tickets are available.', 'sugar-calendar' )
+			'qty_limit_reached' => esc_html__( 'You have reached the maximum number of tickets available to be purchased. No more tickets are available.', 'sugar-calendar-lite' )
 		)
 	);
 }

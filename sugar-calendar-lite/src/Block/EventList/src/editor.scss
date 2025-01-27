@@ -1,6 +1,7 @@
 .sugar-calendar-event-list-block {
 
-	&__calendars {
+	&__calendars,
+	&__venues {
 		margin-bottom: 24px;
 		z-index: 99;
 
@@ -64,6 +65,10 @@
 		.sc-calendar-event-list-block-select__menu {
 			margin-top: 2px;
 		}
+	}
+
+	&__venues {
+		z-index: 90;
 	}
 
 	&__colors {

@@ -76,8 +76,8 @@ class CSV_Export {
 	 */
 	public function csv_cols() {
 		$cols = array(
-			'id'   => esc_html__( 'ID',   'sugar-calendar' ),
-			'date' => esc_html__( 'Date', 'sugar-calendar' )
+			'id'   => esc_html__( 'ID',   'sugar-calendar-lite' ),
+			'date' => esc_html__( 'Date', 'sugar-calendar-lite' )
 		);
 		return $cols;
 	}
@@ -220,7 +220,7 @@ class CSV_Export {
 	public function export( $args = array() ) {
 
 		if ( ! $this->can_export() ) {
-			wp_die( esc_html__( 'You do not have permission to export data.', 'sugar-calendar' ), esc_html__( 'Error', 'sugar-calendar' ), array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You do not have permission to export data.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 ) );
 		}
 
 		// Set headers

@@ -82,7 +82,7 @@ class Importers {
 
 		if ( empty( $migration_slug ) ) {
 			wp_send_json_error(
-				esc_html__( 'Invalid request.', 'sugar-calendar' )
+				esc_html__( 'Invalid request.', 'sugar-calendar-lite' )
 			);
 		}
 
@@ -142,19 +142,19 @@ class Importers {
 				'nonce'      => wp_create_nonce( self::MIGRATION_NONCE_ACTION ),
 				'assets_url' => SC_PLUGIN_ASSETS_URL,
 				'strings'    => [
-					'complete'                 => esc_html__( 'Complete', 'sugar-calendar' ),
-					'in_progress'              => esc_html__( 'In progress', 'sugar-calendar' ),
-					'migration_in_progress'    => esc_html__( 'Migration in Progress...', 'sugar-calendar' ),
-					'migration_completed'      => esc_html__( 'Migration Complete!', 'sugar-calendar' ),
-					'migrated_events'          => esc_html__( 'Events migrated:', 'sugar-calendar' ),
-					'migrated_tickets'         => esc_html__( 'Tickets migrated:', 'sugar-calendar' ),
-					'migrated_orders'          => esc_html__( 'Orders migrated:', 'sugar-calendar' ),
-					'migrated_attendees'       => esc_html__( 'Attendees migrated:', 'sugar-calendar' ),
-					'migrated_failed'          => esc_html__( 'An error occurred during the migration ', 'sugar-calendar' ),
-					'heads_up'                 => esc_html__( 'Heads up!', 'sugar-calendar' ),
-					'yes'                      => esc_html__( 'Yes', 'sugar-calendar' ),
-					'cancel'                   => esc_html__( 'Cancel', 'sugar-calendar' ),
-					'recurring_events_warning' => esc_html__( 'Are you sure you want to import the recurring events as normal non-recurring events?', 'sugar-calendar' ),
+					'complete'                 => esc_html__( 'Complete', 'sugar-calendar-lite' ),
+					'in_progress'              => esc_html__( 'In progress', 'sugar-calendar-lite' ),
+					'migration_in_progress'    => esc_html__( 'Migration in Progress...', 'sugar-calendar-lite' ),
+					'migration_completed'      => esc_html__( 'Migration Complete!', 'sugar-calendar-lite' ),
+					'migrated_events'          => esc_html__( 'Events migrated:', 'sugar-calendar-lite' ),
+					'migrated_tickets'         => esc_html__( 'Tickets migrated:', 'sugar-calendar-lite' ),
+					'migrated_orders'          => esc_html__( 'Orders migrated:', 'sugar-calendar-lite' ),
+					'migrated_attendees'       => esc_html__( 'Attendees migrated:', 'sugar-calendar-lite' ),
+					'migrated_failed'          => esc_html__( 'An error occurred during the migration ', 'sugar-calendar-lite' ),
+					'heads_up'                 => esc_html__( 'Heads up!', 'sugar-calendar-lite' ),
+					'yes'                      => esc_html__( 'Yes', 'sugar-calendar-lite' ),
+					'cancel'                   => esc_html__( 'Cancel', 'sugar-calendar-lite' ),
+					'recurring_events_warning' => esc_html__( 'Are you sure you want to import the recurring events as normal non-recurring events?', 'sugar-calendar-lite' ),
 				],
 			]
 		);
@@ -191,7 +191,7 @@ class Importers {
 			empty( $_POST['importer_slug'] )
 		) {
 			wp_send_json_error(
-				esc_html__( 'Invalid request.', 'sugar-calendar' )
+				esc_html__( 'Invalid request.', 'sugar-calendar-lite' )
 			);
 		}
 
@@ -205,7 +205,7 @@ class Importers {
 			! ( $importers[ $importer_slug ] instanceof ImporterInterface )
 		) {
 			wp_send_json_error(
-				esc_html__( 'Invalid importer.', 'sugar-calendar' )
+				esc_html__( 'Invalid importer.', 'sugar-calendar-lite' )
 			);
 		}
 

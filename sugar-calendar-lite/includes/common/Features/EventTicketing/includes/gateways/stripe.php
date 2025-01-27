@@ -75,7 +75,7 @@ class Stripe extends Checkout {
 		if ( empty( $event ) ) {
 			wp_send_json_error(
 				[
-					'msg'     => esc_html__( 'No event found for this request.', 'sugar-calendar' ),
+					'msg'     => esc_html__( 'No event found for this request.', 'sugar-calendar-lite' ),
 					'sandbox' => false,
 				]
 			);
@@ -98,7 +98,7 @@ class Stripe extends Checkout {
 		if ( empty( Functions\get_stripe_secret_key() ) && ! $is_sandbox ) {
 			wp_send_json_error(
 				[
-					'msg'     => esc_html__( 'No Stripe API key found.', 'sugar-calendar' ),
+					'msg'     => esc_html__( 'No Stripe API key found.', 'sugar-calendar-lite' ),
 					'sandbox' => false,
 				]
 			);
@@ -148,10 +148,10 @@ class Stripe extends Checkout {
 		 *
 		 * @param string $statement_descriptor The statement descriptor.
 		 */
-		$statement   = apply_filters( 'sc_et_stripe_statement_descriptor', esc_html__( 'Event Tickets', 'sugar-calendar' ) ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		$statement   = apply_filters( 'sc_et_stripe_statement_descriptor', esc_html__( 'Event Tickets', 'sugar-calendar-lite' ) ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 		$description = sprintf(
 			/* translators: %1$s: Event title, %2$s: Event date. */
-			esc_html__( 'Event ticket for %1$s on %2$s', 'sugar-calendar' ),
+			esc_html__( 'Event ticket for %1$s on %2$s', 'sugar-calendar-lite' ),
 			$event->title,
 			$event->format_date(
 				sc_get_date_format() . ' ' . sc_get_time_format(),

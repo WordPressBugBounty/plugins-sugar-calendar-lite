@@ -192,7 +192,7 @@ function calendars( $post = null, $box = array() ) {
             </ul>
 
             <a id="<?php echo $tax_name; ?>-clear" href="#<?php echo $tax_name; ?>-clear" class="hide-if-no-js button taxonomy-clear">
-				<?php esc_html_e( 'Clear', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Clear', 'sugar-calendar-lite' ); ?>
             </a>
         </div>
 

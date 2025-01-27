@@ -41,7 +41,7 @@ class Events extends PageAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Events', 'sugar-calendar' );
+		return esc_html__( 'Events', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -109,12 +109,12 @@ class Events extends PageAbstract {
 		?>
 
         <div class="sugar-calendar-admin-subheader">
-            <h4><?php esc_html_e( 'Events', 'sugar-calendar' ); ?></h4>
+            <h4><?php esc_html_e( 'Events', 'sugar-calendar-lite' ); ?></h4>
 
 			<?php
 			UI::button(
 				[
-					'text'  => esc_html__( 'Add New Event', 'sugar-calendar' ),
+					'text'  => esc_html__( 'Add New Event', 'sugar-calendar-lite' ),
 					'size'  => 'sm',
 					'class' => 'sugar-calendar-btn-new-item',
 					'link'  => $add_new_url,
@@ -136,7 +136,7 @@ class Events extends PageAbstract {
 
             <div class="sugar-calendar-admin-content">
 
-                <h1 class="screen-reader-text"><?php esc_html_e( 'Events', 'sugar-calendar' ); ?></h1>
+                <h1 class="screen-reader-text"><?php esc_html_e( 'Events', 'sugar-calendar-lite' ); ?></h1>
 
 				<?php
 				/**

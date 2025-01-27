@@ -37,14 +37,14 @@ function page() {
 	} ?>
 
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Sugar Calendar Upgrades', 'sugar-calendar' ); ?></h1>
+		<h1><?php esc_html_e( 'Sugar Calendar Upgrades', 'sugar-calendar-lite' ); ?></h1>
 		<hr class="wp-header-end">
 
 		<div id="sc-upgrade-status">
-			<p><?php _e( 'The upgrade process has begun. Please be patient. You will be redirected when it is finished.', 'sugar-calendar' ); ?></p>
+			<p><?php _e( 'The upgrade process has begun. Please be patient. You will be redirected when it is finished.', 'sugar-calendar-lite' ); ?></p>
 
 			<?php if ( ! empty( $total ) ) : ?>
-				<p><strong><?php printf( __( 'Step %d of %d...', 'sugar-calendar' ), $step, $steps ); ?></strong></p>
+				<p><strong><?php printf( __( 'Step %d of %d...', 'sugar-calendar-lite' ), $step, $steps ); ?></strong></p>
 			<?php endif; ?>
 		</div>
 
@@ -126,14 +126,14 @@ function notices() {
 	// 2.x - Database migration
 	} elseif ( ! did_upgrade( '20_migration' ) ) {
 		printf(
-			'<div class="updated"><p>' . __( 'Sugar Calendar needs to upgrade the events database. Click <a href="%s">here</a> to start.', 'sugar-calendar' ) . '</p></div>',
+			'<div class="updated"><p>' . __( 'Sugar Calendar needs to upgrade the events database. Click <a href="%s">here</a> to start.', 'sugar-calendar-lite' ) . '</p></div>',
 			page_url( array( 'upgrade' => '20_migration' ) )
 		);
 
 	// 2.0.6 - Flush rewrite rules
 	} else if ( ! did_upgrade( '206_migration' ) ) {
 		printf(
-			'<div class="updated"><p>' . __( 'Sugar Calendar needs to perform an upgrade. Click <a href="%s">here</a> to start.', 'sugar-calendar' ) . '</p></div>',
+			'<div class="updated"><p>' . __( 'Sugar Calendar needs to perform an upgrade. Click <a href="%s">here</a> to start.', 'sugar-calendar-lite' ) . '</p></div>',
 			page_url( array( 'upgrade' => '206_migration' ) )
 		);
 	}

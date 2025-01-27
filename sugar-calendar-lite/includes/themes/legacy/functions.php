@@ -13,7 +13,28 @@ use Sugar_Calendar\Helper;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-function sc_get_events_for_calendar_with_custom_range( $start_range, $end_range, $category = '', $search = '', $number = null ) {
+/**
+ * Get events with a custom parameter.
+ *
+ * @since 3.5.0
+ *
+ * @param DateTimeImmutable $start_range Start range.
+ * @param DateTimeImmutable $end_range   End range.
+ * @param array             $category    Category.
+ * @param string            $search      Search.
+ * @param int               $number      Number.
+ * @param array             $venues      Venues.
+ *
+ * @return array
+ */
+function sc_get_events_for_calendar_with_custom_range(
+	$start_range,
+	$end_range,
+	$category = '',
+	$search = '',
+	$number = null,
+	$venues = []
+) {
 
 	if (
 		! ( $start_range instanceof DateTimeInterface ) ||
@@ -47,6 +68,11 @@ function sc_get_events_for_calendar_with_custom_range( $start_range, $end_range,
 	if ( ! empty( $category ) ) {
 		$tax          = sugar_calendar_get_calendar_taxonomy_id();
 		$args[ $tax ] = $category; // Sanitized later.
+	}
+
+	// Maybe add venues if non-empty.
+	if ( ! empty( $venues ) ) {
+		$args['venue_id'] = $venues;
 	}
 
 	// Query for events.
@@ -1617,7 +1643,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['weekly'] ) ) {
 					$retval = $format['weekly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every %s until %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every %s until %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),
@@ -1631,7 +1657,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['monthly'] ) ) {
 					$retval = $format['monthly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every month on the %s until %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every month on the %s until %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),
@@ -1645,7 +1671,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['yearly'] ) ) {
 					$retval = $format['yearly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every year on the %s of %s until %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every year on the %s of %s until %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),
@@ -1665,7 +1691,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['weekly'] ) ) {
 					$retval = $format['weekly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),
@@ -1678,7 +1704,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['monthly'] ) ) {
 					$retval = $format['monthly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every month on the %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every month on the %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),
@@ -1691,7 +1717,7 @@ function sc_get_recurring_description( $event_id = 0 ) {
 				if ( isset( $format['yearly'] ) ) {
 					$retval = $format['yearly'];
 				} else {
-					$retval = sprintf( __( 'Starts %s then every year on the %s of %s', 'sugar-calendar' ),
+					$retval = sprintf( __( 'Starts %s then every year on the %s of %s', 'sugar-calendar-lite' ),
 
 						// @todo needs time zone support
 						date_i18n( $date_format, $event_date_time ),

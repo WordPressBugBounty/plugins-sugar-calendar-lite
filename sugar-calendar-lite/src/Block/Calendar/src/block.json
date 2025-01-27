@@ -12,22 +12,26 @@
 			"type": "string",
 			"default": ""
 		},
-		"display": {
-			"type": "string",
-			"default": "month"
-		},
-		"accentColor": {
-			"type": "string",
-			"default": "#5685BD"
-		},
 		"calendars": {
 			"type": "array",
 			"default": []
+		},
+		"venues": {
+			"type": "array",
+			"default": []
+		},
+		"display": {
+			"type": "string",
+			"default": "month"
 		},
     "showBlockHeader": {
       "type": "boolean",
       "default": true
     },
+		"allowUserChangeDisplay": {
+			"type": "boolean",
+			"default": true
+		},
 		"showFilters": {
 			"type": "boolean",
 			"default": true
@@ -36,14 +40,14 @@
 			"type": "boolean",
 			"default": true
 		},
-		"allowUserChangeDisplay": {
-			"type": "boolean",
-			"default": true
-		},
     "appearance" : {
       "type": "string",
       "default": "light"
-    }
+    },
+		"accentColor": {
+			"type": "string",
+			"default": "#5685BD"
+		}
 	},
 	"textdomain": "sugar-calendar-block",
 	"editorScript": "file:./index.js",

@@ -197,12 +197,12 @@ function sugar_calendar_human_diff_timezone( $timezone1, $timezone2 = 'UTC', $da
 
 		// Positive or negative
 		$posneg = ( $difference > 0 )
-			? esc_html_x( '+', 'Plus', 'sugar-calendar' )
-			: esc_html_x( '-', 'Minus', 'sugar-calendar' );
+			? esc_html_x( '+', 'Plus', 'sugar-calendar-lite' )
+			: esc_html_x( '-', 'Minus', 'sugar-calendar-lite' );
 
 		// Format the text
 		$number = number_format_i18n( $change );
-		$string = _n( '%s hour', '%s hours', $change, 'sugar-calendar' );
+		$string = _n( '%s hour', '%s hours', $change, 'sugar-calendar-lite' );
 		$retval = sprintf( $string, $posneg . $number );
 	}
 
@@ -283,7 +283,7 @@ function sugar_calendar_format_timezone( $timezone = '', $frontend_display = fal
 
 	// Empty time zone is floating
 	if ( empty( $timezone ) ) {
-		$retval = esc_html__( 'Floating', 'sugar-calendar' );
+		$retval = esc_html__( 'Floating', 'sugar-calendar-lite' );
 
 		// Manual offset looks like "Etc/GMT-5"
 	} elseif ( sugar_calendar_is_manual_timezone_offset( $timezone ) ) {
@@ -857,7 +857,7 @@ function sugar_calendar_timezone_dropdown( $args = [] ) { // phpcs:ignore Generi
 			'allow_manual' => true,
 
 			// Labels.
-			'placeholder'  => esc_html__( 'Floating', 'sugar-calendar' ),
+			'placeholder'  => esc_html__( 'Floating', 'sugar-calendar-lite' ),
 			'none'         => '',
 		]
 	);
@@ -934,15 +934,15 @@ function sugar_calendar_timezone_dropdown( $args = [] ) { // phpcs:ignore Generi
 
 	// Support empty/floating time zone
 	if ( ! empty( $r['allow_empty'] ) ) {
-		$structure[] = '<optgroup label="' . esc_attr__( 'Default', 'sugar-calendar' ) . '">';
+		$structure[] = '<optgroup label="' . esc_attr__( 'Default', 'sugar-calendar-lite' ) . '">';
 		$structure[] = '<option ' . selected( $selected_zone, false, false ) . ' value="">' . esc_html( $placeholder ) . '</option>';
 		$structure[] = '</optgroup>';
 	}
 
 	// Support UTC time zone
 	if ( ! empty( $r['allow_empty'] ) ) {
-		$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'sugar-calendar' ) . '">';
-		$structure[] = '<option ' . selected( 'UTC', $selected_zone, false ) . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'sugar-calendar' ) . '</option>';
+		$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'sugar-calendar-lite' ) . '">';
+		$structure[] = '<option ' . selected( 'UTC', $selected_zone, false ) . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'sugar-calendar-lite' ) . '</option>';
 		$structure[] = '</optgroup>';
 	}
 
@@ -991,7 +991,7 @@ function sugar_calendar_timezone_dropdown( $args = [] ) { // phpcs:ignore Generi
 	if ( ! empty( $r['allow_manual'] ) ) {
 
 		// Do manual UTC offsets
-		$structure[]  = '<optgroup label="' . esc_attr__( 'UTC Manual Offsets', 'sugar-calendar' ) . '">';
+		$structure[]  = '<optgroup label="' . esc_attr__( 'UTC Manual Offsets', 'sugar-calendar-lite' ) . '">';
 		$offset_range = sugar_calendar_get_manual_timezone_offsets();
 
 		// Loop through offsets and create human readible options

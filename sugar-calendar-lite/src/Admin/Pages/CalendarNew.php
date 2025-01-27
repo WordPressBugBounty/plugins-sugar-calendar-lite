@@ -43,7 +43,7 @@ class CalendarNew extends CalendarAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Add New Calendar', 'sugar-calendar' );
+		return esc_html__( 'Add New Calendar', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -109,7 +109,7 @@ class CalendarNew extends CalendarAbstract {
 				'name'        => 'tag-name',
 				'id'          => 'tag-name',
 				'value'       => $this->term->name,
-				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar' ),
+				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar-lite' ),
 				'required'    => true,
 			],
 			true
@@ -145,7 +145,7 @@ class CalendarNew extends CalendarAbstract {
 			UI::button(
 				[
 					'name' => 'submit',
-					'text' => esc_html__( 'Add New Calendar', 'sugar-calendar' ),
+					'text' => esc_html__( 'Add New Calendar', 'sugar-calendar-lite' ),
 				]
 			);
 			?>

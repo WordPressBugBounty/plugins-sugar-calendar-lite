@@ -65,7 +65,7 @@ class ToolsExportTab extends Tools {
 
 		if ( ! check_admin_referer( self::EXPORT_NONCE_ACTION, 'sc_admin_tools_export_nonce' ) ) {
 			wp_nonce_ays(
-				esc_html__( 'Invalid request.', 'sugar-calendar' )
+				esc_html__( 'Invalid request.', 'sugar-calendar-lite' )
 			);
 			die();
 		}
@@ -75,7 +75,7 @@ class ToolsExportTab extends Tools {
 			! is_array( $_POST['sc_admin_tools_export_data'] )
 		) {
 			WP::add_admin_notice(
-				esc_html__( 'Please select the data you want to export.', 'sugar-calendar' ),
+				esc_html__( 'Please select the data you want to export.', 'sugar-calendar-lite' ),
 				WP::ADMIN_NOTICE_ERROR,
 				true
 			);
@@ -121,7 +121,7 @@ class ToolsExportTab extends Tools {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Export', 'sugar-calendar' );
+		return esc_html__( 'Export', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -133,19 +133,19 @@ class ToolsExportTab extends Tools {
 
 		UI::heading(
 			[
-				'title' => esc_html__( 'Export', 'sugar-calendar' ),
+				'title' => esc_html__( 'Export', 'sugar-calendar-lite' ),
 			]
 		);
 
 		$data_checkboxes = [
-			'events'        => __( 'Events', 'sugar-calendar' ),
-			'custom_fields' => __( 'Custom Fields', 'sugar-calendar' ),
-			'calendars'     => __( 'Calendars', 'sugar-calendar' ),
-			'orders'        => __( 'Tickets, Orders and Attendees', 'sugar-calendar' ),
+			'events'        => __( 'Events', 'sugar-calendar-lite' ),
+			'custom_fields' => __( 'Custom Fields', 'sugar-calendar-lite' ),
+			'calendars'     => __( 'Calendars', 'sugar-calendar-lite' ),
+			'orders'        => __( 'Tickets, Orders and Attendees', 'sugar-calendar-lite' ),
 		];
 		?>
 		<p>
-			<?php esc_html_e( 'Select the Sugar Calendar data that you would like to export.', 'sugar-calendar' ); ?>
+			<?php esc_html_e( 'Select the Sugar Calendar data that you would like to export.', 'sugar-calendar-lite' ); ?>
 		</p>
 		<form id="sc-admin-tools-export-form" method="post">
 			<input type="hidden" name="sc_admin_tools_export_nonce" value="<?php echo esc_attr( wp_create_nonce( self::EXPORT_NONCE_ACTION ) ); ?>" />
@@ -167,7 +167,7 @@ class ToolsExportTab extends Tools {
 			</div>
 			<div class="sc-admin-tools-divider"></div>
 			<button class="sugar-calendar-btn sugar-calendar-btn-primary sugar-calendar-btn-md" type="submit" name="sc_admin_tools_export">
-				<?php esc_html_e( 'Export', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Export', 'sugar-calendar-lite' ); ?>
 			</button>
 		</form>
 		<?php

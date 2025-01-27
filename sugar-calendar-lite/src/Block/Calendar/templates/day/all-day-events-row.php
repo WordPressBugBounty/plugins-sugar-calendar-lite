@@ -8,7 +8,7 @@ namespace Sugar_Calendar\Block\Calendar\CalendarView;
 
 <div class="sugar-calendar-block__calendar-day__all-day">
 	<div class="sugar-calendar-block__calendar-day__time-label-cell">
-		<?php echo esc_html__( 'ALL-DAY', 'sugar-calendar' ); ?>
+		<?php echo esc_html__( 'ALL-DAY', 'sugar-calendar-lite' ); ?>
 	</div>
 	<div class="sugar-calendar-block__calendar-day__event-slot--all-day sugar-calendar-block__calendar-day__event-slot">
 		<?php

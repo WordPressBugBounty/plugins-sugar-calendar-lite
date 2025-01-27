@@ -37,7 +37,7 @@ class Calendars extends PageAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Calendars', 'sugar-calendar' );
+		return esc_html__( 'Calendars', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -135,12 +135,12 @@ class Calendars extends PageAbstract {
 
 		?>
         <div class="sugar-calendar-admin-subheader">
-            <h4><?php esc_html_e( 'Calendars', 'sugar-calendar' ); ?></h4>
+            <h4><?php esc_html_e( 'Calendars', 'sugar-calendar-lite' ); ?></h4>
 
 			<?php
 			UI::button(
 				[
-					'text'  => esc_html__( 'Add Calendar', 'sugar-calendar' ),
+					'text'  => esc_html__( 'Add Calendar', 'sugar-calendar-lite' ),
 					'size'  => 'sm',
 					'class' => 'sugar-calendar-btn-new-item',
 					'link'  => CalendarNew::get_url(),
@@ -358,7 +358,7 @@ class Calendars extends PageAbstract {
 	 */
 	public function change_count_column_label( $columns ) {
 
-		$columns['posts'] = esc_html__( 'Events', 'sugar-calendar' );
+		$columns['posts'] = esc_html__( 'Events', 'sugar-calendar-lite' );
 
 		return $columns;
 	}

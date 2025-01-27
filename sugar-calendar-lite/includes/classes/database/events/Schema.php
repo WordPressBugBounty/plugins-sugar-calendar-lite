@@ -206,6 +206,16 @@ final class Event_Schema extends Schema {
 		// uuid
 		array(
 			'uuid'       => true,
-		)
+		),
+
+		// Venue ID.
+		array(
+			'name'     => 'venue_id',
+			'type'     => 'bigint',
+			'length'   => '20',
+			'unsigned' => true,
+			'default'  => '0',
+			'sortable' => true,
+		),
 	);
 }

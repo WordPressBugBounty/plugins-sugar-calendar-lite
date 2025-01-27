@@ -108,7 +108,7 @@ class Tools extends PageTabAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Tools', 'sugar-calendar' );
+		return esc_html__( 'Tools', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class Tools extends PageTabAbstract {
 			<?php UI::tabs( $this->get_tabs(), static::get_tab_slug() ); ?>
 
 			<div class="sugar-calendar-admin-content">
-				<h1 class="screen-reader-text"><?php esc_html_e( 'Tools', 'sugar-calendar' ); ?></h1>
+				<h1 class="screen-reader-text"><?php esc_html_e( 'Tools', 'sugar-calendar-lite' ); ?></h1>
 
 				<?php static::display_tab(); ?>
 			</div>
@@ -209,7 +209,7 @@ class Tools extends PageTabAbstract {
 		$importer = $this->get_importer();
 
 		if ( $importer === false ) {
-			esc_html_e( 'Importer not found.', 'sugar-calendar' );
+			esc_html_e( 'Importer not found.', 'sugar-calendar-lite' );
 
 			return;
 		}

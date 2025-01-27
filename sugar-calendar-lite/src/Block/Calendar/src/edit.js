@@ -27,7 +27,9 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
-import Select from '../../../../node_modules/react-select';
+import Select from 'react-select';
+
+import { useVenues, hasFinishedGettingVenues, onChangeVenues } from './../../Common/assets/js/venue';
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -74,63 +76,131 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes({ calendars: selectedCalendarIds });
 	}
 
+	const // Request the venues.
+		venues = useVenues(),
+		isVenuesResolved = hasFinishedGettingVenues();
+		console.log( 'venues', venues );
+
 	const onChangeDisplay = ( display ) => {
 		setAttributes( { display: display } );
+	};
+
+	const onShowBlockHeader = ( showBlockHeader ) => {
+		setAttributes( {
+			showBlockHeader: showBlockHeader,
+			allowUserChangeDisplay: showBlockHeader,
+			showFilters: showBlockHeader,
+			showSearch: showBlockHeader,
+		} );
 	};
 
 	const onAllowUserChangeDisplay = ( allowUserChangeDisplay ) => {
 		setAttributes( { allowUserChangeDisplay: allowUserChangeDisplay } );
 	}
 
+	const onShowFilters = ( showFilters ) => {
+		setAttributes( { showFilters: showFilters } );
+	};
+
+	const onShowSearch = ( showSearch ) => {
+		setAttributes( { showSearch: showSearch } );
+	};
+
 	const onChangeAccentColor = ( accentColor ) => {
 		setAttributes( { accentColor: accentColor } );
 	}
 
+	const showCalendarFilterSection = hasFinishedGettingCalendars && calendars && calendars.length > 1;
+	const showVenuesFilterSection = isVenuesResolved && venues && venues.length > 0;
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'sugar-calendar-block' ) }>
 
-					{
-						hasFinishedGettingCalendars &&
-						calendars &&
-						calendars.length > 1 &&
-						<Heading
-							level={3}>
-							Calendars
-						</Heading>
-					}
+				{
+					( showCalendarFilterSection || showVenuesFilterSection ) &&
+					(
 
-					{
-						hasFinishedGettingCalendars &&
-						calendars &&
-						calendars.length > 1 &&
-						<Select
-							className="sugar-calendar-block__calendars"
-							classNamePrefix="sc-calendar-block-select"
-							isMulti
-							options={
-								calendars.map( ( calendar ) => {
-									return {
-										value: calendar.id,
-										label: calendar.name
-									};
-								} )
+						<PanelBody
+							title={ __( 'Settings', 'sugar-calendar-block' ) }
+							initialOpen={ true }
+						>
+							{
+								showCalendarFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Calendars', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__calendars"
+										classNamePrefix="sc-calendar-block-select"
+										isMulti
+										options={
+											calendars.map( ( calendar ) => {
+												return {
+													value: calendar.id,
+													label: calendar.name
+												};
+											} )
+										}
+										onChange={onChangeCalendars}
+										value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
+											const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
+											return {
+												value: calendar.id,
+												label: calendar.name
+											};
+										} ) : []}
+									/>
+								</>
 							}
-							onChange={onChangeCalendars}
-							value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
-								const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
-								return {
-									value: calendar.id,
-									label: calendar.name
-								};
-							} ) : []}
-						/>
-					}
 
+							{
+								showVenuesFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Venues', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__venues"
+										classNamePrefix="sc-venue-block-select"
+										isMulti
+										options={
+											venues.map((venue) => {
+												return {
+													value: venue.id,
+													label: venue.title.rendered,
+												};
+											})
+										}
+										onChange={(selectedOptions) => {
+											onChangeVenues(selectedOptions, setAttributes);
+										}}
+										value={attributes.venues ? attributes.venues.map((venueId) => {
+											const venue = venues.find((venue) => venue.id === venueId);
+											return venue
+												? {
+													value: venue.id,
+													label: venue.title.rendered,
+												}
+												: null;
+										}) : []}
+									/>
+								</>
+							}
+						</PanelBody>
+					)
+				}
+
+				<PanelBody
+					title={ __( 'Display', 'sugar-calendar-block' ) }
+					initialOpen={ true }
+				>
 					<ToggleGroupControl
 						onChange={ onChangeDisplay }
-						label={ __( 'Display', 'sugar-calendar-block' ) }
+						label={ __( 'Display Type', 'sugar-calendar-block' ) }
 						value={ attributes.display }
 						isBlock>
 						<ToggleGroupControlOption value="month" label={ __( 'Month', 'sugar-calendar-block' ) } />
@@ -139,11 +209,36 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					</ToggleGroupControl>
 
 					<ToggleControl
+						label={ __( 'Show Block Header', 'sugar-calendar-event-list-block' ) }
+						checked={ attributes.showBlockHeader }
+						onChange={ onShowBlockHeader }
+					/>
+
+					<ToggleControl
 						label={ __( 'Allow Users to Change Display', 'sugar-calendar-block' ) }
 						checked={ attributes.allowUserChangeDisplay }
 						onChange={ onAllowUserChangeDisplay }
 					/>
 
+					<ToggleControl
+						label={ __( 'Show Filters', 'sugar-calendar-event-list-block' ) }
+						checked={ attributes.showFilters }
+						onChange={ onShowFilters }
+						disabled={ ! attributes.showBlockHeader }
+					/>
+
+					<ToggleControl
+						label={ __( 'Show Search', 'sugar-calendar-event-list-block' ) }
+						checked={ attributes.showSearch }
+						onChange={ onShowSearch }
+						disabled={ ! attributes.showBlockHeader }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Styles', 'sugar-calendar-block' ) }
+					initialOpen={ false }
+				>
 					<SelectControl
 						label={ __( 'Appearance', 'sugar-calendar-block' ) }
 						value={attributes.appearance}
@@ -171,7 +266,6 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 							},
 						] }
 					/>
-
 				</PanelBody>
 			</InspectorControls>
 

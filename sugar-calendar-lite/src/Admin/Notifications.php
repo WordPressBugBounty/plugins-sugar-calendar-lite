@@ -511,20 +511,20 @@ class Notifications {
                         <path d="M11.6666 7.60868C13.6677 7.60868 15.2898 5.98653 15.2898 3.9855C15.2898 1.98447 13.6677 0.36232 11.6666 0.36232C9.66561 0.36232 8.04346 1.98447 8.04346 3.9855C8.04346 5.98653 9.66561 7.60868 11.6666 7.60868Z" fill="#d63638"/>
                     </svg>
                 </div>
-                <div class="sugar-calendar-notifications-title"><?php esc_html_e( 'Notifications', 'sugar-calendar' ); ?></div>
+                <div class="sugar-calendar-notifications-title"><?php esc_html_e( 'Notifications', 'sugar-calendar-lite' ); ?></div>
             </div>
 
             <div class="sugar-calendar-notifications-body">
-                <a class="dismiss" title="<?php echo esc_attr__( 'Dismiss this message', 'sugar-calendar' ); ?>"><i class="dashicons dashicons-dismiss" aria-hidden="true"></i></a>
+                <a class="dismiss" title="<?php echo esc_attr__( 'Dismiss this message', 'sugar-calendar-lite' ); ?>"><i class="dashicons dashicons-dismiss" aria-hidden="true"></i></a>
 
 				<?php if ( count( $notifications ) > 1 ) : ?>
                     <div class="navigation">
                         <a class="prev">
-                            <span class="screen-reader-text"><?php esc_attr_e( 'Previous message', 'sugar-calendar' ); ?></span>
+                            <span class="screen-reader-text"><?php esc_attr_e( 'Previous message', 'sugar-calendar-lite' ); ?></span>
                             <span aria-hidden="true">‹</span>
                         </a>
                         <a class="next">
-                            <span class="screen-reader-text"><?php esc_attr_e( 'Next message', 'sugar-calendar' ); ?>"></span>
+                            <span class="screen-reader-text"><?php esc_attr_e( 'Next message', 'sugar-calendar-lite' ); ?>"></span>
                             <span aria-hidden="true">›</span>
                         </a>
                     </div>
@@ -604,7 +604,7 @@ class Notifications {
 			</a>',
 			esc_url( $video_url ),
 			esc_attr( $data_attr_lity ),
-			esc_html__( 'Watch Video', 'sugar-calendar' )
+			esc_html__( 'Watch Video', 'sugar-calendar-lite' )
 		);
 	}
 }

@@ -27,7 +27,7 @@ class Settings extends PageTabAbstract {
 	 */
 	public static function get_slug() {
 
-		return 'sc-settings';
+		return 'sugarcalendar-settings';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Settings extends PageTabAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Settings', 'sugar-calendar' );
+		return esc_html__( 'Settings', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class Settings extends PageTabAbstract {
 			<?php UI::tabs( $this->get_tabs(), static::get_tab_slug() ); ?>
 
 			<div class="sugar-calendar-admin-content">
-				<h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar' ); ?></h1>
+				<h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
 				<form class="sugar-calendar-admin-content__settings-form" method="post" action="">
 
 					<?php $this->display_tab( static::get_tab_slug() ); ?>
@@ -120,7 +120,7 @@ class Settings extends PageTabAbstract {
 						<?php
 						UI::button(
 							[
-								'text' => esc_html__( 'Save Settings', 'sugar-calendar' ),
+								'text' => esc_html__( 'Save Settings', 'sugar-calendar-lite' ),
 							]
 						);
 						?>

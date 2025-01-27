@@ -156,12 +156,12 @@ abstract class CalendarAbstract extends PageAbstract {
 
 		return [
 			0 => '',
-			1 => __( 'Calendar added.', 'sugar-calendar' ),
-			2 => __( 'Calendar deleted.', 'sugar-calendar' ),
-			3 => __( 'Calendar updated.', 'sugar-calendar' ),
-			4 => __( 'Calendar not added.', 'sugar-calendar' ),
-			5 => __( 'Calendar not updated.', 'sugar-calendar' ),
-			6 => __( 'Calendars deleted.', 'sugar-calendar' ),
+			1 => __( 'Calendar added.', 'sugar-calendar-lite' ),
+			2 => __( 'Calendar deleted.', 'sugar-calendar-lite' ),
+			3 => __( 'Calendar updated.', 'sugar-calendar-lite' ),
+			4 => __( 'Calendar not added.', 'sugar-calendar-lite' ),
+			5 => __( 'Calendar not updated.', 'sugar-calendar-lite' ),
+			6 => __( 'Calendars deleted.', 'sugar-calendar-lite' ),
 		];
 	}
 
@@ -201,7 +201,7 @@ abstract class CalendarAbstract extends PageAbstract {
 
 		add_meta_box(
 			'calendar_settings',
-			esc_html__( 'Options', 'sugar-calendar' ),
+			esc_html__( 'Options', 'sugar-calendar-lite' ),
 			[ $this, 'display_settings' ],
 			static::get_slug(),
 			'normal',
@@ -260,7 +260,7 @@ abstract class CalendarAbstract extends PageAbstract {
 
 		?>
         <div class="sugar-calendar-metabox__field-row">
-            <label for="tag-slug"><?php esc_html_e( 'Slug', 'sugar-calendar' ); ?></label>
+            <label for="tag-slug"><?php esc_html_e( 'Slug', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
 
 				<?php
@@ -269,7 +269,7 @@ abstract class CalendarAbstract extends PageAbstract {
 						'name'        => 'slug',
 						'id'          => 'tag-slug',
 						'value'       => $this->term->slug,
-						'description' => esc_html__( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.', 'sugar-calendar' ),
+						'description' => esc_html__( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.', 'sugar-calendar-lite' ),
 						'preserved'   => true,
 					],
 					true
@@ -279,7 +279,7 @@ abstract class CalendarAbstract extends PageAbstract {
             </div>
         </div>
         <div class="sugar-calendar-metabox__field-row">
-            <label for="parent"><?php esc_html_e( 'Parent Calendar', 'sugar-calendar' ); ?></label>
+            <label for="parent"><?php esc_html_e( 'Parent Calendar', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
 
 				<?php
@@ -293,7 +293,7 @@ abstract class CalendarAbstract extends PageAbstract {
 					'name'             => 'parent',
 					'hide_empty'       => false,
 					'orderby'          => 'name',
-					'show_option_none' => __( 'None', 'sugar-calendar' ),
+					'show_option_none' => __( 'None', 'sugar-calendar-lite' ),
 					'description'      => $tax->labels->parent_field_description,
 					'preserved'        => true,
 				];
@@ -304,7 +304,7 @@ abstract class CalendarAbstract extends PageAbstract {
             </div>
         </div>
         <div class="sugar-calendar-metabox__field-row">
-            <label for="parent"><?php esc_html_e( 'Description', 'sugar-calendar' ); ?></label>
+            <label for="parent"><?php esc_html_e( 'Description', 'sugar-calendar-lite' ); ?></label>
             <div class="sugar-calendar-metabox__field">
 				<?php
 				UI::textarea(

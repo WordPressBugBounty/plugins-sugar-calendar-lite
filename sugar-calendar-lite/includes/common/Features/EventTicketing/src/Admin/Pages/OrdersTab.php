@@ -33,7 +33,7 @@ class OrdersTab extends Tickets {
 	 */
 	public static function get_title() {
 
-		return esc_html__( 'Orders', 'sugar-calendar' );
+		return esc_html__( 'Orders', 'sugar-calendar-lite' );
 	}
 
 	/**

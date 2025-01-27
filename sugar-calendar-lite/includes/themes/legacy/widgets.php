@@ -47,9 +47,9 @@ class sc_events_widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'sc_calendar_widget',
-			esc_html__( '(Sugar Calendar) Event Calendar', 'sugar-calendar' ),
+			esc_html__( '(Sugar Calendar) Event Calendar', 'sugar-calendar-lite' ),
 			array(
-				'description' => esc_html__( 'Displays a monthly event calendar widget.', 'sugar-calendar' )
+				'description' => esc_html__( 'Displays a monthly event calendar widget.', 'sugar-calendar-lite' )
 			)
 		);
 	}
@@ -156,20 +156,20 @@ class sc_events_widget extends WP_Widget {
 		$terms = get_terms( $tax ); ?>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar-lite' ); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'size' ); ?>"><?php esc_html_e( 'Size:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'size' ); ?>"><?php esc_html_e( 'Size:', 'sugar-calendar-lite' ); ?></label>
 			<select class="widefat <?php echo $this->get_field_name( 'size' ); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" id="<?php echo $this->get_field_id( 'size' ); ?>">
-				<option value="small" <?php selected( 'small', $size ); ?>><?php esc_html_e( 'Small', 'sugar-calendar' ); ?></option>
-				<option value="large" <?php selected( 'large', $size ); ?>><?php esc_html_e( 'Large', 'sugar-calendar' ); ?></option>
+				<option value="small" <?php selected( 'small', $size ); ?>><?php esc_html_e( 'Small', 'sugar-calendar-lite' ); ?></option>
+				<option value="large" <?php selected( 'large', $size ); ?>><?php esc_html_e( 'Large', 'sugar-calendar-lite' ); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'category' ); ?>"><?php esc_html_e( 'Calendar:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'category' ); ?>"><?php esc_html_e( 'Calendar:', 'sugar-calendar-lite' ); ?></label>
 			<select class="widefat <?php echo $this->get_field_name( 'category' ); ?>" name="<?php echo $this->get_field_name( 'category' ); ?>" id="<?php echo $this->get_field_id( 'category' ); ?>">
-				<option value="0" <?php selected( 0, $category ); ?>><?php esc_html_e( 'All', 'sugar-calendar' ); ?></option><?php
+				<option value="0" <?php selected( 0, $category ); ?>><?php esc_html_e( 'All', 'sugar-calendar-lite' ); ?></option><?php
 
 				if ( ! empty( $terms  ) ) {
 					foreach ( $terms as $term ) {
@@ -180,10 +180,10 @@ class sc_events_widget extends WP_Widget {
 			?></select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'month' ); ?>"><?php esc_html_e( 'Default Month & Year:', 'sugar-calendar' ); ?></label><br>
+			<label for="<?php echo $this->get_field_id( 'month' ); ?>"><?php esc_html_e( 'Default Month & Year:', 'sugar-calendar-lite' ); ?></label><br>
 			<input class="small" id="<?php echo $this->get_field_id( 'month' ); ?>" name="<?php echo $this->get_field_name( 'month' ); ?>" type="number" min="1" max="12" pattern="\d{1,2}" autocomplete="off" value="<?php echo esc_attr( $month ); ?>">
 			<input class="small" id="<?php echo $this->get_field_id( 'year' ); ?>" name="<?php echo $this->get_field_name( 'year' ); ?>" type="number" min="1900" max="9999" pattern="\d{1,4}" autocomplete="off" value="<?php echo esc_attr( $year ); ?>">
-			<br><span class="description"><?php esc_html_e( 'Leave empty for current', 'sugar-calendar' ); ?></span>
+			<br><span class="description"><?php esc_html_e( 'Leave empty for current', 'sugar-calendar-lite' ); ?></span>
 		</p>
 
 		<?php
@@ -205,9 +205,9 @@ class sc_events_list_widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'sc_event_list_widget',
-			esc_html__( '(Sugar Calendar) Event List', 'sugar-calendar' ),
+			esc_html__( '(Sugar Calendar) Event List', 'sugar-calendar-lite' ),
 			array(
-				'description' => esc_html__( 'Displays all/upcoming/past events as a list.', 'sugar-calendar' )
+				'description' => esc_html__( 'Displays all/upcoming/past events as a list.', 'sugar-calendar-lite' )
 			)
 		);
 	}
@@ -389,30 +389,30 @@ class sc_events_list_widget extends WP_Widget {
 		$terms = get_terms( $tax ); ?>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar-lite' ); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>"
 				   name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'display' ); ?>"><?php esc_html_e( 'Time Period:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'display' ); ?>"><?php esc_html_e( 'Time Period:', 'sugar-calendar-lite' ); ?></label>
 			<select class="widefat <?php echo $this->get_field_name( 'display' ); ?>" name="<?php echo $this->get_field_name( 'display' ); ?>" id="<?php echo $this->get_field_id( 'display' ); ?>">
-				<option value="all" <?php selected( 'all', $display ); ?>><?php esc_html_e( 'All', 'sugar-calendar' ); ?></option>
-				<option value="upcoming" <?php selected( 'upcoming', $display ); ?>><?php esc_html_e( 'Upcoming', 'sugar-calendar' ); ?></option>
-				<option value="past" <?php selected( 'past', $display ); ?>><?php esc_html_e( 'Past', 'sugar-calendar' ); ?></option>
+				<option value="all" <?php selected( 'all', $display ); ?>><?php esc_html_e( 'All', 'sugar-calendar-lite' ); ?></option>
+				<option value="upcoming" <?php selected( 'upcoming', $display ); ?>><?php esc_html_e( 'Upcoming', 'sugar-calendar-lite' ); ?></option>
+				<option value="past" <?php selected( 'past', $display ); ?>><?php esc_html_e( 'Past', 'sugar-calendar-lite' ); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'order' ); ?>"><?php esc_html_e( 'Order:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'order' ); ?>"><?php esc_html_e( 'Order:', 'sugar-calendar-lite' ); ?></label>
 			<select class="widefat <?php echo $this->get_field_name( 'order' ); ?>" name="<?php echo $this->get_field_name( 'order' ); ?>" id="<?php echo $this->get_field_id( 'order' ); ?>">
-				<option value="" <?php selected( '', $order ); ?>><?php esc_html_e( 'Default for Period', 'sugar-calendar' ); ?></option>
-				<option value="asc" <?php selected( 'asc', $order ); ?>><?php esc_html_e( 'Oldest First', 'sugar-calendar' ); ?></option>
-				<option value="desc" <?php selected( 'desc', $order ); ?>><?php esc_html_e( 'Newest First', 'sugar-calendar' ); ?></option>
+				<option value="" <?php selected( '', $order ); ?>><?php esc_html_e( 'Default for Period', 'sugar-calendar-lite' ); ?></option>
+				<option value="asc" <?php selected( 'asc', $order ); ?>><?php esc_html_e( 'Oldest First', 'sugar-calendar-lite' ); ?></option>
+				<option value="desc" <?php selected( 'desc', $order ); ?>><?php esc_html_e( 'Newest First', 'sugar-calendar-lite' ); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'category' ); ?>"><?php esc_html_e( 'Calendar:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'category' ); ?>"><?php esc_html_e( 'Calendar:', 'sugar-calendar-lite' ); ?></label>
 			<select class="widefat <?php echo $this->get_field_name( 'category' ); ?>" name="<?php echo $this->get_field_name( 'category' ); ?>" id="<?php echo $this->get_field_id( 'category' ); ?>">
-				<option value="0" <?php selected( 0, $category ); ?>><?php esc_html_e( 'All Calendars', 'sugar-calendar' ); ?></option><?php
+				<option value="0" <?php selected( 0, $category ); ?>><?php esc_html_e( 'All Calendars', 'sugar-calendar-lite' ); ?></option><?php
 
 				if ( count( $terms ) ) {
 					foreach ( $terms as $term ) {
@@ -423,23 +423,23 @@ class sc_events_list_widget extends WP_Widget {
 		</p>
 		<p>
 			<input class="widefat" type="text" id="<?php echo $this->get_field_id( 'number' ); ?>" style="width: 40px;" name="<?php echo $this->get_field_name( 'number' ); ?>" value="<?php echo esc_attr( $number ); ?>">
-			<label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_html_e( 'Number to show', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_html_e( 'Number to show', 'sugar-calendar-lite' ); ?></label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" id="<?php echo $this->get_field_id( 'show_title' ); ?>" name="<?php echo $this->get_field_name( 'show_title' ); ?>" <?php echo checked( $show_title, 1 ); ?>">
-			<label for="<?php echo $this->get_field_id( 'show_title' ); ?>"><?php esc_html_e( 'Show widget title', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'show_title' ); ?>"><?php esc_html_e( 'Show widget title', 'sugar-calendar-lite' ); ?></label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" <?php echo checked( $show_date, 1 ); ?>>
-			<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _ex( 'Show event dates', 'Start & end if available', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _ex( 'Show event dates', 'Start & end if available', 'sugar-calendar-lite' ); ?></label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" id="<?php echo $this->get_field_id( 'show_time' ); ?>" name="<?php echo $this->get_field_name( 'show_time' ); ?>" <?php echo checked( $show_time, 1 ); ?>>
-			<label for="<?php echo $this->get_field_id( 'show_time' ); ?>"><?php _ex( 'Show event times', 'Start & end if available', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'show_time' ); ?>"><?php _ex( 'Show event times', 'Start & end if available', 'sugar-calendar-lite' ); ?></label>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" id="<?php echo $this->get_field_id( 'show_categories' ); ?>" name="<?php echo $this->get_field_name( 'show_categories' ); ?>" <?php echo checked( $show_categories, 1 ); ?>>
-			<label for="<?php echo $this->get_field_id( 'show_categories' ); ?>"><?php esc_html_e( 'Show event categories', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'show_categories' ); ?>"><?php esc_html_e( 'Show event categories', 'sugar-calendar-lite' ); ?></label>
 		</p>
 
 		<?php
@@ -461,9 +461,9 @@ class sc_event_categories_widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'sc_category_widget',
-			esc_html__( '(Sugar Calendar) Calendar List', 'sugar-calendar' ),
+			esc_html__( '(Sugar Calendar) Calendar List', 'sugar-calendar-lite' ),
 			array(
-				'description' => esc_html__( 'Display all of the available calendars as a list.', 'sugar-calendar' )
+				'description' => esc_html__( 'Display all of the available calendars as a list.', 'sugar-calendar-lite' )
 			)
 		);
 	}
@@ -546,7 +546,7 @@ class sc_event_categories_widget extends WP_Widget {
 		?>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar-lite' ); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 
@@ -569,9 +569,9 @@ class sc_event_filter_widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'sc_filter_widget',
-			esc_html__( '(Sugar Calendar) Event Filters', 'sugar-calendar' ),
+			esc_html__( '(Sugar Calendar) Event Filters', 'sugar-calendar-lite' ),
 			array(
-				'description' => esc_html__( 'Event Archive only. Controls for filtering how to list events.', 'sugar-calendar' )
+				'description' => esc_html__( 'Event Archive only. Controls for filtering how to list events.', 'sugar-calendar-lite' )
 			)
 		);
 	}
@@ -674,17 +674,17 @@ class sc_event_filter_widget extends WP_Widget {
 
 		// Filters
 		echo '<ul class="sc_events_filter">';
-		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'upcoming'    ) ) . '"' . $is_upcoming    . '>' . esc_html__( 'Upcoming events',    'sugar-calendar' ) . '</a></li>';
-		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'in-progress' ) ) . '"' . $is_in_progress . '>' . esc_html__( 'In-progress events', 'sugar-calendar' ) . '</a></li>';
-		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'past'        ) ) . '"' . $is_past        . '>' . esc_html__( 'Past events',        'sugar-calendar' ) . '</a></li>';
-		echo '<li class="sc_event_filter"><a href="' . esc_url( remove_query_arg( 'event-display' ) ) . '"' . $is_all . '>' . esc_html__( 'All events', 'sugar-calendar' ) . '</a></li>';
+		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'upcoming'    ) ) . '"' . $is_upcoming    . '>' . esc_html__( 'Upcoming events',    'sugar-calendar-lite' ) . '</a></li>';
+		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'in-progress' ) ) . '"' . $is_in_progress . '>' . esc_html__( 'In-progress events', 'sugar-calendar-lite' ) . '</a></li>';
+		echo '<li class="sc_event_filter"><a href="' . esc_url( add_query_arg( 'event-display', 'past'        ) ) . '"' . $is_past        . '>' . esc_html__( 'Past events',        'sugar-calendar-lite' ) . '</a></li>';
+		echo '<li class="sc_event_filter"><a href="' . esc_url( remove_query_arg( 'event-display' ) ) . '"' . $is_all . '>' . esc_html__( 'All events', 'sugar-calendar-lite' ) . '</a></li>';
 		echo '<li class="sc_event_filter sc_event_order">';
 
 		// Order
-		echo '<span class="sc_event_order_label">' . esc_html__( 'Order:', 'sugar-calendar' ) . '</span>&nbsp;';
-		echo '<a href="' . esc_url( add_query_arg( 'event-order', 'desc' ) ) . '"' . $is_desc . '>' . esc_html__( 'Newest first', 'sugar-calendar' ) . '</a>';
+		echo '<span class="sc_event_order_label">' . esc_html__( 'Order:', 'sugar-calendar-lite' ) . '</span>&nbsp;';
+		echo '<a href="' . esc_url( add_query_arg( 'event-order', 'desc' ) ) . '"' . $is_desc . '>' . esc_html__( 'Newest first', 'sugar-calendar-lite' ) . '</a>';
 		echo '<span class="sc_event_order_sep"> - </span>';
-		echo '<a href="' . esc_url( add_query_arg( 'event-order', 'asc'  ) ) . '"' . $is_asc  . '>' . esc_html__( 'Oldest first', 'sugar-calendar' ) . '</a>';
+		echo '<a href="' . esc_url( add_query_arg( 'event-order', 'asc'  ) ) . '"' . $is_asc  . '>' . esc_html__( 'Oldest first', 'sugar-calendar-lite' ) . '</a>';
 		echo '</li>';
 		echo '</ul>';
 
@@ -721,7 +721,7 @@ class sc_event_filter_widget extends WP_Widget {
 		?>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar' ); ?></label>
+			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_html_e( 'Title:', 'sugar-calendar-lite' ); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
 		</p>
 

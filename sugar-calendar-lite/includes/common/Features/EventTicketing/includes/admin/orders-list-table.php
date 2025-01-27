@@ -323,7 +323,7 @@ class List_Table extends \WP_List_Table {
 		// Setup HTML
 		$retval .= $this->row_actions(
 			array(
-				'view' => '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'Edit order', 'sugar-calendar' ) . '">' . esc_html__( 'Edit', 'sugar-calendar' ) . '</a>'
+				'view' => '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'Edit order', 'sugar-calendar-lite' ) . '">' . esc_html__( 'Edit', 'sugar-calendar-lite' ) . '</a>'
 			)
 		);
 
@@ -342,13 +342,13 @@ class List_Table extends \WP_List_Table {
 
 		// Columns
 		$columns = array(
-			'total'    => esc_html__( 'Total',      'sugar-calendar' ),
-			'tickets'  => esc_html__( 'Tickets',    'sugar-calendar' ),
-			'status'   => esc_html__( 'Status',     'sugar-calendar' ),
-			'customer' => esc_html__( 'Customer',   'sugar-calendar' ),
-			'id'       => esc_html__( 'Order ID',   'sugar-calendar' ),
-			'event'    => esc_html__( 'Event',      'sugar-calendar' ),
-			'date'     => esc_html__( 'Order Date', 'sugar-calendar' ),
+			'total'    => esc_html__( 'Total',      'sugar-calendar-lite' ),
+			'tickets'  => esc_html__( 'Tickets',    'sugar-calendar-lite' ),
+			'status'   => esc_html__( 'Status',     'sugar-calendar-lite' ),
+			'customer' => esc_html__( 'Customer',   'sugar-calendar-lite' ),
+			'id'       => esc_html__( 'Order ID',   'sugar-calendar-lite' ),
+			'event'    => esc_html__( 'Event',      'sugar-calendar-lite' ),
+			'date'     => esc_html__( 'Order Date', 'sugar-calendar-lite' ),
 		);
 
 		// Filter & Return

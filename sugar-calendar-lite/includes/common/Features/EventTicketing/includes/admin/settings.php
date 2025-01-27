@@ -11,6 +11,7 @@ use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Admin\Pages\Settings as PageSettings;
 
 /**
  * Register page ids.
@@ -66,7 +67,7 @@ function get_section_url( $args = [] ) {
 
 	// Parse arguments
 	$r = wp_parse_args( $args, [
-		'page'    => 'sc-settings',
+		'page'    => PageSettings::get_slug(),
 		'section' => 'tickets',
 	] );
 
@@ -88,7 +89,7 @@ function add_section( $sections = [] ) {
 	// Add "Tickets" main section
 	$sections['payments'] = [
 		'id'   => 'payments',
-		'name' => esc_html__( 'Payments', 'sugar-calendar' ),
+		'name' => esc_html__( 'Payments', 'sugar-calendar-lite' ),
 		'url'  => get_section_url(
 			[
 				'section' => 'payments',
@@ -100,7 +101,7 @@ function add_section( $sections = [] ) {
 	// Add "Tickets" main section
 	$sections['tickets'] = [
 		'id'   => 'tickets',
-		'name' => esc_html__( 'Tickets', 'sugar-calendar' ),
+		'name' => esc_html__( 'Tickets', 'sugar-calendar-lite' ),
 		'url'  => get_section_url(
 			[
 				'section' => 'tickets',
@@ -127,7 +128,7 @@ function add_subsection( $subsections = [] ) {
 	// Add "Payments" subsection
 	$subsections['payments']['payments'] = [
 		'id'   => 'payments',
-		'name' => esc_html__( 'Payments', 'sugar-calendar' ),
+		'name' => esc_html__( 'Payments', 'sugar-calendar-lite' ),
 		'url'  => get_section_url( [ 'subsection' => 'main' ] ),
 		'func' => __NAMESPACE__ . '\\payments_section',
 	];
@@ -135,7 +136,7 @@ function add_subsection( $subsections = [] ) {
 	// Add "Emails" subsection
 	$subsections['tickets']['emails'] = [
 		'id'   => 'emails',
-		'name' => esc_html__( 'Emails', 'sugar-calendar' ),
+		'name' => esc_html__( 'Emails', 'sugar-calendar-lite' ),
 		'url'  => get_section_url( [ 'subsection' => 'main' ] ),
 		'func' => __NAMESPACE__ . '\\emails_section',
 	];
@@ -163,7 +164,7 @@ function payments_section() {
 
 	UI::heading(
 		[
-			'title' => esc_html__( 'Currency', 'sugar-calendar' ),
+			'title' => esc_html__( 'Currency', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -177,16 +178,16 @@ function payments_section() {
 			'name'        => 'currency',
 			'options'     => $currencies,
 			'value'       => $current_currency,
-			'label'       => esc_html__( 'Currency', 'sugar-calendar' ),
-			'description' => esc_html__( 'Choose your currency. Note that some payment gateways have currency restrictions.', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Currency', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'Choose your currency. Note that some payment gateways have currency restrictions.', 'sugar-calendar-lite' ),
 		]
 	);
 
 	// Currency Symbol Position.
 	$position  = Settings\get_setting( 'currency_position', 'before' );
 	$positions = [
-		'before' => esc_html__( 'Before ($10)', 'sugar-calendar' ),
-		'after'  => esc_html__( 'After (10$)', 'sugar-calendar' ),
+		'before' => esc_html__( 'Before ($10)', 'sugar-calendar-lite' ),
+		'after'  => esc_html__( 'After (10$)', 'sugar-calendar-lite' ),
 	];
 
 	UI::select_input(
@@ -195,8 +196,8 @@ function payments_section() {
 			'name'        => 'currency_position',
 			'options'     => $positions,
 			'value'       => $position,
-			'label'       => esc_html__( 'Currency Symbol Position', 'sugar-calendar' ),
-			'description' => esc_html__( 'Choose the location of the currency symbol.', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Currency Symbol Position', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'Choose the location of the currency symbol.', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -204,8 +205,8 @@ function payments_section() {
 	$thousands             = Settings\get_setting( 'thousands_separator', ',' );
 	$thousands_description = sprintf( /* translators: %1$s - field description; %2$s - or.*/
 		'%1$s <code>,</code> %2$s <code>.</code>.',
-		esc_html__( 'The symbol to separate thousandths. Usually', 'sugar-calendar' ),
-		esc_html__( 'or', 'sugar-calendar' ),
+		esc_html__( 'The symbol to separate thousandths. Usually', 'sugar-calendar-lite' ),
+		esc_html__( 'or', 'sugar-calendar-lite' ),
 	);
 
 	UI::text_input(
@@ -213,7 +214,7 @@ function payments_section() {
 			'id'          => 'sc_et_thousands_separator',
 			'name'        => 'thousands_separator',
 			'value'       => $thousands,
-			'label'       => esc_html__( 'Thousands Separator', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Thousands Separator', 'sugar-calendar-lite' ),
 			'description' => $thousands_description,
 		]
 	);
@@ -222,8 +223,8 @@ function payments_section() {
 	$decimal             = Settings\get_setting( 'decimal_separator', '.' );
 	$decimal_description = sprintf( /* translators: %1$s - field description; %2$s - or.*/
 		'%1$s <code>,</code> %2$s <code>.</code>.',
-		esc_html__( 'The symbol to separate decimal points. Usually', 'sugar-calendar' ),
-		esc_html__( 'or', 'sugar-calendar' ),
+		esc_html__( 'The symbol to separate decimal points. Usually', 'sugar-calendar-lite' ),
+		esc_html__( 'or', 'sugar-calendar-lite' ),
 	);
 
 	UI::text_input(
@@ -231,17 +232,17 @@ function payments_section() {
 			'id'          => 'sc_et_decimal_separator',
 			'name'        => 'decimal_separator',
 			'value'       => $decimal,
-			'label'       => esc_html__( 'Decimal Separator', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Decimal Separator', 'sugar-calendar-lite' ),
 			'description' => $decimal_description,
 		]
 	);
 
 	UI::heading(
 		[
-			'title'       => esc_html__( 'Stripe', 'sugar-calendar' ),
+			'title'       => esc_html__( 'Stripe', 'sugar-calendar-lite' ),
 			'description' => sprintf( /* translators: %1$s - Stripe connect description; %2$s - Stripe documentation URL; %3$s - Stripe documentation link. */
 				'%1$s <a href="%2$s" target="_blank">%3$s</a>.',
-				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar' ),
+				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar-lite' ),
 				esc_url(
 					Helpers::get_utm_url(
 						'https://sugarcalendar.com/docs/event-ticketing-addon/#connecting-stripe',
@@ -251,7 +252,7 @@ function payments_section() {
 						]
 					)
 				),
-				esc_html__( 'Stripe documentation', 'sugar-calendar' )
+				esc_html__( 'Stripe documentation', 'sugar-calendar-lite' )
 			),
 		]
 	);
@@ -259,16 +260,16 @@ function payments_section() {
 	// Test mode
 	$test_mode_description = sprintf( /* translators: %1$s - test mode help; %2$s - link to Stripe dashboard; %3$s - link text. */
 		'%1$s <a href="%2$s" target="_blank"> %3$s</a>.',
-		esc_html__( 'While in test mode no live payments are processed. Be sure to enable Test Mode in your', 'sugar-calendar' ),
+		esc_html__( 'While in test mode no live payments are processed. Be sure to enable Test Mode in your', 'sugar-calendar-lite' ),
 		esc_url( 'https://dashboard.stripe.com/' ),
-		esc_html__( 'Stripe Dashboard', 'sugar-calendar' )
+		esc_html__( 'Stripe Dashboard', 'sugar-calendar-lite' )
 	);
 
 	if ( $is_constant ) {
 		$test_mode_description .= sprintf( /* translators: %1$s - test mode constant note; %2$s - constant. */
 			'<br/>%1$s <code>SC_GATEWAY_SANDBOX_MODE</code> %2$s.',
-			esc_html__( 'Note: Test Mode is currently enabled via the', 'sugar-calendar' ),
-			esc_html__( 'constant', 'sugar-calendar' ),
+			esc_html__( 'Note: Test Mode is currently enabled via the', 'sugar-calendar-lite' ),
+			esc_html__( 'constant', 'sugar-calendar-lite' ),
 		);
 	}
 
@@ -278,7 +279,7 @@ function payments_section() {
 			'name'        => 'sandbox',
 			'value'       => $is_sandbox,
 			'disabled'    => $is_constant,
-			'label'       => esc_html__( 'Test Mode', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Test Mode', 'sugar-calendar-lite' ),
 			'description' => $test_mode_description,
 		]
 	);
@@ -286,7 +287,7 @@ function payments_section() {
 	// Stripe integration.
 	UI::field_wrapper(
 		[
-			'label' => esc_html__( 'Connection Status', 'sugar-calendar' ),
+			'label' => esc_html__( 'Connection Status', 'sugar-calendar-lite' ),
 			'id'    => 'stripe-connect',
 		],
 		display_stripe_connect_field( $is_sandbox )
@@ -294,9 +295,9 @@ function payments_section() {
 
 	$receipt_page_description = sprintf( /* translators: %1$s - field description; %2$s - configuration hints; %3$s - shortcode. */
 		'%1$s.<br/>%2$s <code>[sc_event_tickets_receipt]</code> %3$s.',
-		esc_html__( 'The page customers are sent to after completing their ticket purchase', 'sugar-calendar' ),
-		esc_html__( 'This page must contain the', 'sugar-calendar' ),
-		esc_html__( 'shortcode', 'sugar-calendar' ),
+		esc_html__( 'The page customers are sent to after completing their ticket purchase', 'sugar-calendar-lite' ),
+		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
+		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
 
 	);
 
@@ -304,7 +305,7 @@ function payments_section() {
 
 	if ( empty( $pages ) ) {
 		$receipt_pages = [
-			esc_html__( 'No pages found', 'sugar-calendar' ),
+			esc_html__( 'No pages found', 'sugar-calendar-lite' ),
 		];
 	}
 
@@ -314,7 +315,7 @@ function payments_section() {
 			'name'        => 'receipt_page',
 			'options'     => $receipt_pages,
 			'value'       => $receipt_page,
-			'label'       => esc_html__( 'Payment Success Page', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Payment Success Page', 'sugar-calendar-lite' ),
 			'description' => $receipt_page_description,
 		]
 	);
@@ -324,15 +325,17 @@ function payments_section() {
 
 function display_stripe_connect_field( $is_sandbox ) {
 
+	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
+
 	$stripe_connect_url = add_query_arg( [
 		'live_mode'         => urlencode( (int) ! $is_sandbox ),
 		'state'             => urlencode( str_pad( wp_rand( wp_rand(), PHP_INT_MAX ), 100, wp_rand(), STR_PAD_BOTH ) ),
-		'customer_site_url' => urlencode( admin_url( 'admin.php?page=sc-settings&section=payments' ) ),
+		'customer_site_url' => urlencode( $url_payment_settings ),
 	], 'https://sugarcalendar.com/?sc_gateway_connect_init=stripe_connect' );
 
 	$stripe_disconnect_url = add_query_arg( [
 		'sc-stripe-disconnect' => true,
-		'page'                 => 'sc-settings',
+		'page'                 => PageSettings::get_slug(),
 		'section'              => 'tickets',
 		'subsection'           => 'payments',
 		'_wpnonce'             => wp_create_nonce( 'sc-stripe-connect-disconnect' ),
@@ -340,8 +343,8 @@ function display_stripe_connect_field( $is_sandbox ) {
 
 	$stripe_connect_account_id = get_option( 'sc_stripe_connect_account_id' );
 
-	$test_text = _x( 'test', 'current value for sandbox mode', 'sugar-calendar' );
-	$live_text = _x( 'live', 'current value for sandbox mode', 'sugar-calendar' );
+	$test_text = _x( 'test', 'current value for sandbox mode', 'sugar-calendar-lite' );
+	$live_text = _x( 'live', 'current value for sandbox mode', 'sugar-calendar-lite' );
 
 	if ( true === $is_sandbox ) {
 		$current_mode = $test_text;
@@ -355,17 +358,25 @@ function display_stripe_connect_field( $is_sandbox ) {
 		?>
 
         <a href="<?php echo esc_url_raw( $stripe_connect_url ); ?>" class="sugar-calendar-stripe-connect">
-            <span><?php esc_html_e( 'Connect with', 'sugar-calendar' ); ?></span>
+            <span><?php esc_html_e( 'Connect with', 'sugar-calendar-lite' ); ?></span>
         </a>
 
         <p class="desc">
 			<?php echo wp_kses(
 				sprintf( /* translators: %1$s - test mode help; %2$s - link to Stripe dashboard; %3$s - link text; %4$s - test mode enable heads up. */
 					'%1$s <a href="%2$s" target="_blank"> %3$s</a> %4$s.',
-					esc_html__( 'Securely connect to Stripe with just a few clicks to begin accepting payments!', 'sugar-calendar' ),
-					esc_url( 'https://dashboard.stripe.com/' ),
-					esc_html__( 'Learn more', 'sugar-calendar' ),
-					esc_html__( 'about connecting with Stripe', 'sugar-calendar' )
+					esc_html__( 'Securely connect to Stripe with just a few clicks to begin accepting payments!', 'sugar-calendar-lite' ),
+					esc_url(
+						Helpers::get_utm_url(
+							'https://sugarcalendar.com/docs/setting-up-event-ticketing-with-sugar-calendar-lite/',
+							[
+								'medium'  => 'lite-event-tickets',
+								'content' => 'Learn more about connecting with Stripe',
+							]
+						)
+					),
+					esc_html__( 'Learn more', 'sugar-calendar-lite' ),
+					esc_html__( 'about connecting with Stripe', 'sugar-calendar-lite' )
 				),
 				[
 					'a' => [ 'href' => true, 'target' => true ],
@@ -377,9 +388,9 @@ function display_stripe_connect_field( $is_sandbox ) {
 	<?php else: ?>
 
         <p class="description">
-			<?php printf( esc_html__( 'Your Stripe account is connected in %s mode.', 'sugar-calendar' ), '<strong>' . $current_mode . '</strong>' ); ?>
-            <a href="<?php echo esc_url_raw( $stripe_connect_url ); ?>" class="button button-primary"><?php esc_html_e( 'Reconnect', 'sugar-calendar' ); ?></a>
-            <a href="<?php echo esc_url_raw( $stripe_disconnect_url ); ?>" class="button"><?php esc_html_e( 'Disconnect', 'sugar-calendar' ); ?></a>
+			<?php printf( esc_html__( 'Your Stripe account is connected in %s mode.', 'sugar-calendar-lite' ), '<strong>' . $current_mode . '</strong>' ); ?>
+            <a href="<?php echo esc_url_raw( $stripe_connect_url ); ?>" class="button button-primary"><?php esc_html_e( 'Reconnect', 'sugar-calendar-lite' ); ?></a>
+            <a href="<?php echo esc_url_raw( $stripe_disconnect_url ); ?>" class="button"><?php esc_html_e( 'Disconnect', 'sugar-calendar-lite' ); ?></a>
         </p>
 
 	<?php
@@ -398,19 +409,19 @@ function emails_section() {
 	// Settings.
 	UI::heading(
 		[
-			'title' => esc_html__( 'Ticket Details', 'sugar-calendar' ),
+			'title' => esc_html__( 'Ticket Details', 'sugar-calendar-lite' ),
 		]
 	);
 
 	// Ticket Details Page.
 	$pages                   = get_pages();
-	$ticket_pages            = [ esc_html__( 'No pages found', 'sugar-calendar' ) ];
+	$ticket_pages            = [ esc_html__( 'No pages found', 'sugar-calendar-lite' ) ];
 	$ticket_page             = 0;
 	$ticket_page_description = sprintf( /* translators: %1$s - field description; %2$s - field directions; %3$s shortcode.*/
 		'%1$s.<br>%2$s<code>[sc_event_tickets_details]</code> %3$s.',
-		esc_html__( 'The page where customer will view the details of their ticket purchases', 'sugar-calendar' ),
-		esc_html__( 'This page must contain the', 'sugar-calendar' ),
-		esc_html__( 'shortcode', 'sugar-calendar' ),
+		esc_html__( 'The page where customer will view the details of their ticket purchases', 'sugar-calendar-lite' ),
+		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
+		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
 	);
 
 	if ( ! empty( $pages ) ) {
@@ -424,14 +435,14 @@ function emails_section() {
 			'name'        => 'ticket_page',
 			'options'     => $ticket_pages,
 			'value'       => $ticket_page,
-			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar' ),
+			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' ),
 			'description' => $ticket_page_description,
 		]
 	);
 
 	UI::heading(
 		[
-			'title' => esc_html__( 'Email Sender', 'sugar-calendar' ),
+			'title' => esc_html__( 'Email Sender', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -444,8 +455,8 @@ function emails_section() {
 			'name'        => 'receipt_from_email',
 			'value'       => $from_email,
 			'placeholder' => get_bloginfo( 'admin_email' ),
-			'label'       => esc_html__( 'From Email Address', 'sugar-calendar' ),
-			'description' => esc_html__( 'The email address notifications are sent from.', 'sugar-calendar' ),
+			'label'       => esc_html__( 'From Email Address', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'The email address notifications are sent from.', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -458,14 +469,14 @@ function emails_section() {
 			'name'        => 'receipt_from_name',
 			'value'       => $from_name,
 			'placeholder' => get_bloginfo( 'name' ),
-			'label'       => esc_html__( 'From Email Name', 'sugar-calendar' ),
-			'description' => esc_html__( 'The person/business name email notifications are sent from.', 'sugar-calendar' ),
+			'label'       => esc_html__( 'From Email Name', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'The person/business name email notifications are sent from.', 'sugar-calendar-lite' ),
 		]
 	);
 
 	UI::heading(
 		[
-			'title' => esc_html__( 'Order Receipt Email', 'sugar-calendar' ),
+			'title' => esc_html__( 'Order Receipt Email', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -477,16 +488,16 @@ function emails_section() {
 			'id'          => 'sc_et_receipt_email_subject',
 			'name'        => 'receipt_subject',
 			'value'       => $subject,
-			'placeholder' => esc_html__( 'Ticket Purchase Receipt', 'sugar-calendar' ),
-			'label'       => esc_html__( 'Order Receipt Subject', 'sugar-calendar' ),
-			'description' => esc_html__( 'The subject line of emailed order receipts.', 'sugar-calendar' ),
+			'placeholder' => esc_html__( 'Ticket Purchase Receipt', 'sugar-calendar-lite' ),
+			'label'       => esc_html__( 'Order Receipt Subject', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'The subject line of emailed order receipts.', 'sugar-calendar-lite' ),
 		]
 	);
 
 	// Order Receipt Message.
 	UI::field_wrapper(
 		[
-			'label' => esc_html__( 'Order Receipt Message', 'sugar-calendar' ),
+			'label' => esc_html__( 'Order Receipt Message', 'sugar-calendar-lite' ),
 			'id'    => 'receipt-message',
 		],
 		display_receipt_message_editor()
@@ -495,7 +506,7 @@ function emails_section() {
 	// Ticket Receipt Email.
 	UI::heading(
 		[
-			'title' => esc_html__( 'Ticket Receipt Email', 'sugar-calendar' ),
+			'title' => esc_html__( 'Ticket Receipt Email', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -507,16 +518,16 @@ function emails_section() {
 			'id'          => 'sc_et_ticket_email_subject',
 			'name'        => 'ticket_subject',
 			'value'       => $t_subject,
-			'placeholder' => esc_html__( 'Ticket Email Subject', 'sugar-calendar' ),
-			'label'       => esc_html__( 'Ticket Email Subject', 'sugar-calendar' ),
-			'description' => esc_html__( 'The subject line used when emailing a ticket to an attendee.', 'sugar-calendar' ),
+			'placeholder' => esc_html__( 'Ticket Email Subject', 'sugar-calendar-lite' ),
+			'label'       => esc_html__( 'Ticket Email Subject', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'The subject line used when emailing a ticket to an attendee.', 'sugar-calendar-lite' ),
 		]
 	);
 
 	// Ticket Email Message.
 	UI::field_wrapper(
 		[
-			'label' => esc_html__( 'Ticket Email Message', 'sugar-calendar' ),
+			'label' => esc_html__( 'Ticket Email Message', 'sugar-calendar-lite' ),
 			'id'    => 'ticket-message',
 		],
 		display_ticket_email_message_editor(),
@@ -535,7 +546,7 @@ function display_receipt_message_editor() {
 	?>
 
     <p class="desc">
-		<?php esc_html_e( 'The full message included in the emailed order receipts. The following dynamic placeholders can be used:', 'sugar-calendar' ); ?>
+		<?php esc_html_e( 'The full message included in the emailed order receipts. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
     </p>
     <dl class="sc-et-email-tags-list">
 
@@ -560,7 +571,7 @@ function display_ticket_email_message_editor() {
 	?>
 
     <p class="description">
-		<?php esc_html_e( 'The message sent when emailing a ticket to an attendee. The following dynamic placeholders can be used:', 'sugar-calendar' ); ?>
+		<?php esc_html_e( 'The message sent when emailing a ticket to an attendee. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
     </p>
     <dl class="sc-et-email-tags-list">
 
@@ -604,17 +615,37 @@ function process_stripe_connect_completion() {
 
 	$is_sandbox = Functions\is_sandbox();
 
+	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
+
 	$sc_credentials_url = add_query_arg( [
 		'live_mode'         => urlencode( (int) ! $is_sandbox ),
 		'state'             => urlencode( sanitize_text_field( $_GET['state'] ) ),
-		'customer_site_url' => urlencode( admin_url( 'admin.php?page=sc-settings&section=payments' ) ),
+		'customer_site_url' => urlencode( $url_payment_settings ),
 	], 'https://sugarcalendar.com/?sc_gateway_connect_credentials=stripe_connect' );
 
 	$response = wp_remote_get( esc_url_raw( $sc_credentials_url ) );
 
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! wp_remote_retrieve_body( $response ) ) {
-		$message = '<p>' . sprintf( __( 'There was an error getting your Stripe credentials. Please <a href="%s">try again</a>. If you continue to have this problem, please contact support.', 'sugar-calendar' ), esc_url( admin_url( 'admin.php?page=sc-settings&section=payments' ) ) ) . '</p>';
-		wp_die( $message );
+
+		$message  = '<p>';
+		$message .= wp_sprintf(
+			__(
+				'There was an error getting your Stripe credentials. Please <a href="%s">try again</a>. If you continue to have this problem, please contact support.',
+				'sugar-calendar'
+			),
+			esc_url( $url_payment_settings )
+		);
+		$message .= '</p>';
+
+		wp_die(
+			wp_kses(
+				$message,
+				[
+					'p' => [],
+					'a' => [ 'href' => [] ],
+				]
+			)
+		);
 	}
 
 	$response = json_decode( $response['body'], true );
@@ -630,13 +661,7 @@ function process_stripe_connect_completion() {
 
 	update_option( 'sc_stripe_connect_account_id', sanitize_text_field( $data['stripe_user_id'] ), false );
 
-	$redirect = add_query_arg(
-		[
-			'page'    => 'sc-settings',
-			'section' => 'payments',
-		],
-		admin_url( 'admin.php' )
-	);
+	$redirect = $url_payment_settings;
 
 	// Redirect
 	wp_safe_redirect( $redirect );
@@ -654,7 +679,7 @@ function process_stripe_disconnect() {
 
 	// Do not need to handle this request, bail.
 	if (
-		! ( isset( $_GET['page'] ) && 'sc-settings' === $_GET['page'] ) ||
+		! ( isset( $_GET['page'] ) && $_GET['page'] === PageSettings::get_slug() ) ||
 		! isset( $_GET['sc-stripe-disconnect'] )
 	) {
 		return;
@@ -685,13 +710,7 @@ function process_stripe_disconnect() {
 
 	update_option( 'sc_stripe_connect_account_id', false );
 
-	$redirect = add_query_arg(
-		[
-			'page'    => 'sc-settings',
-			'section' => 'payments',
-		],
-		admin_url( 'admin.php' )
-	);
+	$redirect = get_section_url( [ 'section' => 'payments' ] );
 
 	// Redirect
 	wp_safe_redirect( $redirect );
@@ -721,12 +740,12 @@ function add_page_states( $states = [], $post = false ) {
 
 	// Receipt Page
 	if ( $post->ID === $receipt_page ) {
-		$states['sc_et_receipt'] = esc_html__( 'Ticket Receipt Page', 'sugar-calendar' );
+		$states['sc_et_receipt'] = esc_html__( 'Ticket Receipt Page', 'sugar-calendar-lite' );
 	}
 
 	// Ticket Page
 	if ( $post->ID === $ticket_page ) {
-		$states['sc_et_ticket'] = esc_html__( 'Ticket Details Page', 'sugar-calendar' );
+		$states['sc_et_ticket'] = esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' );
 	}
 
 	// Return states
@@ -797,7 +816,7 @@ function handle_post( $post_data ) {
 
 	update_option( 'sc_et_settings', $options );
 
-	WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar' ), WP::ADMIN_NOTICE_SUCCESS );
+	WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar-lite' ), WP::ADMIN_NOTICE_SUCCESS );
 }
 
 /**
@@ -819,7 +838,7 @@ function handle_post_ajax() {
 		wp_send_json_error(
 			[
 				'success' => false,
-				'message' => esc_html__( 'Nonce verification failed.', 'sugar-calendar' ),
+				'message' => esc_html__( 'Nonce verification failed.', 'sugar-calendar-lite' ),
 			]
 		);
 	}
@@ -835,7 +854,7 @@ function handle_post_ajax() {
 		wp_send_json_error(
 			[
 				'success' => false,
-				'message' => esc_html__( 'No options were set.', 'sugar-calendar' ),
+				'message' => esc_html__( 'No options were set.', 'sugar-calendar-lite' ),
 			]
 		);
 	}
@@ -878,9 +897,9 @@ function handle_post_ajax() {
 		'message' =>
 			$is_settings_saved
 			?
-			esc_html__( 'Settings saved.', 'sugar-calendar' )
+			esc_html__( 'Settings saved.', 'sugar-calendar-lite' )
 			:
-			esc_html__( 'Settings not saved.', 'sugar-calendar' ),
+			esc_html__( 'Settings not saved.', 'sugar-calendar-lite' ),
 	];
 
 	// Return the response.

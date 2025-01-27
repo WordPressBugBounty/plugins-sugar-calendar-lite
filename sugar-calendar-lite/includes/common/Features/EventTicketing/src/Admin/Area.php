@@ -36,8 +36,8 @@ class Area {
 
 		add_submenu_page(
 			'sugar-calendar',
-			esc_html__( 'Tickets', 'sugar-calendar' ),
-			esc_html__( 'Tickets', 'sugar-calendar' ),
+			esc_html__( 'Tickets', 'sugar-calendar-lite' ),
+			esc_html__( 'Tickets', 'sugar-calendar-lite' ),
 			$pt_object->cap->create_posts,
 			'sc-event-ticketing',
 			[ sugar_calendar()->get_admin(), 'display' ],

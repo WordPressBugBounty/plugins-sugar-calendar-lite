@@ -178,7 +178,7 @@ class Loader {
 		?>
 		<div class="sc-frontend-single-event__details__time sc-frontend-single-event__details-row">
 			<div class="sc-frontend-single-event__details__label">
-				<?php esc_html_e( 'Time:', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Time:', 'sugar-calendar-lite' ); ?>
 			</div>
 			<div class="sc-frontend-single-event__details__val">
 				<?php
@@ -213,7 +213,7 @@ class Loader {
 		?>
 		<div class="sc-frontend-single-event__details__location sc-frontend-single-event__details-row">
 			<div class="sc-frontend-single-event__details__label">
-				<?php esc_html_e( 'Location:', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Location:', 'sugar-calendar-lite' ); ?>
 			</div>
 			<div class="sc-frontend-single-event__details__val">
 				<?php echo esc_html( $event->location ); ?>
@@ -249,7 +249,7 @@ class Loader {
 		?>
 		<div class="sc-frontend-single-event__details__calendar sc-frontend-single-event__details-row">
 			<div class="sc-frontend-single-event__details__label">
-				<?php esc_html_e( 'Calendar:', 'sugar-calendar' ); ?>
+				<?php esc_html_e( 'Calendar:', 'sugar-calendar-lite' ); ?>
 			</div>
 			<div class="sc-frontend-single-event__details__val">
 				<?php

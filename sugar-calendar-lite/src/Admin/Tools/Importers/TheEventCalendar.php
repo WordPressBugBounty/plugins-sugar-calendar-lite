@@ -97,7 +97,7 @@ class TheEventCalendar extends Importer {
 	 */
 	public function get_title() {
 
-		return __( 'Migrate From The Events Calendar', 'sugar-calendar' );
+		return __( 'Migrate From The Events Calendar', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class TheEventCalendar extends Importer {
 						/* translators: %s: Sugar Calendar to TEC migration admin page. */
 						__(
 							'Sugar Calendar to The Events Calendar migration was not completed. Please complete the migration <a href="%s">here</a>.',
-							'sugar-calendar'
+							'sugar-calendar-lite'
 						),
 						esc_url( $this->get_migration_page_url() )
 					),
@@ -211,7 +211,7 @@ class TheEventCalendar extends Importer {
 						/* translators: %s: Sugar Calendar to TEC migration admin page. */
 						__(
 							'Sugar Calendar has detected The Events Calendar events on this site. Migrate them to Sugar Calendar with our <a href="%s">1-click migration tool</a>.',
-							'sugar-calendar'
+							'sugar-calendar-lite'
 						),
 						esc_url( $this->get_migration_page_url() )
 					),
@@ -227,7 +227,7 @@ class TheEventCalendar extends Importer {
 			<button id="sc-admin-tools-migrate-notice-dismiss" data-nonce="<?php echo esc_attr( wp_create_nonce( Importers::MIGRATION_NOTICE_DISMISS_NONCE_ACTION ) ); ?>"
 				data-migration-slug="<?php echo esc_attr( $this->get_slug() ); ?>" type="button" class="notice-dismiss">
 				<span class="screen-reader-text">
-					<?php esc_html_e( 'Dismiss this notice.', 'sugar-calendar' ); ?>
+					<?php esc_html_e( 'Dismiss this notice.', 'sugar-calendar-lite' ); ?>
 				</span>
 			</button>
 		</div>
@@ -265,7 +265,7 @@ class TheEventCalendar extends Importer {
 		if ( empty( $this->get_number_of_tec_events_to_import() ) && self::get_tec_migration_option() === false ) {
 			printf(
 				'<p>%s</p>',
-				esc_html__( 'You have no The Events Calendar events to import.', 'sugar-calendar' )
+				esc_html__( 'You have no The Events Calendar events to import.', 'sugar-calendar-lite' )
 			);
 
 			return;
@@ -277,8 +277,8 @@ class TheEventCalendar extends Importer {
 		<p>
 			<?php
 			if ( $this->get_tec_migration_option() === 'in_progress' ) {
-				esc_html_e( 'The previous migration was not completed. Click the button below to continue the migration.', 'sugar-calendar' );
-				$btn_text = __( 'Continue Migration', 'sugar-calendar' );
+				esc_html_e( 'The previous migration was not completed. Click the button below to continue the migration.', 'sugar-calendar-lite' );
+				$btn_text = __( 'Continue Migration', 'sugar-calendar-lite' );
 			} else {
 
 				echo esc_html(
@@ -286,12 +286,12 @@ class TheEventCalendar extends Importer {
 						/* translators: %s: A sentence describing the number of items per context to be imported. */
 						__(
 							'There are %s defined in The Events Calendar. You can import them to Sugar Calendar with just one click!',
-							'sugar-calendar'
+							'sugar-calendar-lite'
 						),
 						$this->get_number_of_items_per_context_string()
 					)
 				);
-				$btn_text = __( 'Migrate Events', 'sugar-calendar' );
+				$btn_text = __( 'Migrate Events', 'sugar-calendar-lite' );
 			}
 			?>
 		</p>
@@ -306,7 +306,7 @@ class TheEventCalendar extends Importer {
 							/* translators: %s: Sugar Calendar Pro pricing page URL. */
 							__(
 								'The Events Calendar migration contains recurring events. Please <a target="_blank" href="%1$s">upgrade to Sugar Calendar Pro</a>, to successfully import recurring events. If you want to proceed with this migration on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?',
-								'sugar-calendar'
+								'sugar-calendar-lite'
 							),
 							esc_url(
 								Helpers::get_utm_url(
@@ -391,7 +391,7 @@ class TheEventCalendar extends Importer {
 		if ( ! empty( $events_count ) ) {
 			$context_count_string .= sprintf(
 				/* translators: %s: Number of TEC events to import. */
-				_n( '%s event', '%s events', $events_count, 'sugar-calendar' ),
+				_n( '%s event', '%s events', $events_count, 'sugar-calendar-lite' ),
 				$events_count
 			);
 		}
@@ -407,7 +407,7 @@ class TheEventCalendar extends Importer {
 
 			$context_count_string .= sprintf(
 				/* translators: %s: Number of TEC orders to import. */
-				_n( '%s order', '%s orders', $orders_count, 'sugar-calendar' ),
+				_n( '%s order', '%s orders', $orders_count, 'sugar-calendar-lite' ),
 				$orders_count
 			);
 		}
@@ -423,7 +423,7 @@ class TheEventCalendar extends Importer {
 
 			$context_count_string .= sprintf(
 				/* translators: %s: Number of TEC tickets to import. */
-				_n( '%s ticket', '%s tickets', $tickets_count, 'sugar-calendar' ),
+				_n( '%s ticket', '%s tickets', $tickets_count, 'sugar-calendar-lite' ),
 				$tickets_count
 			);
 		}
@@ -435,7 +435,7 @@ class TheEventCalendar extends Importer {
 
 			$context_count_string .= sprintf(
 				/* translators: %s: Number of TEC attendees to import. */
-				_n( '%s attendee', '%s attendees', $attendees_count, 'sugar-calendar' ),
+				_n( '%s attendee', '%s attendees', $attendees_count, 'sugar-calendar-lite' ),
 				$attendees_count
 			);
 		}

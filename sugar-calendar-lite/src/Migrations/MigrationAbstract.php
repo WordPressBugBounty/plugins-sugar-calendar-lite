@@ -153,7 +153,7 @@ abstract class MigrationAbstract {
 			$this->{'migrate_to_' . $version}();
 		} elseif ( WP::in_wp_admin() ) {
 			$message = sprintf( /* translators: %1$s - the DB option name, %2$s - Sugar Calendar, %3$s - error message. */
-				esc_html__( 'There was an error while upgrading the %1$s database. Please contact %2$s support with this information: %3$s.', 'sugar-calendar' ),
+				esc_html__( 'There was an error while upgrading the %1$s database. Please contact %2$s support with this information: %3$s.', 'sugar-calendar-lite' ),
 				static::OPTION_NAME,
 				'<strong>Sugar Calendar</strong>',
 				'<code>migration from v' . static::get_current_version() . ' to v' . static::VERSION . ' failed. Plugin version: v' . SC_PLUGIN_VERSION . '</code>'

@@ -99,7 +99,7 @@ class Loader {
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'sc-frontend-block' ),
 				'strings'  => [
-					'this_week' => esc_html__( 'This Week', 'sugar-calendar' ),
+					'this_week' => esc_html__( 'This Week', 'sugar-calendar-lite' ),
 				],
 				'settings' => [
 					'sow' => absint( sc_get_week_start_day() ),

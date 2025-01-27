@@ -16,6 +16,10 @@
 			"type": "array",
 			"default": []
 		},
+		"venues": {
+			"type": "array",
+			"default": []
+		},
 		"groupEventsByWeek": {
 			"type": "boolean",
 			"default": true

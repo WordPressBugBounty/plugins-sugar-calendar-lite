@@ -20,6 +20,7 @@ use Sugar_Calendar\Admin\Pages\Tools;
 use Sugar_Calendar\Admin\Pages\ToolsExportTab;
 use Sugar_Calendar\Admin\Pages\ToolsImportTab;
 use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
+use Sugar_Calendar\Admin\Pages\Venues;
 use Sugar_Calendar\Admin\Pages\Welcome;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
@@ -156,14 +157,15 @@ class Area {
 	 * @since 3.0.0
 	 * @since 3.0.1 Apply filter on Sugar Calendar Menu capability.
 	 * @since 3.3.0 Added 'Tools' submenu.
+	 * @since 3.5.0 Added 'Venues' submenu.
 	 *
 	 * @return void
 	 */
 	public function admin_menu() {
 
 		add_menu_page(
-			esc_html__( 'Sugar Calendar', 'sugar-calendar' ),
-			esc_html__( 'Sugar Calendar', 'sugar-calendar' ),
+			esc_html__( 'Sugar Calendar', 'sugar-calendar-lite' ),
+			esc_html__( 'Sugar Calendar', 'sugar-calendar-lite' ),
 			/**
 			 * Filters the capability required to view the Sugar Calendar menu.
 			 *
@@ -230,6 +232,16 @@ class Area {
 
 		add_submenu_page(
 			self::SLUG,
+			Venues::get_title(),
+			Venues::get_title(),
+			Venues::get_capability(),
+			Venues::get_slug(),
+			sugar_calendar()->is_pro() ? '' : [ $this, 'display' ],
+			Venues::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
 			Settings::get_title(),
 			Settings::get_title(),
 			Settings::get_capability(),
@@ -261,8 +273,8 @@ class Area {
 		if ( ! Plugin::instance()->is_pro() ) {
 			add_submenu_page(
 				self::SLUG,
-				esc_html__( 'Upgrade to Pro', 'sugar-calendar' ),
-				esc_html__( 'Upgrade to Pro', 'sugar-calendar' ),
+				esc_html__( 'Upgrade to Pro', 'sugar-calendar-lite' ),
+				esc_html__( 'Upgrade to Pro', 'sugar-calendar-lite' ),
 				'manage_options',
 				esc_url(
 					Helpers::get_upgrade_link(
@@ -335,6 +347,7 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 * @since 3.3.0 Added support for Tools page and its tabs.
+	 * @since 3.5.0 Added support for Venues page.
 	 *
 	 * @return string|null
 	 */
@@ -379,7 +392,7 @@ class Area {
 						$page_id = 'welcome';
 						break;
 
-					case 'sc-settings':
+					case Settings::get_slug():
 						$page_id = $this->get_settings_page_id();
 						break;
 
@@ -397,6 +410,10 @@ class Area {
 
 					case Tools::get_slug():
 						$page_id = $this->get_tools_page_id();
+						break;
+
+					case Venues::get_slug():
+						$page_id = 'venues';
 						break;
 				}
 			}
@@ -487,6 +504,7 @@ class Area {
 	 * Get the list of registered page classes.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Added support for Venues page.
 	 *
 	 * @return PageInterface[]
 	 */
@@ -509,6 +527,7 @@ class Area {
 			'tools_import'     => ToolsImportTab::class,
 			'tools_export'     => ToolsExportTab::class,
 			'tools_migrate'    => ToolsMigrateTab::class,
+			'venues'           => Venues::class,
 		];
 
 		/**
@@ -919,7 +938,14 @@ class Area {
 		wp_register_script(
 			'sugar-calendar-admin-event-meta-box',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-event-metabox' . WP::asset_min() . '.js',
-			[ 'jquery', 'jquery-ui-datepicker', 'sugar-calendar-vendor-choices', 'wp-date', 'wp-i18n' ],
+			[
+				'jquery',
+				'jquery-ui-datepicker',
+				'sugar-calendar-vendor-choices',
+				'wp-date',
+				'wp-i18n',
+				'jquery-ui-autocomplete',
+			],
 			SC_PLUGIN_VERSION,
 			true
 		);

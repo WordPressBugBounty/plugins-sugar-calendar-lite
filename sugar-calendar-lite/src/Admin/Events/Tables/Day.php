@@ -80,7 +80,7 @@ class Day extends Grid {
 
 		// Link text.
 		/* translators: %s - week number. */
-		$string = esc_html_x( 'Week %s', 'Week number', 'sugar-calendar' );
+		$string = esc_html_x( 'Week %s', 'Week number', 'sugar-calendar-lite' );
 		$week   = $this->get_week_for_timestamp( $this->today );
 		$text   = sprintf( $string, $week );
 
@@ -107,11 +107,11 @@ class Day extends Grid {
 				'small'  => '1 day',
 				'large'  => '1 week',
 				'labels' => [
-					'today'      => esc_html__( 'Today', 'sugar-calendar' ),
-					'next_small' => esc_html__( 'Tomorrow', 'sugar-calendar' ),
-					'next_large' => esc_html__( 'Next Week', 'sugar-calendar' ),
-					'prev_small' => esc_html__( 'Yesterday', 'sugar-calendar' ),
-					'prev_large' => esc_html__( 'Previous Week', 'sugar-calendar' ),
+					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
+					'next_small' => esc_html__( 'Tomorrow', 'sugar-calendar-lite' ),
+					'next_large' => esc_html__( 'Next Week', 'sugar-calendar-lite' ),
+					'prev_small' => esc_html__( 'Yesterday', 'sugar-calendar-lite' ),
+					'prev_large' => esc_html__( 'Previous Week', 'sugar-calendar-lite' ),
 				],
 			]
 		);
@@ -211,11 +211,11 @@ class Day extends Grid {
 
 					<?php if ( $type === 'all_day' ) : ?>
 
-						<?php esc_html_e( 'All Day', 'sugar-calendar' ); ?>
+						<?php esc_html_e( 'All Day', 'sugar-calendar-lite' ); ?>
 
 					<?php elseif ( $type === 'multi_day' ) : ?>
 
-						<?php esc_html_e( 'Multiple Days', 'sugar-calendar' ); ?>
+						<?php esc_html_e( 'Multiple Days', 'sugar-calendar-lite' ); ?>
 
 					<?php endif; ?>
 

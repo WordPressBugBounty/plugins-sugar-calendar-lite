@@ -213,8 +213,8 @@ class Emails {
 	public function get_templates() {
 
 		$templates = [
-			'default' => esc_html__( 'Default Template', 'sugar-calendar' ),
-			'none'    => esc_html__( 'No template, plain text only', 'sugar-calendar' ),
+			'default' => esc_html__( 'Default Template', 'sugar-calendar-lite' ),
+			'none'    => esc_html__( 'No template, plain text only', 'sugar-calendar-lite' ),
 		];
 
 		/**
@@ -319,7 +319,7 @@ class Emails {
 	public function send( $to, $subject, $message, $attachments = '' ) {
 
 		if ( ! did_action( 'init' ) && ! did_action( 'admin_init' ) ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'You cannot send emails with sc_Emails until init/admin_init has been reached', 'sugar-calendar' ), null );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'You cannot send emails with sc_Emails until init/admin_init has been reached', 'sugar-calendar-lite' ), null );
 
 			return false;
 		}
@@ -457,109 +457,109 @@ class Emails {
 		$email_tags = [
 			[
 				'tag'         => 'name',
-				'description' => esc_html__( 'The display name of the customer', 'sugar-calendar' ),
+				'description' => esc_html__( 'The display name of the customer', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_name',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'email',
-				'description' => esc_html__( 'The email address of the customer', 'sugar-calendar' ),
+				'description' => esc_html__( 'The email address of the customer', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_email',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'order_id',
-				'description' => esc_html__( 'The ID number of the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The ID number of the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_id',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'order_amount',
-				'description' => esc_html__( 'The total purchase amount of the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The total purchase amount of the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_amount',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'order_date',
-				'description' => esc_html__( 'The purchase date of the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The purchase date of the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_date',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'receipt_url',
-				'description' => esc_html__( 'URL to view the receipt in the browser', 'sugar-calendar' ),
+				'description' => esc_html__( 'URL to view the receipt in the browser', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_receipt_url',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'tickets',
-				'description' => esc_html__( 'Outputs a list of tickets in the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'Outputs a list of tickets in the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_tickets',
 				'type'        => 'order',
 			],
 			[
 				'tag'         => 'event_id',
-				'description' => esc_html__( 'The ID number of the event associated with the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The ID number of the event associated with the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_id',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'event_title',
-				'description' => esc_html__( 'The title of the event associated with the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The title of the event associated with the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_title',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'event_url',
-				'description' => esc_html__( 'The URL of the event details page', 'sugar-calendar' ),
+				'description' => esc_html__( 'The URL of the event details page', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_url',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'event_date',
-				'description' => esc_html__( 'The date of the event associated with the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The date of the event associated with the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_date',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'event_start_time',
-				'description' => esc_html__( 'The start time of the event associated with the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The start time of the event associated with the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_start_time',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'event_end_time',
-				'description' => esc_html__( 'The end time of the event associated with the order', 'sugar-calendar' ),
+				'description' => esc_html__( 'The end time of the event associated with the order', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_start_time',
 				'type'        => 'event',
 			],
 			[
 				'tag'         => 'ticket_id',
-				'description' => esc_html__( 'The ticket ID number', 'sugar-calendar' ),
+				'description' => esc_html__( 'The ticket ID number', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_id',
 				'type'        => 'ticket',
 			],
 			[
 				'tag'         => 'ticket_code',
-				'description' => esc_html__( 'The ticket code', 'sugar-calendar' ),
+				'description' => esc_html__( 'The ticket code', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_code',
 				'type'        => 'ticket',
 			],
 			[
 				'tag'         => 'ticket_url',
-				'description' => esc_html__( 'The URL to the ticket details', 'sugar-calendar' ),
+				'description' => esc_html__( 'The URL to the ticket details', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_url',
 				'type'        => 'ticket',
 			],
 			[
 				'tag'         => 'attendee_name',
-				'description' => esc_html__( 'The name of the attendee assigned to a ticket, if provided', 'sugar-calendar' ),
+				'description' => esc_html__( 'The name of the attendee assigned to a ticket, if provided', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_name',
 				'type'        => 'attendee',
 			],
 			[
 				'tag'         => 'attendee_email',
-				'description' => esc_html__( 'The email of the attendee assigned to a ticket, if provided', 'sugar-calendar' ),
+				'description' => esc_html__( 'The email of the attendee assigned to a ticket, if provided', 'sugar-calendar-lite' ),
 				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_email',
 				'type'        => 'attendee',
 			],

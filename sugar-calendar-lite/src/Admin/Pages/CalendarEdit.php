@@ -33,7 +33,7 @@ class CalendarEdit extends CalendarAbstract {
 	 */
 	public static function get_label() {
 
-		return esc_html__( 'Edit Calendar', 'sugar-calendar' );
+		return esc_html__( 'Edit Calendar', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class CalendarEdit extends CalendarAbstract {
 		}
 
 		if ( ! $this->term instanceof WP_Term ) {
-			wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'sugar-calendar' ) );
+			wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'sugar-calendar-lite' ) );
 		}
 	}
 
@@ -108,7 +108,7 @@ class CalendarEdit extends CalendarAbstract {
 				'name'        => 'name',
 				'id'          => 'name',
 				'value'       => $this->term->name,
-				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar' ),
+				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar-lite' ),
 			],
 			true
 		);
@@ -143,7 +143,7 @@ class CalendarEdit extends CalendarAbstract {
 			UI::button(
 				[
 					'name' => 'submit',
-					'text' => esc_html__( 'Update Calendar', 'sugar-calendar' ),
+					'text' => esc_html__( 'Update Calendar', 'sugar-calendar-lite' ),
 				]
 			);
 			?>

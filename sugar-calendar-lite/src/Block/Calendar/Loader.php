@@ -102,12 +102,12 @@ class Loader {
 						/*
 						 * translators: %s: Month name and the date. E.g January 1.
 						 */
-						esc_html__( 'Events on %s', 'sugar-calendar' ),
+						esc_html__( 'Events on %s', 'sugar-calendar-lite' ),
 						'[Month Date]'
 					),
-					'this_month' => esc_html__( 'This Month', 'sugar-calendar' ),
-					'this_week'  => esc_html__( 'This Week', 'sugar-calendar' ),
-					'today'      => esc_html__( 'Today', 'sugar-calendar' ),
+					'this_month' => esc_html__( 'This Month', 'sugar-calendar-lite' ),
+					'this_week'  => esc_html__( 'This Week', 'sugar-calendar-lite' ),
+					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
 				],
 				'settings' => [
 					'sow' => absint( sc_get_week_start_day() ),
@@ -231,6 +231,7 @@ class Loader {
 	 * This function is used to get the event description and image for the event popover.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0 Added `filter_event_more_string` filter.
 	 */
 	public function ajax_event_popover() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
@@ -239,7 +240,7 @@ class Loader {
 		if ( empty( $_POST['event_object_id'] ) ) {
 			wp_send_json_error(
 				[
-					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar' ),
+					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar-lite' ),
 				]
 			);
 		}
@@ -249,18 +250,30 @@ class Loader {
 		if ( empty( $event_object_id ) ) {
 			wp_send_json_error(
 				[
-					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar' ),
+					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar-lite' ),
 				]
 			);
 		}
 
-		$event_image = get_the_post_thumbnail_url( $event_object_id );
+		$event_image = get_the_post_thumbnail_url(
+			$event_object_id,
+			/**
+			 * Filter the size of the event image in the popover in Calendar block.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param string $size Image size. Accepts any registered image size name, or an array of width and height values in pixels (in that order).
+			 */
+			apply_filters( 'sugar_calendar_block_calendar_loader_popover_image_size', 'medium' )
+		);
 
 		add_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
+		add_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
 
 		$event_description = wp_trim_excerpt( '', $event_object_id );
 
 		remove_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
+		remove_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
 
 		wp_send_json_success(
 			[
@@ -274,6 +287,7 @@ class Loader {
 	 * Filter the number of words in the event description.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.0
 	 *
 	 * @param int $number Number of words passed to the filter.
 	 *
@@ -281,7 +295,41 @@ class Loader {
 	 */
 	public function filter_event_description( $number ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
-		return 30;
+		/**
+		 * Filter the number of words in the event description.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param int $number Number of words in the event description.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_popover_event_description_length',
+			30
+		);
+	}
+
+	/**
+	 * Filters the string after the event description excerpt in popover.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $excerpt_more The string after the event description excerpt in popover.
+	 *
+	 * @return string
+	 */
+	public function filter_event_more_string( $excerpt_more ) {
+
+		/**
+		 * Filters the string after the event description excerpt in popover.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param string $excerpt_more The string after the event description excerpt in popover.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_popover_event_more_string',
+			$excerpt_more
+		);
 	}
 
 	/**
@@ -298,7 +346,7 @@ class Loader {
 		if ( empty( $_POST['calendar_block'] ) ) {
 			wp_send_json_error(
 				[
-					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar' ),
+					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar-lite' ),
 				]
 			);
 		}
@@ -341,6 +389,10 @@ class Loader {
 				'heading'           => $heading,
 				'heading_mobile'    => $heading_mobile,
 				'is_update_display' => $clean_data['updateDisplay'],
+				'control_labels'    => [
+					'prev' => esc_attr( $block->get_previous_pagination_display() ),
+					'next' => esc_attr( $block->get_next_pagination_display() ),
+				],
 				'date'              => [
 					'day'   => $block->get_day_num_without_zero(),
 					'month' => $block->get_month_num_without_zero(),
@@ -365,7 +417,7 @@ class Loader {
 			[
 				[
 					'slug'  => 'sugar-calendar',
-					'title' => esc_html__( 'Sugar Calendar', 'sugar-calendar' ),
+					'title' => esc_html__( 'Sugar Calendar', 'sugar-calendar-lite' ),
 				],
 			],
 			$categories
