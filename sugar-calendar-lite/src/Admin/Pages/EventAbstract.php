@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Pages;
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Admin\Pages\VenuesAbstract;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers;
 use WP_Post;
 
 /**
@@ -61,6 +62,7 @@ abstract class EventAbstract extends PageAbstract {
 	 * Register page hooks.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.1 Add loading of compatibility hooks.
 	 */
 	public function hooks() {
 
@@ -68,6 +70,9 @@ abstract class EventAbstract extends PageAbstract {
 		add_action( 'in_admin_header', [ $this, 'display_admin_subheader' ] );
 		add_filter( 'enter_title_here', [ $this, 'get_title_field_placeholder' ], 10, 2 );
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
+
+		// Load compatibility hooks.
+		Helpers::load_compatibility_hooks();
 	}
 
 	/**

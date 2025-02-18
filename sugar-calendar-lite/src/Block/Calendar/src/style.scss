@@ -749,8 +749,8 @@ $event-margin: 18px;
 				}
 
 				&-week {
-					border-bottom-right-radius: 0;
-					border-top-right-radius: 0;
+					border-bottom-right-radius: 0 !important;
+					border-top-right-radius: 0 !important;;
 
 					@include media( '<tablet' ) {
 						border-radius: 50%;
@@ -781,7 +781,7 @@ $event-margin: 18px;
 					}
 
 					&.sugar-calendar-block__calendar-month__body__day__events-container__event-multi-day-7 {
-						width: calc(700% - 10px);
+						width: 700%;
 					}
 				}
 			}
@@ -1062,8 +1062,8 @@ $event-margin: 18px;
 				@include media('>=tablet') {
 
 					.sugar-calendar-block__calendar-week__event-cell--multi-day--overflow-week {
-						border-bottom-right-radius: 0;
-						border-top-right-radius: 0;
+						border-bottom-right-radius: 0 !important;
+						border-top-right-radius: 0 !important;;
 						margin-right: 0;
 
 						&.sugar-calendar-block__calendar-week__event-cell--multi-day--1 {

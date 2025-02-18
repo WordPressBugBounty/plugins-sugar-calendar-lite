@@ -204,82 +204,101 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		<>
 			<InspectorControls>
 
-				{
-					( showCalendarFilterSection || showVenuesFilterSection ) &&
-					(
+				<PanelBody
+					title={ __( 'Settings', 'sugar-calendar-block' ) }
+					initialOpen={ true }
+				>
 
-						<PanelBody
-							title={ __( 'Settings', 'sugar-calendar-block' ) }
-							initialOpen={ true }
-						>
-							{
-								showCalendarFilterSection &&
-								<>
-									<Heading
-										level={3}>
-										{ __( 'Calendars', 'sugar-calendar-block' ) }
-									</Heading>
-									<Select
-										className="sugar-calendar-block__calendars"
-										classNamePrefix="sc-calendar-block-select"
-										isMulti
-										options={
-											calendars.map( ( calendar ) => {
-												return {
-													value: calendar.id,
-													label: calendar.name
-												};
-											} )
-										}
-										onChange={onChangeCalendars}
-										value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
-											const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
+					<>
+						{
+							showCalendarFilterSection &&
+							<>
+								<Heading
+									level={3}>
+									{ __( 'Calendars', 'sugar-calendar-block' ) }
+								</Heading>
+								<Select
+									className="sugar-calendar-block__calendars"
+									classNamePrefix="sc-calendar-block-select"
+									isMulti
+									options={
+										calendars.map( ( calendar ) => {
 											return {
 												value: calendar.id,
 												label: calendar.name
 											};
-										} ) : []}
-									/>
-								</>
-							}
+										} )
+									}
+									onChange={onChangeCalendars}
+									value={attributes.calendars ? attributes.calendars.map( ( calendarId ) => {
+										const calendar = calendars.find( ( calendar ) => calendar.id === calendarId );
+										return {
+											value: calendar.id,
+											label: calendar.name
+										};
+									} ) : []}
+								/>
+							</>
+						}
 
-							{
-								showVenuesFilterSection &&
-								<>
-									<Heading
-										level={3}>
-										{ __( 'Venues', 'sugar-calendar-block' ) }
-									</Heading>
-									<Select
-										className="sugar-calendar-block__venues"
-										classNamePrefix="sc-venue-block-select"
-										isMulti
-										options={
-											venues.map((venue) => {
-												return {
-													value: venue.id,
-													label: venue.title.rendered,
-												};
-											})
-										}
-										onChange={(selectedOptions) => {
-											onChangeVenues(selectedOptions, setAttributes);
-										}}
-										value={attributes.venues ? attributes.venues.map((venueId) => {
-											const venue = venues.find((venue) => venue.id === venueId);
-											return venue
-												? {
-													value: venue.id,
-													label: venue.title.rendered,
-												}
-												: null;
-										}) : []}
-									/>
-								</>
-							}
-						</PanelBody>
-					)
-				}
+						{
+							showVenuesFilterSection &&
+							<>
+								<Heading
+									level={3}>
+									{ __( 'Venues', 'sugar-calendar-block' ) }
+								</Heading>
+								<Select
+									className="sugar-calendar-block__venues"
+									classNamePrefix="sc-venue-block-select"
+									isMulti
+									options={
+										venues.map((venue) => {
+											return {
+												value: venue.id,
+												label: venue.title.rendered,
+											};
+										})
+									}
+									onChange={(selectedOptions) => {
+										onChangeVenues(selectedOptions, setAttributes);
+									}}
+									value={attributes.venues ? attributes.venues.map((venueId) => {
+										const venue = venues.find((venue) => venue.id === venueId);
+										return venue
+											? {
+												value: venue.id,
+												label: venue.title.rendered,
+											}
+											: null;
+									}) : []}
+								/>
+							</>
+						}
+					</>
+
+					<ToggleControl
+						label={ __( 'Group Events by Week', 'sugar-calendar-event-list-block' ) }
+						checked={ attributes.groupEventsByWeek }
+						onChange={ onGroupEventsByWeek }
+					/>
+					{ ! attributes.groupEventsByWeek && (
+						<>
+							<TextControl
+								label={ __( 'Events Per Page', 'sugar-calendar-event-list-block' ) }
+								type="text"
+								value={ attributes.eventsPerPage || '' }
+								onChange={ (value) => onEventsPerPage(parseInt(value, 10) ) }
+							/>
+							<TextControl
+								label={ __( 'Maximum Events To Show', 'sugar-calendar-event-list-block' ) }
+								type="text"
+								value={ attributes.maximumEventsToShow || '' }
+								onChange={ (value) => onMaximumEventsToShow(parseInt(value, 10) ) }
+							/>
+						</>
+					) }
+				</PanelBody>
 
 				<PanelBody
 					title={ __( 'Display', 'sugar-calendar-event-list-block' ) }

@@ -137,6 +137,7 @@ class EventCell implements InterfaceView {
 	 * Get the multi-day duration classes.
 	 *
 	 * @since 3.0.0
+	 * @since 3.5.1 Fixed issue with multi-day events overflow.
 	 *
 	 * @param DateTime $start_date The start date we will display the multi-day event.
 	 *
@@ -144,10 +145,29 @@ class EventCell implements InterfaceView {
 	 */
 	private function get_multi_day_duration_classes( $start_date ) {
 
-		$classes  = [];
-		$duration = absint( $this->get_event()->end_dto->diff( $start_date )->format( '%a' ) );
+		$classes = [];
 
-		// Remaining days in the week.
+		// Clone to avoid modifying the original object.
+		$event_end  = clone $this->get_event()->end_dto;
+		$start_date = clone $start_date;
+
+		// Remove the time part.
+		$start_date->setTime( 0, 0, 0 );
+		$event_end->setTime( 0, 0, 0 );
+
+		// Calculate the full-day difference.
+		$date_diff = $this->get_event()->end_dto->diff( $start_date );
+
+		$duration = absint( $date_diff->format( '%a' ) );
+
+		if (
+			$duration === 7 &&
+			( $date_diff->h > 0 || $date_diff->i > 0 )
+		) {
+			++$duration;
+		}
+
+		// Calculate the remaining days in the current week.
 		$remaining = 7 - $this->calendar_info['days_of_week_ctr'];
 
 		if ( ( $remaining - $duration ) < 0 ) {
@@ -155,8 +175,6 @@ class EventCell implements InterfaceView {
 			 * If we are here then it means that the multi-event overflows to next week.
 			 * We don't want to have it to overflow outside of the week calendar.
 			 * So we will only span it to the rest of the week.
-			 *
-			 * We add one to include the start date.
 			 */
 			$duration = $remaining;
 

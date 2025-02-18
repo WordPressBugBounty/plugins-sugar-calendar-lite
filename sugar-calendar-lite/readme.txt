@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.7
-Stable tag:        3.5.0
+Stable tag:        3.5.1
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -194,6 +194,12 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.5.1 - 2024-02-18 =
+- Fixed: Missing "Group By Event" setting in Event List block.
+- Fixed: Incorrect display of some multi-day events in the Event Calendar block.
+- Fixed: Compatibility issue with ACF datepicker field.
+- Fixed: Venue section display in the admin edit event page in smaller devices.
+
 = 3.5.0 - 2024-01-27 =
 - Added: More UI controls for the Events Calendar block.
 - Added: 2 new filters to customize the event description in the popover in the Event Calendar block.

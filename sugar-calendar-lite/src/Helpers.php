@@ -4,6 +4,7 @@ namespace Sugar_Calendar;
 
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
+use Sugar_Calendar\Helpers\WP;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -1086,5 +1087,42 @@ class Helpers {
 	public static function get_google_maps_api_key() {
 
 		return Options::get( 'maps_google_api_key', '' );
+	}
+
+	/**
+	 * Load compatibility hooks.
+	 *
+	 * @since 3.5.1
+	 *
+	 * @return void
+	 */
+	public static function load_compatibility_hooks() {
+
+		// Detect if ACF is active.
+		if ( function_exists( 'acf' ) ) {
+
+			// Load compatibility script.
+			add_action( 'admin_enqueue_scripts', [ self::class, 'load_compatibility_script_acf' ], 999 );
+		}
+	}
+
+	/**
+	 * Load compatibility script.
+	 *
+	 * @since 3.5.1
+	 *
+	 * @return void
+	 */
+	public static function load_compatibility_script_acf() {
+
+		wp_register_script(
+			'sugar-calendar-admin-compatibility-acf',
+			SC_PLUGIN_ASSETS_URL . 'js/compatibility/sc-compatibility-acf' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			SC_PLUGIN_VERSION,
+			true
+		);
+
+		wp_enqueue_script( 'sugar-calendar-admin-compatibility-acf' );
 	}
 }
