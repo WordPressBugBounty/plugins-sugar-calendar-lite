@@ -124,4 +124,16 @@ class Helpers {
 
 		return defined( 'WP_CLI' ) && WP_CLI;
 	}
+
+	/**
+	 * Generate a random hex color code.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return string Random hex color code with leading #.
+	 */
+	public static function generate_random_hex_color() {
+
+		return sprintf( '#%06X', wp_rand( 0, 0xFFFFFF ) );
+	}
 }

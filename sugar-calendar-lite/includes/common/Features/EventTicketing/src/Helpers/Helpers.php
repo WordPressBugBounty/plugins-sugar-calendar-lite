@@ -77,4 +77,30 @@ class Helpers {
 			wc_get_cart_url()
 		);
 	}
+
+	/**
+	 * Whether or not ticketing is enabled for an event.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event The event object.
+	 *
+	 * @return bool
+	 */
+	public static function is_event_ticketing_enabled( $event ) {
+
+		/**
+		 * Filter to determine if event ticketing is enabled.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string                $enabled The tickets event meta value. `1` if enabled.
+		 * @param \Sugar_Calendar\Event $event   The event object.
+		 */
+		return (bool) apply_filters(
+			'sugar_calendar_add_on_ticketing_helpers_is_event_ticketing_enabled',
+			get_event_meta( $event->id, 'tickets', true ),
+			$event
+		);
+	}
 }

@@ -463,12 +463,12 @@ class Helpers {
 	 *
 	 * @param Event  $event           The event object.
 	 * @param string $format          The format saved in the options.
-	 * @param string $event_time_type Accepts 'start' or 'end'.
+	 * @param string $event_time_type Accepts 'start', 'end', 'recurrence_start', 'recurrence_end'.
 	 * @param bool   $output_array    Whether to output an array or not.
 	 *
 	 * @return string|array
 	 */
-	public static function get_event_time_output( $event, $format, $event_time_type = 'start', $output_array = false ) {
+	public static function get_event_time_output( $event, $format, $event_time_type = 'start', $output_array = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		// Default format.
 		$time_attr_format = 'Y-m-d\TH:i:s';
@@ -480,6 +480,9 @@ class Helpers {
 		} elseif ( $event_time_type === 'recurrence_end' ) {
 			$event_timezone = $event->recurrence_end_tz;
 			$event_time     = $event->recurrence_end;
+		} elseif ( $event_time_type === 'recurrence_start' && ! empty( $event->parent_event_start ) ) {
+			$event_timezone = $event->start_tz;
+			$event_time     = $event->parent_event_start;
 		} else {
 			$event_timezone = $event->start_tz;
 			$event_time     = $event->start;
@@ -646,100 +649,113 @@ class Helpers {
 	 * @since 3.4.0 Added support for the 'search' parameter.
 	 * @since 3.4.0 Use `$wpdb->prefix` instead of hardcoding 'wp_'.
 	 * @since 3.5.0 Added support for the 'venues' parameter.
+	 * @since 3.6.0 Changed the method signature to accept an array of arguments.
 	 *
-	 * @param int    $number   The number of events to get.
-	 * @param string $category The categories separated by comma.
-	 * @param string $venues   The venue ids separated by comma.
-	 * @param string $search   The search keyword for the event title.
+	 * @param array $args       The arguments to get the events.
+	 * @param array $attributes The block attributes.
 	 *
 	 * @return Event[]
 	 */
-	public static function get_upcoming_events_list_with_recurring( // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
-		$number = 5,
-		$category = '',
-		$venues = '',
-		$search = ''
-	) {
+	public static function get_upcoming_events_list_with_recurring( $args, $attributes ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+
+		$default_args = [
+			'number'       => 5,
+			'calendar_ids' => [],
+			'search'       => '',
+			'offset'       => 0,
+		];
+
+		$args = wp_parse_args(
+			$args,
+			$default_args
+		);
+
+		$args['number'] = absint( $args['number'] );
+
+		if ( empty( $args['number'] ) ) {
+			$args['number'] = $default_args['number'];
+		}
+
+		// Include an additional `1` result to check if there are more events.
+		++$args['number'];
+
+		$args['offset'] = absint( $args['offset'] );
+
+		if ( empty( $args['offset'] ) ) {
+			$args['offset'] = $default_args['offset'];
+		}
+
+		/**
+		 * Filters the upcoming events list with recurring events.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Event[]|false $upcoming_events The upcoming events list with recurring events.
+		 * @param array         $args            The arguments to get the events.
+		 * @param array         $attributes      The block attributes.
+		 */
+		$upcoming_events = apply_filters(
+			'sugar_calendar_helpers_get_upcoming_events_list_with_recurring',
+			false,
+			$args,
+			$attributes
+		);
+
+		if ( $upcoming_events !== false ) {
+			return $upcoming_events;
+		}
 
 		global $wpdb;
 
-		$left_join              = '';
-		$where_categories_query = '';
-		$where_search_query     = '';
+		$calendars_left_join = '';
+		$where_calendars     = '';
 
 		// Get the category left join and where queries if necessary.
-		if ( ! empty( $category ) ) {
-			$category_arr    = explode( ',', $category );
-			$categories_data = [];
+		if ( ! empty( $args['calendar_ids'] ) ) {
+			$term_taxonomy_ids = array_filter( array_map( 'absint', $args['calendar_ids'] ) );
 
-			foreach ( $category_arr as $cat ) {
-				$categories_data[] = get_term_by( 'slug', $cat, sugar_calendar_get_calendar_taxonomy_id() );
-			}
-
-			$term_taxonomy_ids = array_map( 'absint', wp_list_pluck( $categories_data, 'term_taxonomy_id' ) );
-
-			if ( ! empty( $categories_data ) ) {
-				$left_join              = 'LEFT JOIN ' . $wpdb->term_relationships . ' ON (sc_e.object_id = ' . $wpdb->term_relationships . '.object_id)';
-				$where_categories_query = $wpdb->prepare(
+			if ( ! empty( $term_taxonomy_ids ) ) {
+				$calendars_left_join = 'LEFT JOIN ' . $wpdb->term_relationships . ' ON ' . $wpdb->prefix . 'sc_events.object_id = ' . $wpdb->term_relationships . '.object_id';
+				$where_calendars     = $wpdb->prepare(
 					'AND ( ' . $wpdb->term_relationships . '.term_taxonomy_id IN (%1$s) )',
 					implode( ',', $term_taxonomy_ids )
 				);
 			}
 		}
 
-		// Get the search query if necessary.
-		if ( ! empty( $search ) ) {
-			$left_join .= ' LEFT JOIN ' . $wpdb->posts . ' wp ON (sc_e.object_id = wp.ID)';
+		$select_query = 'SELECT ' . $wpdb->prefix . 'sc_events.id FROM ' . $wpdb->prefix . 'sc_events';
 
-			$where_search_query = $wpdb->prepare(
-				'AND wp.post_title LIKE %s',
-				'%' . $wpdb->esc_like( $search ) . '%'
-			);
-		}
-
-		$now          = sugar_calendar_get_request_time( 'mysql' );
-		$select_query = 'SELECT sc_e.id FROM ' . $wpdb->prefix . 'sc_events sc_e';
-
-		if ( ! empty( $left_join ) ) {
-			$select_query .= ' ' . $left_join;
+		if ( ! empty( $calendars_left_join ) ) {
+			$select_query .= ' ' . $calendars_left_join;
 		}
 
 		$where_query = $wpdb->prepare(
-			"WHERE sc_e.object_type = 'post' AND sc_e.status = 'publish' AND (
-				(
-					sc_e.recurrence IN ('daily','weekly','monthly','yearly')
-					AND
-					(
-						sc_e.recurrence_end <= '0000-01-01 00:00:00' OR
-						sc_e.recurrence_end >= %s
-					)
-				)
-				OR
-				(
-					sc_e.recurrence = '' AND
-					sc_e.end >= %s
-				)
-			)",
-			$now,
-			$now
+			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND ' . $wpdb->prefix . 'sc_events.`start` >= %s',
+			sugar_calendar_get_request_time( 'mysql' )
 		);
 
-		if ( ! empty( $where_categories_query ) ) {
-			$where_query .= ' ' . $where_categories_query;
+		if ( ! empty( $where_calendars ) ) {
+			$where_query .= ' ' . $where_calendars;
 		}
 
-		if ( ! empty( $where_search_query ) ) {
-			$where_query .= ' ' . $where_search_query;
+		if ( ! empty( $args['search'] ) ) {
+			$where_query .= $wpdb->prepare(
+				' AND ' . $wpdb->prefix . 'sc_events.title LIKE %s',
+				'%' . $wpdb->esc_like( $args['search'] ) . '%'
+			);
 		}
 
 		$order_by = $wpdb->prepare(
-			'ORDER BY sc_e.start ASC LIMIT %d',
-			$number
+			'ORDER BY ' . $wpdb->prefix . 'sc_events.start ASC LIMIT %d OFFSET %d',
+			$args['number'],
+			$args['offset']
 		);
+
+		$final_query = $select_query . ' ' . $where_query . ' ' . $order_by;
 
 		// The query below is prepared/sanitized individually.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$event_ids = $wpdb->get_results( $select_query . ' ' . $where_query . ' ' . $order_by );
+		$event_ids = $wpdb->get_results( $final_query );
 
 		if ( empty( $event_ids ) ) {
 			return [];
@@ -750,10 +766,6 @@ class Helpers {
 			'orderby' => 'start',
 			'order'   => 'ASC',
 		];
-
-		if ( ! empty( $venues ) ) {
-			$sugar_calendar_events_args['venue_id'] = explode( ',', $venues );
-		}
 
 		return sugar_calendar_get_events( $sugar_calendar_events_args );
 	}
@@ -1124,5 +1136,58 @@ class Helpers {
 		);
 
 		wp_enqueue_script( 'sugar-calendar-admin-compatibility-acf' );
+	}
+
+	/**
+	 * Get the version used in our assets.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return int|string
+	 */
+	public static function get_asset_version() {
+
+		if ( defined( 'SC_SCRIPT_DEBUG' ) && SC_SCRIPT_DEBUG ) {
+			return time();
+		}
+
+		return SC_PLUGIN_VERSION;
+	}
+
+	/**
+	 * Get the weekday abbreviation.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \DateTime $day Datetime object.
+	 *
+	 * return string
+	 */
+	public static function get_weekday_abbrev( $day ) {
+
+		global $wp_locale;
+
+		$weekday_abbrev = $day->format( 'D' );
+
+		if (
+			isset( $wp_locale->weekday[ $day->format( 'w' ) ] ) &&
+			isset( $wp_locale->weekday_abbrev[ $wp_locale->weekday[ $day->format( 'w' ) ] ] )
+		) {
+			$weekday_abbrev = $wp_locale->weekday_abbrev[ $wp_locale->weekday[ $day->format( 'w' ) ] ];
+		}
+
+		/**
+		 * Filters the weekday abbreviation.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string    $weekday_abbrev The weekday abbreviation.
+		 * @param \DateTime $day            Datetime object.
+		 */
+		return apply_filters(
+			'sugar_calendar_helpers_get_weekday_abbrev',
+			$weekday_abbrev,
+			$day
+		);
 	}
 }

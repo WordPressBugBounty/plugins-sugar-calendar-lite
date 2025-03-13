@@ -61,6 +61,7 @@ class Day implements InterfaceBaseView {
 	 * @since 3.0.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
 	 * @since 3.5.0 Added support for filtering by venues.
+	 * @since 3.6.0 Added filter hook `sugar_calendar_block_calendar_view_day_events`.
 	 *
 	 * @return \Sugar_Calendar\Event[]
 	 */
@@ -95,12 +96,37 @@ class Day implements InterfaceBaseView {
 			$end_range   = $this->get_block()->get_datetime()->modify( '+1 day' );
 		}
 
+		$block_categories = ! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [];
+		$search_term      = $this->block->get_search_term();
+
 		$events = sc_get_events_for_calendar_with_custom_range(
 			$start_range,
 			$end_range,
-			! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [],
-			$this->block->get_search_term(),
+			$block_categories,
+			$search_term,
 			null,
+			$this->block->get_venues()
+		);
+
+		/**
+		 * Filter the events for the calendar block - day view.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param \Sugar_Calendar\Event[] $events           The calendar events.
+		 * @param \DateTimeImmutable      $start_range      The start period range.
+		 * @param \DateTimeImmutable      $end_range        The end period range.
+		 * @param int[]                   $block_categories The calendars to filter the occurrences.
+		 * @param string                  $search_term      The search term.
+		 * @param int[]                   $venues           The venues to filter the occurrences.
+		 */
+		$events = apply_filters(
+			'sugar_calendar_block_calendar_view_day_events',
+			$events,
+			$start_range,
+			$end_range,
+			$block_categories,
+			$search_term,
 			$this->block->get_venues()
 		);
 

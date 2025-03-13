@@ -7,7 +7,7 @@ use Sugar_Calendar\Helper;
  */
 ?>
 <div
-	data-eventurl="<?php echo esc_url( get_permalink( $context->get_event()->object_id ) ); ?>"
+	data-eventurl="<?php echo esc_url( Helper::get_event_frontend_url( $context->get_event() ) ); ?>"
 	data-eventid="<?php echo esc_attr( $context->get_event()->id ); ?>"
 	data-eventobjid="<?php echo esc_attr( $context->get_event()->object_id ); ?>"
 	data-calendarsinfo="<?php echo esc_attr( wp_json_encode( $context->get_calendars_category_info() ) ); ?>"

@@ -1142,6 +1142,12 @@ $event-margin: 18px;
 				}
 			}
 		}
+
+		.sugar-calendar-block__event-cell__title {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
 	/**

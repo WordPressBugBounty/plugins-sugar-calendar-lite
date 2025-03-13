@@ -29,7 +29,7 @@ var SCTimeZones = window.SCTimeZones || ( function( document, window, $ ) {
 		 */
 		convertEventsTime() {
 			// Get elements and browser time zone
-			var dates   = $( '.sc-date-start time, .sc-date-end time, .sc-frontend-single-event__details__val-date time, .sc-event-ticketing-checkout-totals__summary-block__date time, .sc_event_date time' ),
+			var dates   = $( '.sc-date-start time, .sc-date-end time, .sc-frontend-single-event__details__val-date time, .sc-event-ticketing-checkout-totals__summary-block__date time, .sc_event_date time, .sc-frontend-single-event__details__val time' ),
 				times   = $( '.sc_event_time time, .sc_event_start_time time, .sc_event_end_time time, .sc-frontend-single-event__details__time time, .sc-event-ticketing-checkout-totals__summary-block__time time, .sugar-calendar-block__event-cell__time time, .sc-frontend-single-event__details__val-time time' ),
 				tz      = Intl.DateTimeFormat().resolvedOptions().timeZone,
 				convert = wp.date.dateI18n;

@@ -2,7 +2,6 @@
 
 namespace Sugar_Calendar\Block\Calendar\CalendarView\Week;
 
-use DateInterval;
 use DatePeriod;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -53,7 +52,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @var Event[]
+	 * @var \Sugar_Calendar\Event[]
 	 */
 	private $all_day_events = null;
 
@@ -62,7 +61,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @var Event[]
+	 * @var \Sugar_Calendar\Event[]
 	 */
 	private $multi_day_events = null;
 
@@ -71,7 +70,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @var Event[]
+	 * @var \Sugar_Calendar\Event[]
 	 */
 	private $multi_day_events_by_id = null;
 
@@ -80,7 +79,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @var Event[]
+	 * @var \Sugar_Calendar\Event[]
 	 */
 	private $formatted_events = null;
 
@@ -132,7 +131,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @return Event[]
+	 * @return \Sugar_Calendar\Event[]
 	 *
 	 * @throws Exception When the date for the calendar was not created.
 	 */
@@ -155,7 +154,7 @@ class Week implements InterfaceBaseView {
 	 * @param DateTimeImmutable $day  Day to get the events for.
 	 * @param string            $type Type of events to get.
 	 *
-	 * @return Event[]
+	 * @return \Sugar_Calendar\Event[]
 	 */
 	public function get_day_events_by_type( $day, $type ) {
 
@@ -206,9 +205,6 @@ class Week implements InterfaceBaseView {
 		$all_day_events   = [];
 		$multi_day_events = [];
 
-		/**
-		 * @var Event $event
-		 */
 		foreach ( $this->get_events() as $date => $events ) {
 
 			$normal_events = [];
@@ -435,7 +431,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @param DateTimeInterface $day Day of the events we want to get.
 	 *
-	 * @return array|Event
+	 * @return array|\Sugar_Calendar\Event
 	 */
 	public function get_events_by_day( $day ) {
 

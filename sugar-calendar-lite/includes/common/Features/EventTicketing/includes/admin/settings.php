@@ -403,6 +403,7 @@ function display_stripe_connect_field( $is_sandbox ) {
  * Render the emails section
  *
  * @since 1.0.0
+ * @since 3.6.0 Added `attendee_fields_is_required`.
  */
 function emails_section() {
 
@@ -437,6 +438,17 @@ function emails_section() {
 			'value'       => $ticket_page,
 			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' ),
 			'description' => $ticket_page_description,
+		]
+	);
+
+	// Attendee required fields.
+	UI::toggle_control(
+		[
+			'id'          => 'attendee_fields_is_required',
+			'name'        => 'attendee_fields_is_required',
+			'value'       => Settings\get_setting( 'attendee_fields_is_required', false ),
+			'label'       => esc_html__( 'Attendee Information is Required', 'sugar-calendar-lite' ),
+			'description' => __( "Visitors purchasing your event tickets will be required to provide Attendee's information on checkout for every ticket they purchase.", 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -756,6 +768,7 @@ function add_page_states( $states = [], $post = false ) {
  * Get setting names.
  *
  * @since 3.3.0
+ * @since 3.6.0 Added `attendee_fields_is_required`.
  *
  * @return array
  */
@@ -774,6 +787,7 @@ function get_setting_names() {
 		'receipt_message',
 		'ticket_subject',
 		'ticket_message',
+		'attendee_fields_is_required',
 	];
 }
 
@@ -783,6 +797,7 @@ function get_setting_names() {
  * @since 2.2.4
  * @since 3.1.0 Loop through the data instead of the settings.
  * @since 3.3.0 Decouple setting field names.
+ * @since 3.6.0 Handling for attendee field checkbox.
  *
  * @param array $post_data Array containing the data to be saved.
  */
@@ -813,6 +828,9 @@ function handle_post( $post_data ) {
 	if ( ! empty( $post_data['currency'] ) ) {
 		$options['sandbox'] = isset( $post_data['sandbox'] );
 	}
+
+	// Checkbox field - Attendee Fields is Required.
+	$options['attendee_fields_is_required'] = isset( $post_data['attendee_fields_is_required'] );
 
 	update_option( 'sc_et_settings', $options );
 

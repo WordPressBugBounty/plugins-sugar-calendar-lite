@@ -499,6 +499,7 @@ if ( ! class_exists( __NAMESPACE__ . '\\UI' ) ) :
 		 * Add `meta_key` to term when updating
 		 *
 		 * @since 2.0.0
+		 * @since 3.6.0 Added check for action = editedtag.
 		 *
 		 * @param int    $term_id
 		 * @param int    $tt_id
@@ -506,15 +507,24 @@ if ( ! class_exists( __NAMESPACE__ . '\\UI' ) ) :
 		 */
 		public function save_meta( $term_id = 0, $tt_id = 0, $taxonomy = '' ) {
 
-			// Bail if not a target taxonomy
+			// Bail if not a target taxonomy.
 			if ( ! $this->is_taxonomy( $taxonomy ) ) {
 				return;
 			}
 
-			// Get the term being posted
+			// Bail if action is not set or not editedtag.
+			if (
+				! isset( $_POST['action'] )
+				||
+				! in_array( $_POST['action'], [ 'editedtag', 'add-tag' ], true )
+			) {
+				return;
+			}
+
+			// Get the term being posted.
 			$term_key = 'term-' . $this->meta_key;
 
-			// Bail if not updating meta_key
+			// Bail if not updating meta_key.
 			$meta = ! empty( $_POST[ $term_key ] )
 				? $_POST[ $term_key ]
 				: '';

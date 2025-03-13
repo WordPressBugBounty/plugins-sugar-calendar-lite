@@ -558,11 +558,16 @@ final class Requirements_Check {
 	 * Plugin specific text-domain loader.
 	 *
 	 * @since 2.0.0
+	 * @since {version} Load the translated strings.
 	 *
 	 * @return void
 	 */
 	public function load_textdomain() {
 
-		load_plugin_textdomain( 'sugar-calendar-lite' );
+		load_plugin_textdomain(
+			'sugar-calendar-lite',
+			false,
+			dirname( SC_PLUGIN_BASE ) . '/assets/languages'
+		);
 	}
 }

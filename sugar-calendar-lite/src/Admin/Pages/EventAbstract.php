@@ -153,7 +153,7 @@ abstract class EventAbstract extends PageAbstract {
 		wp_enqueue_script(
 			'sugar-calendar-admin-event',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-event' . WP::asset_min() . '.js',
-			[],
+			[ 'jquery' ],
 			SC_PLUGIN_VERSION,
 			true
 		);

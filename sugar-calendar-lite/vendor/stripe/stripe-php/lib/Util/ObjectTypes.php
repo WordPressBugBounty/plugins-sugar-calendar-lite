@@ -13,7 +13,7 @@ class ObjectTypes
             \Stripe\Issuing\CardDetails::OBJECT_NAME => \Stripe\Issuing\CardDetails::class,
             \Stripe\SearchResult::OBJECT_NAME => \Stripe\SearchResult::class,
             \Stripe\File::OBJECT_NAME_ALT => \Stripe\File::class,
-            // The beginning of the section generated from our OpenAPI spec
+            // object classes: The beginning of the section generated from our OpenAPI spec
             \Stripe\Account::OBJECT_NAME => \Stripe\Account::class,
             \Stripe\AccountLink::OBJECT_NAME => \Stripe\AccountLink::class,
             \Stripe\AccountSession::OBJECT_NAME => \Stripe\AccountSession::class,
@@ -25,6 +25,15 @@ class ObjectTypes
             \Stripe\Balance::OBJECT_NAME => \Stripe\Balance::class,
             \Stripe\BalanceTransaction::OBJECT_NAME => \Stripe\BalanceTransaction::class,
             \Stripe\BankAccount::OBJECT_NAME => \Stripe\BankAccount::class,
+            \Stripe\Billing\Alert::OBJECT_NAME => \Stripe\Billing\Alert::class,
+            \Stripe\Billing\AlertTriggered::OBJECT_NAME => \Stripe\Billing\AlertTriggered::class,
+            \Stripe\Billing\CreditBalanceSummary::OBJECT_NAME => \Stripe\Billing\CreditBalanceSummary::class,
+            \Stripe\Billing\CreditBalanceTransaction::OBJECT_NAME => \Stripe\Billing\CreditBalanceTransaction::class,
+            \Stripe\Billing\CreditGrant::OBJECT_NAME => \Stripe\Billing\CreditGrant::class,
+            \Stripe\Billing\Meter::OBJECT_NAME => \Stripe\Billing\Meter::class,
+            \Stripe\Billing\MeterEvent::OBJECT_NAME => \Stripe\Billing\MeterEvent::class,
+            \Stripe\Billing\MeterEventAdjustment::OBJECT_NAME => \Stripe\Billing\MeterEventAdjustment::class,
+            \Stripe\Billing\MeterEventSummary::OBJECT_NAME => \Stripe\Billing\MeterEventSummary::class,
             \Stripe\BillingPortal\Configuration::OBJECT_NAME => \Stripe\BillingPortal\Configuration::class,
             \Stripe\BillingPortal\Session::OBJECT_NAME => \Stripe\BillingPortal\Session::class,
             \Stripe\Capability::OBJECT_NAME => \Stripe\Capability::class,
@@ -47,6 +56,9 @@ class ObjectTypes
             \Stripe\CustomerSession::OBJECT_NAME => \Stripe\CustomerSession::class,
             \Stripe\Discount::OBJECT_NAME => \Stripe\Discount::class,
             \Stripe\Dispute::OBJECT_NAME => \Stripe\Dispute::class,
+            \Stripe\Entitlements\ActiveEntitlement::OBJECT_NAME => \Stripe\Entitlements\ActiveEntitlement::class,
+            \Stripe\Entitlements\ActiveEntitlementSummary::OBJECT_NAME => \Stripe\Entitlements\ActiveEntitlementSummary::class,
+            \Stripe\Entitlements\Feature::OBJECT_NAME => \Stripe\Entitlements\Feature::class,
             \Stripe\EphemeralKey::OBJECT_NAME => \Stripe\EphemeralKey::class,
             \Stripe\Event::OBJECT_NAME => \Stripe\Event::class,
             \Stripe\ExchangeRate::OBJECT_NAME => \Stripe\ExchangeRate::class,
@@ -64,6 +76,7 @@ class ObjectTypes
             \Stripe\Invoice::OBJECT_NAME => \Stripe\Invoice::class,
             \Stripe\InvoiceItem::OBJECT_NAME => \Stripe\InvoiceItem::class,
             \Stripe\InvoiceLineItem::OBJECT_NAME => \Stripe\InvoiceLineItem::class,
+            \Stripe\InvoiceRenderingTemplate::OBJECT_NAME => \Stripe\InvoiceRenderingTemplate::class,
             \Stripe\Issuing\Authorization::OBJECT_NAME => \Stripe\Issuing\Authorization::class,
             \Stripe\Issuing\Card::OBJECT_NAME => \Stripe\Issuing\Card::class,
             \Stripe\Issuing\Cardholder::OBJECT_NAME => \Stripe\Issuing\Cardholder::class,
@@ -83,9 +96,9 @@ class ObjectTypes
             \Stripe\Payout::OBJECT_NAME => \Stripe\Payout::class,
             \Stripe\Person::OBJECT_NAME => \Stripe\Person::class,
             \Stripe\Plan::OBJECT_NAME => \Stripe\Plan::class,
-            \Stripe\PlatformTaxFee::OBJECT_NAME => \Stripe\PlatformTaxFee::class,
             \Stripe\Price::OBJECT_NAME => \Stripe\Price::class,
             \Stripe\Product::OBJECT_NAME => \Stripe\Product::class,
+            \Stripe\ProductFeature::OBJECT_NAME => \Stripe\ProductFeature::class,
             \Stripe\PromotionCode::OBJECT_NAME => \Stripe\PromotionCode::class,
             \Stripe\Quote::OBJECT_NAME => \Stripe\Quote::class,
             \Stripe\Radar\EarlyFraudWarning::OBJECT_NAME => \Stripe\Radar\EarlyFraudWarning::class,
@@ -139,6 +152,19 @@ class ObjectTypes
             \Stripe\UsageRecord::OBJECT_NAME => \Stripe\UsageRecord::class,
             \Stripe\UsageRecordSummary::OBJECT_NAME => \Stripe\UsageRecordSummary::class,
             \Stripe\WebhookEndpoint::OBJECT_NAME => \Stripe\WebhookEndpoint::class,
-            // The end of the section generated from our OpenAPI spec
+            // object classes: The end of the section generated from our OpenAPI spec
         ];
+
+    /**
+     * @var array Mapping from v2 object types to resource classes
+     */
+    const v2Mapping = [
+        // v2 object classes: The beginning of the section generated from our OpenAPI spec
+        \Stripe\V2\Billing\MeterEvent::OBJECT_NAME => \Stripe\V2\Billing\MeterEvent::class,
+        \Stripe\V2\Billing\MeterEventAdjustment::OBJECT_NAME => \Stripe\V2\Billing\MeterEventAdjustment::class,
+        \Stripe\V2\Billing\MeterEventSession::OBJECT_NAME => \Stripe\V2\Billing\MeterEventSession::class,
+        \Stripe\V2\Event::OBJECT_NAME => \Stripe\V2\Event::class,
+        \Stripe\V2\EventDestination::OBJECT_NAME => \Stripe\V2\EventDestination::class,
+        // v2 object classes: The end of the section generated from our OpenAPI spec
+    ];
 }

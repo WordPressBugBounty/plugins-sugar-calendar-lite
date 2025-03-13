@@ -49,7 +49,21 @@ class Exporter {
 			$this->export_without_events();
 		}
 
-		return $this->export_data;
+		/**
+		 * Filter for extra export support.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $export_data    Export data.
+		 * @param array $keys_to_export Keys to export.
+		 *
+		 * @return array
+		 */
+		return apply_filters(
+			'sugar_calendar_admin_tools_exporter_export_data',
+			$this->export_data,
+			$this->keys_to_import
+		);
 	}
 
 	/**
@@ -131,25 +145,39 @@ class Exporter {
 
 		global $wpdb;
 
-		$select_columns = [
-			"{$wpdb->prefix}sc_events.`id`",
-			"{$wpdb->prefix}sc_events.`object_id` AS `post_id`",
-			"{$wpdb->prefix}sc_events.`title`",
-			"{$wpdb->prefix}sc_events.`content`",
-			"{$wpdb->prefix}sc_events.`status`",
-			"{$wpdb->prefix}sc_events.`start` AS `start_date`",
-			"{$wpdb->prefix}sc_events.`start_tz`",
-			"{$wpdb->prefix}sc_events.`end` AS `end_date`",
-			"{$wpdb->prefix}sc_events.`end_tz`",
-			"{$wpdb->prefix}sc_events.`all_day`",
-			"{$wpdb->prefix}sc_events.`recurrence`",
-			"{$wpdb->prefix}sc_events.`recurrence_interval`",
-			"{$wpdb->prefix}sc_events.`recurrence_count`",
-			"{$wpdb->prefix}sc_events.`recurrence_end`",
-			"{$wpdb->prefix}sc_events.`recurrence_end_tz`",
-			"{$wpdb->prefix}sc_events.`date_created`", // @todo - Should we export this?
-			"{$wpdb->prefix}sc_events.`date_modified`", // @todo - Should we export this?
-		];
+		/**
+		 * Filter support for extra columns.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $select_columns Array of columns to select.
+		 * @param array $keys_to_import Keys to import.
+		 *
+		 * @return array
+		 */
+		$select_columns = apply_filters(
+			'sugar_calendar_admin_tools_exporter_events_select_columns',
+			[
+				"{$wpdb->prefix}sc_events.`id`",
+				"{$wpdb->prefix}sc_events.`object_id` AS `post_id`",
+				"{$wpdb->prefix}sc_events.`title`",
+				"{$wpdb->prefix}sc_events.`content`",
+				"{$wpdb->prefix}sc_events.`status`",
+				"{$wpdb->prefix}sc_events.`start` AS `start_date`",
+				"{$wpdb->prefix}sc_events.`start_tz`",
+				"{$wpdb->prefix}sc_events.`end` AS `end_date`",
+				"{$wpdb->prefix}sc_events.`end_tz`",
+				"{$wpdb->prefix}sc_events.`all_day`",
+				"{$wpdb->prefix}sc_events.`recurrence`",
+				"{$wpdb->prefix}sc_events.`recurrence_interval`",
+				"{$wpdb->prefix}sc_events.`recurrence_count`",
+				"{$wpdb->prefix}sc_events.`recurrence_end`",
+				"{$wpdb->prefix}sc_events.`recurrence_end_tz`",
+				"{$wpdb->prefix}sc_events.`date_created`",
+				"{$wpdb->prefix}sc_events.`date_modified`",
+			],
+			$this->keys_to_import
+		);
 
 		$left_join_query        = '';
 		$should_export_calendar = false;
@@ -445,8 +473,8 @@ class Exporter {
 			"{$wpdb->prefix}sc_attendees.`email`",
 			"{$wpdb->prefix}sc_attendees.`first_name`",
 			"{$wpdb->prefix}sc_attendees.`last_name`",
-			"{$wpdb->prefix}sc_attendees.`date_created`", // @todo - Should we export this?
-			"{$wpdb->prefix}sc_attendees.`date_modified`",  // @todo - Should we export this?
+			"{$wpdb->prefix}sc_attendees.`date_created`",
+			"{$wpdb->prefix}sc_attendees.`date_modified`",
 		];
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching

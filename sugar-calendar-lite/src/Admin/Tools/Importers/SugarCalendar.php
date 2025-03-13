@@ -22,11 +22,30 @@ class SugarCalendar extends Importer {
 	private $importer_data = null;
 
 	/**
+	 * Imported event ids to record old and new event ids.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @var array
+	 */
+	public $imported_event_ids = [];
+
+	/**
 	 * Display the default import display.
 	 *
 	 * @since 3.3.0
+	 * @since 3.6.0 Adjust separator when other importers are present.
 	 */
 	public function display() {
+
+		/**
+		 * Fires before the importer tab is displayed.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Importers\ImporterInterface $importer The importer.
+		 */
+		do_action( 'sugar_calendar_admin_pages_tools_default_importer_before' );
 
 		if ( ! is_null( $this->importer_data ) ) {
 			$this->display_finished_import_summary();
@@ -61,13 +80,26 @@ class SugarCalendar extends Importer {
 			<input type="hidden" name="action" value="import_form">
 			<input type="hidden" name="import_src" value="sugar-calendar" />
 			<?php wp_nonce_field( Importers::IMPORT_NONCE_ACTION, '_nonce' ); ?>
-			<div class="sc-admin-tools-divider"></div>
-			<button id="sc-admin-tools-sc-import-btn" name="submit-import"
+
+				<?php if ( ! has_action( 'sugar_calendar_admin_pages_tools_default_importer_after' ) ) : ?>
+					<div class="sc-admin-tools-divider"></div>
+				<?php endif; ?>
+
+				<button id="sc-admin-tools-sc-import-btn" name="submit-import"
 					class="sc-admin-tools-disabled sc-admin-tools-sc-import-btn-disabled sugar-calendar-btn sugar-calendar-btn-primary sugar-calendar-btn-md">
 				<span class="sc-admin-tools-sc-import-btn__text"><?php esc_html_e( 'Import', 'sugar-calendar-lite' ); ?></span>
 			</button>
 		</form>
 		<?php
+
+		/**
+		 * Fires after the importer tab is displayed.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Importers\ImporterInterface $importer The importer.
+		 */
+		do_action( 'sugar_calendar_admin_pages_tools_default_importer_after' );
 	}
 
 	/**
@@ -87,7 +119,7 @@ class SugarCalendar extends Importer {
 			</p>
 			<div class="sc-admin-tools-import-summary__wrap">
 				<?php
-				foreach ( [ 'events', 'calendars', 'tickets', 'orders', 'attendees' ] as $context ) {
+				foreach ( [ 'events', 'venues', 'calendars', 'tickets', 'orders', 'attendees' ] as $context ) {
 					if ( ! array_key_exists( $context, $this->importer_data ) ) {
 						continue;
 					}
@@ -240,6 +272,24 @@ class SugarCalendar extends Importer {
 
 		$imported_data = [];
 
+		/**
+		 * Pre process import action.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array         $imported_data The imported data.
+		 * @param array         $data          The data to import.
+		 * @param SugarCalendar $this          The importer object.
+		 *
+		 * @return array Returns the number of imported items per context.
+		 */
+		$imported_data = apply_filters(
+			'sugar_calendar_admin_tools_importers_sugar_calendar_imported_data_before_import',
+			$imported_data,
+			$data,
+			$this
+		);
+
 		/*
 		 * Importing should be done in specific order.
 		 * 1. Calendars.
@@ -298,6 +348,38 @@ class SugarCalendar extends Importer {
 			$imported_data['tickets'] = $this->imported_tickets_count;
 		}
 
+		/**
+		 * Post process import action.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array         $imported_data The imported data.
+		 * @param array         $data          The data to import.
+		 * @param SugarCalendar $this          The importer object.
+		 *
+		 * @return array Returns the number of imported items per context.
+		 */
+		$imported_data = apply_filters(
+			'sugar_calendar_admin_tools_importers_sugar_calendar_imported_data_after_import',
+			$imported_data,
+			$data,
+			$this
+		);
+
+		/**
+		 * Fires after the import is done.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $imported_data The imported data.
+		 * @param array $data          The data to import.
+		 */
+		do_action(
+			'sugar_calendar_admin_tools_importers_sugar_calendar_after_import',
+			$imported_data,
+			$data
+		);
+
 		return $imported_data;
 	}
 
@@ -349,9 +431,10 @@ class SugarCalendar extends Importer {
 	}
 
 	/**
-	 * Import events.
+	 * Import events and record old and new event ids.
 	 *
 	 * @since 3.3.0
+	 * @since 3.6.0 Add temporary record of imported event ids.
 	 *
 	 * @param array $events_data Array containing the events data to import.
 	 *
@@ -363,7 +446,18 @@ class SugarCalendar extends Importer {
 
 		foreach ( $events_data as $event ) {
 
-			if ( $this->create_sc_event( $event ) ) {
+			$imported_sc_event = $this->create_sc_event( $event );
+
+			// If the event is imported, add it to the imported events array.
+			if (
+				isset( $imported_sc_event['sc_event_id'] )
+				&&
+				isset( $imported_sc_event['sc_event_post_id'] )
+			) {
+
+				// Record the old and new event ids.
+				$this->imported_event_ids[ $event['id'] ] = $imported_sc_event;
+
 				++$imported_events_count;
 			}
 		}

@@ -18,6 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 1.0.0
  * @since 3.3.0 Added support to 'upcoming_with_recurring' display.
+ * @since 3.6.0 Support improved recurring events.
  *
  * @param string $display
  * @param null $category
@@ -92,7 +93,13 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 			)
 		);
 	} elseif ( $display === 'upcoming_with_recurring' ) {
-		$events = Helpers::get_upcoming_events_list_with_recurring( $number, $category );
+
+		$get_upcoming_events_args = [
+			'number'       => $number,
+			'calendar_ids' => $category,
+		];
+
+		$events = Helpers::get_upcoming_events_list_with_recurring( $get_upcoming_events_args, [] );
 		$args   = [];
 	// All events
 	} else {
@@ -146,7 +153,21 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 
 		do_action( 'sc_before_event_list_item', $event_id );
 
-		echo '<a href="' . get_permalink( $event_id ) . '" class="sc_event_link">';
+		/**
+		 * Filter the event link in legacy event list.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string                $event_link The event link.
+		 * @param \Sugar_Calendar\Event $event      The event object.
+		 */
+		$event_link = apply_filters(
+			'sugar_calendar_legacy_event_list_link',
+			get_permalink( $event_id ),
+			$event
+		);
+
+		echo '<a href="' . esc_url( $event_link ) . '" class="sc_event_link">';
 		echo '<span class="sc_event_title">' . get_the_title( $event_id ) . '</span></a>';
 
 		if ( ! empty( $show['date'] ) ) {

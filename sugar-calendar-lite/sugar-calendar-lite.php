@@ -7,11 +7,11 @@
  * Author URI:        https://sugarcalendar.com
  * License:           GNU General Public License v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       sugar-calendar
+ * Text Domain:       sugar-calendar-lite
  * Domain Path:       /assets/languages
  * Requires PHP:      7.4
  * Requires at least: 5.9
- * Version:           3.5.1
+ * Version:           3.6.0
  */
 
 // Exit if accessed directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
 	 *
 	 * @since 3.0.0
 	 */
-	define( 'SC_PLUGIN_VERSION', '3.5.1' );
+	define( 'SC_PLUGIN_VERSION', '3.6.0' );
 }
 
 if ( ! defined( 'SC_PLUGIN_FILE' ) ) {

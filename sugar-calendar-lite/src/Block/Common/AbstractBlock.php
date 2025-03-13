@@ -630,6 +630,7 @@ abstract class AbstractBlock {
 	 * @since 3.1.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
 	 * @since 3.5.0 Added support for filtering by venues.
+	 * @since 3.6.0 Added filter hook `sugar_calendar_block_common_abstract_block_get_week_events`.
 	 *
 	 * @return Event[]
 	 */
@@ -648,13 +649,38 @@ abstract class AbstractBlock {
 			$end_period_range   = $end_period_range->modify( '+1 day' );
 		}
 
+		$block_categories = array_map( 'absint', $this->get_calendars() );
+		$search_term      = $this->get_search_term();
+
 		// Get all the events on the calendar period.
 		$calendar_events = sc_get_events_for_calendar_with_custom_range(
 			$start_period_range,
 			$end_period_range,
-			array_map( 'absint', $this->get_calendars() ),
-			$this->get_search_term(),
+			$block_categories,
+			$search_term,
 			null,
+			$this->get_venues()
+		);
+
+		/**
+		 * Filter the events for the calendar block - week view.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
+		 * @param \DateTimeImmutable      $start_period_range The start period range.
+		 * @param \DateTimeImmutable      $end_period_range   The end period range.
+		 * @param int[]                   $block_categories   The calendars to filter the occurrences.
+		 * @param string                  $search_term        The search term.
+		 * @param int[]                   $venues             The venues to filter the occurrences.
+		 */
+		$calendar_events = apply_filters(
+			'sugar_calendar_block_common_abstract_block_get_week_events',
+			$calendar_events,
+			$start_period_range,
+			$end_period_range,
+			$block_categories,
+			$search_term,
 			$this->get_venues()
 		);
 

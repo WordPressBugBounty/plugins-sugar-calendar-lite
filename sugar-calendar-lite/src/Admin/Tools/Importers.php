@@ -122,6 +122,7 @@ class Importers {
 	 * Enqueue admin importers script.
 	 *
 	 * @since 3.3.0
+	 * @since 3.6.0 Add categories to the importer.
 	 *
 	 * @param string $hook Hook suffix for the current admin page.
 	 */
@@ -147,8 +148,10 @@ class Importers {
 					'migration_in_progress'    => esc_html__( 'Migration in Progress...', 'sugar-calendar-lite' ),
 					'migration_completed'      => esc_html__( 'Migration Complete!', 'sugar-calendar-lite' ),
 					'migrated_events'          => esc_html__( 'Events migrated:', 'sugar-calendar-lite' ),
+					'migrated_venues'          => esc_html__( 'Venues migrated:', 'sugar-calendar-lite' ),
 					'migrated_tickets'         => esc_html__( 'Tickets migrated:', 'sugar-calendar-lite' ),
 					'migrated_orders'          => esc_html__( 'Orders migrated:', 'sugar-calendar-lite' ),
+					'migrated_categories'      => esc_html__( 'Categories migrated:', 'sugar-calendar-lite' ),
 					'migrated_attendees'       => esc_html__( 'Attendees migrated:', 'sugar-calendar-lite' ),
 					'migrated_failed'          => esc_html__( 'An error occurred during the migration ', 'sugar-calendar-lite' ),
 					'heads_up'                 => esc_html__( 'Heads up!', 'sugar-calendar-lite' ),
@@ -247,8 +250,9 @@ class Importers {
 	 * Get loaded importers/migrators.
 	 *
 	 * @since 3.3.0
+	 * @since 3.6.0 Add ICS importer.
 	 *
-	 * @return \Sugar_Calendar\Admin\Tools\Importers\Importer[]
+	 * @return Importer[]
 	 */
 	public function get_loaded_importers() {
 
@@ -256,10 +260,21 @@ class Importers {
 			return $this->loaded_importers;
 		}
 
-		$this->loaded_importers = [
-			'sugar-calendar'      => new Importers\SugarCalendar(),
-			'the-events-calendar' => new Importers\TheEventCalendar(),
-		];
+		/**
+		 * Filter the loaded importers.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Importer[] $importers Loaded importers.
+		 */
+		$this->loaded_importers = apply_filters(
+			'sugar_calendar_admin_tools_importers',
+			[
+				'sugar-calendar'      => new Importers\SugarCalendar(),
+				'sugar-calendar-ics'  => new Importers\SugarCalendarIcs(),
+				'the-events-calendar' => new Importers\TheEventCalendar(),
+			]
+		);
 
 		return $this->loaded_importers;
 	}

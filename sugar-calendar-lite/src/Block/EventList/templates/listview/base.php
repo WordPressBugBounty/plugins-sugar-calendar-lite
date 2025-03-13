@@ -12,6 +12,7 @@ $view_class = 'sugar-calendar-event-list-block__listview sugar-calendar-block__e
 if ( ! $context->get_block()->should_render_block_header() ) {
 	$view_class .= ' sugar-calendar-block__events-display-container__no-header';
 }
+
 ?>
 <div class="<?php echo esc_attr( $view_class ); ?>">
 	<?php
@@ -70,7 +71,7 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 					<div class="sugar-calendar-event-list-block__listview__event__day">
 						<div class="sugar-calendar-event-list-block__listview__event__day__block">
 							<div class="sugar-calendar-event-list-block__listview__event__day__block-name">
-								<?php echo esc_html( $day->format( 'D' ) ); ?>
+								<?php echo esc_html( \Sugar_Calendar\Helpers::get_weekday_abbrev( $day ) ); ?>
 							</div>
 							<div class="sugar-calendar-event-list-block__listview__event__day__block-num">
 								<?php echo esc_html( $day->format( 'd' ) ); ?>

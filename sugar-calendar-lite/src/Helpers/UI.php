@@ -817,6 +817,7 @@ class UI {
 	 * Output a button setting control.
 	 *
 	 * @since 3.0.0
+	 * @since 3.6.0 Added the data-importer attribute support.
 	 *
 	 * @param array $args Control arguments.
 	 *
@@ -836,6 +837,7 @@ class UI {
 				'link'   => '',
 				'submit' => true,
 				'target' => '_self',
+				'data'   => [],
 			]
 		);
 
@@ -850,12 +852,12 @@ class UI {
 
 		// Type.
 		$types     = [ 'primary', 'secondary', 'tertiary' ];
-		$type      = in_array( $args['type'], $types ) ? $args['type'] : 'primary';
+		$type      = in_array( $args['type'], $types, true ) ? $args['type'] : 'primary';
 		$classes[] = "sugar-calendar-btn-{$type}";
 
 		// Size.
 		$sizes     = [ 'sm', 'md', 'lg', 'xl' ];
-		$size      = in_array( $args['size'], $sizes ) ? $args['size'] : 'md';
+		$size      = in_array( $args['size'], $sizes, true ) ? $args['size'] : 'md';
 		$classes[] = "sugar-calendar-btn-{$size}";
 		$class     = self::sanitize_class( $classes );
 
@@ -869,19 +871,26 @@ class UI {
 
 		<?php if ( empty( $link ) ) : ?>
 
-            <button type="<?php echo esc_attr( $submit ); ?>"
-                    name="<?php echo esc_attr( $name ); ?>"
-                    id="<?php echo esc_attr( $id ); ?>"
-                    class="<?php echo esc_attr( $class ); ?>"
-            ><?php echo esc_html( $text ); ?></button>
+			<button
+				type="<?php echo esc_attr( $submit ); ?>"
+				name="<?php echo esc_attr( $name ); ?>"
+				id="<?php echo esc_attr( $id ); ?>"
+				class="<?php echo esc_attr( $class ); ?>"
+				<?php if ( ! empty( $args['data'] ) ) : ?>
+					<?php foreach ( $args['data'] as $key => $value ) : ?>
+						data-<?php echo esc_attr( $key ); ?>="<?php echo esc_attr( $value ); ?>"
+					<?php endforeach; ?>
+				<?php endif; ?>
+			><?php echo esc_html( $text ); ?></button>
 
 		<?php else : ?>
 
-            <a href="<?php echo esc_url( $link ); ?>"
-               id="<?php echo esc_attr( $id ); ?>"
-               target="<?php echo esc_attr( $target ); ?>"
-               class="<?php echo esc_attr( $class ); ?>"
-            ><?php echo esc_html( $text ); ?></a>
+			<a
+				href="<?php echo esc_url( $link ); ?>"
+				id="<?php echo esc_attr( $id ); ?>"
+				target="<?php echo esc_attr( $target ); ?>"
+				class="<?php echo esc_attr( $class ); ?>"
+			><?php echo esc_html( $text ); ?></a>
 
 		<?php endif; ?>
 		<?php

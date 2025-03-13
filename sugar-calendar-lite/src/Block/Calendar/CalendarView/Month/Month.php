@@ -58,12 +58,13 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 * @since 3.0.0
 	 * @since 3.1.2 Added support for visitor timezone conversion.
 	 * @since 3.5.0 Added support for filter by venues.
+	 * @since 3.6.0 Added filter hook `sugar_calendar_block_calendar_view_month_events`.
 	 *
 	 * @return array
 	 *
 	 * @throws Exception When the date for the calendar was not created.
 	 */
-	public function get_calendar_data() {
+	public function get_calendar_data() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		if ( ! empty( $this->calendar_data ) ) {
 			return $this->calendar_data;
@@ -111,13 +112,38 @@ class Month implements InterfaceBaseView, InterfaceView {
 				$end_period_range   = $end_period_range->modify( '+1 day' );
 			}
 
+			$search_term      = $this->block->get_search_term();
+			$block_categories = ! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [];
+
 			// Get all the events on the calendar period.
 			$calendar_events = sc_get_events_for_calendar_with_custom_range(
 				$start_period_range,
 				$end_period_range,
-				! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [],
-				$this->block->get_search_term(),
+				$block_categories,
+				$search_term,
 				null,
+				$this->block->get_venues()
+			);
+
+			/**
+			 * Filter the events for the month block.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
+			 * @param \DateTimeImmutable      $start_period_range The start period range.
+			 * @param \DateTimeImmutable      $end_period_range   The end period range.
+			 * @param int[]                   $block_categories   The calendars to filter the occurrences.
+			 * @param string                  $search_term        The search term.
+			 * @param int[]                   $venues             The venues to filter the occurrences.
+			 */
+			$calendar_events = apply_filters(
+				'sugar_calendar_block_calendar_view_month_events',
+				$calendar_events,
+				$start_period_range,
+				$end_period_range,
+				$block_categories,
+				$search_term,
 				$this->block->get_venues()
 			);
 		}

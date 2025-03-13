@@ -8,9 +8,9 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
-use Sugar_Calendar\Event;
+use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\Helpers;
+use WP_Error;
 
 /**
  * Stripe checkout class.
@@ -29,34 +29,97 @@ class Stripe extends Checkout {
 	 */
 	public function init() {
 
-		// AJAX hooks
-		add_action( 'wp_ajax_sc_et_stripe_create_payment_intent', [ $this, 'create_payment_intent' ] );
-		add_action( 'wp_ajax_nopriv_sc_et_stripe_create_payment_intent', [ $this, 'create_payment_intent' ] );
+		$this->hooks();
+	}
 
-		// Redirect hook
+	/**
+	 * Hooks.
+	 *
+	 * @since 3.6.0
+	 */
+	private function hooks() {
+
+		add_action( 'wp_ajax_sc_et_stripe_fetch_data', [ $this, 'ajax_fetch_data' ] );
+		add_action( 'wp_ajax_nopriv_sc_et_stripe_fetch_data', [ $this, 'ajax_fetch_data' ] );
+
+		// Redirect hook.
 		add_action( 'sc_et_checkout_pre_redirect', [ $this, 'after_complete' ], 10, 2 );
 	}
 
 	/**
-	 * Load up the Stripe SDK.
+	 * Fetch data with the Stripe Payment Intent.
 	 *
-	 * @since 1.0.0
+	 * @since 3.6.0
 	 */
-	public function load_sdk() {
+	public function ajax_fetch_data() {
 
-		// Setup the app info
-		\Stripe\Stripe::setAppInfo(
-			'Sugar Calendar - Event Tickets',
-			SC_PLUGIN_VERSION,
-			'https://sugarcalendar.com',
-			'pp_partner_HxGcEqfw4pwJeS'
+		check_ajax_referer( Checkout::NONCE_KEY, 'nonce' );
+
+		if (
+			empty( $_POST['event_id'] ) ||
+			empty( $_POST['quantity'] ) ||
+			empty( $_POST['email'] )
+		) {
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Missing data.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		$event_id = absint( $_POST['event_id'] );
+		$quantity = absint( $_POST['quantity'] );
+
+		if ( empty( $event_id ) || empty( $quantity ) ) {
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Invalid data.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		$event = sugar_calendar_get_event( $event_id );
+
+		if ( empty( $event ) ) {
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Event not found!', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		$name = '';
+
+		if ( ! empty( $_POST['first_name'] ) ) {
+			$name = sanitize_text_field( $_POST['first_name'] );
+		}
+
+		if ( ! empty( $_POST['last_name'] ) ) {
+			$name .= ' ' . sanitize_text_field( $_POST['last_name'] );
+		}
+
+		$data = $this->create_payment_intent(
+			$event,
+			$this->get_amount( $event_id, $quantity ),
+			[
+				'name'  => trim( $name ),
+				'email' => sanitize_email( $_POST['email'] ),
+			]
 		);
 
-		// Setup the API key
-		\Stripe\Stripe::setApiKey( Functions\get_stripe_secret_key() );
+		if ( is_wp_error( $data ) ) {
+			wp_send_json_error(
+				[
+					'error_msg' => sprintf(
+						/* translators: %s: Error code. */
+						__( 'Error: %s', 'sugar-calendar-lite' ),
+						$data->get_error_code()
+					),
+				]
+			);
+		}
 
-		// Setup the API version
-		\Stripe\Stripe::setApiVersion( '2020-08-27' );
+		wp_send_json_success( $data );
 	}
 
 	/**
@@ -64,82 +127,25 @@ class Stripe extends Checkout {
 	 *
 	 * @since 1.0.0
 	 * @since 3.3.0 Add nonce check and refactor.
+	 * @since 3.6.0 Refactor for Payment Element.
+	 *
+	 * @param \Sugar_Calendar\Event $event          The Event object.
+	 * @param int                   $amount         The amount to charge.
+	 * @param array                 $customer       Array containing customer email and name.
 	 */
-	public function create_payment_intent() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	public function create_payment_intent( $event, $amount, $customer ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
-		check_ajax_referer( Checkout::NONCE_KEY, 'nonce' );
-
-		$event_id = ! empty( $_POST['event_id'] ) ? absint( $_POST['event_id'] ) : 0;
-		$event    = sugar_calendar_get_event( $event_id );
-
-		if ( empty( $event ) ) {
-			wp_send_json_error(
-				[
-					'msg'     => esc_html__( 'No event found for this request.', 'sugar-calendar-lite' ),
-					'sandbox' => false,
-				]
-			);
-		}
-
-		$quantity   = ! empty( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
-		$amount     = $this->get_amount( $event_id, $quantity );
 		$is_sandbox = Functions\is_sandbox();
 
-		if ( empty( $amount ) ) {
-			// Do not proceed to Stripe processing if the amount is zero (ticket is free).
-			wp_send_json_success(
-				[
-					'is_free' => true,
-					'sandbox' => $is_sandbox,
-				]
-			);
-		}
-
 		if ( empty( Functions\get_stripe_secret_key() ) && ! $is_sandbox ) {
-			wp_send_json_error(
-				[
-					'msg'     => esc_html__( 'No Stripe API key found.', 'sugar-calendar-lite' ),
-					'sandbox' => false,
-				]
+			return new WP_Error(
+				'sc_et_create_payment_intent_no_secret_key',
+				__( 'No Stripe API key found.', 'sugar-calendar-lite' )
 			);
 		}
-
-		$email  = ! empty( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$intent = $this->send_payment_intent_create( $email, $event, $amount );
-
-		if ( ! empty( $intent ) ) {
-			wp_send_json_success( $intent );
-		}
-
-		// Always succeed if sandboxed.
-		if ( $is_sandbox ) {
-			wp_send_json_success( [ 'sandbox' => true ] );
-		} else {
-			wp_send_json_error( [ 'sandbox' => false ] );
-		}
-	}
-
-	/**
-	 * Send the Create Payment Intent request to the Stripe API.
-	 *
-	 * @since 3.3.0
-	 *
-	 * @param string $email  Customer's email address.
-	 * @param Event  $event  SC Event object.
-	 * @param double $amount The amount to charge.
-	 *
-	 * @return false|\Stripe\PaymentIntent
-	 */
-	private function send_payment_intent_create( $email, $event, $amount ) {
 
 		// Load the Stripe SDK.
 		$this->load_sdk();
-
-		$customer = $this->get_customer( $email );
-
-		if ( empty( $customer->id ) ) {
-			return false;
-		}
 
 		/**
 		 * Filter the statement descriptor for the Stripe payment.
@@ -160,23 +166,60 @@ class Stripe extends Checkout {
 		);
 
 		$args = [
-			'amount'               => $amount,
-			'currency'             => strtolower( Functions\get_currency() ),
-			'statement_descriptor' => $statement,
-			'receipt_email'        => $email,
-			'customer'             => $customer->id,
-			'description'          => $description,
-			'metadata'             => [
+			'amount'                    => $amount,
+			'automatic_payment_methods' => [
+				'enabled'         => true,
+				'allow_redirects' => 'never',
+			],
+			'currency'                  => strtolower( Functions\get_currency() ),
+			'description'               => $description,
+			'metadata'                  => [
 				'event_id' => $event->id,
 			],
+			'statement_descriptor'      => $statement,
 		];
 
 		if ( ! Helpers::is_license_valid() || ! sugar_calendar()->is_pro() || Helpers::is_application_fee_supported() ) {
 			$args['application_fee_amount'] = (int) round( $amount * 0.03, 2 );
 		}
 
+		$stripe_customer  = $this->get_customer( $customer['email'], $customer['name'] );
+		$args['customer'] = $stripe_customer->id;
+
 		// phpcs:ignore WPForms.PHP.BackSlash.UseShortSyntax
-		return \Stripe\PaymentIntent::create( $args );
+		try {
+			$payment_intent = \Stripe\PaymentIntent::create( $args );
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'sc_et_create_payment_intent_error',
+				$e->getMessage()
+			);
+		}
+
+		return [
+			'payment_intent_client_secret' => $payment_intent->client_secret,
+			'amount'                       => $payment_intent->amount,
+			'currency'                     => $payment_intent->currency,
+			'is_sandbox'                   => $is_sandbox,
+		];
+	}
+
+	/**
+	 * Load up the Stripe SDK.
+	 *
+	 * @since 1.0.0
+	 */
+	public function load_sdk() {
+
+		\Stripe\Stripe::setAppInfo(
+			'Sugar Calendar - Event Tickets',
+			SC_PLUGIN_VERSION,
+			'https://sugarcalendar.com',
+			'pp_partner_HxGcEqfw4pwJeS'
+		);
+
+		\Stripe\Stripe::setApiKey( Functions\get_stripe_secret_key() );
+		\Stripe\Stripe::setApiVersion( '2020-08-27' );
 	}
 
 	/**
@@ -257,39 +300,36 @@ class Stripe extends Checkout {
 	 * Contact the Stripe API and attempt to retrieve a customer record.
 	 *
 	 * @since 1.0.0
+	 * @since 3.6.0 Added the `$name` parameter.
 	 *
-	 * @param string $email
+	 * @param string $email The customer email.
+	 * @param string $name  The customer name.
 	 *
 	 * @return object
 	 */
-	public function get_customer( $email = '' ) {
+	public function get_customer( $email = '', $name = '' ) {
 
-		// Get customers that match this email address (up to 3)
-		$customers = \Stripe\Customer::all( [
-			'email' => $email,
-			'limit' => 3,
-		] );
+		$customers = \Stripe\Customer::all(
+			[
+				'email' => $email,
+				'limit' => 3,
+			]
+		);
 
-		// Customers found
 		if ( ! empty( $customers->data ) ) {
 
-			// Return the first one for now - we can do more with this later
 			$customer = $customers->data[0];
-
-			// Customers not found
 		} else {
 
-			// Sanitize the posted name
-			$name = sanitize_text_field( $_POST['name'] );
-
-			// Create a new customer
-			$customer = \Stripe\Customer::create( [
-				'email' => $email,
-				'name'  => $name,
-			] );
+			$name     = ! empty( $name ) ? $name : sanitize_text_field( $_POST['name'] );
+			$customer = \Stripe\Customer::create(
+				[
+					'email' => $email,
+					'name'  => $name,
+				]
+			);
 		}
 
-		// Return the customer
 		return $customer;
 	}
 

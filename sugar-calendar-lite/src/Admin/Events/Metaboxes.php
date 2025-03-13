@@ -285,8 +285,10 @@ class Metaboxes {
 		 * Filter event data before saving.
 		 *
 		 * @since 3.0.0
+		 * @since 3.6.0 Pass the event object.
 		 *
-		 * @param array $data Data to save.
+		 * @param array $data  Data to save.
+		 * @param Event $event Event object.
 		 */
 		$to_save = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_event_to_save',
@@ -297,13 +299,16 @@ class Metaboxes {
 				'title'          => $title,
 				'content'        => $content,
 				'status'         => $status,
-			]
+			],
+			$event
 		);
 
 		// Update or Add New.
-		$success = ! empty( $event->id )
-			? sugar_calendar_update_event( $event->id, $to_save )
-			: sugar_calendar_add_event( $to_save );
+		if ( ! empty( $event->id ) ) {
+			$success = sugar_calendar_update_event( $event->id, $to_save, $event );
+		} else {
+			$success = sugar_calendar_add_event( $to_save );
+		}
 
 		// Return the results of the update/add event.
 		return $success;

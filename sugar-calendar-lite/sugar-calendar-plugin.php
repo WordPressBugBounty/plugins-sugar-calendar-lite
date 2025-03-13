@@ -653,6 +653,7 @@ final class Plugin {
 	 * Perform post-upgrade tasks.
 	 *
 	 * @since 3.5.0
+	 * @since 3.6.0 Added `maybe_flush_rewrite_rules` method.
 	 */
 	public function perform_post_upgrade() {
 
@@ -668,6 +669,8 @@ final class Plugin {
 			// Nothing to do here since we are already at the latest version.
 			return;
 		}
+
+		$this->maybe_flush_rewrite_rules();
 
 		/**
 		 * Post upgrade action.
@@ -939,5 +942,23 @@ final class Plugin {
 		}
 
 		return $importers;
+	}
+
+	/**
+	 * Flush rewrite rules if needed.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return void
+	 */
+	public function maybe_flush_rewrite_rules() {
+
+		if ( version_compare( SC_PLUGIN_VERSION, '3.6.0', '<=' ) ) {
+			// Flush rewrite rules.
+			flush_rewrite_rules();
+
+			// To flush the rules in DB (without .htaccess).
+			flush_rewrite_rules( false );
+		}
 	}
 }

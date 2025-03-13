@@ -273,20 +273,44 @@ function get_order_tickets( $order_id = 0 ) {
 }
 
 /**
- * Retrieve available ticket count
+ * Retrieve available ticket count.
  *
  * @since 1.0.0
  *
  * @param array $event_id Event ID.
+ *
  * @return int
  */
 function get_available_tickets( $event_id = 0 ) {
 
-	$available = -1; // Default to infinite
+	$available = -1; // Default to infinite.
 	$quantity  = get_event_meta( $event_id, 'ticket_quantity', true );
 
+	/**
+	 * Filter the available ticket count.
+	 *
+	 * This filter allows to override the available ticket count for an event.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param int|false $available Available ticket count. If this is other value than `false`
+	 *                             then it will return that value.
+	 * @param string    $quantity  Ticket quantity.
+	 * @param int       $event_id  Event ID.
+	 */
+	$pre_available = apply_filters(
+		'sc_et_pre_get_available_tickets',
+		false,
+		$quantity,
+		$event_id
+	);
+
+	if ( $pre_available !== false ) {
+		return $pre_available;
+	}
+
 	if ( ! empty( $quantity ) ) {
-		$purchased = count_tickets( array( 'event_id' => $event_id ) );
+		$purchased = count_tickets( [ 'event_id' => $event_id ] );
 		$available = max( $quantity - $purchased, 0 );
 	}
 
@@ -1077,10 +1101,12 @@ function get_stripe_secret_key() {
 }
 
 /**
- * Send order receipt email
+ * Send order receipt email.
  *
  * @since 1.0.0
- * @param $order_id ID of the order to send receipt for
+ *
+ * @param int $order_id ID of the order to send receipt for.
+ *
  * @return bool
  */
 function send_order_receipt_email( $order_id = 0 ) {
@@ -1327,43 +1353,88 @@ function get_email_tag_event_title( $object_id = 0, $object_type = 'order' ) {
 }
 
 /**
- * Email template tag: event_url
+ * Email template tag: event_url.
  *
  * @since 1.0.0
- * @param int $object_id
- * @param string $object_type
- * @return int Event URL
+ *
+ * @param int    $object_id   Object ID.
+ * @param string $object_type Object type. Can be either 'order' or 'ticket'.
+ *
+ * @return string Event URL
  */
 function get_email_tag_event_url( $object_id = 0, $object_type = 'order' ) {
 
-	if ( 'order' === $object_type ) {
+	if ( $object_type === 'order' ) {
 		$object = get_order( $object_id );
 	} else {
 		$object = get_ticket( $object_id );
 	}
 
-	$event = sugar_calendar_get_event( $object->event_id );
+	/**
+	 * Filters the event object for the event URL tag.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event       The event object.
+	 * @param string                $object_type Can be either 'order' or 'ticket'.
+	 * @param object                $object      Can either be the Order or Ticket object.
+	 */
+	$event = apply_filters(
+		'sc_et_receipt_email_tag_event_url_event',
+		sugar_calendar_get_event( $object->event_id ),
+		$object_type,
+		$object
+	);
 
-	return esc_url( get_permalink( $event->object_id ) );
+	/**
+	 * Filters the email tag event URL.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param string                $url   The event URL.
+	 * @param \Sugar_Calendar\Event $event The event object.
+	 */
+	return apply_filters(
+		'sc_et_receipt_email_tag_event_url',
+		esc_url( get_permalink( $event->object_id ) ),
+		$event
+	);
 }
 
 /**
- * Email template tag: event_date
+ * Email template tag: event_date.
  *
  * @since 1.0.0
- * @param int $object_id
- * @param string $object_type
+ *
+ * @param int    $object_id   Object ID.
+ * @param string $object_type Object type. Can be either 'order' or 'ticket'.
+ *
  * @return string Event date
  */
 function get_email_tag_event_date( $object_id = 0, $object_type = 'order' ) {
 
-	if ( 'order' === $object_type ) {
+	if ( $object_type === 'order' ) {
 		$object = get_order( $object_id );
 	} else {
 		$object = get_ticket( $object_id );
 	}
 
-	$event  = sugar_calendar_get_event( $object->event_id );
+	/**
+	 * Filters the event object for the event date tag.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event       The event object.
+	 * @param string                $object_type Can be either 'order' or 'ticket'.
+	 * @param object                $object      Can either be the Order or Ticket object.
+	 */
+	$event = apply_filters(
+		'sc_et_receipt_email_tag_event_date_event',
+		sugar_calendar_get_event( $object->event_id ),
+		$object_type,
+		$object
+	);
+
 	$retval = $event->format_date( sc_get_date_format(), $event->start );
 
 	return $retval;

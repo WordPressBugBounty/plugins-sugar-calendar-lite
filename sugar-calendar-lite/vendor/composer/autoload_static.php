@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit7668392a096ddbef1d996e403f2405de
+class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
 {
     public static $prefixLengthsPsr4 = array (
         'S' => 
@@ -30,8 +30,20 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'I' => 
+        array (
+            'ICal' => 
+            array (
+                0 => __DIR__ . '/..' . '/johngrogg/ics-parser/src',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'ICal\\Event' => __DIR__ . '/..' . '/johngrogg/ics-parser/src/ICal/Event.php',
+        'ICal\\ICal' => __DIR__ . '/..' . '/johngrogg/ics-parser/src/ICal/ICal.php',
         'Stripe\\Account' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Account.php',
         'Stripe\\AccountLink' => __DIR__ . '/..' . '/stripe/stripe-php/lib/AccountLink.php',
         'Stripe\\AccountSession' => __DIR__ . '/..' . '/stripe/stripe-php/lib/AccountSession.php',
@@ -59,6 +71,15 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\BaseStripeClientInterface' => __DIR__ . '/..' . '/stripe/stripe-php/lib/BaseStripeClientInterface.php',
         'Stripe\\BillingPortal\\Configuration' => __DIR__ . '/..' . '/stripe/stripe-php/lib/BillingPortal/Configuration.php',
         'Stripe\\BillingPortal\\Session' => __DIR__ . '/..' . '/stripe/stripe-php/lib/BillingPortal/Session.php',
+        'Stripe\\Billing\\Alert' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/Alert.php',
+        'Stripe\\Billing\\AlertTriggered' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/AlertTriggered.php',
+        'Stripe\\Billing\\CreditBalanceSummary' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/CreditBalanceSummary.php',
+        'Stripe\\Billing\\CreditBalanceTransaction' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/CreditBalanceTransaction.php',
+        'Stripe\\Billing\\CreditGrant' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/CreditGrant.php',
+        'Stripe\\Billing\\Meter' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/Meter.php',
+        'Stripe\\Billing\\MeterEvent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/MeterEvent.php',
+        'Stripe\\Billing\\MeterEventAdjustment' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/MeterEventAdjustment.php',
+        'Stripe\\Billing\\MeterEventSummary' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Billing/MeterEventSummary.php',
         'Stripe\\Capability' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Capability.php',
         'Stripe\\Card' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Card.php',
         'Stripe\\CashBalance' => __DIR__ . '/..' . '/stripe/stripe-php/lib/CashBalance.php',
@@ -80,9 +101,16 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\CustomerSession' => __DIR__ . '/..' . '/stripe/stripe-php/lib/CustomerSession.php',
         'Stripe\\Discount' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Discount.php',
         'Stripe\\Dispute' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Dispute.php',
+        'Stripe\\Entitlements\\ActiveEntitlement' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Entitlements/ActiveEntitlement.php',
+        'Stripe\\Entitlements\\ActiveEntitlementSummary' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Entitlements/ActiveEntitlementSummary.php',
+        'Stripe\\Entitlements\\Feature' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Entitlements/Feature.php',
         'Stripe\\EphemeralKey' => __DIR__ . '/..' . '/stripe/stripe-php/lib/EphemeralKey.php',
         'Stripe\\ErrorObject' => __DIR__ . '/..' . '/stripe/stripe-php/lib/ErrorObject.php',
         'Stripe\\Event' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Event.php',
+        'Stripe\\EventData\\V1BillingMeterErrorReportTriggeredEventData' => __DIR__ . '/..' . '/stripe/stripe-php/lib/EventData/V1BillingMeterErrorReportTriggeredEventData.php',
+        'Stripe\\EventData\\V1BillingMeterNoMeterFoundEventData' => __DIR__ . '/..' . '/stripe/stripe-php/lib/EventData/V1BillingMeterNoMeterFoundEventData.php',
+        'Stripe\\Events\\V1BillingMeterErrorReportTriggeredEvent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Events/V1BillingMeterErrorReportTriggeredEvent.php',
+        'Stripe\\Events\\V1BillingMeterNoMeterFoundEvent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Events/V1BillingMeterNoMeterFoundEvent.php',
         'Stripe\\Exception\\ApiConnectionException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/ApiConnectionException.php',
         'Stripe\\Exception\\ApiErrorException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/ApiErrorException.php',
         'Stripe\\Exception\\AuthenticationException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/AuthenticationException.php',
@@ -104,6 +132,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Exception\\PermissionException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/PermissionException.php',
         'Stripe\\Exception\\RateLimitException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/RateLimitException.php',
         'Stripe\\Exception\\SignatureVerificationException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/SignatureVerificationException.php',
+        'Stripe\\Exception\\TemporarySessionExpiredException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/TemporarySessionExpiredException.php',
         'Stripe\\Exception\\UnexpectedValueException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/UnexpectedValueException.php',
         'Stripe\\Exception\\UnknownApiErrorException' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Exception/UnknownApiErrorException.php',
         'Stripe\\ExchangeRate' => __DIR__ . '/..' . '/stripe/stripe-php/lib/ExchangeRate.php',
@@ -124,6 +153,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Invoice' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Invoice.php',
         'Stripe\\InvoiceItem' => __DIR__ . '/..' . '/stripe/stripe-php/lib/InvoiceItem.php',
         'Stripe\\InvoiceLineItem' => __DIR__ . '/..' . '/stripe/stripe-php/lib/InvoiceLineItem.php',
+        'Stripe\\InvoiceRenderingTemplate' => __DIR__ . '/..' . '/stripe/stripe-php/lib/InvoiceRenderingTemplate.php',
         'Stripe\\Issuing\\Authorization' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Issuing/Authorization.php',
         'Stripe\\Issuing\\Card' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Issuing/Card.php',
         'Stripe\\Issuing\\CardDetails' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Issuing/CardDetails.php',
@@ -146,16 +176,18 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Payout' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Payout.php',
         'Stripe\\Person' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Person.php',
         'Stripe\\Plan' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Plan.php',
-        'Stripe\\PlatformTaxFee' => __DIR__ . '/..' . '/stripe/stripe-php/lib/PlatformTaxFee.php',
         'Stripe\\Price' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Price.php',
         'Stripe\\Product' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Product.php',
+        'Stripe\\ProductFeature' => __DIR__ . '/..' . '/stripe/stripe-php/lib/ProductFeature.php',
         'Stripe\\PromotionCode' => __DIR__ . '/..' . '/stripe/stripe-php/lib/PromotionCode.php',
         'Stripe\\Quote' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Quote.php',
         'Stripe\\Radar\\EarlyFraudWarning' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Radar/EarlyFraudWarning.php',
         'Stripe\\Radar\\ValueList' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Radar/ValueList.php',
         'Stripe\\Radar\\ValueListItem' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Radar/ValueListItem.php',
+        'Stripe\\Reason' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Reason.php',
         'Stripe\\RecipientTransfer' => __DIR__ . '/..' . '/stripe/stripe-php/lib/RecipientTransfer.php',
         'Stripe\\Refund' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Refund.php',
+        'Stripe\\RelatedObject' => __DIR__ . '/..' . '/stripe/stripe-php/lib/RelatedObject.php',
         'Stripe\\Reporting\\ReportRun' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Reporting/ReportRun.php',
         'Stripe\\Reporting\\ReportType' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Reporting/ReportType.php',
         'Stripe\\RequestTelemetry' => __DIR__ . '/..' . '/stripe/stripe-php/lib/RequestTelemetry.php',
@@ -176,6 +208,14 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Service\\BillingPortal\\BillingPortalServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/BillingPortal/BillingPortalServiceFactory.php',
         'Stripe\\Service\\BillingPortal\\ConfigurationService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/BillingPortal/ConfigurationService.php',
         'Stripe\\Service\\BillingPortal\\SessionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/BillingPortal/SessionService.php',
+        'Stripe\\Service\\Billing\\AlertService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/AlertService.php',
+        'Stripe\\Service\\Billing\\BillingServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/BillingServiceFactory.php',
+        'Stripe\\Service\\Billing\\CreditBalanceSummaryService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/CreditBalanceSummaryService.php',
+        'Stripe\\Service\\Billing\\CreditBalanceTransactionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/CreditBalanceTransactionService.php',
+        'Stripe\\Service\\Billing\\CreditGrantService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/CreditGrantService.php',
+        'Stripe\\Service\\Billing\\MeterEventAdjustmentService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/MeterEventAdjustmentService.php',
+        'Stripe\\Service\\Billing\\MeterEventService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/MeterEventService.php',
+        'Stripe\\Service\\Billing\\MeterService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Billing/MeterService.php',
         'Stripe\\Service\\ChargeService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/ChargeService.php',
         'Stripe\\Service\\Checkout\\CheckoutServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Checkout/CheckoutServiceFactory.php',
         'Stripe\\Service\\Checkout\\SessionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Checkout/SessionService.php',
@@ -191,6 +231,9 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Service\\CustomerService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/CustomerService.php',
         'Stripe\\Service\\CustomerSessionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/CustomerSessionService.php',
         'Stripe\\Service\\DisputeService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/DisputeService.php',
+        'Stripe\\Service\\Entitlements\\ActiveEntitlementService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Entitlements/ActiveEntitlementService.php',
+        'Stripe\\Service\\Entitlements\\EntitlementsServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Entitlements/EntitlementsServiceFactory.php',
+        'Stripe\\Service\\Entitlements\\FeatureService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Entitlements/FeatureService.php',
         'Stripe\\Service\\EphemeralKeyService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/EphemeralKeyService.php',
         'Stripe\\Service\\EventService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/EventService.php',
         'Stripe\\Service\\ExchangeRateService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/ExchangeRateService.php',
@@ -206,6 +249,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Service\\Identity\\VerificationReportService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Identity/VerificationReportService.php',
         'Stripe\\Service\\Identity\\VerificationSessionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Identity/VerificationSessionService.php',
         'Stripe\\Service\\InvoiceItemService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/InvoiceItemService.php',
+        'Stripe\\Service\\InvoiceRenderingTemplateService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/InvoiceRenderingTemplateService.php',
         'Stripe\\Service\\InvoiceService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/InvoiceService.php',
         'Stripe\\Service\\Issuing\\AuthorizationService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Issuing/AuthorizationService.php',
         'Stripe\\Service\\Issuing\\CardService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Issuing/CardService.php',
@@ -238,6 +282,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Service\\Reporting\\ReportTypeService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Reporting/ReportTypeService.php',
         'Stripe\\Service\\Reporting\\ReportingServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Reporting/ReportingServiceFactory.php',
         'Stripe\\Service\\ReviewService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/ReviewService.php',
+        'Stripe\\Service\\ServiceNavigatorTrait' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/ServiceNavigatorTrait.php',
         'Stripe\\Service\\SetupAttemptService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/SetupAttemptService.php',
         'Stripe\\Service\\SetupIntentService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/SetupIntentService.php',
         'Stripe\\Service\\ShippingRateService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/ShippingRateService.php',
@@ -292,6 +337,15 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Service\\Treasury\\TransactionEntryService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Treasury/TransactionEntryService.php',
         'Stripe\\Service\\Treasury\\TransactionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Treasury/TransactionService.php',
         'Stripe\\Service\\Treasury\\TreasuryServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/Treasury/TreasuryServiceFactory.php',
+        'Stripe\\Service\\V2\\Billing\\BillingServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Billing/BillingServiceFactory.php',
+        'Stripe\\Service\\V2\\Billing\\MeterEventAdjustmentService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Billing/MeterEventAdjustmentService.php',
+        'Stripe\\Service\\V2\\Billing\\MeterEventService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Billing/MeterEventService.php',
+        'Stripe\\Service\\V2\\Billing\\MeterEventSessionService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Billing/MeterEventSessionService.php',
+        'Stripe\\Service\\V2\\Billing\\MeterEventStreamService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Billing/MeterEventStreamService.php',
+        'Stripe\\Service\\V2\\Core\\CoreServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Core/CoreServiceFactory.php',
+        'Stripe\\Service\\V2\\Core\\EventDestinationService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Core/EventDestinationService.php',
+        'Stripe\\Service\\V2\\Core\\EventService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/Core/EventService.php',
+        'Stripe\\Service\\V2\\V2ServiceFactory' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/V2/V2ServiceFactory.php',
         'Stripe\\Service\\WebhookEndpointService' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Service/WebhookEndpointService.php',
         'Stripe\\SetupAttempt' => __DIR__ . '/..' . '/stripe/stripe-php/lib/SetupAttempt.php',
         'Stripe\\SetupIntent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/SetupIntent.php',
@@ -324,6 +378,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Terminal\\Location' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Terminal/Location.php',
         'Stripe\\Terminal\\Reader' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Terminal/Reader.php',
         'Stripe\\TestHelpers\\TestClock' => __DIR__ . '/..' . '/stripe/stripe-php/lib/TestHelpers/TestClock.php',
+        'Stripe\\ThinEvent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/ThinEvent.php',
         'Stripe\\Token' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Token.php',
         'Stripe\\Topup' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Topup.php',
         'Stripe\\Transfer' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Transfer.php',
@@ -344,12 +399,19 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Stripe\\Util\\ApiVersion' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/ApiVersion.php',
         'Stripe\\Util\\CaseInsensitiveArray' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/CaseInsensitiveArray.php',
         'Stripe\\Util\\DefaultLogger' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/DefaultLogger.php',
+        'Stripe\\Util\\EventTypes' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/EventTypes.php',
         'Stripe\\Util\\LoggerInterface' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/LoggerInterface.php',
         'Stripe\\Util\\ObjectTypes' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/ObjectTypes.php',
         'Stripe\\Util\\RandomGenerator' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/RandomGenerator.php',
         'Stripe\\Util\\RequestOptions' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/RequestOptions.php',
         'Stripe\\Util\\Set' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/Set.php',
         'Stripe\\Util\\Util' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Util/Util.php',
+        'Stripe\\V2\\Billing\\MeterEvent' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/Billing/MeterEvent.php',
+        'Stripe\\V2\\Billing\\MeterEventAdjustment' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/Billing/MeterEventAdjustment.php',
+        'Stripe\\V2\\Billing\\MeterEventSession' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/Billing/MeterEventSession.php',
+        'Stripe\\V2\\Collection' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/Collection.php',
+        'Stripe\\V2\\Event' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/Event.php',
+        'Stripe\\V2\\EventDestination' => __DIR__ . '/..' . '/stripe/stripe-php/lib/V2/EventDestination.php',
         'Stripe\\Webhook' => __DIR__ . '/..' . '/stripe/stripe-php/lib/Webhook.php',
         'Stripe\\WebhookEndpoint' => __DIR__ . '/..' . '/stripe/stripe-php/lib/WebhookEndpoint.php',
         'Stripe\\WebhookSignature' => __DIR__ . '/..' . '/stripe/stripe-php/lib/WebhookSignature.php',
@@ -408,6 +470,7 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Sugar_Calendar\\Admin\\Tools\\Importers\\Importer' => __DIR__ . '/../..' . '/src/Admin/Tools/Importers/Importer.php',
         'Sugar_Calendar\\Admin\\Tools\\Importers\\ImporterInterface' => __DIR__ . '/../..' . '/src/Admin/Tools/Importers/ImporterInterface.php',
         'Sugar_Calendar\\Admin\\Tools\\Importers\\SugarCalendar' => __DIR__ . '/../..' . '/src/Admin/Tools/Importers/SugarCalendar.php',
+        'Sugar_Calendar\\Admin\\Tools\\Importers\\SugarCalendarIcs' => __DIR__ . '/../..' . '/src/Admin/Tools/Importers/SugarCalendarIcs.php',
         'Sugar_Calendar\\Admin\\Tools\\Importers\\TheEventCalendar' => __DIR__ . '/../..' . '/src/Admin/Tools/Importers/TheEventCalendar.php',
         'Sugar_Calendar\\Block\\Calendar\\CalendarView\\Block' => __DIR__ . '/../..' . '/src/Block/Calendar/CalendarView/Block.php',
         'Sugar_Calendar\\Block\\Calendar\\CalendarView\\Day\\Day' => __DIR__ . '/../..' . '/src/Block/Calendar/CalendarView/Day/Day.php',
@@ -446,6 +509,23 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Sugar_Calendar\\Migrations\\MigrationAbstract' => __DIR__ . '/../..' . '/src/Migrations/MigrationAbstract.php',
         'Sugar_Calendar\\Migrations\\Migrations' => __DIR__ . '/../..' . '/src/Migrations/Migrations.php',
         'Sugar_Calendar\\Options' => __DIR__ . '/../..' . '/src/Options.php',
+        'Sugar_Calendar\\Pro\\Admin\\Loader' => __DIR__ . '/../..' . '/src/Pro/Admin/Loader.php',
+        'Sugar_Calendar\\Pro\\Admin\\MSClarity' => __DIR__ . '/../..' . '/src/Pro/Admin/MSClarity.php',
+        'Sugar_Calendar\\Pro\\Admin\\Tools\\Exporter' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Exporter.php',
+        'Sugar_Calendar\\Pro\\Admin\\Tools\\Importers\\SugarCalendar' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Importers/SugarCalendar.php',
+        'Sugar_Calendar\\Pro\\Admin\\Tools\\Importers\\SugarCalendarIcs' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Importers/SugarCalendarIcs.php',
+        'Sugar_Calendar\\Pro\\Admin\\Tools\\Importers\\TheEventCalendar' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Importers/TheEventCalendar.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\AdminTable' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/AdminTable.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\EventSequence' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/EventSequence.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Frontend' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Frontend.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Helpers' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Helpers.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Integrations\\EventTicketing' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Integrations/EventTicketing.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Loader' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Loader.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Occurrence' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Occurrence.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\OccurrenceAction' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/OccurrenceAction.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\PostType\\SugarCalendarRecurringEvent' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/PostType/SugarCalendarRecurringEvent.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\RecurringBuilder' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/RecurringBuilder.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\RegenerateOccurrences' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/RegenerateOccurrences.php',
         'Sugar_Calendar\\Pro\\Features\\CalendarFeeds\\Admin\\Pages\\SettingsFeedsTab' => __DIR__ . '/../..' . '/src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php',
         'Sugar_Calendar\\Pro\\Features\\CalendarFeeds\\Migration' => __DIR__ . '/../..' . '/src/Pro/Features/CalendarFeeds/Migration.php',
         'Sugar_Calendar\\Pro\\Frontend\\Loader' => __DIR__ . '/../..' . '/src/Pro/Frontend/Loader.php',
@@ -453,6 +533,10 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
         'Sugar_Calendar\\Pro\\License\\License' => __DIR__ . '/../..' . '/src/Pro/License/License.php',
         'Sugar_Calendar\\Pro\\License\\Updater' => __DIR__ . '/../..' . '/src/Pro/License/Updater.php',
         'Sugar_Calendar\\Pro\\Migrations\\LicenseKeyMigration' => __DIR__ . '/../..' . '/src/Pro/Migrations/LicenseKeyMigration.php',
+        'Sugar_Calendar\\Pro\\Migrations\\RecurringEventsMigration' => __DIR__ . '/../..' . '/src/Pro/Migrations/RecurringEventsMigration.php',
+        'Sugar_Calendar\\Pro\\REST\\Loader' => __DIR__ . '/../..' . '/src/Pro/REST/Loader.php',
+        'Sugar_Calendar\\Pro\\REST\\Occurrences_Autosaves_Controller' => __DIR__ . '/../..' . '/src/Pro/REST/Occurrences_Autosaves_Controller.php',
+        'Sugar_Calendar\\Pro\\REST\\Occurrences_Controller' => __DIR__ . '/../..' . '/src/Pro/REST/Occurrences_Controller.php',
         'Sugar_Calendar\\Pro\\Tasks\\LicenseCheckTask' => __DIR__ . '/../..' . '/src/Pro/Tasks/LicenseCheckTask.php',
         'Sugar_Calendar\\Pro\\Translations\\Translations' => __DIR__ . '/../..' . '/src/Pro/Translations/Translations.php',
         'Sugar_Calendar\\Pro\\Translations\\WPOrg' => __DIR__ . '/../..' . '/src/Pro/Translations/WPOrg.php',
@@ -466,9 +550,10 @@ class ComposerStaticInit7668392a096ddbef1d996e403f2405de
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit7668392a096ddbef1d996e403f2405de::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$classMap;
 
         }, null, ClassLoader::class);
     }

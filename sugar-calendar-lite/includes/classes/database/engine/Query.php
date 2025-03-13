@@ -878,12 +878,12 @@ class Query extends Base {
 			$this->query_vars['update_meta_cache'] = false;
 		}
 
-		// Check the cache
+		// Check the cache.
 		$cache_key   = $this->get_cache_key();
 		$cache_value = $this->cache_get( $cache_key, $this->cache_group );
 
-		// No cache value
-		if ( false === $cache_value ) {
+		// No cache value.
+		if ( $cache_value === false ) {
 			$item_ids = $this->get_item_ids();
 
 			// Set the number of found items

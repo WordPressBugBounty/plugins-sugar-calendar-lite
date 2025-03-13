@@ -47,9 +47,19 @@ class Loader {
 			return;
 		}
 
-		$event = sugar_calendar_get_event_by_object( get_the_ID() );
+		/**
+		 * Filter the Event object to be used in the enqueueing of the Event Ticketing assets.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param \Sugar_Calendar\Event $event The Event object.
+		 */
+		$event = apply_filters(
+			'sugar_calendar_add_on_ticketing_frontend_loader_event_object',
+			sugar_calendar_get_event_by_object( get_the_ID() )
+		);
 
-		if ( Helpers::get_event_remaining_tickets( $event ) === false ) {
+		if ( ! Helpers::is_event_ticketing_enabled( $event ) ) {
 			return;
 		}
 

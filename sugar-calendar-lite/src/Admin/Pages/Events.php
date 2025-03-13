@@ -8,6 +8,7 @@ use Sugar_Calendar\Admin\Events\Tables\Day;
 use Sugar_Calendar\Admin\Events\Tables\Month;
 use Sugar_Calendar\Admin\Events\Tables\Week;
 use Sugar_Calendar\Admin\PageAbstract;
+use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;

@@ -327,7 +327,19 @@ class Event implements MetaboxInterface {
 	 */
 	private function get_post_event_data( $post = 0 ) {
 
-		return sugar_calendar_get_event_by_object( $post->ID );
+		/**
+		 * Filter the event data for a post.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param \Sugar_Calendar\Event $event Event object.
+		 * @param WP_Post               $post  Post object.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_event_metabox_get_post_event_data',
+			sugar_calendar_get_event_by_object( $post->ID ),
+			$post
+		);
 	}
 
 	/**
@@ -390,6 +402,7 @@ class Event implements MetaboxInterface {
 	 * Get the contents of all sections as HTML.
 	 *
 	 * @since 2.0.0
+	 * @since 3.6.0 Added DOM ID on each section.
 	 *
 	 * @param array $sections Metabox sections.
 	 *
@@ -404,12 +417,12 @@ class Event implements MetaboxInterface {
 			$selected = $this->is_current_section( $section->id ) ? ' selected' : '';
 			?>
 
-            <div data-id="<?php echo esc_attr( $section->id ); ?>"
-                 class="sugar-calendar-metabox__section<?php echo esc_attr( $selected ); ?>">
+			<div id="sugar-calendar-metabox__section__<?php echo esc_attr( $section->id ); ?>" data-id="<?php echo esc_attr( $section->id ); ?>"
+				class="sugar-calendar-metabox__section<?php echo esc_attr( $selected ); ?>">
 
 				<?php $this->get_section_contents( $section ); ?>
 
-            </div>
+			</div>
 
 		<?php
 		endforeach;

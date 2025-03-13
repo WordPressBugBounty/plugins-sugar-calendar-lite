@@ -6,20 +6,30 @@ window.sc_checkout_valid = false;
 jQuery( document ).ready( function( $ ) {
 	'use strict';
 
-	$( '#sc-event-ticketing-modal' ).modal( 'handleUpdate' );
+	const // Elements.
+		$modal = $( '#sc-event-ticketing-modal' ),
+		$quantityField = $( '#sc-event-ticketing-quantity' ),
+		$eventIdField = $( 'input#sc_et_event_id' ),
+		$checkoutForm = $( "#sc-event-ticketing-checkout" ),
+		$attendeeListItem = $( '.sc-event-ticketing-attendee:first' ).clone();
 
-	$( '#sc-event-ticketing-modal' ).on( 'show.bs.modal', function () {
-		var modal = $( this ),
-			qty   = $( '#sc-event-ticketing-quantity' ).val(),
-			max   = $( '#sc-event-ticketing-quantity' ).attr( 'max' );
+	$modal.modal( 'handleUpdate' );
 
-		// Get initial price
+	$modal.on( 'show.bs.modal', function () {
+
+		// Ticket quantity.
+		const qty = parseInt( $quantityField.val() );
+
+		// Remove all errors.
+		$( '.sc-et-error', $checkoutForm ).remove();
+
+		// Get initial price.
 		$.ajax({
 			type: "POST",
 			url: sc_event_ticket_vars.ajaxurl,
 			data: {
 				action : 'sc_et_get_price',
-				event_id: $( 'input#sc_et_event_id' ).val(),
+				event_id: $eventIdField.val(),
 				quantity: qty
 			},
 			dataType: 'json',
@@ -30,61 +40,153 @@ jQuery( document ).ready( function( $ ) {
 
 		$( '#sc-event-ticketing-quantity-span' ).text( qty );
 
-		if ( qty > 1 && qty > $( '.sc-event-ticketing-attendee' ).length ) {
-
-			$( '.sc-event-ticketing-attendee-controls-group' ).find( '.sc-event-ticketing-remove-attendee' )
-				.removeClass( 'sc-event-ticketing-control-inactive' );
+		if ( qty > 1 ) {
 
 			$( '#sc_et_quantity' ).val( qty );
 
-			var i,
-				clone = $( '.sc-event-ticketing-attendee:first' ).clone();
+			// Attendee index count.
+			let attendeeIndex = 1;
 
-			$( '.sc-event-ticketing-attendee' ).not( ':first' ).remove();
+			// Loop through all attendees except the first one.
+			// If any of the input fields are not empty, do not remove the attendee.
+			// If we're passed the quantity limit, remove the remaining attendees.
+			$( '.sc-event-ticketing-attendee' )
+				.not( ':first' )
+				.each( function() {
 
-			for ( i = 2; i <= max; i++ ) {
+					attendeeIndex++;
 
-				clone.find( 'input, select, textarea' ).val( '' ).each(function() {
-					var name = $( this ).attr( 'name' ),
-						id   = $( this ).attr( 'id' );
+					// If we're passed the quantity limit, remove the remaining attendees.
+					if ( attendeeIndex > qty ) {
 
-					if ( name ) {
-						name = name.replace( /\[(\d+)\]/, '[' + parseInt( i ) + ']' );
-						$( this ).attr( 'name', name );
+						$( this ).remove();
+
+						return;
 					}
 
-					if ( typeof id !== 'undefined' ) {
-						id = id.replace( /(\d+)/, parseInt( i ) );
-						$( this ).attr( 'id', id );
+					// If we're here, we're not passed the quantity limit.
+					// Check if any of the input fields are not empty.
+					const shouldPreserve = $( this )
+						.find( 'input' )
+						.toArray()
+						.some( input => $( input ).val() !== '' );
+
+					// If any of the input fields are not empty, do not remove the attendee.
+					if ( shouldPreserve ) {
+
+						// Set the attendee key.
+						$( this ).attr( 'attendee-key', attendeeIndex );
+
+						// Set the attendee data-key.
+						$( this ).attr( 'data-key', attendeeIndex );
+
+						return;
 					}
+
+					$( this ).remove();
 				});
 
-				clone.data( 'key', i );
-				clone.appendTo( '#sc-event-ticketing-modal-attendee-list' );
-				clone.find( 'input, textarea, select' ).eq(0).focus();
+			// Loop starts from the number of attendees preserved in the list.
+			for (
+				let i = $( '.sc-event-ticketing-attendee' ).length;
+				i < qty;
+				i++
+			) {
 
-				if ( i < qty ) {
-					clone = clone.clone();
-				}
+				// Prepare the attendee list item clone.
+				const $attendeeListItemClone = $attendeeListItem.clone();
+
+				// Remove default inactive class.
+				$attendeeListItemClone
+					.find( '.sc-event-ticketing-remove-attendee' )
+					.removeClass( 'sc-event-ticketing-control-inactive' );
+
+				// Setup fields with clear inputs.
+				setup_attendee_input_attributes(
+					$attendeeListItemClone,
+					i + 1,
+					true
+				);
+
+				// Add the clone to the attendee list.
+				$attendeeListItemClone.appendTo( '#sc-event-ticketing-modal-attendee-list' );
 			}
+		} else {
+
+			// Remove all attendees.
+			$( '.sc-event-ticketing-attendee' ).not( ':first' ).remove();
 		}
 
-		refresh_attendee_labels();
+		refresh_attendee_informations();
+	});
+
+	// Focus on first name field after modal is fully shown.
+	$modal.on( 'shown.bs.modal', function () {
+		$( '#sc-event-ticketing-first-name' ).focus();
 	});
 
 	/**
-	 * Refresh the attendee labels.
+	 * Setup attendee input id and name attributes.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param {jQuery} $attendee Attendee row.
+	 * @param {number} index Attendee index.
+	 * @param {boolean} clearInputs Clear inputs values.
+	 */
+	function setup_attendee_input_attributes( $attendee, index, clearInputs = false ) {
+
+		const intIndex = parseInt( index );
+		const $attendeeDOM = $( $attendee );
+
+		if ( clearInputs ) {
+			$attendeeDOM.find( 'input, select, textarea' ).val( '' );
+		}
+
+		// Setup input id and name attributes.
+		$attendeeDOM.find( 'input, select, textarea' ).each(function() {
+			let name = $( this ).attr( 'name' ),
+				id   = $( this ).attr( 'id' );
+
+			if ( name ) {
+				name = name.replace( /\[(\d+)\]/, '[' + intIndex + ']' );
+				$( this ).attr( 'name', name );
+			}
+
+			if ( typeof id !== 'undefined' ) {
+				id = id.replace( /(\d+)/, intIndex );
+				$( this ).attr( 'id', id );
+			}
+		});
+
+		// Update label.
+		$attendeeDOM.find( '.sc-event-ticketing-attendee__input-group__attendee-label' ).text( `Attendee ${intIndex}` );
+
+		// Update key.
+		$attendeeDOM.attr( 'attendee-key', intIndex );
+
+		// Update data-key.
+		$attendeeDOM.attr( 'data-key', intIndex );
+	}
+
+	/**
+	 * Refresh the attendee informations.
 	 *
 	 * @since 3.1.0
+	 * @since 3.6.0 Refresh all attendees informations.
 	 */
-	function refresh_attendee_labels() {
+	function refresh_attendee_informations() {
 
 		let attendee_count = 1;
 
-		$( '.sc-event-ticketing-attendee__input-group__attendee-label' ).each( function() {
-			$( this ).text( `Attendee ${attendee_count}`);
+		// Loop each attendee.
+		$( '.sc-event-ticketing-attendee' ).each( function() {
+
+			// Refresh fields but preserve inputs values.
+			setup_attendee_input_attributes( $( this ), attendee_count );
+
 			attendee_count++;
-		} );
+		});
 	}
 
 	$( '#sc-event-ticketing-modal-attendee-list' ).on(
@@ -92,10 +194,14 @@ jQuery( document ).ready( function( $ ) {
 		'.sc-event-ticketing-add-attendee',
 		function() {
 
-			let $current_attendee_row = $( this ).parents( '.sc-event-ticketing-attendee' );
+			let // Elements.
+				$current_attendee_row = $( this ).parents( '.sc-event-ticketing-attendee' ),
+				$insertAfterElement = $current_attendee_row.next( '.sc-et-error' ).length
+					? $current_attendee_row.next( '.sc-et-error' )
+					: $current_attendee_row;
 
 			var qty = $( '.sc-event-ticketing-attendee' ).length,
-			max = $( '#sc-event-ticketing-quantity' ).attr( 'max' );
+			max = $quantityField.attr( 'max' );
 
 			if ( qty >= max ) {
 				alert( sc_event_ticket_vars.qty_limit_reached );
@@ -128,12 +234,11 @@ jQuery( document ).ready( function( $ ) {
 				}
 			});
 
-			// '.sc-event-ticketing-attendee:last'
-			clone.insertAfter( $current_attendee_row )
+			clone.insertAfter( $insertAfterElement )
 				.find( 'input, textarea, select' )
 				.filter( ':visible' ).eq(0).focus();
 
-			refresh_attendee_labels();
+			refresh_attendee_informations();
 
 			$( '#sc_et_quantity, #sc-event-ticketing-quantity' ).val( qty + 1 );
 			$( '#sc-event-ticketing-quantity-span' ).text( qty + 1 );
@@ -144,7 +249,7 @@ jQuery( document ).ready( function( $ ) {
 				url: sc_event_ticket_vars.ajaxurl,
 				data: {
 					action : 'sc_et_get_price',
-					event_id: $( 'input#sc_et_event_id' ).val(),
+					event_id: $eventIdField.val(),
 					quantity: $( 'input#sc_et_quantity' ).val()
 				},
 				dataType: 'json',
@@ -157,12 +262,17 @@ jQuery( document ).ready( function( $ ) {
 
 	$( 'body' ).on( 'click', '.sc-event-ticketing-remove-attendee', function() {
 
+		const $attendee = $( this ).closest( '.sc-event-ticketing-attendee' );
+
 		let attendee_count = $( '.sc-event-ticketing-attendee' ).length;
 
 		if ( attendee_count > 1 ) {
 
-			// Delete the nearest attendee row
-			$( this ).closest( '.sc-event-ticketing-attendee' ).remove();
+			// Delete next if it's an error.
+			$attendee.next( '.sc-et-error' ).remove();
+
+			// Delete the parent attendee row.
+			$attendee.remove();
 
 			if ( attendee_count === 2 ) {
 				$( '.sc-event-ticketing-attendee-controls-group' ).find( '.sc-event-ticketing-remove-attendee' )
@@ -175,7 +285,7 @@ jQuery( document ).ready( function( $ ) {
 			$( 'input', '.sc-event-ticketing-attendee' ).val( '' );
 		}
 
-		refresh_attendee_labels();
+		refresh_attendee_informations();
 
 		var qty = $( '.sc-event-ticketing-attendee' ).length;
 
@@ -212,10 +322,11 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$( '#sc-event-ticketing-purchase' ).on( 'click', function () {
-		$( "#sc-event-ticketing-checkout" ).first().trigger( "submit" );
+
+		$checkoutForm.first().trigger( "submit" );
 	});
 
-	$( '#sc-event-ticketing-checkout' ).on( 'submit', function (event) {
+	$checkoutForm.on( 'submit', function (event) {
 
 		event.preventDefault();
 
@@ -237,16 +348,7 @@ jQuery( document ).ready( function( $ ) {
 
 				if ( response.success ) {
 					$( 'body' ).trigger( 'sc_et_gateway_ajax', response );
-
-					// Validation succeeded, submit for backend processing
-					setTimeout( function() {
-						if ( window.sc_checkout_valid ) {
-							form.get(0).submit();
-						}
-					}, 4000 );
-
 				} else {
-
 					// Validation failed, display errors
 					$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
 
@@ -265,9 +367,17 @@ jQuery( document ).ready( function( $ ) {
 		});
 	});
 
-	$('#sc-event-ticketing-quantity').on('change', function() {
-		var link = $('#sc-event-ticketing-buy-button-woocommerce').attr( 'href' );
-		link = $('#sc-event-ticketing-buy-button-woocommerce').attr( 'href').replace(/[0-9]+(?!.*[0-9])/, $(this).val() );
-		$('#sc-event-ticketing-buy-button-woocommerce').attr( 'href', link );
+	$quantityField.on('change', function() {
+
+		const $scWooBtn = $( '#sc-event-ticketing-buy-button-woocommerce' );
+
+		let link = $scWooBtn.attr( 'href' );
+
+		// Modify WooCommerce button link if it's available.
+		if ( $scWooBtn.length ) {
+			link = $scWooBtn.attr( 'href').replace(/[0-9]+(?!.*[0-9])/, $(this).val() );
+		}
+
+		$scWooBtn.attr( 'href', link );
 	});
 });

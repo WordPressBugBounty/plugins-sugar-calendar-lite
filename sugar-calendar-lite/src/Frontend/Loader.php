@@ -71,12 +71,39 @@ class Loader {
 	 * Wrap the new event details container.
 	 *
 	 * @since 3.1.0
+	 * @since 3.6.0 Added filter for the get event args and hook for the event object.
 	 *
 	 * @param int $post_id The post ID.
 	 */
 	public function event_details( $post_id ) {
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		/**
+		 * Filters the arguments for getting the event object.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $args The arguments for getting the event object. Default `[]`.
+		 */
+		$sc_get_event_by_obj_args = apply_filters(
+			'sugar_calendar_frontend_loader_get_event_by_object_args',
+			[]
+		);
+
+		/**
+		 * Filters the event object for the frontend event details.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param \Sugar_Calendar\Event $event The event object.
+		 */
+		$event = apply_filters(
+			'sugar_calendar_frontend_loader_event_object',
+			sugar_calendar_get_event_by_object(
+				$post_id,
+				'post',
+				$sc_get_event_by_obj_args
+			)
+		);
 
 		if ( empty( $event->object_id ) ) {
 			return;

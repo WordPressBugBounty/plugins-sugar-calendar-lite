@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Common\Assets as Assets;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\WP;
 
 /**
@@ -66,8 +67,8 @@ function register() {
 	wp_register_script(
 		'sc-event-ticketing-stripe',
 		Assets\get_url( 'js' ) . "/frontend/stripe{$min}.js",
-		[ 'jquery', 'sc-et-general' ],
-		SC_PLUGIN_VERSION
+		[ 'jquery', 'sc-et-general', 'sandhills-stripe-js-v3' ],
+		Helpers::get_asset_version()
 	);
 
 	wp_register_script(
@@ -83,28 +84,37 @@ function register() {
  * Enqueue front-end assets.
  *
  * @since 1.0.0
+ * @since 3.6.0 Added localized variables.
  */
 function enqueue() {
 
-	// Bail if not Event or Receipt page
+	// Bail if not Event or Receipt page.
 	if ( ! is_singular( sugar_calendar_get_event_post_type_id() ) && ! is_page( Settings\get_setting( 'receipt_page' ) ) ) {
 		return;
 	}
 
-	// Check if ticketing is enabled
-	$event   = sugar_calendar_get_event_by_object( get_the_ID() );
+	/**
+	 * Filter the Event object to be used in the enqueueing of the Event Ticketing assets.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event The Event object.
+	 */
+	$event = apply_filters(
+		'sugar_calendar_addon_ticketing_enqueue_event_object',
+		sugar_calendar_get_event_by_object( get_the_ID() )
+	);
+
 	$enabled = get_event_meta( $event->id, 'tickets', true );
 
-	// Bail if not enabled on this Event
+	// Bail if not enabled on this Event.
 	if ( is_singular( sugar_calendar_get_event_post_type_id() ) && empty( $enabled ) ) {
 		return;
 	}
 
-	// Enqueue CSS
 	wp_enqueue_style( 'sc-et-bootstrap' );
 	wp_enqueue_style( 'sc-et-general' );
 
-	// Timezone
 	$tz    = wp_timezone();
 	$start = new \DateTime( $event->start, $tz );
 	$today = new \DateTime( 'now', $tz );
@@ -114,19 +124,31 @@ function enqueue() {
 		return;
 	}
 
-	// Do not load JS when not on single event page
-	if ( ! is_singular( sugar_calendar_get_event_post_type_id() ) ) {
-		return;
-	}
-
-	// Enqueue JS
 	wp_enqueue_script( 'sc-et-bootstrap' );
 	wp_enqueue_script( 'sc-et-popper' );
 	wp_enqueue_script( 'sc-et-general' );
 
-	// Stripe
 	wp_enqueue_script( 'sc-event-ticketing-stripe' );
 	wp_enqueue_script( 'sandhills-stripe-js-v3' );
+
+	wp_localize_script(
+		'sc-event-ticketing-stripe',
+		'sc_event_ticket_stripe_vars',
+		/**
+		 * Filter the Stripe variables to be localized.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $vars Variables to be available in the frontend.
+		 */
+		apply_filters(
+			'sc_et_stripe_vars',
+			[
+				'currency'   => Functions\get_currency(),
+				'min_charge' => 100,
+			]
+		)
+	);
 }
 
 /**

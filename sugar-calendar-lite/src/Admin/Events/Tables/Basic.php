@@ -327,6 +327,24 @@ class Basic extends Base {
 				$this->item_counts[ $status ] = count( $items );
 			}
 		}
+
+		/**
+		 * Filter the item counts for the current view.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array  $item_counts The item counts for the current view.
+		 * @param string $view_start  The beginning boundary for the current view.
+		 * @param string $view_end    The end boundary for the current view.
+		 * @param string $status      The status of the events to filter.
+		 */
+		$this->item_counts = apply_filters(
+			'sugar_calendar_admin_events_tables_basic_item_counts',
+			$this->item_counts,
+			$this->view_start,
+			$this->view_end,
+			$this->get_status()
+		);
 	}
 
 	/**
@@ -883,11 +901,25 @@ class Basic extends Base {
 	 */
 	public function display_mode() {
 
+		/**
+		 * Filter the list table items before they are displayed.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Event[] $list_items The list of items to display.
+		 * @param Basic   $this       The current instance of the list table.
+		 */
+		$list_items = apply_filters(
+			'sugar_calendar_admin_events_tables_basic_items_display_before',
+			$this->filtered_items,
+			$this
+		);
+
 		// Attempt to display rows.
-		if ( ! empty( $this->filtered_items ) ) {
+		if ( ! empty( $list_items ) ) {
 
 			// Loop through items and show them.
-			foreach ( $this->filtered_items as $item ) {
+			foreach ( $list_items as $item ) {
 				$this->single_row( $item );
 			}
 

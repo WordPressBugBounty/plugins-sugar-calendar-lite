@@ -40,9 +40,11 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			 */
 			total_number_to_import: {
 				events: null,
+				venues: null,
 				tickets: null,
 				orders: null,
 				attendees: null,
+				categories: null,
 			},
 
 			/**
@@ -52,9 +54,11 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			 */
 			number_of_success_import: {
 				events: 0,
+				venues: 0,
 				tickets: 0,
 				orders: 0,
 				attendees: 0,
+				categories: 0,
 			},
 
 			/**
@@ -65,6 +69,24 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			 * @type {string}
 			 */
 			last_migrated_context: null,
+
+			/**
+			 * The ICS URL.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @type {string}
+			 */
+			ics_url: null,
+
+			/**
+			 * The assets URL.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @type {string}
+			 */
+			assets_url: null,
 
 			/**
 			 * DOM elements cache.
@@ -93,6 +115,15 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 				$import_file_info_span: null,
 
 				/**
+				 * jQuery DOM of the ICS Importer field.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @type {jQuery}
+				 */
+				$import_ics_url_field: null,
+
+				/**
 				 * jQuery DOM of the Importer button.
 				 *
 				 * @since 3.3.0
@@ -100,6 +131,15 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 				 * @type {jQuery}
 				 */
 				$import_sc_btn: null,
+
+				/**
+				 * jQuery DOM of the ICS Importer button.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @type {jQuery}
+				 */
+				$import_ics_btn: null,
 
 				/**
 				 * jQuery DOM of the importer logs.
@@ -118,7 +158,34 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 				 * @type {jQuery}
 				 */
 				$importer_logs_status: null,
-			}
+
+				/**
+				 * jQuery DOM of the ICS Importer form.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @type {jQuery}
+				 */
+				$import_ics_form: null,
+
+				/**
+				 * jQuery DOM of the ICS Importer summary.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @type {jQuery}
+				 */
+				$import_ics_summary: null,
+			},
+
+			/**
+			 * Strings.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @type {object}
+			 */
+			strings: {},
 		},
 
 		/**
@@ -139,6 +206,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 
 			app.cacheDom();
 			app.bindEvents();
+			app.setDefaults();
 		},
 
 		/**
@@ -159,15 +227,38 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 		},
 
 		/**
+		 * Set defaults.
+		 *
+		 * @since 3.6.0
+		 */
+		setDefaults: function () {
+
+			jconfirm.defaults = {
+				typeAnimated: false,
+				draggable: false,
+				animateFromElement: false,
+				boxWidth: '400px',
+				useBootstrap: false,
+			};
+		},
+
+		/**
 		 * Bind events.
 		 *
 		 * @since 3.3.0
+		 * @since 3.6.0 Modified where to get the assets URL.
 		 */
 		bindEvents() {
 
 			// Listen to migrate button click.
 			$( '#sc-admin-tools-import-btn' ).on( 'click', function( e ) {
 				e.preventDefault();
+
+				// Set the assets URL.
+				app.runtime_vars.assets_url = sc_admin_importers.assets_url;
+
+				// Set the strings.
+				app.runtime_vars.strings = sc_admin_importers.strings;
 
 				const $this = $( this );
 				const warning = $this.data( 'warning' );
@@ -224,6 +315,101 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 					app.runtime_vars.doms.$import_sc_btn.removeClass( 'sc-admin-tools-disabled' );
 				}
 			} );
+
+			// Listen to ics import form submit.
+			$( '#sc-admin-tools-import-form-ics' ).on( 'submit', function( e ) {
+
+				e.preventDefault();
+
+				// Set elements.
+				app.runtime_vars.doms.$import_ics_form = $( 'form#sc-admin-tools-import-form-ics' );
+				app.runtime_vars.doms.$import_ics_url_field = $( this ).find( '#sugar-calendar-setting-sc-admin-tools-ics-import-url' );
+				app.runtime_vars.doms.$import_ics_btn = $( this ).find( '#sc-admin-tools-sc-import-ics-btn' );
+				app.runtime_vars.doms.$import_ics_summary = $( '.sc-admin-tools-import-summary-ics' );
+
+				// Set strings.
+				app.runtime_vars.strings = sc_admin_ics_importers.strings;
+
+				// Set the assets URL.
+				app.runtime_vars.assets_url = sc_admin_ics_importers.assets_url;
+
+				// ICS URL is set and not empty.
+				if (
+					app.runtime_vars.doms.$import_ics_url_field.val().length > 0
+				) {
+
+					// Set the ICS URL.
+					app.runtime_vars.ics_url = app.runtime_vars.doms.$import_ics_url_field.val();
+
+					// Setup the importer slug.
+					app.runtime_vars.importer_slug = 'sugar-calendar-ics';
+
+					// Disable the button.
+					app.toggleEnabledIcsButtonState( false );
+
+					// Run the importer.
+					app.runIcsImporter();
+				}
+			} );
+		},
+
+		/**
+		 * Toggle ICS button state.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param {boolean} is_enabled The state to set.
+		 */
+		toggleEnabledIcsButtonState( is_enabled ) {
+
+			if ( is_enabled ) {
+				app.runtime_vars.doms.$import_ics_btn.removeClass( 'sc-admin-tools__invisible' );
+				app.runtime_vars.doms.$import_ics_btn.find( '.sc-admin-tools-loading-spinner' ).remove();
+				app.runtime_vars.doms.$import_ics_btn.prop( 'disabled', false );
+			} else {
+				app.runtime_vars.doms.$import_ics_btn.addClass( 'sc-admin-tools__invisible' );
+				app.runtime_vars.doms.$import_ics_btn.append( '<span class="sc-admin-tools-loading-spinner"></span>' );
+				app.runtime_vars.doms.$import_ics_btn.blur();
+				app.runtime_vars.doms.$import_ics_btn.prop( 'disabled', true );
+			}
+		},
+
+		/**
+		 * Toggle ICS summary state.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param {number} eventsImported The number of events imported.
+		 */
+		showIcsSummaryState( eventsImported ) {
+
+			// Hide the form.
+			app.runtime_vars.doms.$import_ics_form.addClass( 'hidden' );
+
+			// Show the summary.
+			app.runtime_vars.doms.$import_ics_summary.addClass( 'visible' );
+
+			// If the events imported are more than 0, show the summary.
+			// Show the item.
+			app.runtime_vars.doms.$import_ics_summary
+				.find( '.sc-admin-tools-import-summary__item-events-created' )
+				.removeClass( 'hidden' );
+
+			// Update number of events imported.
+			app.runtime_vars.doms.$import_ics_summary
+				.find( '.sc-admin-tools-import-summary__item-events-created .sc-admin-tools-import-summary-ics__item__value' )
+				.text( eventsImported.created );
+
+			// If the events updated are more than 0, show the summary.
+			// Show the item.
+			app.runtime_vars.doms.$import_ics_summary
+				.find( '.sc-admin-tools-import-summary__item-events-updated' )
+				.removeClass( 'hidden' );
+
+			// Update number of events imported.
+			app.runtime_vars.doms.$import_ics_summary
+				.find( '.sc-admin-tools-import-summary__item-events-updated .sc-admin-tools-import-summary-ics__item__value' )
+				.text( eventsImported.updated );
 		},
 
 		/**
@@ -252,13 +438,15 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 		 * Returns prepared modal icon.
 		 *
 		 * @since 3.3.0
+		 * @since 3.6.0 Modified where to get the URL.
 		 *
 		 * @param {string} icon The icon name from /assets/ to be used in modal.
 		 *
 		 * @returns {string} Modal icon HTML.
 		 */
 		getIcon( icon ) {
-			return '"></i><img src="' + sc_admin_importers.assets_url + 'images/icons/' + icon + '.svg" style="width: 40px; height: 40px;" alt="Icon"><i class="';
+
+			return '"></i><img src="' + app.runtime_vars.assets_url + 'images/icons/' + icon + '.svg" style="width: 40px; height: 40px;" alt="Icon"><i class="';
 		},
 
 		/**
@@ -318,6 +506,91 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 				}
 			).fail( function( res ) {
 				app.retryAttempt();
+			});
+		},
+
+		/**
+		 * Run the ics importer.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param {boolean} clear_cache Whether to clear the cache.
+		 */
+		runIcsImporter( clear_cache = false ) {
+
+			$.post(
+				sc_admin_ics_importers.ajax_url,
+				{
+					nonce: sc_admin_ics_importers.nonce,
+					action: 'sc_admin_importer',
+					importer_slug: app.runtime_vars.importer_slug,
+					total_number_to_import: app.runtime_vars.total_number_to_import,
+					ics_url: app.runtime_vars.ics_url,
+					clear_cache: clear_cache,
+				},
+				function ( response ) {
+
+					if ( ! response.success ) {
+						app.retryAttempt(
+							function() {
+								app.runIcsImporter( true );
+							},
+							function() {
+								app.toggleEnabledIcsButtonState( true );
+							}
+						);
+
+						return;
+					}
+
+					const // Response data.
+						responseStatus = response.data.importer.status,
+						responseTotalNumberToImport = response.data.importer.total_number_to_import,
+						responseProgress = response.data.importer.progress,
+						responseMessage = response.data.importer.message;
+
+					switch ( responseStatus ) {
+
+						case 'completed':
+							app.showIcsSummaryState( responseProgress );
+							break;
+
+						case 'error':
+							$.alert( {
+								title: false,
+								content: responseMessage,
+								titleClass: 'sc-ics-importer-error-title',
+								icon: app.getIcon( 'exclamation-circle-solid-orange' ),
+								type: 'red',
+								boxWidth: '400px',
+								buttons: {
+									confirm: {
+										text: sc_admin_ics_importers.strings.ok,
+										btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg sugar-calendar-btn-primary',
+										keys: ['enter'],
+									},
+								},
+							} );
+							break;
+
+						case 'in_progress':
+							app.runtime_vars.total_number_to_import.events = responseTotalNumberToImport;
+							app.runIcsImporter();
+							return;
+					}
+
+					// Enable the button.
+					app.toggleEnabledIcsButtonState( true );
+				}
+			).fail( function( res ) {
+
+				// Retry with ICS importer.
+				app.retryAttempt( function() {
+					app.runIcsImporter( true );
+				},
+				function() {
+					app.toggleEnabledIcsButtonState( true );
+				} );
 			});
 		},
 
@@ -383,17 +656,32 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 		 * Retry the migration.
 		 *
 		 * @since 3.3.0
+		 * @since 3.6.0 Modified to use the custom and final callback.
+		 *
+		 * @param {function} customCallback      The custom callback.
+		 * @param {function} customFinalCallback The custom final callback.
 		 */
-		retryAttempt() {
+		retryAttempt( customCallback, customFinalCallback ) {
 
 			if ( app.runtime_vars.number_of_retries >= 5 ) {
-				alert( sc_admin_importers.strings['migration_failed'] );
+
+				alert( app.runtime_vars.strings.migration_failed );
+
+				if ( customFinalCallback ) {
+					customFinalCallback();
+				}
+
 				return;
 			}
 
 			++app.runtime_vars.number_of_retries;
-			app.runImporter();
-		}
+
+			if ( customCallback ) {
+				customCallback();
+			} else {
+				app.runImporter();
+			}
+		},
 	};
 
 	return app;

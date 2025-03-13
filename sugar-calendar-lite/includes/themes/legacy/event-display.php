@@ -13,49 +13,67 @@ defined( 'ABSPATH' ) || exit;
  * Adds an action to the start and end of event post content
  * that can be hooked to by other functions
  *
- * @access      private
- * @since       1.0
- * @param       $content string the the_content field of the post object
- * @return      $content string the content with any additional data attached
+ * @access private
+ *
+ * @since 1.0
+ * @since 3.6.0 Passed the $event object to the hooks.
+ *
+ * @param string $content The_content field of the post object.
+ *
+ * @return string $content The content with any additional data attached.
  */
 function sc_event_content_hooks( $content = '' ) {
 
-	// Bail if not in the main query loop
+	// Bail if not in the main query loop.
 	if ( ! ( is_main_query() && in_the_loop() ) ) {
 		return $content;
 	}
 
-	// Bail if recursing
+	// Bail if recursing.
 	if ( doing_filter( 'get_the_excerpt' ) && doing_filter( 'the_content' ) ) {
 		return $content;
 	}
 
-	// Bail if not doing events
 	if ( ! sc_doing_events() ) {
 		return $content;
 	}
 
-	// Get the global post
 	$post_id = get_the_ID();
 
-	// Bail if no post ID
 	if ( empty( $post_id ) ) {
 		return $content;
 	}
 
-	// Start an output buffer
+	/**
+	 * Filters the event object before outputting the event content.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event The event object.
+	 */
+	$event = apply_filters(
+		'sc_event_content_hooks_event',
+		sugar_calendar_get_event_by_object( $post_id )
+	);
+
 	ob_start();
 
-	// Before content
 	do_action( 'sc_before_event_content', $post_id );
 
-	// Output the original content
+	// Output the original content.
 	echo $content;
 
-	// After content
-	do_action( 'sc_after_event_content', $post_id );
+	/**
+	 * Fires after the event content.
+	 *
+	 * @since 1.0
+	 * @since 3.6.0 Added the `$event` parameters.
+	 *
+	 * @param int                   $post_id Post ID.
+	 * @param \Sugar_Calendar\Event $event   Event object.
+	 */
+	do_action( 'sc_after_event_content', $post_id, $event );
 
-	// Return the current output buffer
 	return ob_get_clean();
 }
 

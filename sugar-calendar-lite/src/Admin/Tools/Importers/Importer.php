@@ -124,6 +124,8 @@ abstract class Importer implements ImporterInterface {
 	 * Create a new Sugar Calendar event.
 	 *
 	 * @since 3.3.0
+	 * @since 3.6.0 Add uuid to event data.
+	 * @since 3.6.0 Added the `venue_id` to the event data.
 	 *
 	 * @param array $data The event data.
 	 *
@@ -185,6 +187,11 @@ abstract class Importer implements ImporterInterface {
 			'all_day'        => Helpers::sanitize_all_day( $all_day, $data['start_date'], $data['end_date'] ),
 		];
 
+		// If the venue ID is set, add it to the event data.
+		if ( ! empty( $data['venue_id'] ) ) {
+			$event_data['venue_id'] = absint( $data['venue_id'] );
+		}
+
 		if ( ! empty( $data['location'] ) ) {
 			$event_data['location'] = sanitize_text_field( $data['location'] );
 		}
@@ -192,6 +199,10 @@ abstract class Importer implements ImporterInterface {
 		if ( ! empty( $data['url'] ) ) {
 			$event_data['url']        = sanitize_url( $data['url'] );
 			$event_data['url_target'] = absint( $data['url_target'] );
+		}
+
+		if ( ! empty( $data['uuid'] ) ) {
+			$event_data['uuid'] = $data['uuid'];
 		}
 
 		if ( ! empty( $data['event_meta'] ) ) {
@@ -209,6 +220,7 @@ abstract class Importer implements ImporterInterface {
 				'recurrence_bymonthday' => 1,
 				'recurrence_bypos'      => 1,
 				'recurrence_bymonth'    => 1,
+				'show_map'              => 1,
 			];
 
 			foreach ( $data['event_meta'] as $meta ) {
@@ -280,6 +292,107 @@ abstract class Importer implements ImporterInterface {
 			'sc_event_id'      => $sc_event,
 			'sc_event_post_id' => $post_id,
 		];
+	}
+
+	/**
+	 * Update the event.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param int   $event_id  The event ID.
+	 * @param array $event     The event data.
+	 * @param Event $old_event The old event instance.
+	 *
+	 * @return array Returns an array with the `sc_event_id` and `sc_event_post_id`.
+	 */
+	protected function update_event( $event_id, $event, $old_event = null ) {
+
+		$retval = [
+			'sc_event_id'      => 0,
+			'sc_event_post_id' => 0,
+		];
+
+		if ( is_null( $old_event ) ) {
+			$old_event = sugar_calendar_get_event( $event_id );
+		}
+
+		$all_day = ! empty( $event['all_day'] );
+
+		// Prepare the event data.
+		$event_data = [
+			'title'    => sanitize_text_field( $event['title'] ),
+			'content'  => wp_kses_post( $event['content'] ),
+			'status'   => sanitize_text_field( $event['status'] ),
+			'start'    => Helpers::sanitize_start( $event['start_date'], $event['end_date'], $all_day ),
+			'start_tz' => Helpers::sanitize_timezone( $event['start_tz'], $event['end_tz'], $all_day ),
+			'end'      => Helpers::sanitize_end( $event['end_date'], $event['start_date'], $all_day ),
+			'end_tz'   => Helpers::sanitize_timezone( $event['end_tz'], $event['start_tz'], $all_day ),
+			'all_day'  => Helpers::sanitize_all_day( $all_day, $event['start_date'], $event['end_date'] ),
+		];
+
+		// Update the event.
+		$updated_event = sugar_calendar_update_event( $event_id, $event_data, $old_event );
+
+		if ( $updated_event ) {
+			$retval['sc_event_id'] = $event_id;
+		}
+
+		// Update the WordPress post if old event instance is not empty.
+		if ( ! empty( $old_event ) ) {
+
+			$updated_post = $this->update_event_wp_post( $old_event, $event_data );
+
+			if ( $updated_post ) {
+				$retval['sc_event_post_id'] = $event_id;
+			}
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Update WordPress post of event.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param Event $old_event_instance Event instance before the update.
+	 * @param array $event_data         Data used to update the event.
+	 *
+	 * @return mixed Returns the post ID if the post was updated, false otherwise, and WP_Error if there was an error.
+	 */
+	protected function update_event_wp_post( $old_event_instance, $event_data ) {
+
+		// Map event data fields to post data fields.
+		$field_map = [
+			'title'   => 'post_title',
+			'content' => 'post_content',
+		];
+
+		$post_data = [];
+
+		// Loop through field mappings and update post data if changed.
+		foreach ( $field_map as $event_field => $post_field ) {
+
+			// Check if the event field exists and has been modified:
+			// 1. The event data field must not be empty.
+			// 2. The event data field value must be different from the old event instance value.
+			if (
+				! empty( $event_data[ $event_field ] )
+				&&
+				$event_data[ $event_field ] !== $old_event_instance->$event_field
+			) {
+				$post_data[ $post_field ] = $event_data[ $event_field ];
+			}
+		}
+
+		// Update post if we have changes.
+		if ( empty( $post_data ) ) {
+			return false;
+		}
+
+		$post_data['ID'] = $old_event_instance->object_id;
+
+		return wp_update_post( $post_data );
 	}
 
 	/**

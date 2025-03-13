@@ -2,6 +2,7 @@
 namespace Sugar_Calendar\AddOn\Ticketing\Frontend\Single;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers;
 
 /**
  * Render the ticket add-to-cart form.
@@ -9,21 +10,23 @@ use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
  * @since 1.0.0
  * @since 3.1.0 Only display on single event page.
  * @since 3.2.0 Added a check to determine if the tickets should be displayed.
+ * @since 3.6.0 Added $event parameter.
  *
  * @param int|string $post_id The post ID.
  */
-function display( $post_id = 0 ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+function display( $post_id = 0, $event = null ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 	// Bail if no post.
 	if ( empty( $post_id ) || ! is_singular( sugar_calendar_get_event_post_type_id() ) ) {
 		return;
 	}
 
-	$event   = sugar_calendar_get_event_by_object( $post_id );
-	$enabled = get_event_meta( $event->id, 'tickets', true );
+	if ( empty( $event ) ) {
+		$event = sugar_calendar_get_event_by_object( $post_id );
+	}
 
 	// Bail if not enabled.
-	if ( empty( $enabled ) ) {
+	if ( empty( Helpers::is_event_ticketing_enabled( $event ) ) ) {
 		return;
 	}
 

@@ -430,4 +430,41 @@ class Helper {
 
 		return $formatted_events;
 	}
+
+	/**
+	 * Get the event frontend URL.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param Event $event Event object.
+	 *
+	 * @return string|false Returns the event URL or `false` if the event does not exists.
+	 */
+	public static function get_event_frontend_url( $event ) {
+
+		if ( empty( $event ) ) {
+			return false;
+		}
+
+		/**
+		 * Filters the frontend URL of a non-standard event.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string|false $url   URL of the event.
+		 * @param Event        $event Event object.
+		 */
+		$url = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_get_non_standard_event_frontend_url',
+			false,
+			$event
+		);
+
+		// Early return if already set by the filter.
+		if ( ! empty( $url ) ) {
+			return $url;
+		}
+
+		return get_permalink( $event->object_id );
+	}
 }

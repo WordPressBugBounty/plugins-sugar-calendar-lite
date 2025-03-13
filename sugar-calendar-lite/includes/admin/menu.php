@@ -200,62 +200,61 @@ function calendar_page() {
 }
 
 /**
- * Maybe empty event trash
+ * Maybe empty event trash.
  *
  * Hooked onto a specific action, and empties the event trash after a series of
  * nonce and capability checks.
  *
  * @since 2.0.0
+ * @since 3.6.0 Added the hook `sugar_calendar_admin_menu_maybe_empty_trash_after`.
  */
-function maybe_empty_trash() {
+function maybe_empty_trash() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh, Generic.Metrics.NestingLevel.MaxExceeded
 
-	// Bail if not asking to delete all trashed events
 	if ( ! isset( $_REQUEST['delete_all_trashed_events'] ) ) {
 		return;
 	}
 
 	check_admin_referer( 'event-actions' );
 
-	// Get the post type object
 	$pt_obj = get_post_type_object( sugar_calendar_get_event_post_type_id() );
 
-	// Bail if current user cannot trash events
+	// Bail if current user cannot trash events.
 	if ( ! current_user_can( $pt_obj->cap->delete_posts ) ) {
 		return;
 	}
 
-	// Get trashed events
-	$trashed = sugar_calendar_get_events( array(
-		'status'            => 'trash',
-		'number'            => false,
-		'update_item_cache' => false,
-		'update_meta_cache' => false,
-		'no_found_rows'     => true,
-	) );
+	$trashed = sugar_calendar_get_events(
+		[
+			'status'            => 'trash',
+			'number'            => false,
+			'update_item_cache' => false,
+			'update_meta_cache' => false,
+			'no_found_rows'     => true,
+		]
+	);
 
-	// Bail if nothing in trash
-	if ( empty( $trashed ) ) {
-		return;
-	}
+	if ( ! empty( $trashed ) ) {
+		$post_ids = wp_filter_object_list( $trashed, [ 'object_type' => 'post' ], 'and', 'object_id' );
 
-	// Get posts
-	$post_ids = wp_filter_object_list( $trashed, array( 'object_type' => 'post' ), 'and', 'object_id' );
-
-	// Maybe delete posts
-	if ( ! empty( $post_ids ) ) {
-		foreach ( $post_ids as $post_id ) {
-			if ( current_user_can( 'delete_post', $post_id ) ) {
-				wp_delete_post( $post_id );
+		if ( ! empty( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				if ( current_user_can( 'delete_post', $post_id ) ) {
+					wp_delete_post( $post_id );
+				}
 			}
 		}
+
+		// Delete all trashed events, regardless of their object relationships.
+		sugar_calendar_delete_events( [ 'status' => 'trash' ] );
 	}
 
-	// Delete all trashed events, regardless of their object relationships
-	sugar_calendar_delete_events( array(
-		'status' => 'trash',
-	) );
+	/**
+	 * Fires after trashed events are deleted.
+	 *
+	 * @since 3.6.0
+	 */
+	do_action( 'sugar_calendar_admin_menu_maybe_empty_trash_after' );
 
-	// Redirect
 	wp_safe_redirect( remove_query_arg( 'delete_all_trashed_events', wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
 	exit();
 }

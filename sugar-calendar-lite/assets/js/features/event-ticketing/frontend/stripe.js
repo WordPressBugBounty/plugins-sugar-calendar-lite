@@ -1,148 +1,202 @@
-/* global sc_event_ticket_vars */
-jQuery( document ).ready( function( $ ) {
+/* globals jQuery, Stripe, sc_event_ticket_vars, sc_event_ticket_stripe_vars */
+( function ( $ ) {
+
 	'use strict';
 
-	// Stripe key exists
-	if ( sc_event_ticket_vars.publishable_key ) {
+	let SugarCalendar = window.SugarCalendar || {};
+	SugarCalendar.Stripe = SugarCalendar.Stripe || {};
 
-		// Get variables
-		var stripe   = Stripe( sc_event_ticket_vars.publishable_key ),
-			elements = stripe.elements(),
-			cardArgs = {
-				style: {
-					base: {
-						color:      '#32325d',
-						lineHeight: '1.5rem'
-					}
-				},
-				classes: {
-					base: 'form-group'
-				},
-				hidePostalCode: false
-			};
+	SugarCalendar.Stripe = {
 
-		// Check "single-sc_event-dark" class in body.
-		if ( $( 'body' ).hasClass( 'single-sc_event-dark' ) ) {
-			cardArgs.style.base.iconColor = '#ffffff';
-			cardArgs.style.base.color     = 'rgba(255, 255, 255, 0.85)';
-		}
+		/**
+		 * Stripe instance.
+		 *
+		 * @since 3.6.0
+		 */
+		stripe: null,
 
-		var card = elements.create( 'card', cardArgs );
+		/**
+		 * Stripe elements.
+		 *
+		 * @since 3.6.0
+		 */
+		elements: null,
 
-		// Add Stripe card elements
-		card.mount( '#sc-event-ticketing-card-element' );
+		/**
+		 * Stripe payment elements.
+		 *
+		 * @since 3.6.0
+		 */
+		paymentElement: null,
 
-		// Display dynamic error messages as user types
-		card.addEventListener( 'change', ({error}) => {
+		/**
+		 * jQuery DOM elements.
+		 *
+		 * @since 3.6.0
+		 */
+		$el: {
+			$body: null,
+			$modalPaymentFieldset: null,
+			$checkoutForm: null,
+			$errorContainer: null,
+		},
 
-			// Error, so display it
-			if (error) {
-				$( '#sc-event-ticketing-card-errors' )
-					.append( '<div class="sc-et-error alert alert-danger" role="alert">' + error.message + '</div>' );
+		/**
+		 * Initialize.
+		 *
+		 * @since 3.6.0
+		 */
+		init: function () {
 
-			// No error, so remove all errors
+			// Set elements.
+			this.$el.$body = $( 'body' );
+			this.$el.$modalPaymentFieldset = $( '#sc-event-ticketing-modal-payment-fieldset' );
+
+			if ( sc_event_ticket_vars.publishable_key ) {
+				this.setupStripe();
 			} else {
-				$( '#sc-event-ticketing-card-errors' ).text( '' );
+				this.$el.$modalPaymentFieldset.hide();
 			}
-		});
+		},
 
-	// No Stripe key
-	} else {
-		var stripe, elements, card;
+		/**
+		 * Setup Stripe.
+		 *
+		 * @since 3.6.0
+		 */
+		setupStripe: function() {
 
-		// Hide the payment fieldset if no Stripe
-		$( '#sc-event-ticketing-modal-payment-fieldset' ).hide();
-	}
+			this.stripe = Stripe( sc_event_ticket_vars.publishable_key );
+			this.elements = this.stripe.elements({
+				amount: parseInt( sc_event_ticket_stripe_vars.min_charge, 10 ),
+				currency: sc_event_ticket_stripe_vars.currency.toLowerCase(),
+				mode: 'payment',
+			});
 
-	$( 'body' ).on( 'sc_et_gateway_ajax', function() {
+			this.paymentElement = this.elements.create( 'payment' );
+			this.paymentElement.mount( '#sc-event-ticketing-card-element' );
 
-		const nonce = $( '#sc_et_nonce' ).val();
+			this.$el.$checkoutForm = $( '#sc-event-ticketing-checkout' );
+			this.$el.$errorContainer = $( '#sc-event-ticketing-card-errors' );
 
-		if ( ! nonce ) {
-			return;
-		}
+			this.$el.$body.on( 'sc_et_gateway_ajax', this.performStripeProcess.bind( this ) );
+		},
 
-		// Get values
-		var email     = $( '#sc-event-ticketing-email' ).val(),
-			firstname = $( '#sc-event-ticketing-first-name' ).val(),
-			lastname  = $( '#sc-event-ticketing-last-name' ).val(),
-			eventid   = $( '#sc_et_event_id' ).val(),
-			quantity  = $( '#sc_et_quantity' ).val();
+		/**
+		 * Perform the Stripe process.
+		 *
+		 * @since 3.6.0
+		 */
+		performStripeProcess: function() {
 
-		// Create Payment Intent
-		$.ajax({
-			type:     'POST',
-			url:      sc_event_ticket_vars.ajaxurl,
-			dataType: 'json',
-			data: {
-				action:   'sc_et_stripe_create_payment_intent',
-				email:    email,
-				name:     firstname + ' ' + lastname,
-				event_id: eventid,
-				quantity: quantity,
-				nonce: nonce,
-			},
-			success: function( response ) {
+			const that = this,
+				nonce = $( '#sc_et_nonce' ).val();
 
-				// All info exists to attempt payment confirmation
-				if ( response.data.client_secret && stripe && card ) {
+			if ( ! nonce ) {
+				return;
+			}
 
-					// Confirm the Stripe payment
-					stripe.confirmCardPayment(
-						response.data.client_secret,
-						{
-							payment_method: {
-								card: card,
-								billing_details: {
-									name:  firstname + ' ' + lastname,
-									email: email
-								}
-							}
-						}
+			// Fetch the Stripe Payment Intent data.
+			$.post(
+				sc_event_ticket_vars.ajaxurl,
+				{
+					'action': 'sc_et_stripe_fetch_data',
+					'nonce': nonce,
+					'email': this.$el.$checkoutForm.find( '#sc-event-ticketing-email' ).val(),
+					'first_name': this.$el.$checkoutForm.find( '#sc-event-ticketing-first-name' ).val(),
+					'last_name': this.$el.$checkoutForm.find( '#sc-event-ticketing-last-name' ).val(),
+					'event_id': this.$el.$checkoutForm.find( '#sc_et_event_id' ).val(),
+					'quantity': this.$el.$checkoutForm.find( '#sc_et_quantity' ).val(),
+				},
+				function ( res ) {
 
-					// Then decide what to do with the result
-					).then( function( result ) {
+					if ( ! res.success ) {
+						that.hideSpinner();
 
-						// Some error occurred, so display it
-						if ( result.error && result.error.message ) {
+						that.$el.$errorContainer
+							.append( '<div class="sc-et-error alert alert-danger" role="alert">' + res.data.error_msg + '</div>' );
 
-							// Hide the spinner
-							$( '#sc-event-ticketing-modal .spinner-border' ).hide();
+						return;
+					}
 
-							// Output the error(s)
-							$( '#sc-event-ticketing-card-errors' )
-								.text( '' )
-								.append( '<div class="sc-et-error alert alert-danger" role="alert">' + result.error.message + '</div>' );
-
-						// The payment has been processed!
-						} else if ( 'succeeded' === result.paymentIntent.status ) {
-
-							$( '#sc-event-ticketing-checkout' )
-								.append( '<input type="hidden" name="sc_et_payment_intent" value="' + result.paymentIntent.id + '"/>' );
-
-							$( '#sc-event-ticketing-checkout' )
-								.append( '<input type="hidden" name="sc_et_payment_amount" value="' + result.paymentIntent.amount + '"/>' );
-
-							// Trigger the checkout (saving of data)
-							$( '#sc-event-ticketing-checkout' )
-								.get(0)
-								.submit();
-						}
-					});
-
-				// Sandbox mode passes the transaction through
-				} else if ( response.data.sandbox || response.data.is_free ) {
-					$( '#sc-event-ticketing-checkout' )
-						.get(0)
-						.submit();
+					that.confirmPayment( res.data );
 				}
+			);
+		},
+
+		/**
+		 * Confirm the Stripe payment.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param {Object} fetchPaymentIntentData
+		 *
+		 * @return {Promise<boolean>}
+		 */
+		async confirmPayment( fetchPaymentIntentData ) {
+
+			this.elements.update( {
+				mode: 'payment',
+				amount: fetchPaymentIntentData.amount,
+				currency: fetchPaymentIntentData.currency,
+			} );
+
+			const submitResults = await this.elements.submit();
+
+			if ( submitResults.error ) {
+				this.hideSpinner();
+
+				this.$el.$errorContainer
+					.append( '<div class="sc-et-error alert alert-danger" role="alert">' + submitResults.error.message + '</div>' );
+
+				return false;
 			}
-		}).done(function() {
 
-		}).fail(function() {
+			const redirectUrl = new URL( window.location.href );
 
-		}).always(function() {
+			// Confirm the payment.
+			const confirmPayment = await this.stripe.confirmPayment({
+				elements: this.elements,
+				clientSecret: fetchPaymentIntentData.payment_intent_client_secret,
+				confirmParams: {
+					return_url: redirectUrl.toString()
+				},
+				redirect: 'if_required'
+			});
 
-		});
-	});
-});
+			if ( confirmPayment.error ) {
+				this.hideSpinner();
+
+				this.$el.$errorContainer
+					.append( '<div class="sc-et-error alert alert-danger" role="alert">' + confirmPayment.error.message + '</div>' );
+
+				return false;
+			}
+
+			if ( confirmPayment.paymentIntent.status === 'succeeded' ) {
+				this.$el.$checkoutForm.append( '<input type="hidden" name="sc_et_payment_intent" value="' + confirmPayment.paymentIntent.id + '"/>' );
+				this.$el.$checkoutForm.append( '<input type="hidden" name="sc_et_payment_amount" value="' + confirmPayment.paymentIntent.amount + '"/>' );
+
+				// Trigger the checkout (saving of data)
+				this.$el.$checkoutForm.get(0).submit();
+
+				return true;
+			}
+		},
+
+		/**
+		 * Hide the spinner.
+		 *
+		 * @since 3.6.0
+		 */
+		hideSpinner: function() {
+
+			$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
+		},
+	};
+
+	$( document ).ready( SugarCalendar.Stripe.init.bind( SugarCalendar.Stripe ) );
+
+	window.SugarCalendar = SugarCalendar;
+
+} )( jQuery );

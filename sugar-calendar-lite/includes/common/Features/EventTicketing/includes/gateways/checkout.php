@@ -7,8 +7,9 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
-use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\AddOn\Ticketing\Settings;
+use Sugar_Calendar\Event;
 
 class Checkout {
 
@@ -28,9 +29,9 @@ class Checkout {
 
 	public function __construct() {
 
-		$this->gateways = apply_filters( 'sc_et_gateways', array(
+		$this->gateways = apply_filters( 'sc_et_gateways', [
 			'stripe' => __NAMESPACE__ . '\\Stripe'
-		) );
+		] );
 
 		add_action( 'init',                                   array( $this, 'load_gateways' ), 9 );
 		add_action( 'init',                                   array( $this, 'process_form' ) );
@@ -56,37 +57,63 @@ class Checkout {
 		}
 	}
 
+	/**
+	 * Get the price for the event via AJAX.
+	 *
+	 * @since 1.0.0
+	 */
 	public function get_price_ajax() {
 
-		$event_id = ! empty( $_POST['event_id'] )
-			? absint( $_POST['event_id'] )
-			: 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$event_id = ! empty( $_POST['event_id'] ) ? absint( $_POST['event_id'] ) : 0;
 
 		if ( empty( $event_id ) ) {
-			wp_send_json_error( array( 'success' => false, 'data' => $_POST ) );
+			wp_send_json_error(
+				[
+					'success' => false,
+					'data'    => $_POST, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				]
+			);
 		}
 
-		$quantity = ! empty( $_POST['quantity'] )
-			? absint( $_POST['quantity'] )
-			: 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$quantity = ! empty( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
+
+		wp_send_json_success(
+			[
+				'success' => true,
+				'data'    => $this->get_price( $event_id, $quantity ),
+			]
+		);
+	}
+
+	/**
+	 * Get the price for the event.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param int $event_id Event ID.
+	 * @param int $quantity Quantity.
+	 *
+	 * @return array
+	 */
+	private function get_price( $event_id, $quantity ) {
 
 		$price = get_event_meta( $event_id, 'ticket_price', true );
 		$price = Functions\sanitize_amount( $price );
 		$price = $price * max( 1, absint( $quantity ) );
 
-		$data = array(
+		return [
 			'price'     => Functions\currency_filter( $price ),
-			'price_raw' => $price
-		);
-
-		wp_send_json_success( array( 'success' => true, 'data' => $data ) );
+			'price_raw' => $price,
+		];
 	}
 
 	/**
 	 * Process the checkout form.
 	 *
 	 * @since 3.1.0
-	 * @since {VERDION} Added nonce verification.
+	 * @since 3.3.0 Added nonce verification.
 	 */
 	public function process_form() {
 
@@ -104,29 +131,43 @@ class Checkout {
 		$this->send_to_gateway();
 	}
 
+	/**
+	 * AJAX validation process.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
 	public function process_ajax_validation() {
 
-		// Fill the POST super global with our form data
+		// @todo - Add nonce verification
+
+		// Fill the POST super global with our form data.
 		parse_str( $_POST['data'], $_POST );
 
 		$success = $this->validate();
 
-		if ( true !== $success ) {
-			wp_send_json_error( array( 'errors' => $this->errors ) );
+		if ( $success !== true ) {
+			wp_send_json_error( [ 'errors' => $this->errors ] );
 		}
 
 		wp_send_json_success();
 	}
 
+	/**
+	 * Validate the checkout form.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
 	public function validate() {
 
-		// This needs ajax processing
-
 		$this->validate_data();
-
 		$this->validate_gateway();
 
 		$gateway_obj = new $this->gateways[ $this->gateway ];
+
 		if ( is_callable( array( $gateway_obj, 'validate_gateway_data' ) ) ) {
 			$gateway_obj->validate_gateway_data();
 		}
@@ -138,6 +179,12 @@ class Checkout {
 		return empty( $this->errors );
 	}
 
+	/**
+	 * Validate the checkout form data.
+	 *
+	 * @since 1.0.0
+	 * @since 3.6.0 Add required condition for attendee fields.
+	 */
 	public function validate_data() {
 
 		$qty = ! empty( $_POST['sc_et_quantity'] )
@@ -165,6 +212,61 @@ class Checkout {
 		if ( $qty > $available ) {
 			$this->add_error( 'insufficient_quantity', sprintf( esc_html__( 'Only %d tickets are available. Please reduce your purchase quantity.', 'sugar-calendar-lite' ), $available ), '#sc-event-ticketing-modal-attendee-fieldset' );
 		}
+
+		// Validate attendees if present.
+		if (
+			$this->is_attendee_validation_enabled()
+			&&
+			! empty( $_POST['attendees'] )
+			&&
+			is_array( $_POST['attendees'] )
+		) {
+
+			foreach ( $_POST['attendees'] as $index => $attendee ) {
+
+				$fieldset_selector = '.sc-et-form-group.sc-event-ticketing-attendee[attendee-key=\'' . absint( $index ) . '\']';
+
+				// Check if any required field is missing or invalid.
+				if (
+					empty( $attendee['first_name'] )
+					||
+					empty( $attendee['last_name'] )
+					||
+					empty( $attendee['email'] )
+					||
+					! is_email( wp_unslash( $attendee['email'] ) )
+				) {
+
+					// Set error message.
+					$this->add_error(
+						'missing_attendee_info_' . $index,
+						esc_html__( 'Please complete attendee\'s information.', 'sugar-calendar-lite' ),
+						$fieldset_selector
+					);
+				}
+			}
+		}
+
+		/**
+		 * Extra validation actions.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param Checkout $this Checkout object.
+		 */
+		do_action( 'sc_et_checkout_validate_data', $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	/**
+	 * Check if attendee validation is enabled.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return bool
+	 */
+	public function is_attendee_validation_enabled() {
+
+		return Settings\get_setting( 'attendee_fields_is_required', false );
 	}
 
 	public function validate_gateway() {
@@ -184,29 +286,64 @@ class Checkout {
 		// Overwritten in each gateway
 	}
 
+	/**
+	 * Add an error to the errors array.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param string $error_id      The error ID.
+	 * @param string $error_message The error message.
+	 * @param string $selector      The CSS selector for the error.
+	 */
 	public function add_error( $error_id = '', $error_message = '', $selector = '' ) {
 
 		if ( ! is_array( $this->errors ) ) {
-			$this->errors = array();
+			$this->errors = [];
 		}
 
-		$this->errors[ $error_id ] = array(
+		// Prepare error data.
+		$error = [
+			'id'       => $error_id,
 			'msg'      => $error_message,
 			'selector' => ! empty( $selector )
 				? $selector
-				: '#sc-event-ticketing-modal-fieldset'
+				: '#sc-event-ticketing-modal-fieldset',
+		];
+
+		/**
+		 * Filter the error data before adding it to the errors array.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array  $error    The error data.
+		 * @param string $error_id The error ID.
+		 */
+		$error = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sc_et_checkout_error',
+			$error,
+			$error_id
 		);
+
+		// Add error to errors array.
+		$this->errors[ $error_id ] = $error;
 	}
 
-	public function complete( $order_data = array() ) {
+	/**
+	 * Complete the purchase.
+	 *
+	 * @since 3.1.0
+	 * @since 3.6.0
+	 *
+	 * @param array $order_data Order data.
+	 */
+	public function complete( $order_data = [] ) {
 
-		// Maybe create attendees
-
-		$stored_attendees = array();
+		// Maybe create attendees.
+		$stored_attendees = [];
 
 		$attendees = ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] )
 			? $_POST['attendees']
-			: array();
+			: [];
 
 		$event_id = ! empty( $_POST['sc_et_event_id'] )
 			? absint( $_POST['sc_et_event_id'] )
@@ -224,6 +361,20 @@ class Checkout {
 			? $event->start
 			: '0000-00-00 00:00:00';
 
+		/**
+		 * Filter the order data before saving.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array $order_data Order data.
+		 * @param Event $event      Event object.
+		 */
+		$order_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sc_et_checkout_complete_order_data_before_save',
+			$order_data,
+			$event
+		);
+
 		if ( ! empty( $attendees ) ) {
 
 			foreach ( $attendees as $attendee ) {
@@ -238,36 +389,60 @@ class Checkout {
 			}
 		}
 
-		// Create Order
 		$order_id = Functions\add_order( $order_data );
 
-		// Create tickets
+		// Create tickets.
 		foreach ( $stored_attendees as $attendee ) {
 
-			$ticket_data = array();
-
-			$ticket_data['event_id']    = $event_id;
-			$ticket_data['event_date']  = $event_date;
-			$ticket_data['attendee_id'] = $attendee->id;
-			$ticket_data['order_id']    = $order_id;
+			/**
+			 * Filter the ticket data before saving.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param array $ticket_data Ticket data.
+			 * @param array $order_data  Order data.
+			 */
+			$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				'sc_et_checkout_complete_ticket_data_before_save_ticket',
+				[
+					'event_id'    => $event_id,
+					'event_date'  => $event_date,
+					'attendee_id' => $attendee->id,
+					'order_id'    => $order_id,
+				],
+				$order_data
+			);
 
 			Functions\add_ticket( $ticket_data );
 		}
 
 		$quantity = max( $quantity, count( $attendees ) );
+
 		if ( count( $stored_attendees ) < $quantity ) {
 
-			// Create tickets for unnamed attendees
+			// Create tickets for unnamed attendees.
 
 			$to_create = $quantity - count( $stored_attendees );
 
 			for ( $i = 0; $i < $to_create; $i++ ) {
 
-				$ticket_data = array();
-
-				$ticket_data['event_id']   = $event_id;
-				$ticket_data['event_date'] = $event_date;
-				$ticket_data['order_id']   = $order_id;
+				/**
+				 * Filter the ticket data before saving.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param array $ticket_data Ticket data.
+				 * @param array $order_data  Order data.
+				 */
+				$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+					'sc_et_checkout_complete_ticket_data_before_save_ticket',
+					[
+						'event_id'   => $event_id,
+						'event_date' => $event_date,
+						'order_id'   => $order_id,
+					],
+					$order_data
+				);
 
 				Functions\add_ticket( $ticket_data );
 			}

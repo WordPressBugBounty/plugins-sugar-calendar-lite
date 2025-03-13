@@ -833,6 +833,8 @@ class Column extends Base {
 	 * From http://php.net/manual/en/function.uniqid.php#94959
 	 *
 	 * @since 1.0.0
+	 * @since 3.6.0 Allow uuid data to be passed.
+	 *
 	 * @param string $value The UUID value (empty on insert, string on update)
 	 * @return string Generated UUID.
 	 */
@@ -843,7 +845,7 @@ class Column extends Base {
 
 		// Bail if not empty and correctly prefixed
 		// (UUIDs should _never_ change once they are set)
-		if ( ! empty( $value ) && ( 0 === strpos( $value, $prefix ) ) ) {
+		if ( ! empty( $value ) ) {
 			return $value;
 		}
 

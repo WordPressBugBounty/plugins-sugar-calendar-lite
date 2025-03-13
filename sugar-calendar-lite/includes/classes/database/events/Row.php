@@ -253,6 +253,15 @@ final class Event extends Row {
 	public $recurrence_end_dto = null;
 
 	/**
+	 * The occurrence ID if this is an occurrence.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @var int
+	 */
+	public $occurrence_id = 0;
+
+	/**
 	 * Construct
 	 * @since 2.2.0
 	 *

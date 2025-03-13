@@ -4,13 +4,26 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
-
+use Sugar_Calendar\Admin\PageAbstract;
 /**
  * Tickets page.
  *
  * @since 1.2.0
+ * @since 3.6.0 Extend this class from PageAbstract.
  */
-class Tickets {
+class Tickets extends PageAbstract {
+
+	/**
+	 * Page label.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return string
+	 */
+	public static function get_label() {
+
+		return esc_html__( 'Tickets', 'sugar-calendar-lite' );
+	}
 
 	/**
 	 * Page slug.

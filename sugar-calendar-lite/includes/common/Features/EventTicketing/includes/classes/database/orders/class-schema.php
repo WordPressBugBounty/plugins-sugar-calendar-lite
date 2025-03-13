@@ -213,6 +213,15 @@ final class Order_Schema extends Schema {
 		// uuid
 		array(
 			'uuid'       => true,
-		)
+		),
+
+		array(
+			'name'     => 'occurrence_id',
+			'type'     => 'bigint',
+			'length'   => '20',
+			'unsigned' => true,
+			'default'  => '0',
+			'sortable' => true,
+		),
 	);
 }

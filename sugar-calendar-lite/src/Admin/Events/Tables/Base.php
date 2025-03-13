@@ -5,7 +5,8 @@ namespace Sugar_Calendar\Admin\Events\Tables;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Event_Query;
-use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Helper;
+use Sugar_Calendar\Pro\Features\AdvancedRecurring\Occurrence;
 use WP_List_Table;
 use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
 
@@ -529,6 +530,24 @@ class Base extends WP_List_Table {
 
 		// Set the filtered IDs.
 		$this->filtered_ids = wp_list_pluck( $this->filtered_items, 'id' );
+
+		/**
+		 * Filter the filtered ids to be displayed in the admin events tables.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array  $filtered_ids The filtered ids to be displayed in the admin events tables.
+		 * @param string $view_start   The beginning boundary for the current view.
+		 * @param string $view_end     The end boundary for the current view.
+		 * @param string $status       The status of the events to filter.
+		 */
+		$this->filtered_ids = apply_filters(
+			'sugar_calendar_admin_events_tables_base_filtered_ids',
+			$this->filtered_ids,
+			$this->view_start,
+			$this->view_end,
+			$this->get_status()
+		);
 	}
 
 	/**
@@ -561,14 +580,33 @@ class Base extends WP_List_Table {
 				$sow
 			);
 		}
+
+		/**
+		 * Filter the all items to be displayed in the admin events tables.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array  $all_items  The items to be displayed in the admin events tables.
+		 * @param string $view_start The beginning boundary for the current view.
+		 * @param string $view_end   The end boundary for the current view.
+		 * @param string $status     The status of the events to filter.
+		 */
+		$this->all_items = apply_filters(
+			'sugar_calendar_admin_events_tables_base_all_items',
+			$this->all_items,
+			$this->view_start,
+			$this->view_end,
+			$this->get_status()
+		);
 	}
 
 	/**
 	 * Set the item counts for the current view.
 	 *
 	 * @since 2.1.6
+	 * @since 3.6.0 Added the filter `sugar_calendar_admin_events_tables_base_item_counts`.
 	 */
-	protected function set_item_counts() {
+	protected function set_item_counts() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded, Generic.Metrics.NestingLevel.MaxExceeded
 
 		// Reset.
 		$this->item_counts = [
@@ -576,7 +614,7 @@ class Base extends WP_List_Table {
 		];
 
 		// Bail if no queried items or no cells.
-		if ( empty( $this->query->items ) || empty( $this->cells ) ) {
+		if ( empty( $this->cells ) ) {
 			return;
 		}
 
@@ -616,14 +654,13 @@ class Base extends WP_List_Table {
 		// Unique items.
 		$all_items = array_unique( $countables, SORT_REGULAR );
 
-		// Set total to count of all items.
-		$this->item_counts['total'] = count( $all_items );
-
 		// Pluck all queried statuses.
 		$statuses = wp_list_pluck( $all_items, 'status' );
 
 		// Get unique statuses only.
 		$statuses = array_unique( $statuses );
+
+		$unique_events = [];
 
 		// Loop through statuses.
 		if ( ! empty( $statuses ) ) {
@@ -637,10 +674,42 @@ class Base extends WP_List_Table {
 					]
 				);
 
+				$counter = 0;
+
+				// Loop through each of the status items.
+				foreach ( $status_items as $item ) {
+					if ( ! in_array( $item->object_id, $unique_events, true ) ) {
+						$unique_events[] = $item->object_id;
+
+						++$counter;
+					}
+				}
+
 				// Add count to return value.
-				$this->item_counts[ $status ] = count( $status_items );
+				$this->item_counts[ $status ] = $counter;
 			}
 		}
+
+		// Set total to count of all items.
+		$this->item_counts['total'] = count( $this->all_items );
+
+		/**
+		 * Filter the item counts for the current view.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param array  $item_counts The item counts for the current view.
+		 * @param string $view_start  The beginning boundary for the current view.
+		 * @param string $view_end    The end boundary for the current view.
+		 * @param string $status      The status of the events to filter.
+		 */
+		$this->item_counts = apply_filters(
+			'sugar_calendar_admin_events_tables_base_item_counts',
+			$this->item_counts,
+			$this->view_start,
+			$this->view_end,
+			$this->get_status()
+		);
 	}
 
 	/**
@@ -1498,6 +1567,7 @@ class Base extends WP_List_Table {
 	 * individual query arguments easier.
 	 *
 	 * @since 2.0.0
+	 * @since 3.6.0 Add the 'object_subtype' arg.
 	 *
 	 * @param array $args Query arguments.
 	 *
@@ -1514,11 +1584,12 @@ class Base extends WP_List_Table {
 
 		// Setup default args.
 		$defaults = [
-			'number'     => $this->get_max(),
-			'orderby'    => $this->get_orderby(),
-			'order'      => $this->get_order(),
-			'search'     => $this->get_search(),
-			'date_query' => $this->get_date_query_args(),
+			'number'         => $this->get_max(),
+			'orderby'        => $this->get_orderby(),
+			'order'          => $this->get_order(),
+			'search'         => $this->get_search(),
+			'date_query'     => $this->get_date_query_args(),
+			'object_subtype' => sugar_calendar_get_event_post_type_id(),
 		];
 
 		// Parse the arguments.
@@ -1589,6 +1660,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 2.0.0
 	 * @since 2.1.2 Prefers Event::intersects() over Event::overlaps()
+	 * @since 3.6.0 Fix issue with events extending one hour in week and day view.
 	 *
 	 * @param object $item Cell item.
 	 *
@@ -1603,6 +1675,10 @@ class Base extends WP_List_Table {
 
 		// Start boundary.
 		$start = $this->get_current_cell( 'start_dto' );
+
+		if ( in_array( $this->mode, [ 'week', 'day' ], true ) && $start instanceof \DateTime ) {
+			$start->modify( '+1 second' );
+		}
 
 		// End boundary.
 		$end = $this->get_current_cell( 'end_dto' );
@@ -2038,17 +2114,17 @@ class Base extends WP_List_Table {
 		ob_start();
 		?>
 
-        <div class="sugar_calendar_event_tooltip__header">
-            <h3>
+		<div class="sugar_calendar_event_tooltip__header">
+			<h3>
 				<?php echo wp_kses( $title, $this->get_allowed_pointer_tags() ); ?>
-            </h3>
-        </div>
-        <div class="sugar_calendar_event_tooltip__body">
+			</h3>
+		</div>
+		<div class="sugar_calendar_event_tooltip__body">
 			<?php echo wp_kses( $text, $this->get_allowed_pointer_tags() ); ?>
-        </div>
-        <div class="sugar_calendar_event_tooltip__footer">
+		</div>
+		<div class="sugar_calendar_event_tooltip__footer">
 			<?php echo wp_kses( implode( ' | ', $links ), $this->get_allowed_pointer_tags() ); ?>
-        </div>
+		</div>
 
 		<?php
 
@@ -2110,9 +2186,9 @@ class Base extends WP_List_Table {
 	 *
 	 * @param object $event Event object.
 	 *
-	 * @return string
+	 * @return string[]
 	 */
-	protected function get_pointer_links( $event = false ) {
+	protected function get_pointer_links( $event = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		// Default no links.
 		$links = [];
@@ -2138,7 +2214,6 @@ class Base extends WP_List_Table {
 				$links['edit'] = $this->get_event_edit_link( $event, esc_html_x( 'Edit', 'verb', 'sugar-calendar-lite' ) );
 			}
 
-			// Maybe add delete link.
 			if ( $this->current_user_can_delete( $event ) ) {
 				$links['delete'] = $this->get_event_delete_link( $event, esc_html_x( 'Trash', 'verb', 'sugar-calendar-lite' ) );
 			}
@@ -2157,6 +2232,7 @@ class Base extends WP_List_Table {
 	 * Get the link used to edit an event.
 	 *
 	 * @since 2.0.0
+	 * @since 3.6.0 Added the `sugar_calendar_admin_events_table_event_edit_link` filter.
 	 *
 	 * @param object $event     Event object.
 	 * @param string $link_text Text of the link.
@@ -2165,7 +2241,19 @@ class Base extends WP_List_Table {
 	 */
 	public function get_event_edit_link( $event = false, $link_text = '' ) {
 
-		return '<a href="' . esc_url( $this->get_event_edit_url( $event ) ) . '">' . $link_text . '</a>';
+		/**
+		 * Filter the event edit link.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $link  The event edit link.
+		 * @param Event  $event The event object.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_events_table_event_edit_link',
+			'<a href="' . esc_url( $this->get_event_edit_url( $event ) ) . '">' . $link_text . '</a>',
+			$event
+		);
 	}
 
 	/**
@@ -2187,6 +2275,7 @@ class Base extends WP_List_Table {
 	 * Get the link used to delete an event.
 	 *
 	 * @since 2.0.21
+	 * @since 3.6.0 Added the `sugar_calendar_admin_events_tables_base_event_delete_link` filter.
 	 *
 	 * @param object $event     Event object.
 	 * @param string $link_text Text of the link.
@@ -2195,13 +2284,26 @@ class Base extends WP_List_Table {
 	 */
 	public function get_event_delete_link( $event = false, $link_text = '' ) {
 
-		return '<a href="' . esc_url( $this->get_event_delete_url( $event ) ) . '" class="delete">' . $link_text . '</a>';
+		/**
+		 * Filter the event delete link.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $link  The event delete link.
+		 * @param Event  $event The event object.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_events_table_event_delete_link',
+			'<a href="' . esc_url( $this->get_event_delete_url( $event ) ) . '" class="delete">' . $link_text . '</a>',
+			$event
+		);
 	}
 
 	/**
 	 * Get the link used to restore an event.
 	 *
 	 * @since 2.0.21
+	 * @since 3.6.0 Added the `sugar_calendar_admin_events_table_event_restore_link` filter.
 	 *
 	 * @param object $event     Event object.
 	 * @param string $link_text Text of the link.
@@ -2210,7 +2312,19 @@ class Base extends WP_List_Table {
 	 */
 	public function get_event_restore_link( $event = false, $link_text = '' ) {
 
-		return '<a href="' . esc_url( $this->get_event_restore_url( $event ) ) . '">' . $link_text . '</a>';
+		/**
+		 * Filter the event delete link.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $link  The event restore link.
+		 * @param Event  $event The event object.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_events_table_event_restore_link',
+			'<a href="' . esc_url( $this->get_event_restore_url( $event ) ) . '">' . $link_text . '</a>',
+			$event
+		);
 	}
 
 	/**
@@ -2225,7 +2339,7 @@ class Base extends WP_List_Table {
 	 */
 	public function get_event_view_link( $event = false, $link_text = '' ) {
 
-		return '<a href="' . esc_url( $this->get_event_view_url( $event ) ) . '">' . $link_text . '</a>';
+		return '<a href="' . esc_url( Helper::get_event_frontend_url( $event ) ) . '">' . $link_text . '</a>';
 	}
 
 	/**
@@ -2296,7 +2410,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param object $event Event object.
+	 * @param Event $event Event object.
 	 *
 	 * @return string
 	 */
@@ -2353,39 +2467,6 @@ class Base extends WP_List_Table {
 
 		// Return the URL.
 		return wp_nonce_url( $url, $nonce );
-	}
-
-	/**
-	 * Get the URL used to view an event.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param object $event Event object.
-	 *
-	 * @return string
-	 */
-	protected function get_event_view_url( $event = false ) {
-
-		// Default return value.
-		$retval = '';
-
-		// Type of object.
-		switch ( $event->object_type ) {
-			case 'post':
-				$retval = get_permalink( $event->object_id );
-				break;
-
-			case 'user':
-				$retval = get_author_posts_url( $event->object_id );
-				break;
-
-			case 'comment':
-				$retval = get_comment_link( $event->object_id );
-				break;
-		}
-
-		// Return the HTML.
-		return $retval;
 	}
 
 	/**
@@ -2657,60 +2738,6 @@ class Base extends WP_List_Table {
 			}
 		}
 
-		// Recurrence.
-		if ( ! empty( $event->recurrence ) ) {
-			$intervals = $this->get_recurrence_types();
-
-			// Interval is known.
-			if ( isset( $intervals[ $event->recurrence ] ) ) {
-				$pointer_dates['recurrence'] = '<strong>' . esc_html_x( 'Repeats', 'Noun', 'sugar-calendar-lite' ) . '</strong>';
-
-				// No end.
-				if ( empty( $event->recurrence_end ) ) {
-					$pointer_dates['interval'] = esc_html( $intervals[ $event->recurrence ] );
-
-					// Recurrence ends.
-				} elseif ( ! $event->is_empty_date( $event->recurrence_end ) ) {
-
-					if (
-						property_exists( $event, 'original_start' ) &&
-						property_exists( $event, 'original_start_tz' )
-					) {
-						$recurring_start = $this->get_event_date( $event->original_start, $event->original_start_tz );
-					} else {
-						$recurring_start = $this->get_event_date( $event->start, $event->start_tz );
-					}
-
-					$recurring = sprintf( /* translators: %1$s - Recurrence; %2$s - Start date; %3$s - End date. */
-						esc_html_x( '%1$s from %2$s until %3$s', 'Weekly from December 1, 2030 until December 31, 2030', 'sugar-calendar-lite' ),
-						$intervals[ $event->recurrence ],
-						$recurring_start,
-						$this->get_event_date( $event->recurrence_end, $event->recurrence_end_tz )
-					);
-
-					$pointer_dates['recurrence_end'] = '<span>' . esc_html( $recurring ) . '</span>';
-
-					// Recurrence goes forever.
-				} elseif ( ! $event->is_empty_date( $event->end ) && ( $event->start === $event->end ) ) {
-					$recurring = sprintf( /* translators: %1$s - Recurrence; %2$s - Start date. */
-						esc_html_x( '%1$s starting %2$s', 'Weekly forever, starting May 15, 1980', 'sugar-calendar-lite' ),
-						$intervals[ $event->recurrence ],
-						$this->get_event_date( $event->start, $event->start_tz )
-					);
-
-					$pointer_dates['recurrence_end'] = '<span>' . esc_html( $recurring ) . '</span>';
-
-				} else {
-					$recurring = sprintf( /* translators: %s - Recurrence. */
-						esc_html_x( '%s', 'Weekly forever', 'sugar-calendar-lite' ), // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
-						$intervals[ $event->recurrence ]
-					);
-
-					$pointer_dates['recurrence_end'] = '<span>' . esc_html( $recurring ) . '</span>';
-				}
-			}
-		}
-
 		/**
 		 * Filter the event pointer date.
 		 *
@@ -2776,8 +2803,10 @@ class Base extends WP_List_Table {
 
 		return [
 			'a'      => [
-				'href'  => [],
-				'class' => [],
+				'href'               => [],
+				'class'              => [],
+				'data-action'        => [],
+				'data-occurrence-id' => [],
 			],
 			'strong' => [],
 			'span'   => [ 'class' => [] ],
@@ -2939,7 +2968,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @return bool Default false. True if user can view event.
 	 */
-	protected function user_can_view( $user_id = 0, $event = false ) { // phpcs:ignore Generic.Metrics.NestingLevel.MaxExceeded
+	protected function user_can_view( $user_id = 0, $event = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh, Generic.Metrics.NestingLevel.MaxExceeded
 
 		// Bail if no user was passed.
 		if ( empty( $user_id ) ) {
@@ -4213,5 +4242,17 @@ class Base extends WP_List_Table {
 		 * @param object $event Event object.
 		 */
 		return (array) apply_filters( $filter, $links, $object ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	/**
+	 * Get all items.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return Event[]
+	 */
+	public function get_all_items() {
+
+		return $this->all_items;
 	}
 }

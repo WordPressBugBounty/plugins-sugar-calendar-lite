@@ -24,9 +24,14 @@ final class Tickets_Table extends Table {
 	protected $name = 'tickets';
 
 	/**
-	 * @var string Database version
+	 * Database version.
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 * @since 3.6.0 Updated to `202501150001`.
 	 */
-	protected $version = 202010270003;
+	protected $version = 202501150001;
 
 	/**
 	 * @var string Table schema
@@ -34,24 +39,33 @@ final class Tickets_Table extends Table {
 	protected $schema = __NAMESPACE__ . '\\Ticket_Schema';
 
 	/**
-	 * @var array Array of upgrade versions and methods.
+	 * Array of upgrade versions and methods.
+	 *
+	 * @var array
+	 *
+	 * @since 1.0.0
+	 * @since 3.6.0 Added `202010270003` upgrade.
 	 */
-	protected $upgrades = array(
+	protected $upgrades = [
 		'202010020000' => 202010020000,
 		'202010270001' => 202010270001,
 		'202010270002' => 202010270002,
 		'202010270003' => 202010270003,
-	);
+		'202501150001' => 202501150001,
+	];
 
 	/**
-	 * Setup the database schema
+	 * Setup the database schema.
 	 *
 	 * @since 1.0.0
+	 * @since 3.6.0 Added `occurrence_id` column.
 	 */
 	protected function set_schema() {
+
 		$this->schema = "id bigint(20) unsigned NOT NULL auto_increment,
 			order_id varchar(20) NOT NULL default '0',
 			event_id bigint(20) unsigned NOT NULL default '0',
+			occurrence_id bigint(20) unsigned NOT NULL default 0,
 			attendee_id bigint(20) unsigned default '0',
 			code varchar(20) NOT NULL default '',
 			event_date datetime NOT NULL default '0000-00-00 00:00:00',
@@ -141,6 +155,26 @@ final class Tickets_Table extends Table {
 		}
 
 		// Return success/fail
+		return $this->is_success( $result );
+	}
+
+	/**
+	 * Upgrade to version 202501150001.
+	 *
+	 * Add the `occurrence_id` column.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return bool
+	 */
+	protected function __202501150001() { // phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.MethodDoubleUnderscore
+
+		$result = $this->column_exists( 'occurrence_id' );
+
+		if ( $result === false ) {
+			$result = $this->get_db()->query( "ALTER TABLE {$this->table_name} ADD COLUMN `occurrence_id` bigint(20) unsigned NOT NULL default 0 AFTER `event_id`;" );
+		}
+
 		return $this->is_success( $result );
 	}
 }

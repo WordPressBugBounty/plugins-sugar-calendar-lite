@@ -251,13 +251,33 @@ class List_Table extends \WP_List_Table {
 	 * Event column.
 	 *
 	 * @since 1.0.0
+	 * @since 3.6.0 Added the ability to filter the event column value.
 	 *
-	 * @param Order $item Order object
+	 * @param Order $item Order object.
+	 *
 	 * @return string
 	 */
 	public function column_event( $item = null ) {
 
-		// Get Event
+		/**
+		 * Filter the event column value.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string|false $pre_column_event_val The value of the column.
+		 * @param object       $item                 The current item.
+		 */
+		$pre_column_event_val = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sc_et_admin_orders_list_table_event_col',
+			false,
+			$item
+		);
+
+		if ( $pre_column_event_val !== false ) {
+			return $pre_column_event_val;
+		}
+
+		// Get Event.
 		$event = sugar_calendar_get_event( $item->event_id );
 
 		// Bail if no Event

@@ -3,6 +3,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Frontend\Modal;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
+use Sugar_Calendar\AddOn\Ticketing\Settings;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Helpers;
 
@@ -83,6 +84,7 @@ function render_event_date_time( $event ) {
  * Render the checkout modal
  *
  * @since 1.0.0
+ * @since 3.6.0 Modify optional description for attendee information based on settings.
  */
 function display() {
 
@@ -90,7 +92,18 @@ function display() {
 		return;
 	}
 
-	$event   = sugar_calendar_get_event_by_object( get_the_ID() );
+	/**
+	 * Filter the Event object to be used in the enqueueing of the Event Ticketing assets.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event $event The Event object.
+	 */
+	$event = apply_filters(
+		'sugar_calendar_add_on_ticketing_frontend_loader_event_object',
+		sugar_calendar_get_event_by_object( get_the_ID() )
+	);
+
 	$enabled = get_event_meta( $event->id, 'tickets', true );
 
 	if ( empty( $enabled ) ) {
@@ -115,6 +128,12 @@ function display() {
 	) {
 		$is_ticket_free = true;
 	}
+
+	$field_attendee_info_description = sprintf(
+		/* translators: %s: Optional text. */
+		__( 'Enter the name and email of all attendees%s.', 'sugar-calendar-lite' ),
+		Settings\get_setting( 'attendee_fields_is_required', false ) ? '' : ' (optional)'
+	);
 	?>
 
 	<div class="modal fade" id="sc-event-ticketing-modal" tabindex="-1" role="dialog" aria-labelledby="sc-event-ticketing-modalLabel" aria-hidden="true">
@@ -157,9 +176,9 @@ function display() {
 
 								<fieldset id="sc-event-ticketing-modal-attendee-fieldset" class="sc-et-fieldset">
 									<legend class="sc-et-legend"><?php esc_html_e( 'Attendee Information', 'sugar-calendar-lite' ); ?></legend>
-									<p><?php esc_html_e( 'Enter the name and email of all attendees (optional).', 'sugar-calendar-lite' ); ?> <a href="#" id="sc-event-ticketing-copy-billing-attendee"><?php esc_html_e( 'Copy from Billing Details.', 'sugar-calendar-lite' ); ?></a></p>
+									<p><?php echo esc_html( $field_attendee_info_description ); ?> <a href="#" id="sc-event-ticketing-copy-billing-attendee"><?php esc_html_e( 'Copy from Billing Details.', 'sugar-calendar-lite' ); ?></a></p>
 									<div id="sc-event-ticketing-modal-attendee-list">
-										<div class="sc-et-form-group sc-event-ticketing-attendee" data-key="1">
+										<div class="sc-et-form-group sc-event-ticketing-attendee" data-key="1" attendee-key="1">
 											<div class="sc-event-ticketing-attendee__input-group sc-et-input-group">
 												<div class="sc-et-input-group-prepend">
 													<span class="sc-et-input-group-text sc-event-ticketing-attendee__input-group__attendee-label" id=""><?php esc_html_e( 'Attendee 1', 'sugar-calendar-lite' ); ?></span>
@@ -295,6 +314,16 @@ function display() {
 							<input type="hidden" name="sc_et_gateway" value="stripe" />
 							<input type="hidden" name="sc_et_action" value="checkout" />
 							<input type="hidden" id="sc_et_nonce" name="sc_et_nonce" value="<?php echo esc_attr( wp_create_nonce( Checkout::NONCE_KEY ) ); ?>" />
+							<?php
+							/**
+							 * Fires before the closing </form> tag in the modal.
+							 *
+							 * @since 3.6.0
+							 *
+							 * @param Event $event The event object.
+							 */
+							do_action( 'sc_et_modal_form_bottom', $event );
+							?>
 						</div>
 					</div>
 				</form>

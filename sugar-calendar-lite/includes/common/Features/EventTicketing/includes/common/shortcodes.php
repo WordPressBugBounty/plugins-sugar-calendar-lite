@@ -32,8 +32,20 @@ function receipt_shortcode() {
 		return '<div class="sc-et-error alert alert-danger" role="alert">' . esc_html__( 'The specified email does not match the email on the requested order.', 'sugar-calendar-lite' ) . '</div>';
 	}
 
-	// Event date/time
-	$event      = sugar_calendar_get_event( $order->event_id );
+	/**
+	 * Filters the event object for the receipt shortcode.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event                          $event The event object.
+	 * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order object.
+	 */
+	$event = apply_filters(
+		'sc_et_receipt_shortcode_event',
+		sugar_calendar_get_event( $order->event_id ),
+		$order
+	);
+
 	$start_date = $event->format_date( sc_get_date_format(), $event->start );
 	$start_time = $event->format_date( sc_get_time_format(), $event->start );
 
@@ -90,7 +102,28 @@ function receipt_shortcode() {
 			<tr>
 				<td><?php echo esc_html( $event->title ); ?></td>
 				<td><?php printf( esc_html__( '%s at %s', 'sugar-calendar-lite' ), $start_date, $start_time ); ?></td>
-				<td><a href="<?php echo get_permalink( $event->object_id ); ?>"><?php esc_html_e( 'View event details', 'sugar-calendar-lite' ); ?></a></td>
+				<td>
+					<?php
+					/**
+					 * Filters the event URL for the receipt shortcode.
+					 *
+					 * @since 3.6.0
+					 *
+					 * @param string                                         $url The event URL.
+					 * @param \Sugar_Calendar\Event                          $event The event object.
+					 * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order object.
+					 */
+					$url = apply_filters(
+						'sc_et_receipt_shortcode_event_url',
+						get_permalink( $event->object_id ),
+						$event,
+						$order
+					);
+					?>
+					<a href="<?php echo esc_url( $url ); ?>">
+						<?php esc_html_e( 'View event details', 'sugar-calendar-lite' ); ?>
+					</a>
+				</td>
 			</tr>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></th>
@@ -150,8 +183,20 @@ function ticket_shortcode() {
 	$order  = Functions\get_order( $order_id );
 	$ticket = Functions\get_ticket_by_code( $ticket_code );
 
-	// Event date/time
-	$event      = sugar_calendar_get_event( $ticket->event_id );
+	/**
+	 * Filters the event object for the ticket shortcode.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param \Sugar_Calendar\Event                           $event The event object.
+	 * @param \Sugar_Calendar\AddOn\Ticketing\Database\Ticket $ticket The ticket object.
+	 */
+	$event = apply_filters(
+		'sc_et_ticket_shortcode_event',
+		sugar_calendar_get_event( $ticket->event_id ),
+		$ticket
+	);
+
 	$start_date = $event->format_date( sc_get_date_format(), $event->start );
 	$start_time = $event->format_date( sc_get_time_format(), $event->start );
 
@@ -194,7 +239,24 @@ function ticket_shortcode() {
 				<th colspan="3"><?php esc_html_e( 'Event Details', 'sugar-calendar-lite' ); ?></th>
 			</tr>
 			<tr>
-				<td colspan="3"><a href="<?php echo get_permalink( $event->object_id ); ?>"><?php esc_html_e( 'View event details', 'sugar-calendar-lite' ); ?></a></td>
+				<?php
+				/**
+				 * Filters the event URL for the ticket shortcode.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param string                                          $url   The event URL.
+				 * @param \Sugar_Calendar\Event                           $event  The event object.
+				 * @param \Sugar_Calendar\AddOn\Ticketing\Database\Ticket $ticket The ticket object.
+				 */
+				$url = apply_filters(
+					'sc_et_ticket_shortcode_event_url',
+					get_permalink( $event->object_id ),
+					$event,
+					$ticket
+				);
+				?>
+				<td colspan="3"><a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'View event details', 'sugar-calendar-lite' ); ?></a></td>
 			</tr>
 		</table>
 	</div>

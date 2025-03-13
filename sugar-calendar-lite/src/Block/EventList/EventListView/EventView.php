@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Block\EventList\EventListView;
 use DatePeriod;
 use DateTime;
 use DateInterval;
+use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Options;
 
@@ -77,6 +78,7 @@ class EventView {
 	 * Render the title.
 	 *
 	 * @since 3.1.0
+	 * @since 3.6.0 Used the Helper class to get the frontend URL.
 	 */
 	public function render_title() {
 
@@ -88,7 +90,7 @@ class EventView {
 
 		printf(
 			'<a href="%1$s">%2$s</a>',
-			esc_url( get_permalink( $this->event->object_id ) ),
+			esc_url( Helper::get_event_frontend_url( $this->event ) ),
 			esc_html( $this->event->title )
 		);
 	}
@@ -131,10 +133,20 @@ class EventView {
 	 * @return string
 	 */
 	private function get_multiday_date_time_display() {
+		/**
+		 * Filters the date format to use in the event list block body.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $date_format Date format.
+		 */
+		$date_format = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_event_list_body_date_format',
+			Options::get( 'date_format', 'F j, Y' )
+		);
 
-		$date_format = Options::get( 'date_format', 'F j, Y' );
-		$start_date  = sugar_calendar_format_date_i18n( $date_format, $this->event->start );
-		$end_date    = sugar_calendar_format_date_i18n( $date_format, $this->event->end );
+		$start_date = sugar_calendar_format_date_i18n( $date_format, $this->event->start );
+		$end_date   = sugar_calendar_format_date_i18n( $date_format, $this->event->end );
 
 		if ( $this->event->is_all_day() ) {
 			return sprintf(
@@ -144,7 +156,17 @@ class EventView {
 			);
 		}
 
-		$time_format = Options::get( 'time_format' );
+		/**
+		 * Filters the time format to use in the event list block body.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $time_format Time format.
+		 */
+		$time_format = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_event_list_body_time_format',
+			Options::get( 'time_format', 'g:i a' )
+		);
 
 		return sprintf(
 			/* translators: 1: start date, 2: start time, 3: end date, 4: end time. */
@@ -165,13 +187,36 @@ class EventView {
 	 */
 	private function get_date_time_display() {
 
-		$event_date = Helpers::get_event_time_output( $this->event, Options::get( 'date_format', 'F j, Y' ) );
+		$event_date = Helpers::get_event_time_output(
+			$this->event,
+			/**
+			 * Filters the date format to use in the event list block body.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param string $date_format Date format.
+			 */
+			apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				'sugar_calendar_block_event_list_body_date_format',
+				Options::get( 'date_format', 'F j, Y' )
+			)
+		);
 
 		if ( $this->event->is_all_day() ) {
 			return $event_date;
 		}
 
-		$time_format = Options::get( 'time_format', 'g:i a' );
+		/**
+		 * Filters the time format to use in the event list block body.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $time_format Time format.
+		 */
+		$time_format = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_block_event_list_body_time_format',
+			Options::get( 'time_format', 'g:i a' )
+		);
 
 		/*
 		 * translators: 1: start date, 2: start time, 3: end time

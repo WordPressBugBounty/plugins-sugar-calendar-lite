@@ -9,8 +9,8 @@ namespace Sugar_Calendar\AddOn\Ticketing\Frontend;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-// Details
-add_action( 'sc_after_event_content', __NAMESPACE__ . '\\Single\\display' );
+// Details.
+add_action( 'sc_after_event_content', __NAMESPACE__ . '\\Single\\display', 10, 2 );
 
 // Modal
 add_action( 'wp_footer', __NAMESPACE__ . '\\Modal\\display', 10, 2 );

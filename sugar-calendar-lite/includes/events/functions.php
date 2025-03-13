@@ -13,11 +13,13 @@ defined( 'ABSPATH' ) || exit;
  * Add an event.
  *
  * @since 2.0
+ * @since 3.6.0 Added the `sugar_calendar_added_event` action.
  *
- * @param array $data
+ * @param array $data Event data.
+ *
  * @return int
  */
-function sugar_calendar_add_event( $data = array() ) {
+function sugar_calendar_add_event( $data = [] ) {
 
 	// An object ID and object type must be supplied for every event that is
 	// inserted into the database.
@@ -25,10 +27,22 @@ function sugar_calendar_add_event( $data = array() ) {
 		return false;
 	}
 
-	// Instantiate a query object
-	$events = new \Sugar_Calendar\Event_Query();
+	$events   = new \Sugar_Calendar\Event_Query();
+	$add_item = $events->add_item( $data );
 
-	return $events->add_item( $data );
+	if ( $add_item ) {
+		/**
+		 * Fires after an event is added.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param int   $add_item The ID of the event that was added.
+		 * @param array $to_save  Data used to save the event.
+		 */
+		do_action( 'sugar_calendar_added_event', $add_item, $data ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	return $add_item;
 }
 
 /**
@@ -112,15 +126,37 @@ function sugar_calendar_delete_events( $args = array() ) {
  * Update an event.
  *
  * @since 2.0
+ * @since 3.6.0 Added the `sugar_calendar_updated_event` action.
  *
- * @param int   $event_id event ID.
- * @param array $data    Updated event data.
+ * @param int                   $event_id           Event ID.
+ * @param array                 $data               Updated event data.
+ * @param \Sugar_Calendar\Event $old_event_instance The event instance before the update.
+ *
  * @return bool Whether or not the event was updated.
  */
-function sugar_calendar_update_event( $event_id = 0, $data = array() ) {
-	$events = new \Sugar_Calendar\Event_Query();
+function sugar_calendar_update_event( $event_id = 0, $data = [], $old_event_instance = null ) {
 
-	return $events->update_item( $event_id, $data );
+	if ( is_null( $old_event_instance ) ) {
+		$old_event_instance = sugar_calendar_get_event( $event_id );
+	}
+
+	$events      = new \Sugar_Calendar\Event_Query();
+	$update_item = $events->update_item( $event_id, $data );
+
+	if ( $update_item ) {
+		/**
+		 * Fires after an event is updated.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param int                   $event_id           The ID of the event that was added.
+		 * @param array                 $to_save            Data used to update the event.
+		 * @param \Sugar_Calendar\Event $old_event_instance Event instance before the update.
+		 */
+		do_action( 'sugar_calendar_updated_event', $event_id, $data, $old_event_instance ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	return $update_item;
 }
 
 /**
@@ -158,27 +194,33 @@ function sugar_calendar_get_event_by( $field = '', $value = '' ) {
  * Get an event by a specific object ID and Type.
  *
  * @since 2.0
+ * @since 3.6.0 Added the `$args` parameter.
  *
- * @param int    $object_id   Object ID
- * @param string $object_type Object type
+ * @param int    $object_id   Object ID.
+ * @param string $object_type Object type.
+ *
  * @return Sugar_Calendar\Event
  */
-function sugar_calendar_get_event_by_object( $object_id = 0, $object_type = 'post' ) {
+function sugar_calendar_get_event_by_object( $object_id = 0, $object_type = 'post', $args = [] ) {
 
-	// Get events
-	$events = sugar_calendar_get_events( array(
-		'object_id'     => $object_id,
-		'object_type'   => $object_type,
-		'number'        => 1,
-		'no_found_rows' => true
-	) );
+	// Get events.
+	$args = wp_parse_args(
+		$args,
+		[
+			'object_id'     => $object_id,
+			'object_type'   => $object_type,
+			'number'        => 1,
+			'no_found_rows' => true,
+		]
+	);
 
-	// Bail if no events
+	$events = sugar_calendar_get_events( $args );
+
 	if ( empty( $events ) ) {
 		return new Sugar_Calendar\Event();
 	}
 
-	// Return the first event
+	// Return the first event.
 	return reset( $events );
 }
 
@@ -186,22 +228,35 @@ function sugar_calendar_get_event_by_object( $object_id = 0, $object_type = 'pos
  * Query for events.
  *
  * @since 2.0
+ * @since 3.6.0 Added the default 'object_subtype' argument and the filter
+ *                  `sugar_calendar_get_events_args`.
  *
- * @param array $args
+ * @param array $args Arguments.
+ *
  * @return array
  */
-function sugar_calendar_get_events( $args = array() ) {
+function sugar_calendar_get_events( $args = [] ) {
 
-	// Parse args
-	$r = wp_parse_args( $args, array(
-		'number' => 30
-	) );
+	$query_args = wp_parse_args(
+		$args,
+		[
+			'number'         => 30,
+			'object_subtype' => sugar_calendar_get_event_post_type_id(),
+		]
+	);
 
-	// Instantiate a query object
+	/**
+	 * Filter the arguments used to query for events.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param array $query_args The arguments used to query for events.
+	 */
+	$query_args = apply_filters( 'sugar_calendar_get_events_args', $query_args );
+
 	$events = new \Sugar_Calendar\Event_Query();
 
-	// Return events
-	return $events->query( $r );
+	return $events->query( $query_args );
 }
 
 /**
