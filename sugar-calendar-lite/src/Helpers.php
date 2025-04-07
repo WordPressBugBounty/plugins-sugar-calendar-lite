@@ -1190,4 +1190,25 @@ class Helpers {
 			$day
 		);
 	}
+
+	/**
+	 * Get the event slug.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @return string
+	 */
+	public static function get_event_slug() {
+
+		if (
+			defined( 'SC_EVENTS_SLUG' ) &&
+			! empty( SC_EVENTS_SLUG )
+		) {
+			$slug = SC_EVENTS_SLUG;
+		} else {
+			$slug = 'events';
+		}
+
+		return $slug;
+	}
 }

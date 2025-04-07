@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.6.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-03-13T13:18:56+00:00\n"
+"POT-Creation-Date: 2025-04-07T07:09:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: sugar-calendar-lite\n"
@@ -1977,7 +1977,7 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:145
 #: includes/common/Features/EventTicketing/includes/front-end/singular.php:48
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:157
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:256
 msgid "Event Tickets"
 msgstr ""
 
@@ -2139,30 +2139,47 @@ msgstr ""
 msgid "The gateway you have selected does not exist."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:65
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:125
+msgid "Invalid Event!"
+msgstr ""
+
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:130
+msgid "Unable to process your payment! Please try again."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:154
 msgid "Missing data."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:76
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:165
 msgid "Invalid data."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:86
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:175
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:430
 msgid "Event not found!"
 msgstr ""
 
 #. translators: %s: Error code.
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:115
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:214
 msgid "Error: %s"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:143
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:242
 msgid "No Stripe API key found."
 msgstr ""
 
 #. translators: %1$s: Event title, %2$s: Event date.
-#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:160
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:259
 msgid "Event ticket for %1$s on %2$s"
+msgstr ""
+
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:439
+msgid "Missing Stripe Intent."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/includes/gateways/stripe.php:444
+msgid "Invalid transaction!"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:85
@@ -4062,7 +4079,7 @@ msgstr ""
 
 #. translators: %s: Sugar Calendar to TEC migration admin page.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:233
-msgid "Sugar Calendar to The Events Calendar migration was not completed. Please complete the migration <a href=\"%s\">here</a>."
+msgid "The Events Calendar to Sugar Calendar migration was not completed. Please complete the migration <a href=\"%s\">here</a>."
 msgstr ""
 
 #. translators: %s: Sugar Calendar to TEC migration admin page.

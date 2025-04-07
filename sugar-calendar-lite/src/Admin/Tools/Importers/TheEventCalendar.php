@@ -231,7 +231,7 @@ class TheEventCalendar extends Importer {
 					sprintf(
 						/* translators: %s: Sugar Calendar to TEC migration admin page. */
 						__(
-							'Sugar Calendar to The Events Calendar migration was not completed. Please complete the migration <a href="%s">here</a>.',
+							'The Events Calendar to Sugar Calendar migration was not completed. Please complete the migration <a href="%s">here</a>.',
 							'sugar-calendar-lite'
 						),
 						esc_url( $this->get_migration_page_url() )

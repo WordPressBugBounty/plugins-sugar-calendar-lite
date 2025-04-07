@@ -86,6 +86,7 @@
 		 * Perform the Stripe process.
 		 *
 		 * @since 3.6.0
+		 * @since 3.6.1 Support free tickets.
 		 */
 		performStripeProcess: function() {
 
@@ -119,7 +120,11 @@
 						return;
 					}
 
-					that.confirmPayment( res.data );
+					if ( res.data.is_free_event ) {
+						that.$el.$checkoutForm.get(0).submit();
+					} else {
+						that.confirmPayment( res.data );
+					}
 				}
 			);
 		},

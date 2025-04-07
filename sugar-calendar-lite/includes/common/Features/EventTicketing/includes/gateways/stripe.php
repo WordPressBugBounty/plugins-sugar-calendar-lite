@@ -9,6 +9,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
 use WP_Error;
 
@@ -21,6 +22,33 @@ use WP_Error;
  * @since 1.0.0
  */
 class Stripe extends Checkout {
+
+	/**
+	 * Error code for missing event.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @var string
+	 */
+	const ERROR_MISSING_EVENT = 'sc_et_validate_transaction_missing_event';
+
+	/**
+	 * Error code for missing Stripe intent.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @var string
+	 */
+	const ERROR_MISSING_STRIPE_INTENT = 'sc_et_validate_transaction_missing_intent';
+
+	/**
+	 * Error code for invalid Stripe intent.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @var string
+	 */
+	const ERROR_INVALID_STRIPE_INTENT = 'sc_et_validate_transaction_invalid_intent';
 
 	/**
 	 * Initialize the Stripe checkout.
@@ -39,6 +67,8 @@ class Stripe extends Checkout {
 	 */
 	private function hooks() {
 
+		add_action( 'sc_event_details', [ $this, 'display_checkout_error' ], 5 );
+
 		add_action( 'wp_ajax_sc_et_stripe_fetch_data', [ $this, 'ajax_fetch_data' ] );
 		add_action( 'wp_ajax_nopriv_sc_et_stripe_fetch_data', [ $this, 'ajax_fetch_data' ] );
 
@@ -47,9 +77,68 @@ class Stripe extends Checkout {
 	}
 
 	/**
+	 * Display errors if applicable.
+	 *
+	 * @since 3.6.1
+	 */
+	public function display_checkout_error() {
+		
+		if ( empty( $_GET['error_code'] ) ) {
+			return;
+		}
+
+		/**
+		 * Filters the error message to display.
+		 *
+		 * @since 3.6.1
+		 *
+		 * @param string $error_msg The error message.
+		 */
+		$error_msg = apply_filters(
+			'sc_et_stripe_display_checkout_error_msg',
+			$this->get_error_msg( $_GET['error_code'] )
+		);
+
+		if ( empty( $error_msg ) ) {
+			return;
+		}
+		?>
+		<div id="sc-et-checkout-error">
+			<p><?php echo esc_html( $error_msg ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Get the error msg for the error code.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @param string $error_code Error code.
+	 *
+	 * @return string
+	 */
+	private function get_error_msg( $error_code ) {
+
+		switch ( $error_code ) {
+			case self::ERROR_MISSING_EVENT:
+				$error_msg = __( 'Invalid Event!', 'sugar-calendar-lite' );
+				break;
+			
+			default:
+				// We don't want to provide too much information.
+				$error_msg = __( 'Unable to process your payment! Please try again.', 'sugar-calendar-lite' );
+				break;
+		}
+
+		return $error_msg;
+	}
+
+	/**
 	 * Fetch data with the Stripe Payment Intent.
 	 *
 	 * @since 3.6.0
+	 * @since 3.6.1 Support free tickets.
 	 */
 	public function ajax_fetch_data() {
 
@@ -96,6 +185,16 @@ class Stripe extends Checkout {
 
 		if ( ! empty( $_POST['last_name'] ) ) {
 			$name .= ' ' . sanitize_text_field( $_POST['last_name'] );
+		}
+
+		$ticket_price = $this->get_ticket_price( $event_id );
+
+		if ( $ticket_price <= 0 ) {
+			wp_send_json_success(
+				[
+					'is_free_event' => true,
+				]
+			);
 		}
 
 		$data = $this->create_payment_intent(
@@ -226,6 +325,7 @@ class Stripe extends Checkout {
 	 * Process a payment.
 	 *
 	 * @since 1.0.0
+	 * @since 3.6.1 Validate the Payment intent.
 	 */
 	public function process() {
 
@@ -292,8 +392,115 @@ class Stripe extends Checkout {
 			? sanitize_text_field( $_POST['last_name'] )
 			: '';
 
+		$validate_transaction = $this->validate_transaction( $event, $order_data );
+
+		if ( is_wp_error( $validate_transaction ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					[
+						'error_code' => $validate_transaction->get_error_code(),
+					],
+					Helper::get_event_frontend_url( $event )
+				)
+			);
+			exit;
+		}
+
 		// Order data is complete
 		parent::complete( $order_data );
+	}
+
+	/**
+	 * Validate the Stripe transaction.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @param \Sugar_Calendar\Event $event      The Event object.
+	 * @param array                 $order_data The order data.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function validate_transaction( $event, $order_data ) {
+
+		$return_val = true;
+
+		if ( empty( $event ) || empty( $event->id ) ) {
+			$return_val = new WP_Error(
+				self::ERROR_MISSING_EVENT,
+				__( 'Event not found!', 'sugar-calendar-lite' )
+			);
+		} elseif ( $this->get_ticket_price( $event->id ) > 0 ) {
+
+			// If we're then the event is not free.
+
+			if ( empty( $_POST['sc_et_payment_intent'] ) ) {
+				$return_val = new WP_Error(
+					self::ERROR_MISSING_STRIPE_INTENT,
+					__( 'Missing Stripe Intent.', 'sugar-calendar-lite' )
+				);
+			} elseif ( ! $this->is_valid_intent( $_POST['sc_et_payment_intent'], $order_data ) ) {
+				$return_val = new WP_Error(
+					self::ERROR_INVALID_STRIPE_INTENT,
+					__( 'Invalid transaction!', 'sugar-calendar-lite' )
+				);
+			}
+		}
+
+		/**
+		 * Filters the validity of a transaction.
+		 *
+		 * @since 3.6.1
+		 *
+		 * @param true|\WP_Error              $return_val `true` if transaction is valid. Otherwise a WP_Error.
+		 * @param false|\Sugar_Calendar\Event $event      `false` if Event is not found. Otherwise the Event object.
+		 * @param array                       $order_data  The order data.
+		 */
+		return apply_filters(
+			'sc_et_stripe_validate_transaction',
+			$return_val,
+			$event,
+			$order_data
+		);
+	}
+
+	/**
+	 * Whether a Stripe Intent is valid or not.
+	 *
+	 * @param string $intent     The Stripe Intent.
+	 * @param array  $order_data The order data.
+	 *
+	 * @return bool
+	 */
+	private function is_valid_intent( $intent, $order_data ) {
+
+		$this->load_sdk();
+
+		$retrieve = false;
+		$is_valid = false;
+		
+		try {
+			$retrieve = \Stripe\PaymentIntent::retrieve( $intent );
+
+			if ( $retrieve->status === 'succeeded' ) {
+				$is_valid = true;
+			}
+		} catch ( \Exception $e ) {}
+
+		/**
+		 * Filters the validity of an intent.
+		 *
+		 * @since 3.6.1
+		 *
+		 * @param bool                        $is_valid   Whether the intent is valid or not.
+		 * @param false|\Stripe\PaymentIntent $retrieve   The PaymentIntent object if found, otherwise `false`.
+		 * @param array                       $order_data The order data.
+		 */
+		return apply_filters(
+			'sc_et_stripe_is_valid_intent',
+			$is_valid,
+			$retrieve,
+			$order_data
+		);
 	}
 
 	/**
@@ -349,8 +556,7 @@ class Stripe extends Checkout {
 		$quantity = max( 1, $quantity );
 
 		// Sanitize the price
-		$price = get_event_meta( $event_id, 'ticket_price', true );
-		$price = Functions\sanitize_amount( $price );
+		$price = $this->get_ticket_price( $event_id );
 
 		// Format the amount
 		$amount = Functions\is_zero_decimal_currency()

@@ -458,6 +458,22 @@ class Checkout {
 		exit;
 	}
 
+	/**
+	 * Get the sanitized ticket price of an event.
+	 *
+	 * @since 3.6.1
+	 *
+	 * @param int $event_id Event ID.
+	 *
+	 * @return float
+	 */
+	protected function get_ticket_price( $event_id ) {
+
+		$price = get_event_meta( $event_id, 'ticket_price', true );
+
+		return floatval( Functions\sanitize_amount( $price ) );
+	}
+
 	private function maybe_create_attendee( $attendee ) {
 
 		// Bail if no email
