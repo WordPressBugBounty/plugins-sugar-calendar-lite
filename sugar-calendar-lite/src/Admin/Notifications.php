@@ -7,6 +7,7 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Tasks\Tasks;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Notifications.
@@ -385,14 +386,14 @@ class Notifications {
 			'sugar-calendar-lity',
 			SC_PLUGIN_ASSETS_URL . 'lib/lity/lity.min.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_enqueue_script(
 			'sugar-calendar-lity',
 			SC_PLUGIN_ASSETS_URL . 'lib/lity/lity.min.js',
 			[ 'jquery' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -400,14 +401,14 @@ class Notifications {
 			'sugar-calendar-admin-notifications',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-notifications' . WP::asset_min() . '.css',
 			[ 'sugar-calendar-lity' ],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_enqueue_script(
 			'sugar-calendar-admin-notifications',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-notifications' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-lity' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 

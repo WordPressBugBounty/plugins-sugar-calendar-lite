@@ -5,6 +5,8 @@ namespace Sugar_Calendar;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -106,6 +108,10 @@ class Helpers {
 				'default' => [],
 				'type'    => 'array',
 			],
+			'tags'               => [
+				'default' => [],
+				'type'    => 'array',
+			],
 			'venues'             => [
 				'default' => [],
 				'type'    => 'array',
@@ -114,7 +120,19 @@ class Helpers {
 				'default' => [],
 				'type'    => 'array',
 			],
+			'tagsFilter'         => [
+				'default' => [],
+				'type'    => 'array',
+			],
 			'venuesFilter'       => [
+				'default' => [],
+				'type'    => 'array',
+			],
+			'speakers'           => [
+				'default' => [],
+				'type'    => 'array',
+			],
+			'speakersFilter'     => [
 				'default' => [],
 				'type'    => 'array',
 			],
@@ -273,6 +291,16 @@ class Helpers {
 			],
 			[
 				'name'    => 'venues',
+				'type'    => 'array_int',
+				'default' => [],
+			],
+			[
+				'name'    => 'tags',
+				'type'    => 'array_int',
+				'default' => [],
+			],
+			[
+				'name'    => 'speakers',
 				'type'    => 'array_int',
 				'default' => [],
 			],
@@ -650,6 +678,8 @@ class Helpers {
 	 * @since 3.4.0 Use `$wpdb->prefix` instead of hardcoding 'wp_'.
 	 * @since 3.5.0 Added support for the 'venues' parameter.
 	 * @since 3.6.0 Changed the method signature to accept an array of arguments.
+	 * @since 3.7.0 Fixed issue with not displaying on-going events.
+	 * @since 3.7.0 Added support for the 'tags' parameter.
 	 *
 	 * @param array $args       The arguments to get the events.
 	 * @param array $attributes The block attributes.
@@ -715,9 +745,9 @@ class Helpers {
 			$term_taxonomy_ids = array_filter( array_map( 'absint', $args['calendar_ids'] ) );
 
 			if ( ! empty( $term_taxonomy_ids ) ) {
-				$calendars_left_join = 'LEFT JOIN ' . $wpdb->term_relationships . ' ON ' . $wpdb->prefix . 'sc_events.object_id = ' . $wpdb->term_relationships . '.object_id';
+				$calendars_left_join = 'LEFT JOIN ' . $wpdb->term_relationships . ' AS cal_terms ON ' . $wpdb->prefix . 'sc_events.object_id = cal_terms.object_id';
 				$where_calendars     = $wpdb->prepare(
-					'AND ( ' . $wpdb->term_relationships . '.term_taxonomy_id IN (%1$s) )',
+					'AND ( cal_terms.term_taxonomy_id IN (%1$s) )',
 					implode( ',', $term_taxonomy_ids )
 				);
 			}
@@ -729,9 +759,14 @@ class Helpers {
 			$select_query .= ' ' . $calendars_left_join;
 		}
 
+		$now   = sugar_calendar_get_request_time( 'mysql' );
+		$today = gmdate( 'Y-m-d 00:00:00', strtotime( $now ) );
+
 		$where_query = $wpdb->prepare(
-			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND ' . $wpdb->prefix . 'sc_events.`start` >= %s',
-			sugar_calendar_get_request_time( 'mysql' )
+			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND '
+			. $wpdb->prefix . 'sc_events.`start` >= %s AND ' . $wpdb->prefix . 'sc_events.`end` >= %s' ,
+			$today,
+			$now
 		);
 
 		if ( ! empty( $where_calendars ) ) {
@@ -743,6 +778,41 @@ class Helpers {
 				' AND ' . $wpdb->prefix . 'sc_events.title LIKE %s',
 				'%' . $wpdb->esc_like( $args['search'] ) . '%'
 			);
+		}
+
+		// Add tags filter.
+		if ( ! empty( $attributes['tags'] ) ) {
+
+			$tag_ids = array_filter( array_map( 'absint', $attributes['tags'] ) );
+
+			if ( ! empty( $tag_ids ) ) {
+				// Change the SELECT query to include tag term taxonomy ID.
+				$select_query = 'SELECT ' . $wpdb->prefix . 'sc_events.id, tag_terms.term_taxonomy_id AS tag_term_taxonomy_id FROM ' . $wpdb->prefix . 'sc_events';
+
+				// Add tag JOIN - using standard WordPress term relationships table.
+				$tag_taxonomy_id = TagsHelpers::get_tags_taxonomy_id();
+
+				// Create tag-specific join clause.
+				$tags_join  = 'INNER JOIN ' . $wpdb->term_relationships . ' AS tag_terms ON ' . $wpdb->prefix . 'sc_events.object_id = tag_terms.object_id';
+				$tags_join .= ' INNER JOIN ' . $wpdb->term_taxonomy . ' AS tag_taxonomy ON tag_terms.term_taxonomy_id = tag_taxonomy.term_taxonomy_id';
+
+				// Combine joins - if calendar join exists, append to it, otherwise use tag join.
+				if ( ! empty( $calendars_left_join ) ) {
+					$combined_join = $calendars_left_join . ' ' . $tags_join;
+				} else {
+					$combined_join = $tags_join;
+				}
+
+				// Update SELECT query with combined JOIN clause.
+				$select_query .= ' ' . $combined_join;
+
+				// Add tag WHERE clause - filter by taxonomy and tag IDs.
+				$placeholders = implode( ',', array_fill( 0, count( $tag_ids ), '%d' ) );
+				$where_query .= $wpdb->prepare(
+					' AND tag_taxonomy.taxonomy = %s AND tag_taxonomy.term_id IN (' . $placeholders . ')',
+					array_merge( [ $tag_taxonomy_id ], $tag_ids )
+				);
+			}
 		}
 
 		$order_by = $wpdb->prepare(
@@ -1131,7 +1201,7 @@ class Helpers {
 			'sugar-calendar-admin-compatibility-acf',
 			SC_PLUGIN_ASSETS_URL . 'js/compatibility/sc-compatibility-acf' . WP::asset_min() . '.js',
 			[ 'jquery' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -1211,4 +1281,35 @@ class Helpers {
 
 		return $slug;
 	}
+
+	/**
+	 * Check if an event exists.
+	 *
+	 * @param int $event_id Event ID.
+	 *
+	 * @return bool
+	 */
+	public static function event_exists( $event_id ) {
+
+		global $wpdb;
+
+		$cache_key = 'sc_event_exists_' . $event_id;
+		$exists    = wp_cache_get( $cache_key, 'sugar_calendar' );
+
+		if ( $exists !== false ) {
+			return (bool) $exists;
+		}
+
+		$exists = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(id) FROM ' . $wpdb->prefix . 'sc_events WHERE id = %d',
+				absint( $event_id )
+			)
+		);
+
+		wp_cache_set( $cache_key, $exists, 'sugar_calendar' );
+
+		return (bool) $exists;
+	}
+
 }

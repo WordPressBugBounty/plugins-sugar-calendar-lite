@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Block;
 
 use Sugar_Calendar\Common\Editor;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 class Loader {
 
@@ -46,12 +47,17 @@ class Loader {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+
+		// Add translation support.
+		add_filter( 'sugar_calendar_block_calendar_loader_localized_script_data', [ $this, 'add_translation_support' ] );
+		add_filter( 'sugar_calendar_block_common_localized_script_data', [ $this, 'add_translation_support' ] );
 	}
 
 	/**
 	 * Enqueue scripts.
 	 *
 	 * @since 3.1.0
+	 * @since 3.7.0 Added filter for the localized script data.
 	 */
 	public function enqueue_scripts() {
 
@@ -89,22 +95,32 @@ class Loader {
 			'sc-frontend-blocks-common-js',
 			SC_PLUGIN_ASSETS_URL . "js/frontend/blocks/common{$min}.js",
 			[ 'jquery', 'floating-ui-core', 'floating-ui-dom', 'bootstrap-datepicker' ],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_localize_script(
 			'sc-frontend-blocks-common-js',
 			'sc_frontend_blocks_common_obj',
-			[
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'sc-frontend-block' ),
-				'strings'  => [
-					'this_week' => esc_html__( 'This Week', 'sugar-calendar-lite' ),
-				],
-				'settings' => [
-					'sow' => absint( sc_get_week_start_day() ),
-				],
-			]
+			/**
+			 * Filters the localized script data.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param array $data The localized script data.
+			 */
+			apply_filters(
+				'sugar_calendar_block_common_localized_script_data',
+				[
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'nonce'    => wp_create_nonce( 'sc-frontend-block' ),
+					'strings'  => [
+						'this_week' => esc_html__( 'This Week', 'sugar-calendar-lite' ),
+					],
+					'settings' => [
+						'sow' => absint( sc_get_week_start_day() ),
+					],
+				]
+			)
 		);
 	}
 
@@ -151,5 +167,45 @@ class Loader {
 		}
 
 		return $this->blocks;
+	}
+
+	/**
+	 * Add translation support based on WordPress locale.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $data The localized script data.
+	 *
+	 * @return array
+	 */
+	public function add_translation_support( $data ) {
+
+		// Check if key 'settings' exists in the data array. Return early if it doesn't.
+		if ( ! isset( $data['settings'] ) ) {
+			return $data;
+		}
+
+		// Get WordPress locale.
+		global $wp_locale;
+
+		// Add current locale. Set in lowercase.
+		$data['settings']['locale'] = strtolower( get_locale() );
+
+		// Add days translation locale.
+		$data['settings']['i18n']['days'] = array_values( $wp_locale->weekday );
+
+		// Add daysShort translation locale.
+		$data['settings']['i18n']['daysShort'] = array_values( $wp_locale->weekday_abbrev );
+
+		// Add daysMin translation locale.
+		$data['settings']['i18n']['daysMin'] = array_values( $wp_locale->weekday_initial );
+
+		// Add months translation locale.
+		$data['settings']['i18n']['months'] = array_values( $wp_locale->month );
+
+		// Add monthsShort translation locale.
+		$data['settings']['i18n']['monthsShort'] = array_values( $wp_locale->month_abbrev );
+
+		return $data;
 	}
 }

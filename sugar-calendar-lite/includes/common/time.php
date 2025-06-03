@@ -499,3 +499,61 @@ function sugar_calendar_daynum_to_ical( $day = 0 ) {
 	// Return
 	return $retval;
 }
+
+/**
+ * Get available date formats.
+ *
+ * @since 3.7.0
+ *
+ * @return array
+ */
+function sugar_calendar_date_formats() {
+
+	/**
+	 * Filters the default date formats.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string[] $default_date_formats Array of default date formats.
+	 */
+	$date_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		'date_formats',
+		[
+			'F j, Y',
+			'Y-m-d',
+			'm/d/Y',
+			'd/m/Y',
+			'jS F, Y',
+		]
+	);
+
+	return $date_formats;
+}
+
+/**
+ * Get available time formats.
+ *
+ * @since 3.7.0
+ *
+ * @return array
+ */
+function sugar_calendar_time_formats() {
+
+	/**
+	 * Filters the default time formats.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string[] $default_time_formats Array of default time formats.
+	 */
+	$time_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		'time_formats',
+		[
+			esc_html__( 'g:i a', 'sugar-calendar-lite' ),
+			'g:i A',
+			'H:i',
+		]
+	);
+
+	return $time_formats;
+}

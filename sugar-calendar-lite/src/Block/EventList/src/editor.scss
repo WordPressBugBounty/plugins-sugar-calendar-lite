@@ -1,7 +1,9 @@
 .sugar-calendar-event-list-block {
 
 	&__calendars,
-	&__venues {
+	&__tags,
+	&__venues,
+	&__speakers {
 		margin-bottom: 24px;
 		z-index: 99;
 
@@ -67,8 +69,21 @@
 		}
 	}
 
-	&__venues {
+	// z-indexes.
+	&__calendars {
+		z-index: 99;
+	}
+
+	&__tags {
 		z-index: 90;
+	}
+
+	&__venues {
+		z-index: 85;
+	}
+
+	&__speakers {
+		z-index: 80;
 	}
 
 	&__colors {
@@ -80,5 +95,12 @@
 		.components-tools-panel-item {
 			margin-top: 0 !important;
 		}
+	}
+}
+
+.editor-sidebar__panel {
+
+	.sugar-calendar-block__tags:has( + .components-base-control ) {
+		margin-bottom: 16px;
 	}
 }

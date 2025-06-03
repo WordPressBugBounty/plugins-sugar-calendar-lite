@@ -320,6 +320,7 @@ class Metaboxes {
 	 * @since 3.0.0
 	 * @since 3.1.0 Remove event ticketing education.
 	 * @since 3.5.0 Add event venue education.
+	 * @since 3.7.0 Added RSVP education.
 	 *
 	 * @param Event $box
 	 *
@@ -357,10 +358,32 @@ class Metaboxes {
 		$box->add_section(
 			[
 				'id'       => 'venue',
-				'label'    => esc_html__( 'Venue', 'sugar-calendar' ),
+				'label'    => esc_html__( 'Venue', 'sugar-calendar-lite' ),
 				'icon'     => 'location',
 				'order'    => 50,
 				'callback' => [ $this, 'event_metabox_venue_education' ],
+			]
+		);
+
+		// Speakers.
+		$box->add_section(
+			[
+				'id'       => 'speakers',
+				'label'    => esc_html__( 'Speakers', 'sugar-calendar-lite' ),
+				'icon'     => 'admin-users',
+				'order'    => 60,
+				'callback' => [ $this, 'event_metabox_speakers_education' ],
+			]
+		);
+
+		// RSVP.
+		$box->add_section(
+			[
+				'id'       => 'rsvp',
+				'label'    => esc_html__( 'RSVP', 'sugar-calendar' ),
+				'icon'     => 'yes-alt',
+				'order'    => 50,
+				'callback' => [ $this, 'event_metabox_rsvp_education' ],
 			]
 		);
 	}
@@ -375,55 +398,55 @@ class Metaboxes {
 	public function event_metabox_recurring_education() {
 
 		?>
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education">
-            <label for="recurrence"><?php esc_html_e( 'Repeat', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <select id="recurrence" class="recurrence" disabled>
-                    <option><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></option>
-                </select>
-            </div>
-        </div>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education">
+			<label for="recurrence"><?php esc_html_e( 'Repeat', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<select id="recurrence" class="recurrence" disabled>
+					<option><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></option>
+				</select>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-interval repeat-advanced">
-            <label for="recurrence_interval"><?php esc_html_e( 'Every', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <input type="number" min="1" max="999" disabled/>
-            </div>
-        </div>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-interval repeat-advanced">
+			<label for="recurrence_interval"><?php esc_html_e( 'Every', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<input type="number" min="1" max="999" disabled/>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-end-type repeat-advanced">
-            <label for="recurrence_end_type"><?php esc_html_e( 'Ends', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
-                    <input type="radio" id="recurrence_end_type_never" checked disabled/>
-                    <label for="recurrence_end_type_never">
-                        <span class="end-repeat-label"><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></span>
-                    </label>
-                </div>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--recurrence-end-type repeat-advanced">
+			<label for="recurrence_end_type"><?php esc_html_e( 'Ends', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
+					<input type="radio" id="recurrence_end_type_never" checked disabled/>
+					<label for="recurrence_end_type_never">
+						<span class="end-repeat-label"><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></span>
+					</label>
+				</div>
 
-                <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
-                    <input type="radio" id="recurrence_end_type_date" disabled/>
-                    <label for="recurrence_end_type_date">
-                        <span class="end-repeat-label"><?php esc_html_e( 'On', 'sugar-calendar-lite' ); ?></span>
-                    </label>
-                    <input type="text" id="recurrence_end_date" placeholder="<?php esc_html_e( 'Date', 'sugar-calendar-lite' ); ?>" disabled/>
-                </div>
+				<div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
+					<input type="radio" id="recurrence_end_type_date" disabled/>
+					<label for="recurrence_end_type_date">
+						<span class="end-repeat-label"><?php esc_html_e( 'On', 'sugar-calendar-lite' ); ?></span>
+					</label>
+					<input type="text" id="recurrence_end_date" placeholder="<?php esc_html_e( 'Date', 'sugar-calendar-lite' ); ?>" disabled/>
+				</div>
 
-                <div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
-                    <input type="radio" id="recurrence_end_type_count" disabled/>
-                    <label for="recurrence_end_type_count">
-                        <span class="end-repeat-label"><?php esc_html_e( 'After', 'sugar-calendar-lite' ); ?></span>
-                    </label>
-                    <input type="number" min="1" max="999" id="recurrence_end_count" placeholder="1" disabled/>
-                    <label for="recurrence_end_type_count">
-                        <span id="repeat-occurrence"><?php esc_html_e( 'time', 'sugar-calendar-lite' ); ?></span>
-                    </label>
-                </div>
-            </div>
-        </div>
+				<div class="sugar-calendar-metabox__field__wrapper end-repeat-type">
+					<input type="radio" id="recurrence_end_type_count" disabled/>
+					<label for="recurrence_end_type_count">
+						<span class="end-repeat-label"><?php esc_html_e( 'After', 'sugar-calendar-lite' ); ?></span>
+					</label>
+					<input type="number" min="1" max="999" id="recurrence_end_count" placeholder="1" disabled/>
+					<label for="recurrence_end_type_count">
+						<span id="repeat-occurrence"><?php esc_html_e( 'time', 'sugar-calendar-lite' ); ?></span>
+					</label>
+				</div>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
-            <p class="desc">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+			<p class="desc">
 				<?php
 				echo wp_kses(
 					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
@@ -441,8 +464,8 @@ class Metaboxes {
 					]
 				);
 				?>
-            </p>
-        </div>
+			</p>
+		</div>
 
 		<?php
 	}
@@ -458,13 +481,13 @@ class Metaboxes {
 
 		?>
 
-        <div class="sugar-calendar-metabox__field-row">
-            <p class="desc"><?php esc_html_e( 'Add a custom URL which will be displayed in the event details or redirect visitors to a different page.', 'sugar-calendar-lite' ); ?></p>
-        </div>
+		<div class="sugar-calendar-metabox__field-row">
+			<p class="desc"><?php esc_html_e( 'Add a custom URL which will be displayed in the event details or redirect visitors to a different page.', 'sugar-calendar-lite' ); ?></p>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-redirect">
-            <label for="sc-event-url-redirect"><?php esc_html_e( 'Redirect', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-redirect">
+			<label for="sc-event-url-redirect"><?php esc_html_e( 'Redirect', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
 				<?php
 				UI::toggle_control(
 					[
@@ -480,39 +503,39 @@ class Metaboxes {
 					true
 				);
 				?>
-            </div>
-        </div>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url">
-            <label for="sc-event-url"><?php esc_html_e( 'URL', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <input type="text" id="sc-event-url" disabled/>
-                <p class="desc">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url">
+			<label for="sc-event-url"><?php esc_html_e( 'URL', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<input type="text" id="sc-event-url" disabled/>
+				<p class="desc">
 					<?php esc_html_e( 'Paste the full URL starting with https://', 'sugar-calendar-lite' ); ?>
-                </p>
-            </div>
-        </div>
+				</p>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-target">
-            <label for="sc-event-url-target"><?php esc_html_e( 'Target', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <input type="checkbox" id="sc-event-url-target" disabled/>
-                <label for="sc-event-url-target"><?php esc_html_e( 'Open link in a new tab', 'sugar-calendar-lite' ); ?></label>
-            </div>
-        </div>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-target">
+			<label for="sc-event-url-target"><?php esc_html_e( 'Target', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<input type="checkbox" id="sc-event-url-target" disabled/>
+				<label for="sc-event-url-target"><?php esc_html_e( 'Open link in a new tab', 'sugar-calendar-lite' ); ?></label>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-text">
-            <label for="sc-event-url-text"><?php esc_html_e( 'Text', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <input type="text" id="sc-event-url-text" disabled/>
-                <p class="desc">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education sugar-calendar-metabox__field-row--education--sc-event-url-text">
+			<label for="sc-event-url-text"><?php esc_html_e( 'Text', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field">
+				<input type="text" id="sc-event-url-text" disabled/>
+				<p class="desc">
 					<?php esc_html_e( 'Use this text instead of showing the URL.', 'sugar-calendar-lite' ); ?>
-                </p>
-            </div>
-        </div>
+				</p>
+			</div>
+		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
-            <p class="desc">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+			<p class="desc">
 				<?php
 				echo wp_kses(
 					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
@@ -530,8 +553,8 @@ class Metaboxes {
 					]
 				);
 				?>
-            </p>
-        </div>
+			</p>
+		</div>
 
 		<?php
 	}
@@ -548,7 +571,7 @@ class Metaboxes {
 		?>
 		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--venue sugar-calendar-metabox__field-row--education">
 			<label for="venue"><?php esc_html_e( 'Venue', 'sugar-calendar-lite' ); ?></label>
-			<div class="sugar-calendar-metabox__field">
+			<div class="sugar-calendar-metabox__field sugar-calendar-event-venue-selection">
 				<div id="sugar-calendar-setting-row-venue" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-setting-row-select">
 					<span class="sugar-calendar-setting-field choicesjs-select-wrap">
 						<div class="choices" data-type="select-one" tabindex="0" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
@@ -605,8 +628,8 @@ class Metaboxes {
 			</div>
 		</div>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
-            <p class="desc">
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+			<p class="desc">
 				<?php
 				echo wp_kses(
 					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
@@ -633,6 +656,164 @@ class Metaboxes {
 				?>
             </p>
         </div>
+		<?php
+	}
+
+	/**
+	 * Event metabox RSVP section education.
+	 *
+	 * @since 3.7.0
+	 */
+	public function event_metabox_rsvp_education() {
+
+		$toggles = [
+			[
+				'label'     => __( 'RSVP', 'sugar-calendar-lite' ),
+				'separator' => true,
+			],
+			[
+				'label'     => __( 'Limit Capacity', 'sugar-calendar-lite' ),
+				'separator' => true,
+			],
+			[
+				'label' => __( 'Phone Required', 'sugar-calendar-lite' ),
+			],
+			[
+				'label' => __( 'Show Attendee List', 'sugar-calendar-lite' ),
+			],
+			[
+				'label'       => __( 'Allow "Not Going"', 'sugar-calendar-lite' ),
+				'description' => __( 'Enabling this will allow users to submit “Not Going” as a response', 'sugar-calendar-lite'),
+			],
+		];
+
+		foreach ( $toggles as $toggle ) {
+			?>
+			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education">
+				<label for="sc-event-url-redirect"><?php echo esc_html( $toggle['label'] ); ?></label>
+
+				<div class="sugar-calendar-metabox__field">
+					<span class="sugar-calendar-toggle-control">
+						<input type="checkbox" id="sc-event-url-redirect" name="" value="1" disabled="disabled">
+						<label class="sugar-calendar-toggle-control-icon" for="sc-event-url-redirect"></label>
+						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-on" for="sc-event-url-redirect">ON</label>
+						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off" for="sc-event-url-redirect">OFF</label>
+					</span>
+
+					<?php
+					if ( ! empty( $toggle['description'] ) ) {
+						?>
+						<p class="desc"><?php echo esc_html( $toggle['description'] ); ?></p>
+					<?php
+					}
+					?>
+				</div>
+			</div>
+			<?php
+			if ( ! empty( $toggle['separator'] ) && $toggle['separator'] ) {
+				?>
+				<div class="sugar-calendar-metabox__field-row__sep"></div>
+				<?php
+			}
+		}
+		?>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+			<p class="desc">
+				<?php
+				echo wp_kses(
+					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
+						esc_url(
+							Helpers::get_upgrade_link(
+								[
+									'medium'  => 'lite-event-rsvp',
+									'content' => 'Upgrade to Sugar Calendar Pro',
+								]
+							)
+						),
+						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+					),
+					[
+						'a' => [
+							'href'   => [],
+							'rel'    => [],
+							'target' => [],
+						],
+					]
+				);
+				?>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Event metabox venue section education.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return void
+	 */
+	public function event_metabox_speakers_education() {
+
+		?>
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--speaker sugar-calendar-metabox__field-row--education">
+			<label for="speakers"><?php esc_html_e( 'Speakers', 'sugar-calendar-lite' ); ?></label>
+			<div class="sugar-calendar-metabox__field sugar-calendar-event-speaker-selection">
+
+				<div id="sugar-calendar-setting-row-speakers" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-field--event-speaker-selection sugar-calendar-setting-row-select">
+					<span class="sugar-calendar-setting-field">
+						<span class="choicesjs-select-wrap">
+							<div class="choices" data-type="select-multiple" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
+								<div class="choices__inner">
+									<select id="sugar-calendar-setting-speakers" class="sugar-calendar-field--event-speaker-selection choices__input" multiple hidden tabindex="-1" data-choice="active">
+										<option>Mia Harper</option>
+									</select>
+									<div class="choices__list choices__list--multiple">
+										<div class="choices__item choices__item--selectable" aria-selected="true" data-deletable="">
+											Mia Harper
+											<button type="button" class="choices__button" data-button=""></button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</span>
+						<p class="desc"><?php esc_html_e( 'Search an existing speaker or create a new one.', 'sugar-calendar-lite' ); ?></p>
+					</span>
+				</div>
+			</div>
+			<span id="speaker-add-new"><?php esc_html_e( 'Add New Speaker', 'sugar-calendar-lite' ); ?></span>
+		</div>
+
+		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
+			<p class="desc">
+				<?php
+				echo wp_kses(
+					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
+						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
+						esc_url(
+							Helpers::get_upgrade_link(
+								[
+									'medium'  => 'lite-event-speakers',
+									'content' => 'Upgrade to Sugar Calendar Pro',
+								]
+							)
+						),
+						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+					),
+					[
+						'a' => [
+							'href'   => [],
+							'rel'    => [],
+							'target' => [],
+						],
+					]
+				);
+				?>
+			</p>
+		</div>
 		<?php
 	}
 }

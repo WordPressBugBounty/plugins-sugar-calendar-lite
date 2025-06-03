@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelpers;
 use WP_Post;
 
 /**
@@ -111,7 +112,7 @@ class Event extends PageAbstract {
 			'sugar-calendar-admin-event',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-event' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 }

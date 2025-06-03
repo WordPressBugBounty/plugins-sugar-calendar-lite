@@ -29,21 +29,21 @@ function register() {
 		'sc-et-bootstrap',
 		Assets\get_url( 'css' ) . "/frontend/et-bootstrap{$min}.css",
 		[],
-		SC_PLUGIN_VERSION
+		Helpers::get_asset_version()
 	);
 
 	wp_register_style(
 		'sc-et-general',
 		Assets\get_url( 'css' ) . "/frontend/{$path}general{$min}.css",
 		[],
-		SC_PLUGIN_VERSION
+		Helpers::get_asset_version()
 	);
 
 	wp_register_script(
 		'sc-et-bootstrap',
 		Assets\get_url( 'js' ) . "/frontend/bootstrap{$min}.js",
 		[ 'jquery' ],
-		SC_PLUGIN_VERSION,
+		Helpers::get_asset_version(),
 		false
 	);
 
@@ -51,7 +51,7 @@ function register() {
 		'sc-et-popper',
 		Assets\get_url( 'js' ) . "/frontend/popper{$min}.js",
 		[ 'jquery' ],
-		SC_PLUGIN_VERSION,
+		Helpers::get_asset_version(),
 		false
 	);
 
@@ -59,7 +59,7 @@ function register() {
 		'sc-et-general',
 		Assets\get_url( 'js' ) . "/frontend/general{$min}.js",
 		[ 'jquery' ],
-		SC_PLUGIN_VERSION,
+		Helpers::get_asset_version(),
 		false
 	);
 

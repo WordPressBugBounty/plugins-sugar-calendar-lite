@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Tasks;
 
+use ActionScheduler;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
@@ -303,5 +304,43 @@ class Task {
 	public function cancel_force() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
 		add_action( 'shutdown', [ $this, 'cancel' ], PHP_INT_MAX );
+	}
+
+	/**
+	 * Delete license check task duplicates.
+	 *
+	 * @since 3.7.0
+	 */
+	protected function delete_pending() {
+
+		// Make sure that all used functions, classes, and methods exist.
+		if (
+			! function_exists( 'as_get_scheduled_actions' ) ||
+			! class_exists( 'ActionScheduler' ) ||
+			! method_exists( 'ActionScheduler', 'store' ) ||
+			! class_exists( 'ActionScheduler_Store' ) ||
+			! method_exists( 'ActionScheduler_Store', 'delete_action' )
+		) {
+			return;
+		}
+
+		// Get all pending license check actions.
+		$action_ids = as_get_scheduled_actions(
+			[
+				'hook'     => static::ACTION,
+				'status'   => 'pending',
+				'per_page' => 1000,
+			],
+			'ids'
+		);
+
+		if ( empty( $action_ids ) ) {
+			return;
+		}
+
+		// Delete all pending license check actions.
+		foreach ( $action_ids as $action_id ) {
+			ActionScheduler::store()->delete_action( $action_id );
+		}
 	}
 }

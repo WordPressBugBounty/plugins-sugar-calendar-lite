@@ -141,7 +141,7 @@
 			<?php
 			foreach ( $context->get_display_options() as $display_key => $display_option ) {
 				?>
-				<div class="sugar-calendar-block__popover__display_selector__container__body__option">
+				<div data-mode="<?php echo esc_attr( $display_key ); ?>" class="sugar-calendar-block__popover__display_selector__container__body__option">
 					<?php echo esc_html( $display_option ); ?>
 				</div>
 				<?php

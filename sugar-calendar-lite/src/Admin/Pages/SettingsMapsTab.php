@@ -84,7 +84,7 @@ class SettingsMapsTab extends Settings {
 			'sugar-calendar-admin-settings-maps',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-settings-maps' . WP::asset_min() . '.js',
 			[ 'jquery' ],
-			SC_PLUGIN_VERSION,
+			Sugar_Calendar_Helpers::get_asset_version(),
 			true
 		);
 

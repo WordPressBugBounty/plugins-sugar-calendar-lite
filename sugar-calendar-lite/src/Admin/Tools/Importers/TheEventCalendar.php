@@ -2,11 +2,12 @@
 
 namespace Sugar_Calendar\Admin\Tools\Importers;
 
-use WP_Term;
 use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use WP_Term;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_order;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_ticket;
 
@@ -25,6 +26,15 @@ class TheEventCalendar extends Importer {
 	 * @var string
 	 */
 	const SC_TEC_MIGRATION_OPTION_KEY = 'sugar_calendar_tec_migration';
+
+	/**
+	 * The TEC to SC per-process migration option key.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @var string
+	 */
+	const SC_TEC_PROCESS_PROGRESS_OPTION_KEY = 'sugar_calendar_tec_migration_process';
 
 	/**
 	 * DB table used to keep track of the events migrated.
@@ -81,6 +91,15 @@ class TheEventCalendar extends Importer {
 	const MIGRATE_VENUES_TABLE = 'sc_migrate_tec_venues';
 
 	/**
+	 * DB table used to keep track of the tags migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @var string
+	 */
+	const MIGRATE_TAGS_TABLE = 'sc_migrate_tec_tags';
+
+	/**
 	 * The number of TEC events to import.
 	 *
 	 * @since 3.3.0
@@ -106,6 +125,15 @@ class TheEventCalendar extends Importer {
 	 * @var int
 	 */
 	private $number_of_tec_venues_to_import = null;
+
+	/**
+	 * The number of TEC tags to import.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @var int
+	 */
+	private $number_of_tec_tags_to_import = null;
 
 	/**
 	 * TEC custom fields.
@@ -414,6 +442,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @since 3.3.0
 	 * @since 3.6.0 Add tec category to sc calendar import.
+	 * @since 3.7.0 Add tec tag to sc import.
 	 *
 	 * @return string
 	 */
@@ -425,6 +454,7 @@ class TheEventCalendar extends Importer {
 		$tickets_count    = $this->get_total_number_to_import_by_context( 'attendees', [] );
 		$attendees_count  = $this->get_number_of_tec_attendees_to_import();
 		$categories_count = $this->get_total_number_to_import_by_context( 'categories', [] );
+		$tags_count       = $this->get_total_number_to_import_by_context( 'tags', [] );
 
 		$items_per_context = [];
 
@@ -453,6 +483,22 @@ class TheEventCalendar extends Importer {
 				/* translators: %s: Number of TEC categories to import. */
 				_n( '%s category', '%s categories', $categories_count, 'sugar-calendar-lite' ),
 				$categories_count
+			);
+		}
+
+		if ( ! empty( $tags_count ) ) {
+			if ( ! empty( $items_per_context ) ) {
+				$items_per_context[] = ', ';
+
+				if ( empty( $orders_count ) && empty( $tickets_count ) && empty( $attendees_count ) ) {
+					$items_per_context[] = 'and ';
+				}
+			}
+
+			$items_per_context[] = sprintf(
+				/* translators: %s: Number of TEC tags to import. */
+				_n( '%s tag', '%s tags', $tags_count, 'sugar-calendar-lite' ),
+				$tags_count
 			);
 		}
 
@@ -508,6 +554,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @since 3.3.0
 	 * @since 3.6.0 Add tec category to sc calendar import and post migration process.
+	 * @since 3.7.0 Add tec tag migration.
 	 *
 	 * @param int[] $total_number_to_import The total number to import per context.
 	 *
@@ -519,17 +566,34 @@ class TheEventCalendar extends Importer {
 
 		// Get the migration progress.
 		$migration_progress     = $this->get_migration_progress();
-		$total_number_to_import = $this->get_total_number_to_import_by_context( $migration_progress['migration_process'], $total_number_to_import );
+		$migration_process      = $migration_progress['migration_process'];
+		$total_number_to_import = $this->get_total_number_to_import_by_context( $migration_process, $total_number_to_import );
+
+		// Update per-process progress.
+		$process_progresses                       = get_option( self::SC_TEC_PROCESS_PROGRESS_OPTION_KEY, [] );
+		$process_batch_size                       = $this->get_import_batch_size( $migration_process );
+		$process_progress                         = ( $process_progresses[ $migration_process ] ?? 0 ) + $process_batch_size;
+		$process_progresses[ $migration_process ] = $process_progress;
+
+		update_option( self::SC_TEC_PROCESS_PROGRESS_OPTION_KEY, $process_progresses );
+
+		// Get the per-process status.
+		$process_status = self::AJAX_RETURN_STATUS_IN_PROGRESS;
+
+		if ( $process_progress >= $total_number_to_import ) {
+			$process_status = self::AJAX_RETURN_STATUS_COMPLETE;
+		}
 
 		// phpcs:disable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 
-		switch ( $migration_progress['migration_process'] ) {
+		switch ( $migration_process ) {
 			case 'events':
 				return [
 					'total_number_to_import' => $total_number_to_import,
 					'process'                => 'events',
 					'progress'               => $this->start_tec_events_migration( $migration_progress['context'] ),
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case 'categories':
@@ -538,6 +602,16 @@ class TheEventCalendar extends Importer {
 					'process'                => 'categories',
 					'progress'               => $this->start_tec_categories_migration( $migration_progress['context'] ),
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
+				];
+
+			case 'tags':
+				return [
+					'total_number_to_import' => $total_number_to_import,
+					'process'                => 'tags',
+					'progress'               => $this->start_tec_tags_migration( $migration_progress['context'] ),
+					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case 'tickets':
@@ -551,6 +625,7 @@ class TheEventCalendar extends Importer {
 					'process'                => 'hidden',
 					'progress'               => $this->start_tec_tickets_migration( $migration_progress['context'] ),
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case 'orders':
@@ -559,6 +634,7 @@ class TheEventCalendar extends Importer {
 					'process'                => 'orders',
 					'progress'               => $this->start_tec_orders_migration( $migration_progress['context'] ),
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case 'attendees':
@@ -572,6 +648,7 @@ class TheEventCalendar extends Importer {
 					'progress'               => $this->start_tec_attendees_migration( $migration_progress['context'] ),
 					'attendees_count'        => $this->imported_attendees_count,
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case 'venues':
@@ -580,16 +657,13 @@ class TheEventCalendar extends Importer {
 					'process'                => 'venues',
 					'progress'               => $this->start_tec_venues_migration( $migration_progress['context'] ),
 					'status'                 => self::AJAX_RETURN_STATUS_IN_PROGRESS,
+					'process_status'         => $process_status,
 				];
 
 			case self::AJAX_RETURN_STATUS_COMPLETE:
 
 				$this->post_migration_process();
-
 				$this->drop_migration_tables();
-
-				// Let's delete the error transient as well.
-				delete_transient( $this->get_errors_transient_key() );
 
 				update_option( self::SC_TEC_MIGRATION_OPTION_KEY, gmdate( 'Y-m-d' ) );
 
@@ -602,11 +676,21 @@ class TheEventCalendar extends Importer {
 				 */
 				do_action( 'sugar_calendar_admin_tools_importers_the_event_calendar_post_migration_process', $this );
 
-				return [
+				$result = [
 					'status'     => self::AJAX_RETURN_STATUS_COMPLETE,
+					'errors'     => $this->get_errors(),
 					'error_html' => wp_kses_post( $this->get_error_html_display() ),
 				];
+
+				// Delete per-process progress option.
+				delete_option( self::SC_TEC_PROCESS_PROGRESS_OPTION_KEY );
+
+				// Let's delete the error transient as well.
+				delete_transient( $this->get_errors_transient_key() );
+
+				return $result;
 		}
+
 		// phpcs:enable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 
 		return false;
@@ -617,6 +701,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @since 3.3.0
 	 * @since 3.6.0 Add venue context.
+	 * @since 3.7.0 Add tags context.
 	 *
 	 * @param string $context  The context of the migration.
 	 * @param array  $haystack The array containing the total number to import per context.
@@ -653,6 +738,10 @@ class TheEventCalendar extends Importer {
 			case 'categories':
 				$result = $this->get_tec_categories_to_import( true );
 				break;
+
+			case 'tags':
+				$result = $this->get_tec_tags_to_import( true );
+				break;
 		}
 
 		if ( ! empty( $result ) && ! empty( $result[0]->context_to_import_count ) ) {
@@ -671,6 +760,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @since 3.3.0
 	 * @since 3.6.0 Add tec category and venue to migrate, and switched venue to be imported first.
+	 * @since 3.7.0 Add tags to migration process.
 	 *
 	 * @return array
 	 */
@@ -683,6 +773,16 @@ class TheEventCalendar extends Importer {
 			return [
 				'migration_process' => 'venues',
 				'context'           => $tec_venues_to_import,
+			];
+		}
+
+		// Get the TEC tags that are not yet migrated.
+		$tec_tags_to_import = $this->get_tec_tags_to_import();
+
+		if ( ! empty( $tec_tags_to_import ) ) {
+			return [
+				'migration_process' => 'tags',
+				'context'           => $tec_tags_to_import,
 			];
 		}
 
@@ -765,6 +865,8 @@ class TheEventCalendar extends Importer {
 
 		// Get TEC event data.
 		foreach ( $tec_events as $result ) {
+
+			$this->insert_migrating_event( $result->event_id );
 
 			$tec_event = $this->get_tec_event( $result->post_id );
 
@@ -853,6 +955,8 @@ class TheEventCalendar extends Importer {
 
 		foreach ( $tec_categories as $tec_category ) {
 
+			$this->insert_migrating_category( intval( $tec_category->term_id ) );
+
 			if ( $this->migrate_category( $tec_category ) ) {
 
 				++$successful_migrations;
@@ -877,6 +981,8 @@ class TheEventCalendar extends Importer {
 
 		foreach ( $tec_tickets as $ticket_to_import ) {
 
+			$this->insert_migrating_ticket( $ticket_to_import->ID );
+
 			if ( $this->migrate_ticket( $ticket_to_import->ID ) ) {
 				++$successful_migrations;
 			}
@@ -900,6 +1006,8 @@ class TheEventCalendar extends Importer {
 
 		foreach ( $tec_orders_to_import as $tec_order_to_import ) {
 
+			$this->insert_migrating_order( $tec_order_to_import->ID );
+
 			if ( $this->migrate_order( $tec_order_to_import->ID ) ) {
 				++$successful_migrations;
 			}
@@ -922,6 +1030,8 @@ class TheEventCalendar extends Importer {
 		$successful_migrations = 0;
 
 		foreach ( $tec_attendees_to_import as $tec_attendee ) {
+
+			$this->insert_migrating_attendee( $tec_attendee->ID );
 
 			if ( $this->migrate_attendee( $tec_attendee->ID ) ) {
 				++$successful_migrations;
@@ -1542,8 +1652,6 @@ class TheEventCalendar extends Importer {
 			return false;
 		}
 
-		$this->save_migrated_attendee( $tec_attendee_id );
-
 		return true;
 	}
 
@@ -1758,14 +1866,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT ' . $wpdb->prefix . 'tec_events.event_id, ' . $wpdb->prefix . 'tec_events.post_id';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC events to import per iteration.
-				 *
-				 * @since 3.3.0
-				 *
-				 * @param int $limit The number of TEC events to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_events_limit', 10 ) // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				$this->get_import_batch_size( 'events' )
 			);
 		}
 
@@ -1786,7 +1887,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @return int
 	 */
-	private function get_number_of_tec_events_to_import() {
+	public function get_number_of_tec_events_to_import() {
 
 		if ( ! is_null( $this->number_of_tec_events_to_import ) ) {
 			return absint( $this->number_of_tec_events_to_import );
@@ -1829,14 +1930,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT t.term_id, t.name, t.slug, tt.parent';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC categories to import per iteration.
-				 *
-				 * @since 3.6.0
-				 *
-				 * @param int $limit The number of TEC categories to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_categories_limit', 100 ) // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				$this->get_import_batch_size( 'categories' )
 			);
 		}
 
@@ -1904,14 +1998,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT ' . $wpdb->posts . '.ID';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC tickets to import per iteration.
-				 *
-				 * @since 3.3.0
-				 *
-				 * @param int $limit The number of TEC tickets to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_tickets_limit', 10 ) // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				$this->get_import_batch_size( 'tickets' )
 			);
 		}
 
@@ -1953,14 +2040,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT ' . $wpdb->posts . '.ID';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC orders to import per iteration.
-				 *
-				 * @since 3.3.0
-				 *
-				 * @param int $limit The number of TEC orders to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_orders_limit', 10 ) // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				$this->get_import_batch_size( 'orders' )
 			);
 		}
 
@@ -1998,14 +2078,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT ' . $wpdb->posts . '.ID';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC attendees to import per iteration.
-				 *
-				 * @since 3.3.0
-				 *
-				 * @param int $limit The number of TEC attendees to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_attendees_limit', 10 ) // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				$this->get_import_batch_size( 'attendees' )
 			);
 		}
 
@@ -2048,6 +2121,30 @@ class TheEventCalendar extends Importer {
 	}
 
 	/**
+	 * Insert the event to be migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $sc_event_id The Sugar Calendar event ID.
+	 *
+	 * @return int|false
+	 */
+	private function insert_migrating_event( $tec_event_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_EVENTS_TABLE,
+			[
+				'tec_event_id' => $tec_event_id,
+			],
+			[
+				'%d',
+			]
+		);
+	}
+
+	/**
 	 * Save the migrated event info.
 	 *
 	 * @since 3.3.0
@@ -2063,18 +2160,46 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->update(
 			$wpdb->prefix . self::MIGRATE_EVENTS_TABLE,
 			[
-				'tec_event_id'      => $tec_event_id,
 				'tec_event_post_id' => $tec_event_post_id,
 				'sc_event_id'       => $sc_event_id,
 				'sc_event_post_id'  => $sc_event_post_id,
 			],
 			[
+				'tec_event_id' => $tec_event_id,
+			],
+			[
 				'%d',
 				'%d',
 				'%d',
+			],
+			[
+				'%d',
+			]
+		);
+	}
+
+	/**
+	 * Insert the ticket to be migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_ticket_id TEC event ID.
+	 *
+	 * @return int|false
+	 */
+	private function insert_migrating_ticket( $tec_ticket_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_TICKETS_TABLE,
+			[
+				'tec_ticket_id' => $tec_ticket_id,
+			],
+			[
 				'%d',
 			]
 		);
@@ -2092,6 +2217,7 @@ class TheEventCalendar extends Importer {
 	 * @return int|false
 	 */
 	private function save_migrated_ticket( $tec_ticket_id, $sc_event_id = 0, $is_migrated = false ) {
+
 		/*
 		 * SC can only have 1 ticket per event, for the other TEC tickets we don't have to migrate them.
 		 */
@@ -2101,16 +2227,44 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->update(
 			$wpdb->prefix . self::MIGRATE_TICKETS_TABLE,
 			[
+				'sc_event_id' => $sc_event_id,
+				'is_migrated' => $is_migrated,
+			],
+			[
 				'tec_ticket_id' => $tec_ticket_id,
-				'sc_event_id'   => $sc_event_id,
-				'is_migrated'   => $is_migrated,
+			],
+			[
+				'%d',
 			],
 			[
 				'%d',
 				'%d',
+			]
+		);
+	}
+
+	/**
+	 * Insert the category to be migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_category_id TEC category ID.
+	 *
+	 * @return int|false
+	 */
+	private function insert_migrating_category( $tec_category_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_CATEGORIES_TABLE,
+			[
+				'tec_category_id' => $tec_category_id,
+			],
+			[
 				'%d',
 			]
 		);
@@ -2121,7 +2275,7 @@ class TheEventCalendar extends Importer {
 	 *
 	 * @since 3.6.0
 	 *
-	 * @param int $tec_category_id         The TEC category ID.
+	 * @param int $tec_category_id        The TEC category ID.
 	 * @param int $tec_category_parent_id The TEC category parent ID.
 	 * @param int $sc_category_id         The Sugar Calendar category ID.
 	 *
@@ -2131,16 +2285,44 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->update(
 			$wpdb->prefix . self::MIGRATE_CATEGORIES_TABLE,
 			[
-				'tec_category_id'        => $tec_category_id,
 				'tec_category_parent_id' => $tec_category_parent_id,
 				'sc_category_id'         => $sc_category_id,
 			],
 			[
+				'tec_category_id' => $tec_category_id,
+			],
+			[
+				'%d',
+			],
+			[
 				'%d',
 				'%d',
+			]
+		);
+	}
+
+	/**
+	 * Insert the order to be migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_order_id TEC order ID.
+	 *
+	 * @return int|false
+	 */
+	private function insert_migrating_order( $tec_order_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_ORDERS_TABLE,
+			[
+				'tec_order_id' => $tec_order_id,
+			],
+			[
 				'%d',
 			]
 		);
@@ -2160,29 +2342,33 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->update(
 			$wpdb->prefix . self::MIGRATE_ORDERS_TABLE,
 			[
+				'sc_order_id' => $sc_order_id,
+			],
+			[
 				'tec_order_id' => $tec_order_id,
-				'sc_order_id'  => $sc_order_id,
 			],
 			[
 				'%d',
+			],
+			[
 				'%d',
 			]
 		);
 	}
 
 	/**
-	 * Save the migrated attendee info.
+	 * Insert the attendee to be migrated.
 	 *
-	 * @since 3.3.0
+	 * @since 3.7.0
 	 *
-	 * @param int $tec_attendee_id The Event Calendar attendee ID.
+	 * @param int $tec_attendee_id TEC attendee ID.
 	 *
 	 * @return int|false
 	 */
-	private function save_migrated_attendee( $tec_attendee_id ) {
+	private function insert_migrating_attendee( $tec_attendee_id ) {
 
 		global $wpdb;
 
@@ -2374,6 +2560,7 @@ class TheEventCalendar extends Importer {
 	 * Drop the migration tables.
 	 *
 	 * @since 3.3.0
+	 * @since 3.7.0 Add tags migration table.
 	 *
 	 * @return bool|int
 	 */
@@ -2388,7 +2575,8 @@ class TheEventCalendar extends Importer {
 			$wpdb->prefix . esc_sql( self::MIGRATE_TICKETS_TABLE ) . ', ' .
 			$wpdb->prefix . esc_sql( self::MIGRATE_ORDERS_TABLE ) . ', ' .
 			$wpdb->prefix . esc_sql( self::MIGRATE_ATTENDEES_TABLE ) . ', ' .
-			$wpdb->prefix . esc_sql( self::MIGRATE_CATEGORIES_TABLE ) . ';'
+			$wpdb->prefix . esc_sql( self::MIGRATE_CATEGORIES_TABLE ) . ', ' .
+			$wpdb->prefix . esc_sql( self::MIGRATE_TAGS_TABLE ) . ';'
 		);
 	}
 
@@ -2422,6 +2610,7 @@ class TheEventCalendar extends Importer {
 	 * Post migration process.
 	 *
 	 * @since 3.6.0
+	 * @since 3.7.0 Add tag association to events.
 	 *
 	 * @return void
 	 */
@@ -2432,6 +2621,9 @@ class TheEventCalendar extends Importer {
 
 		// Relate migrated categories to migrated events.
 		$this->relate_migrated_categories_to_events();
+
+		// Relate migrated tags to migrated events.
+		$this->relate_migrated_tags_to_events();
 	}
 
 	/**
@@ -2558,14 +2750,7 @@ class TheEventCalendar extends Importer {
 			$select_query = 'SELECT ' . $wpdb->posts . '.ID';
 			$limit_query  = $wpdb->prepare(
 				'LIMIT %d',
-				/**
-				 * Filter the number of TEC venues to import per iteration.
-				 *
-				 * @since 3.6.0
-				 *
-				 * @param int $limit The number of TEC venues to import per iteration.
-				 */
-				apply_filters( 'sc_import_tec_venues_limit', 50 )
+				$this->get_import_batch_size( 'venues' )
 			);
 		}
 
@@ -2593,6 +2778,9 @@ class TheEventCalendar extends Importer {
 		$successful_migrations = 0;
 
 		foreach ( $tec_venues as $venue ) {
+
+			$this->insert_migrating_venue( $venue->ID );
+
 			if ( $this->migrate_venue( $venue->ID ) ) {
 				++$successful_migrations;
 			}
@@ -2647,6 +2835,30 @@ class TheEventCalendar extends Importer {
 	}
 
 	/**
+	 * Insert the venue to be migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_venue_id TEC venue ID.
+	 *
+	 * @return int|false
+	 */
+	private function insert_migrating_venue( $tec_venue_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_VENUES_TABLE,
+			[
+				'tec_venue_id' => $tec_venue_id,
+			],
+			[
+				'%d',
+			]
+		);
+	}
+
+	/**
 	 * Save the migrated venue info.
 	 *
 	 * @since 3.6.0
@@ -2660,14 +2872,18 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->update(
 			$wpdb->prefix . self::MIGRATE_VENUES_TABLE,
 			[
+				'sc_venue_id' => $sc_venue_id,
+			],
+			[
 				'tec_venue_id' => $tec_venue_id,
-				'sc_venue_id'  => $sc_venue_id,
 			],
 			[
 				'%d',
+			],
+			[
 				'%d',
 			]
 		);
@@ -2688,6 +2904,25 @@ class TheEventCalendar extends Importer {
 
 		$sql = 'CREATE TABLE ' . $wpdb->prefix . self::MIGRATE_VENUES_TABLE
 			. ' (`id` int AUTO_INCREMENT,`tec_venue_id` int,`sc_venue_id` int, PRIMARY KEY (id));';
+
+		dbDelta( $sql );
+	}
+
+	/**
+	 * Create the `sc_migrate_tec_tags` table.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return void
+	 */
+	private function create_tec_migrate_tec_tags_table() {
+
+		global $wpdb;
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		$sql = 'CREATE TABLE ' . $wpdb->prefix . self::MIGRATE_TAGS_TABLE
+			. ' (`id` int AUTO_INCREMENT,`tec_tag_id` int,`sc_tag_id` int, PRIMARY KEY (id));';
 
 		dbDelta( $sql );
 	}
@@ -2852,5 +3087,363 @@ class TheEventCalendar extends Importer {
 		}
 
 		return absint( $sc_venue_id );
+	}
+
+	/**
+	 * Get the TEC tags that are not yet migrated.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param bool $count_only Whether to return the count only.
+	 *
+	 * @return array
+	 */
+	private function get_tec_tags_to_import( $count_only = false ) {
+
+		// First, check if the `sc_migrate_tec_tags` table exists.
+		if ( empty( $this->check_if_db_table_exists( self::MIGRATE_TAGS_TABLE ) ) ) {
+			// Create the table.
+			$this->create_tec_migrate_tec_tags_table();
+		}
+
+		global $wpdb;
+
+		$group_by = '';
+
+		if ( $count_only ) {
+
+			$select_query = 'SELECT COUNT(t.term_id) AS context_to_import_count';
+			$limit_query  = '';
+
+		} else {
+
+			$select_query = 'SELECT t.term_id, t.name, t.slug';
+			$group_by     = ' GROUP BY t.term_id ';
+			$limit_query  = $wpdb->prepare(
+				'LIMIT %d',
+				/**
+				 * Filter the number of TEC tags to import per iteration.
+				 *
+				 * @since 3.7.0
+				 *
+				 * @param int $limit The number of TEC tags to import per iteration.
+				 */
+				apply_filters( 'sugar_calendar_admin_tools_importers_the_event_calendar_tags_limit', 100 )
+			);
+		}
+
+		// Get tag terms that are used by TEC events and not yet migrated.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+		$query = esc_sql( $select_query ) . ' FROM ' . $wpdb->terms . ' AS t'
+			. ' INNER JOIN ' . $wpdb->term_taxonomy . ' AS tt ON t.term_id = tt.term_id'
+			. ' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_TAGS_TABLE ) . ' AS mtt'
+			. ' ON mtt.tec_tag_id = t.term_id'
+			. ' WHERE tt.taxonomy = "post_tag"'
+			. ' AND mtt.id IS NULL '
+			. esc_sql( $group_by )
+			. esc_sql( $limit_query );
+
+		$results = $wpdb->get_results( $query );
+
+		return $results;
+	}
+
+	/**
+	 * Start the migration of TEC tags.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $tec_tags Array containing the TEC tags to migrate.
+	 *
+	 * @return int The number of successful migrations.
+	 */
+	private function start_tec_tags_migration( $tec_tags ) {
+
+		$successful_migrations = 0;
+
+		/**
+		 * Debugging with Ray.
+		 *
+		 * @TODO: Remove before commit.
+		 */
+		ray(
+			[
+				'name' => __FUNCTION__,
+				'tec_tags' => $tec_tags,
+			]
+		);
+
+		foreach ( $tec_tags as $tec_tag ) {
+			if ( $this->migrate_tag( $tec_tag ) ) {
+				++$successful_migrations;
+			}
+		}
+
+		return $successful_migrations;
+	}
+
+	/**
+	 * Migrate the TEC tag to Sugar Calendar.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param object $tec_tag The TEC tag term object.
+	 *                        - term_id: TEC tag ID.
+	 *                        - name: TEC tag name.
+	 *                        - slug: TEC tag slug.
+	 *
+	 * @return bool Returns `true` if the tag is successfully migrated. Otherwise, `false`.
+	 */
+	private function migrate_tag( $tec_tag ) {
+
+		// Default migrated state.
+		$migrated = false;
+
+		// Get the TEC tag term ID.
+		$tec_tag_id = intval( $tec_tag->term_id );
+
+		// Get full tag term data.
+		$tec_tag_data = $this->get_term_data_from_db( $tec_tag_id );
+
+		// Return if $tec_tag_data is not an array or a wp error.
+		if (
+			! is_array( $tec_tag_data )
+			||
+			is_wp_error( $tec_tag_data )
+		) {
+			return $migrated;
+		}
+
+		// By default, let wp handle the slug.
+		$sc_tag_args = [
+			// Setup tag name and description.
+			'name'        => $tec_tag_data['name'],
+			'description' => $tec_tag_data['description'],
+
+			// If the term already exists, use the unique slug.
+			'slug'        => term_exists( $tec_tag_data['name'], 'post_tag' )
+				? wp_unique_term_slug(
+					$tec_tag_data['slug'],
+					(object) [ 'taxonomy' => 'post_tag' ]
+				)
+				: $tec_tag_data['slug'],
+		];
+
+		// Insert term as a tag.
+		$sc_tag_id = wp_insert_term(
+			$tec_tag_data['name'],
+			TagsHelpers::get_tags_taxonomy_id(),
+			$sc_tag_args
+		);
+
+		// If term is inserted, update migration table.
+		if (
+			is_array( $sc_tag_id )
+			&&
+			! is_wp_error( $sc_tag_id )
+		) {
+			$sc_tag_id = intval( $sc_tag_id['term_id'] );
+
+			// Save the migrated tag info.
+			$saved_migrated_tag = $this->save_migrated_tag(
+				$tec_tag_id,
+				$sc_tag_id
+			);
+
+			$migrated = $saved_migrated_tag !== false;
+
+			/**
+			 * Additional actions for tag migration.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param int    $sc_tag_id    The Sugar Calendar tag ID.
+			 * @param object $tec_tag      The TEC tag object.
+			 * @param array  $tec_tag_data The tag data.
+			 */
+			do_action(
+				'sugar_calendar_admin_tools_importers_the_event_calendar_migrate_tag',
+				$sc_tag_id,
+				$tec_tag,
+				$tec_tag_data
+			);
+		}
+
+		return $migrated;
+	}
+
+	/**
+	 * Save the migrated tag info.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_tag_id The TEC tag ID.
+	 * @param int $sc_tag_id  The Sugar Calendar tag ID.
+	 *
+	 * @return int|false
+	 */
+	private function save_migrated_tag( $tec_tag_id, $sc_tag_id ) {
+
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::MIGRATE_TAGS_TABLE,
+			[
+				'tec_tag_id' => $tec_tag_id,
+				'sc_tag_id'  => $sc_tag_id,
+			],
+			[
+				'%d',
+				'%d',
+			]
+		);
+	}
+
+	/**
+	 * Get the migrated tag ID by TEC tag ID.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $tec_tag_id The TEC tag ID.
+	 *
+	 * @return int
+	 */
+	private function get_migrated_tag_id_by_tec_tag_id( $tec_tag_id ) {
+
+		global $wpdb;
+
+		return $wpdb->get_var(
+			$wpdb->prepare( 'SELECT sc_tag_id FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_TAGS_TABLE ) . ' WHERE tec_tag_id = %d', $tec_tag_id )
+		);
+	}
+
+	/**
+	 * Relate migrated tags to migrated events.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return void
+	 */
+	private function relate_migrated_tags_to_events() {
+
+		global $wpdb;
+
+		// Get all migrated events with their TEC IDs.
+		$migrated_events = $wpdb->get_results(
+			'SELECT
+				tec_event_id, sc_event_id, tec_event_post_id, sc_event_post_id
+			FROM
+				' . esc_sql( $wpdb->prefix . self::MIGRATE_EVENTS_TABLE ) . '
+			WHERE
+				sc_event_id IS NOT NULL'
+		);
+
+		if ( empty( $migrated_events ) ) {
+			return;
+		}
+
+		// Process each migrated event.
+		foreach ( $migrated_events as $event ) {
+
+			$tec_tags = $this->get_post_term_ids_from_db(
+				$event->tec_event_post_id,
+				'post_tag'
+			);
+
+			if ( empty( $tec_tags ) || is_wp_error( $tec_tags ) ) {
+				continue;
+			}
+
+			$sc_tag_ids = [];
+
+			// Map TEC tag IDs to Sugar Calendar tag IDs.
+			foreach ( $tec_tags as $tec_tag_id ) {
+
+				// Get the migrated Sugar Calendar tag ID by TEC tag ID.
+				$sc_tag_id = $this->get_migrated_tag_id_by_tec_tag_id( $tec_tag_id );
+
+				if ( ! empty( $sc_tag_id ) ) {
+					$sc_tag_ids[] = (int) $sc_tag_id;
+				}
+			}
+
+			if ( ! empty( $sc_tag_ids ) ) {
+
+				// Set the tags for the Sugar Calendar event using post ID.
+				wp_set_object_terms(
+					$event->sc_event_post_id,
+					$sc_tag_ids,
+					TagsHelpers::get_tags_taxonomy_id()
+				);
+			}
+		}
+	}
+
+	private function get_import_batch_size( $context ) {
+
+		switch ( $context ) {
+			case 'events':
+				/**
+				 * Filter the number of TEC events to import per iteration.
+				 *
+				 * @since 3.3.0
+				 *
+				 * @param int $limit The number of TEC events to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_events_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			case 'categories':
+				/**
+				 * Filter the number of TEC categories to import per iteration.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param int $limit The number of TEC categories to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_categories_limit', 100 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			case 'tickets':
+				/**
+				 * Filter the number of TEC tickets to import per iteration.
+				 *
+				 * @since 3.3.0
+				 *
+				 * @param int $limit The number of TEC tickets to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_tickets_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			case 'orders':
+				/**
+				 * Filter the number of TEC orders to import per iteration.
+				 *
+				 * @since 3.3.0
+				 *
+				 * @param int $limit The number of TEC orders to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_orders_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			case 'attendees':
+				/**
+				 * Filter the number of TEC attendees to import per iteration.
+				 *
+				 * @since 3.3.0
+				 *
+				 * @param int $limit The number of TEC attendees to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_attendees_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			case 'venues':
+				/**
+				 * Filter the number of TEC venues to import per iteration.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param int $limit The number of TEC venues to import per iteration.
+				 */
+				return apply_filters( 'sc_import_tec_venues_limit', 50 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			default:
+				return 0;
+		}
 	}
 }

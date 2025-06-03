@@ -7,12 +7,16 @@
 .sugar-calendar-block {
 
 	&__calendars,
-	&__venues {
+	&__venues,
+	&__speakers,
+	&__tags {
+
 		margin-bottom: 24px;
-		z-index: 99;
 
 		.sc-calendar-block-select,
-		.sc-venue-block-select {
+		.sc-venue-block-select,
+		.sc-speaker-block-select,
+		.sc-tag-block-select {
 
 			&__control {
 				border-color: inherit;
@@ -65,8 +69,18 @@
 		}
 	}
 
-	&__venues {
+	// z-indexes
+	&__calendars {
+		z-index: 99;
+	}
+	&__tags {
 		z-index: 90;
+	}
+	&__venues {
+		z-index: 85;
+	}
+	&__speakers {
+		z-index: 80;
 	}
 
 	&__colors {
@@ -77,6 +91,19 @@
 
 		.components-tools-panel-item {
 			margin-top: 0 !important;
+		}
+	}
+}
+
+.editor-sidebar__panel {
+
+	.sugar-calendar-block__tags {
+
+		/**
+		 * Remove the box shadow from the tags input when it is focused.
+		 */
+		.sc-tag-block-select__input:focus {
+			box-shadow: none;
 		}
 	}
 }

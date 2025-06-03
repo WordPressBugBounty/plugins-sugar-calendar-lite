@@ -232,6 +232,7 @@ class UI {
 				'value'       => '',
 				'description' => '',
 				'choicejs'    => false,
+				'multiple'    => false,
 			]
 		);
 
@@ -242,6 +243,7 @@ class UI {
 		}
 
 		$choicejs = (bool) $args['choicejs'];
+		$multiple = (bool) $args['multiple'];
 
 		// Prioritize args class over choicejs.
 		if ( ! empty( $args['class'] ) ) {
@@ -256,6 +258,10 @@ class UI {
 
 		if ( ! empty( $name ) ) {
 			$name = "sugar-calendar[$name]";
+
+			if ( $multiple ) {
+				$name .= '[]';
+			}
 		}
 
 		$options = $args['options'];
@@ -270,9 +276,11 @@ class UI {
 
 		<?php endif; ?>
 
-        <select name="<?php echo esc_attr( $name ); ?>"
-                id="<?php echo esc_attr( $id ); ?>"
-                class="<?php echo sanitize_html_class( $class ); ?>">
+        <select
+			name="<?php echo esc_attr( $name ); ?>"
+			id="<?php echo esc_attr( $id ); ?>"
+			class="<?php echo sanitize_html_class( $class ); ?>"
+			<?php echo $multiple ? 'multiple' : ''; ?>>
 
 			<?php foreach ( $options as $option_value => $option_label ) : ?>
 
@@ -283,7 +291,6 @@ class UI {
 					[ $option_label, $option_enabled ] = $option_label;
 				}
 				?>
-
                 <option value="<?php echo esc_attr( $option_value ); ?>"
                     <?php disabled( ! (bool) $option_enabled ); ?>
 					<?php echo in_array( $option_value, $value ) ? 'selected' : ''; ?>><?php echo esc_html( $option_label ); ?></option>

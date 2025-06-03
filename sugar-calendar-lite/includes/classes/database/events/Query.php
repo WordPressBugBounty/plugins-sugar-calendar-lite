@@ -122,6 +122,7 @@ final class Event_Query extends Query {
 	 *                                                 Default null.
 	 * @type array         $date_modified_query        Date query clauses to limit by. See Date_Query.
 	 *                                                 Default null.
+	 * @type array         $speaker_ids                Array of speaker IDs to filter events by. Default empty.
 	 * @type bool          $count                      Whether to return a event count (true) or array of event objects.
 	 *                                                 Default false.
 	 * @type string        $fields                     Item fields to return. Accepts any column known names
@@ -141,7 +142,7 @@ final class Event_Query extends Query {
 	 *                                                 Default true.
 	 *                                                 }
 	 */
-	public function __construct( $query = array() ) {
+	public function __construct( $query = [] ) {
 
 		parent::__construct( $query );
 	}
@@ -158,7 +159,7 @@ final class Event_Query extends Query {
 	 *
 	 * @return array|int List of items, or number of items when 'count' is passed as a query var.
 	 */
-	public function query( $query = array() ) {
+	public function query( $query = [] ) {
 
 		// Do the query
 		$retval = parent::query( $query );
@@ -183,7 +184,7 @@ final class Event_Query extends Query {
 	 *
 	 * @param array $events
 	 */
-	private function maybe_prime_object_id_caches( $events = array() ) {
+	private function maybe_prime_object_id_caches( $events = [] ) {
 
 		// Maybe prime the post cache if there are more than 2 post objects
 		if ( empty( $events ) ) {
@@ -193,9 +194,9 @@ final class Event_Query extends Query {
 		// Extract post IDs from queried events
 		$post_ids = wp_filter_object_list(
 			$events,
-			array(
+			[
 				'object_type' => 'post',
-			),
+			],
 			'and',
 			'object_id'
 		);
@@ -205,7 +206,7 @@ final class Event_Query extends Query {
 		if ( count( $post_ids ) > 1 ) {
 
 			// Query for posts to prime the caches
-			new \WP_Query( array(
+			new \WP_Query( [
 				'post_type'              => sugar_calendar_get_event_post_type_id(),
 				'post_status'            => 'any',
 				'post__in'               => $post_ids,
@@ -216,7 +217,32 @@ final class Event_Query extends Query {
 				'update_post_term_cache' => true,
 				'update_post_meta_cache' => true,
 				'lazy_load_term_meta'    => true,
-			) );
+			] );
 		}
+	}
+
+	/**
+	 * Override the parse_where method to add support for speaker_ids argument.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return void
+	 */
+	public function parse_where() {
+
+		// Call parent parse_where to set up the base where conditions.
+		parent::parse_where();
+
+		/**
+		 * Filter for the query clauses.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $query_clauses The join and where clauses.
+		 * @param Query $query         Current Query instance.
+		 *
+		 * @return array The modified join and where clauses.
+		 */
+		$this->query_clauses = apply_filters( 'sugar_calendar_event_query_parse_where_query_clauses', $this->query_clauses, $this );
 	}
 }

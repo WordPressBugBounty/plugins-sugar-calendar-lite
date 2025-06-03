@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Integrations\Elementor;
 use Elementor\Plugin;
 use Elementor\Widgets_Manager;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Elementor integration.
@@ -140,7 +141,7 @@ class Elementor {
 			'sugar-calendar-elementor-editor',
 			SC_PLUGIN_ASSETS_URL . 'css/integrations/elementor/editor' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 

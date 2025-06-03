@@ -30,6 +30,8 @@ import { useEffect } from '@wordpress/element';
 import Select from 'react-select';
 
 import { useVenues, hasFinishedGettingVenues, onChangeVenues } from './../../Common/assets/js/venue';
+import { useSpeakers, hasFinishedGettingSpeakers, onChangeSpeakers } from './../../Common/assets/js/speaker';
+import { useTags, hasFinishedGettingTags, onChangeTags } from './../../Common/assets/js/tags';
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -76,10 +78,18 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		setAttributes({ calendars: selectedCalendarIds });
 	}
 
+	const // Request the tags.
+		tagsSlug = window.sugar_calendar_admin_common.tags_slug,
+		tags = useTags( tagsSlug ),
+		isTagsResolved = hasFinishedGettingTags( tagsSlug );
+
 	const // Request the venues.
 		venues = useVenues(),
 		isVenuesResolved = hasFinishedGettingVenues();
-		console.log( 'venues', venues );
+
+	// Request the speakers.
+	const speakers = useSpeakers(),
+		isSpeakersResolved = hasFinishedGettingSpeakers();
 
 	const onChangeDisplay = ( display ) => {
 		setAttributes( { display: display } );
@@ -111,14 +121,16 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	}
 
 	const showCalendarFilterSection = hasFinishedGettingCalendars && calendars && calendars.length > 1;
+	const showTagsFilterSection = isTagsResolved && tags && tags.length > 0;
 	const showVenuesFilterSection = isVenuesResolved && venues && venues.length > 0;
+	const showSpeakersFilterSection = isSpeakersResolved && speakers && speakers.length > 0;
 
 	return (
 		<>
 			<InspectorControls>
 
 				{
-					( showCalendarFilterSection || showVenuesFilterSection ) &&
+					( showCalendarFilterSection || showVenuesFilterSection || showSpeakersFilterSection || showTagsFilterSection ) &&
 					(
 
 						<PanelBody
@@ -157,6 +169,41 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 							}
 
 							{
+								showTagsFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Tags', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__tags"
+										classNamePrefix="sc-tag-block-select"
+										isMulti
+										options={
+											tags.map( ( tag ) => {
+												return {
+													value: tag.id,
+													label: tag.name
+												};
+											} )
+										}
+										onChange={(selectedOptions) => {
+											onChangeTags(selectedOptions, setAttributes);
+										}}
+										value={attributes.tags ? attributes.tags.map( ( tagId ) => {
+											const tag = tags.find( ( tag ) => tag.id === tagId );
+											return tag
+												? {
+													value: tag.id,
+													label: tag.name
+												}
+												: null;
+										} ) : []}
+									/>
+								</>
+							}
+
+							{
 								showVenuesFilterSection &&
 								<>
 									<Heading
@@ -184,6 +231,41 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 												? {
 													value: venue.id,
 													label: venue.title.rendered,
+												}
+												: null;
+										}) : []}
+									/>
+								</>
+							}
+
+							{
+								showSpeakersFilterSection &&
+								<>
+									<Heading
+										level={3}>
+										{ __( 'Speakers', 'sugar-calendar-block' ) }
+									</Heading>
+									<Select
+										className="sugar-calendar-block__speakers"
+										classNamePrefix="sc-speaker-block-select"
+										isMulti
+										options={
+											speakers.map((speaker) => {
+												return {
+													value: speaker.id,
+													label: speaker.title.rendered,
+												};
+											})
+										}
+										onChange={(selectedOptions) => {
+											onChangeSpeakers(selectedOptions, setAttributes);
+										}}
+										value={attributes.speakers ? attributes.speakers.map((speakerId) => {
+											const speaker = speakers.find((speaker) => speaker.id === speakerId);
+											return speaker
+												? {
+													value: speaker.id,
+													label: speaker.title.rendered,
 												}
 												: null;
 										}) : []}

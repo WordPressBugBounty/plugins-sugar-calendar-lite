@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Events\Tables;
 
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 
 /**
  * Event table.
@@ -362,6 +363,7 @@ class Basic extends Base {
 			'title'    => esc_html_x( 'Title', 'Noun', 'sugar-calendar-lite' ),
 			'start'    => esc_html_x( 'Start', 'Noun', 'sugar-calendar-lite' ),
 			'end'      => esc_html_x( 'End', 'Noun', 'sugar-calendar-lite' ),
+			'tags'     => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
 			'duration' => esc_html_x( 'Duration', 'Noun', 'sugar-calendar-lite' ),
 		];
 
@@ -445,6 +447,9 @@ class Basic extends Base {
 
 			// Default actions.
 			$actions['trash'] = esc_html__( 'Move to Trash', 'sugar-calendar-lite' );
+
+			// Edit tags action. Handled via JS.
+			$actions['edit_tags'] = esc_html__( 'Edit Tags', 'sugar-calendar-lite' );
 		}
 
 		return $actions;
@@ -918,10 +923,28 @@ class Basic extends Base {
 		// Attempt to display rows.
 		if ( ! empty( $list_items ) ) {
 
+			/**
+			 * Fires before displaying the table rows.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param Basic $this ListTable instance.
+			 */
+			do_action( 'sugar_calendar_admin_events_tables_basic_before_rows', $this );
+
 			// Loop through items and show them.
 			foreach ( $list_items as $item ) {
 				$this->single_row( $item );
 			}
+
+			/**
+			 * Fires after displaying the table rows.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param Basic $this ListTable instance.
+			 */
+			do_action( 'sugar_calendar_admin_events_tables_basic_after_rows', $this );
 
 			// No rows to display.
 		} else {

@@ -37,6 +37,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 	 * @since 3.1.2 Convert to visitor timezone if necessary.
 	 * @since 3.4.0 Add paged data support.
 	 * @since 3.5.0 Add `venues` and `venuesFilter` to block data.
+	 * @since 3.7.0 Add `tags` and `tagsFilter` to block data.
 	 */
 	Block.prototype.update = function( args ) {
 
@@ -61,8 +62,12 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 			attributes: this.$blockContainer.data( 'attributes' ),
 			calendars: this.controls.getCalendarIds(),
 			venues: this.controls.getVenueIds(),
+			speakers: this.controls.getSpeakerIds(),
+			tags: this.controls.getTagIds(),
 			calendarsFilter: this.controls.getCalendarsFilter(),
 			venuesFilter: this.controls.getVenuesFilter(),
+			speakersFilter: this.controls.getSpeakersFilter(),
+			tagsFilter: this.controls.getTagsFilter(),
 			day: parseInt( this.controls.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.controls.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.controls.$formContainer.find( 'input[name="sc_year"]' ).val() ),

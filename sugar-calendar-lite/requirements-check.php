@@ -183,6 +183,9 @@ final class Requirements_Check {
 
 		// Add transient to trigger redirect to the Welcome page.
 		set_transient( 'sugar_calendar_activation_redirect', true, 30 );
+
+		// Add transient to signal Setup Wizard first run.
+		set_transient( 'sugar_calendar_setup_wizard_first_run', true, 30 );
 	}
 
 	/**

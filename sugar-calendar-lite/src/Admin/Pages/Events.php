@@ -338,23 +338,35 @@ class Events extends PageAbstract {
 			'sugar-calendar-admin-events',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-events' . WP::asset_min() . '.css',
 			[ 'sugar-calendar-vendor-tippy' ],
-			SC_PLUGIN_VERSION
+			Helpers::get_asset_version()
 		);
 
 		wp_enqueue_script(
 			'sugar-calendar-admin-events',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-events' . WP::asset_min() . '.js',
-			[ 'jquery', 'sugar-calendar-vendor-tippy' ],
-			SC_PLUGIN_VERSION,
+			[ 'jquery', 'sugar-calendar-vendor-tippy', 'sugar-calendar-vendor-choices', 'underscore' ],
+			Helpers::get_asset_version(),
 			true
+		);
+
+		/**
+		 * Filters the localize script for the events page.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $localize_script Localize script.
+		 */
+		$admin_events_localize_script = apply_filters(
+			'sugar_calendar_admin_pages_events_localize_script',
+			[
+				'ajax_url' => Plugin::instance()->get_admin()->ajax_url(),
+			]
 		);
 
 		wp_localize_script(
 			'sugar-calendar-admin-events',
 			'sugar_calendar_admin_events',
-			[
-				'ajax_url' => Plugin::instance()->get_admin()->ajax_url(),
-			]
+			$admin_events_localize_script
 		);
 	}
 

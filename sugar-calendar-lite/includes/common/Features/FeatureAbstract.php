@@ -14,6 +14,15 @@ abstract class FeatureAbstract implements HasRequirementsInterface {
 	use CheckRequirements;
 
 	/**
+	 * Feature name.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @var string
+	 */
+	public $name;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0

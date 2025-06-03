@@ -16,7 +16,15 @@
       "type": "array",
       "default": []
     },
+    "tags": {
+      "type": "array",
+      "default": []
+    },
     "venues": {
+      "type": "array",
+      "default": []
+    },
+    "speakers": {
       "type": "array",
       "default": []
     },

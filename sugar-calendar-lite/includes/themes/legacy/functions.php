@@ -10,13 +10,105 @@
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Helper;
 
-// Exit if accessed directly
+// Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * Get events within a custom date range with flexible arguments.
+ *
+ * @since 3.7.0
+ *
+ * @param array $args Arguments.
+ *        DateTimeInterface $start_range Start date range.
+ *        DateTimeInterface $end_range   End date range.
+ *        array|string      $category    Category IDs or term slugs.
+ *        string            $search      Search term.
+ *        int|null          $number      Number of events to retrieve.
+ *        array             $venues      Venue IDs.
+ *        array             $tags        Tag IDs.
+ *        array             $speakers    Speaker IDs.
+ *
+ * @return array Array of event objects.
+ */
+function sugar_calendar_get_events_within_range( $args = [] ) {
+
+	$defaults = [
+		'start_range' => null,
+		'end_range'   => null,
+		'category'    => '',
+		'search'      => '',
+		'number'      => null,
+		'venues'      => [],
+		'tags'        => [],
+		'speakers'    => [],
+	];
+
+	$args = wp_parse_args( $args, $defaults );
+
+	if (
+		! ( $args['start_range'] instanceof DateTimeInterface ) ||
+		! ( $args['end_range'] instanceof DateTimeInterface )
+	) {
+		return [];
+	}
+
+	$view_start = $args['start_range']->format( 'Y-m-d H:i:s' );
+	$view_end   = $args['end_range']->format( 'Y-m-d 23:59:59' );
+
+	if ( is_null( $args['number'] ) ) {
+		$args['number'] = sc_get_number_of_events();
+	} else {
+		$args['number'] = absint( $args['number'] );
+	}
+
+	// Default arguments.
+	$query_args = [
+		'no_found_rows' => true,
+		'number'        => $args['number'],
+		'object_type'   => 'post',
+		'status'        => 'publish',
+		'orderby'       => 'start',
+		'order'         => 'ASC',
+		'date_query'    => sugar_calendar_get_date_query_args( 'month', $view_start, $view_end ),
+		'search'        => $args['search'],
+	];
+
+	// Maybe add category if non-empty.
+	if ( ! empty( $args['category'] ) ) {
+		$tax                = sugar_calendar_get_calendar_taxonomy_id();
+		$query_args[ $tax ] = $args['category']; // Sanitized later.
+	}
+
+	// Maybe add venues if non-empty.
+	if ( ! empty( $args['venues'] ) ) {
+		$query_args['venue_id'] = $args['venues'];
+	}
+
+	// Maybe add tags if non-empty.
+	if ( ! empty( $args['tags'] ) ) {
+		$query_args['sc_event_tags'] = $args['tags'];
+	}
+
+	// Maybe add speakers if non-empty.
+	if ( ! empty( $args['speakers'] ) ) {
+		$query_args['speaker_ids'] = $args['speakers'];
+	}
+
+	// Query for events.
+	$events = sugar_calendar_get_events( $query_args );
+
+	// Get event sequences.
+	$retval = sc_get_event_sequences_for_calendar( $events, $view_start, $view_end );
+
+	// Return the events.
+	return $retval;
+}
 
 /**
  * Get events with a custom parameter.
  *
  * @since 3.5.0
+ * @deprecated 3.7.0 Use sugar_calendar_get_events_within_range() instead.
  *
  * @param DateTimeImmutable $start_range Start range.
  * @param DateTimeImmutable $end_range   End range.
@@ -33,56 +125,23 @@ function sc_get_events_for_calendar_with_custom_range(
 	$category = '',
 	$search = '',
 	$number = null,
-	$venues = []
+	$venues = [],
 ) {
 
-	if (
-		! ( $start_range instanceof DateTimeInterface ) ||
-		! ( $end_range instanceof DateTimeInterface )
-	) {
-		return [];
-	}
+	// Trigger deprecation notice.
+	_deprecated_function( __FUNCTION__, '3.7.0', 'sugar_calendar_get_events_within_range()' );
 
-	$view_start = $start_range->format( 'Y-m-d H:i:s' );
-	$view_end   = $end_range->format( 'Y-m-d 23:59:59' );
-
-	if ( is_null( $number ) ) {
-		$number = sc_get_number_of_events();
-	} else {
-		$number = absint( $number );
-	}
-
-	// Default arguments.
-	$args = [
-		'no_found_rows' => true,
-		'number'        => $number,
-		'object_type'   => 'post',
-		'status'        => 'publish',
-		'orderby'       => 'start',
-		'order'         => 'ASC',
-		'date_query'    => sugar_calendar_get_date_query_args( 'month', $view_start, $view_end ),
-		'search'        => $search,
-	];
-
-	// Maybe add category if non-empty.
-	if ( ! empty( $category ) ) {
-		$tax          = sugar_calendar_get_calendar_taxonomy_id();
-		$args[ $tax ] = $category; // Sanitized later.
-	}
-
-	// Maybe add venues if non-empty.
-	if ( ! empty( $venues ) ) {
-		$args['venue_id'] = $venues;
-	}
-
-	// Query for events.
-	$events = sugar_calendar_get_events( $args );
-
-	// Get event sequences.
-	$retval = sc_get_event_sequences_for_calendar( $events, $view_start, $view_end );
-
-	// Return the events.
-	return $retval;
+	// Backward compatibility.
+	return sugar_calendar_get_events_within_range(
+		[
+			'start_range' => $start_range,
+			'end_range'   => $end_range,
+			'category'    => $category,
+			'search'      => $search,
+			'number'      => $number,
+			'venues'      => $venues,
+		]
+	);
 }
 
 /**
@@ -680,7 +739,8 @@ function sc_get_calendar_day_offset( $timestamp = '' ) {
 /**
  * Build Calendar for Event post type
  *
- * @since  1.0.0
+ * @since 1.0.0
+ * @since 3.7.0 Use sugar_calendar_get_events_within_range() instead.
  *
  * @param                    $month
  * @param                    $year
@@ -732,10 +792,12 @@ function sc_draw_calendar( $month, $year, $size = 'large', $category = null, $st
 		$end_period   = $end_period->modify( '+1 day' );
 	}
 
-	$all_events = sc_get_events_for_calendar_with_custom_range(
-		$start_period,
-		$end_period,
-		$category
+	$all_events = sugar_calendar_get_events_within_range(
+		[
+			'start_range' => $start_period,
+			'end_range'   => $end_period,
+			'category'    => $category,
+		]
 	);
 
 	//row for week one */
@@ -927,6 +989,7 @@ function sc_draw_calendar_week($display_time, $size = 'large', $category = null,
  *
  * @since 1.0.0
  * @since 3.1.2 Support `$timezone`.
+ * @since 3.7.0 Use sugar_calendar_get_events_within_range() instead.
  *
  * @param                    $display_time
  * @param string             $size
@@ -974,10 +1037,12 @@ function sc_draw_calendar_2week( $display_time, $size = 'large', $category = nul
 		$end_period   = $end_period->modify( '+1 day' );
 	}
 
-	$all_events = sc_get_events_for_calendar_with_custom_range(
-		$start_period,
-		$end_period,
-		$category
+	$all_events = sugar_calendar_get_events_within_range(
+		[
+			'start_range' => $start_period,
+			'end_range'   => $end_period,
+			'category'    => $category,
+		]
 	);
 
 	// output seven days
@@ -1033,6 +1098,7 @@ function sc_draw_calendar_2week( $display_time, $size = 'large', $category = nul
  *
  * @since 1.0.0
  * @since 3.1.2 Support `$timezone`.
+ * @since 3.7.0 Use sugar_calendar_get_events_within_range() instead.
  *
  * @param                    $display_time
  * @param string             $size
@@ -1077,10 +1143,12 @@ function sc_draw_calendar_day( $display_time, $size = 'large', $category = null,
 		$end_period   = $end_period->modify( '+1 day' );
 	}
 
-	$all_events = sc_get_events_for_calendar_with_custom_range(
-		$start_period,
-		$end_period,
-		$category
+	$all_events = sugar_calendar_get_events_within_range(
+		[
+			'start_range' => $start_period,
+			'end_range'   => $end_period,
+			'category'    => $category,
+		]
 	);
 
 	// output current day

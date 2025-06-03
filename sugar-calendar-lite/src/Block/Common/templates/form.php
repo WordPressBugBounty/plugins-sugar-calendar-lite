@@ -16,4 +16,6 @@ use Sugar_Calendar\Options;
 	<input type="hidden" name="sc_visitor_tz_convert" value="<?php echo esc_attr( absint( Options::get( 'timezone_convert' ) ) ); ?>">
 	<input type="hidden" name="sc_calendars_filter" value="<?php echo esc_attr( implode( ',', $context->get_calendars() ) ); ?>" />
 	<input type="hidden" name="sc_venues_filter" value="<?php echo esc_attr( implode( ',', $context->get_venues() ) ); ?>" />
+	<input type="hidden" name="sc_speakers_filter" value="<?php echo esc_attr( implode( ',', $context->get_speakers() ) ); ?>" />
+	<input type="hidden" name="sc_tags_filter" value="<?php echo esc_attr( implode( ',', $context->get_tags() ) ); ?>" />
 </form>

@@ -57,6 +57,52 @@ const SCAdminCommon = window.SCAdminCommon || ( function( document, window, $ ) 
 					)
 				} );
 			}
+
+			$( '.sugar-calendar-widget-ajax-action' ).on(
+				'click',
+				function( e ) {
+					e.preventDefault();
+
+					const el = $( e.currentTarget );
+					app.saveWidgetMeta(
+						el.data( 'meta-action' ),
+						el.data( 'meta-nonce' ),
+						el.data( 'meta-name' ),
+						el.data( 'meta-value' )
+					);
+
+
+					if ( el.data( 'callback' ) === 'closeWidgetBlock' ) {
+						el.closest( '.sugar-calendar-dash-widget-block' )
+							.hide( 'fast' );
+					}
+				}
+			);
+		},
+
+		/**
+		 * Save dashboard widget meta on a backend.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param {string} metaAction Meta action to save.
+		 * @param {string} metaNonce Nonce to save.
+		 * @param {string} metaName  Meta name to save.
+		 * @param {number} metaValue Value to save.
+		 */
+		saveWidgetMeta( metaAction, metaNonce, metaName, metaValue ) {
+
+			$.post(
+				sugar_calendar_admin_common.ajaxurl,
+				{
+					nonce   : metaNonce,
+					action  : metaAction,
+					meta    : {
+						name: metaName,
+						value: metaValue,
+					},
+				}
+			);
 		},
 	};
 

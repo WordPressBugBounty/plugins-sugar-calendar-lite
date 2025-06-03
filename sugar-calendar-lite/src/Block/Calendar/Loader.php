@@ -59,6 +59,7 @@ class Loader {
 	 * @since 3.0.0
 	 * @since 3.1.2 Add new deps for the `sugar-calendar-js` script.
 	 * @since 3.2.0 Loaded the assets only when the block is present.
+	 * @since 3.7.0 Added filter for the localized script data.
 	 */
 	public function enqueue_script() {
 
@@ -87,32 +88,42 @@ class Loader {
 			'sugar-calendar-js',
 			SC_PLUGIN_ASSETS_URL . "js/sugar-calendar{$min}.js",
 			$sugar_calendar_js_deps,
-			SC_PLUGIN_VERSION
+			Helpers::get_asset_version()
 		);
 
 		wp_localize_script(
 			'sugar-calendar-js',
 			'sugar_calendar_obj',
-			[
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'sugar-calendar-block' ),
-				'strings'  => [
-					'events_on'  => sprintf(
-						// phpcs:ignore Squiz.Commenting.BlockComment.NoEmptyLineBefore
-						/*
-						 * translators: %s: Month name and the date. E.g January 1.
-						 */
-						esc_html__( 'Events on %s', 'sugar-calendar-lite' ),
-						'[Month Date]'
-					),
-					'this_month' => esc_html__( 'This Month', 'sugar-calendar-lite' ),
-					'this_week'  => esc_html__( 'This Week', 'sugar-calendar-lite' ),
-					'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
-				],
-				'settings' => [
-					'sow' => absint( sc_get_week_start_day() ),
-				],
-			]
+			/**
+			 * Filters the localized script data.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param array $data The localized script data.
+			 */
+			apply_filters(
+				'sugar_calendar_block_calendar_loader_localized_script_data',
+				[
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'nonce'    => wp_create_nonce( 'sugar-calendar-block' ),
+					'strings'  => [
+						'events_on'  => sprintf(
+							// phpcs:ignore Squiz.Commenting.BlockComment.NoEmptyLineBefore
+							/*
+							* translators: %s: Month name and the date. E.g January 1.
+							*/
+							esc_html__( 'Events on %s', 'sugar-calendar-lite' ),
+							'[Month Date]'
+						),
+						'this_month' => esc_html__( 'This Month', 'sugar-calendar-lite' ),
+						'this_week'  => esc_html__( 'This Week', 'sugar-calendar-lite' ),
+						'today'      => esc_html__( 'Today', 'sugar-calendar-lite' ),
+					],
+					'settings' => [
+						'sow' => absint( sc_get_week_start_day() ),
+					],
+				]
+			)
 		);
 	}
 

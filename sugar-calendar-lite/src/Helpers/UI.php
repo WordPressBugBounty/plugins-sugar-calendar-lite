@@ -37,15 +37,16 @@ class UI {
 	 * @return void
 	 */
 	public static function header() {
+
 		?>
-		<div id="sugar-calendar-header" class="sugar-calendar-header">
-			<img class="sugar-calendar-header-logo"
-				src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
-				alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar-lite' ); ?>"/>
-			<a href="<?php echo esc_url( Helpers::get_utm_url( 'https://sugarcalendar.com/docs/', [ 'content' => 'Help' ] ) ); ?>" target="_blank" id="sugar-calendar-header-help">
+        <div id="sugar-calendar-header" class="sugar-calendar-header">
+            <img class="sugar-calendar-header-logo"
+                 src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
+                 alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar-lite' ); ?>"/>
+            <a href="<?php echo esc_url( Helpers::get_utm_url( 'https://sugarcalendar.com/docs/', [ 'content' => 'Help' ] ) ); ?>" target="_blank" id="sugar-calendar-header-help">
 				<?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?>
-			</a>
-		</div>
+            </a>
+        </div>
 		<?php
 	}
 
@@ -232,6 +233,7 @@ class UI {
 				'value'       => '',
 				'description' => '',
 				'choicejs'    => false,
+				'multiple'    => false,
 			]
 		);
 
@@ -242,12 +244,25 @@ class UI {
 		}
 
 		$choicejs = (bool) $args['choicejs'];
-		$class    = $choicejs ? 'choicesjs-select' : '';
+		$multiple = (bool) $args['multiple'];
+
+		// Prioritize args class over choicejs.
+		if ( ! empty( $args['class'] ) ) {
+			$class = $args['class'];
+		} elseif ( $choicejs ) {
+			$class = 'choicesjs-select';
+		} else {
+			$class = '';
+		}
 
 		$name = sanitize_key( $args['name'] );
 
 		if ( ! empty( $name ) ) {
 			$name = "sugar-calendar[$name]";
+
+			if ( $multiple ) {
+				$name .= '[]';
+			}
 		}
 
 		$options = $args['options'];
@@ -264,7 +279,8 @@ class UI {
 
         <select name="<?php echo esc_attr( $name ); ?>"
                 id="<?php echo esc_attr( $id ); ?>"
-                class="<?php echo sanitize_html_class( $class ); ?>">
+                class="<?php echo sanitize_html_class( $class ); ?>"
+                <?php echo $multiple ? 'multiple' : ''; ?>>
 
 			<?php foreach ( $options as $option_value => $option_label ) : ?>
 
@@ -710,7 +726,7 @@ class UI {
                value="<?php echo esc_attr( $value ); ?>"
                id="<?php echo esc_attr( $id ); ?>"
                placeholder="<?php echo esc_attr( $placeholder ); ?>"
-			   <?php echo ( $args['required'] ? esc_attr( 'required' ) : '' ); ?>
+			<?php echo( $args['required'] ? esc_attr( 'required' ) : '' ); ?>
         />
 
 		<?php
@@ -871,26 +887,26 @@ class UI {
 
 		<?php if ( empty( $link ) ) : ?>
 
-			<button
-				type="<?php echo esc_attr( $submit ); ?>"
-				name="<?php echo esc_attr( $name ); ?>"
-				id="<?php echo esc_attr( $id ); ?>"
-				class="<?php echo esc_attr( $class ); ?>"
+            <button
+                    type="<?php echo esc_attr( $submit ); ?>"
+                    name="<?php echo esc_attr( $name ); ?>"
+                    id="<?php echo esc_attr( $id ); ?>"
+                    class="<?php echo esc_attr( $class ); ?>"
 				<?php if ( ! empty( $args['data'] ) ) : ?>
 					<?php foreach ( $args['data'] as $key => $value ) : ?>
-						data-<?php echo esc_attr( $key ); ?>="<?php echo esc_attr( $value ); ?>"
+                        data-<?php echo esc_attr( $key ); ?>="<?php echo esc_attr( $value ); ?>"
 					<?php endforeach; ?>
 				<?php endif; ?>
-			><?php echo esc_html( $text ); ?></button>
+            ><?php echo esc_html( $text ); ?></button>
 
 		<?php else : ?>
 
-			<a
-				href="<?php echo esc_url( $link ); ?>"
-				id="<?php echo esc_attr( $id ); ?>"
-				target="<?php echo esc_attr( $target ); ?>"
-				class="<?php echo esc_attr( $class ); ?>"
-			><?php echo esc_html( $text ); ?></a>
+            <a
+                    href="<?php echo esc_url( $link ); ?>"
+                    id="<?php echo esc_attr( $id ); ?>"
+                    target="<?php echo esc_attr( $target ); ?>"
+                    class="<?php echo esc_attr( $class ); ?>"
+            ><?php echo esc_html( $text ); ?></a>
 
 		<?php endif; ?>
 		<?php
@@ -922,5 +938,131 @@ class UI {
 	public static function get_preserved_value( $name ) {
 
 		return isset( $_REQUEST['preserved'][ $name ] ) ? wp_unslash( $_REQUEST['preserved'][ $name ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	}
+
+	/**
+	 * Get addon badge HTML.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $addon Addon data.
+	 *
+	 * @return string
+	 */
+	public static function get_addon_badge( array $addon ): string {
+
+		// List of possible badges.
+		$badges = [
+			'recommended' => [
+				'text'  => esc_html__( 'Recommended', 'sugar-calendar-lite' ),
+				'color' => 'green',
+				'icon'  => 'star',
+			],
+			'new'         => [
+				'text'  => esc_html__( 'New', 'sugar-calendar-lite' ),
+				'color' => 'blue',
+			],
+			'featured'    => [
+				'text'  => esc_html__( 'Featured', 'sugar-calendar-lite' ),
+				'color' => 'orange',
+			],
+		];
+
+		$badge = [];
+
+		// Get first badge that exists.
+		foreach ( $badges as $key => $value ) {
+			if ( ! empty( $addon[ $key ] ) ) {
+				$badge = $value;
+
+				break;
+			}
+		}
+
+		if ( empty( $badge ) ) {
+			return '';
+		}
+
+		return self::get_badge( $badge['text'], 'sm', 'inline', $badge['color'], $badge['icon'] ?? '' );
+	}
+
+	/**
+	 * Get badge HTML.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $text     Badge text.
+	 * @param string $size     Badge size.
+	 * @param string $position Badge position.
+	 * @param string $color    Badge color.
+	 * @param string $icon     Badge icon name in Font Awesome "format", e.g. `fa-check`, defaults to empty string.
+	 *
+	 * @return string
+	 */
+	public static function get_badge(
+		string $text,
+		string $size = 'sm',
+		string $position = 'inline',
+		string $color = 'neutral',
+		string $icon = ''
+	): string {
+
+		if ( ! empty( $icon ) ) {
+			$icon = self::get_inline_icon( $icon );
+		}
+
+		return sprintf(
+			'<span class="sugar-calendar-badge sugar-calendar-badge-%1$s sugar-calendar-badge-%2$s sugar-calendar-badge-%3$s">%4$s%5$s</span>',
+			esc_attr( $size ),
+			esc_attr( $position ),
+			esc_attr( $color ),
+			wp_kses(
+				$icon,
+				[
+					'i' => [
+						'class'       => [],
+						'aria-hidden' => [],
+					],
+				]
+			),
+			esc_html( $text )
+		);
+	}
+
+	/**
+	 * Print badge HTML.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $text     Badge text.
+	 * @param string $size     Badge size.
+	 * @param string $position Badge position.
+	 * @param string $color    Badge color.
+	 * @param string $icon     Badge icon name in Font Awesome "format", e.g. `fa-check`, defaults to empty string.
+	 */
+	public static function print_badge(
+		string $text,
+		string $size = 'sm',
+		string $position = 'inline',
+		string $color = 'neutral',
+		string $icon = ''
+	) {
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo self::get_badge( $text, $size, $position, $color, $icon );
+	}
+
+	/**
+	 * Get inline icon HTML.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $name Font Awesome icon name, e.g. `fa-check`.
+	 *
+	 * @return string HTML markup for the icon element.
+	 */
+	public static function get_inline_icon( string $name ): string {
+
+		return sprintf( '<i class="sugar-calendar-icon sugar-calendar-icon--%1$s" aria-hidden="true"></i>', esc_attr( $name ) );
 	}
 }

@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Abstract Event page.
@@ -77,7 +78,7 @@ abstract class VenuesAbstract extends PageAbstract {
 			'sugar-calendar-admin-venues',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-venues' . WP::asset_min() . '.css',
 			[ 'sugar-calendar-admin-settings', 'sugar-calendar-admin-education' ],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 

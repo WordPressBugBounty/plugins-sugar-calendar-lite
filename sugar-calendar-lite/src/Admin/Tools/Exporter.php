@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Admin\Tools;
 
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagHelpers;
+
 class Exporter {
 
 	/**
@@ -89,6 +91,11 @@ class Exporter {
 					$this->get_orders_without_event_export_data();
 					$this->get_extra_tickets_export_data();
 					break;
+
+				case 'tags':
+					$this->get_tags_export_data();
+					$this->get_events_tags_relationship_data();
+					break;
 			}
 		}
 	}
@@ -111,6 +118,10 @@ class Exporter {
 					$this->get_attendees_export_data();
 					$this->get_all_orders_export_data();
 					$this->get_extra_tickets_export_data( [ 'order' ] );
+					break;
+
+				case 'tags':
+					$this->get_tags_export_data();
 					break;
 			}
 		}
@@ -795,5 +806,85 @@ class Exporter {
 			'SELECT ' . esc_sql( implode( ',', $this->get_orders_select_columns() ) )
 			. ' FROM ' . $wpdb->prefix . 'sc_orders'
 		);
+	}
+
+	/**
+	 * Get tags for export.
+	 *
+	 * @since 3.7.0
+	 */
+	private function get_tags_export_data() {
+
+		$tags = get_terms(
+			[
+				'taxonomy'   => TagHelpers::get_tags_taxonomy_id(),
+				'hide_empty' => false,
+			]
+		);
+
+		if ( empty( $tags ) || is_wp_error( $tags ) ) {
+			return [];
+		}
+
+		$tags_data = [];
+
+		foreach ( $tags as $tag ) {
+			$tags_data[] = [
+				'id'          => $tag->term_id,
+				'name'        => $tag->name,
+				'slug'        => $tag->slug,
+				'description' => $tag->description,
+			];
+		}
+
+		$this->export_data['tags'] = $tags_data;
+	}
+
+	/**
+	 * Get event-tag relationships for export.
+	 *
+	 * @since 3.7.0
+	 */
+	private function get_events_tags_relationship_data() {
+
+		global $wpdb;
+
+		$taxonomy_id = TagHelpers::get_tags_taxonomy_id();
+
+		// Get all events with their tags.
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tr.object_id as event_id, tt.term_id as tag_id
+				 FROM {$wpdb->term_relationships} tr
+				 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				 INNER JOIN {$wpdb->prefix}sc_events sce ON sce.object_id = tr.object_id
+				 WHERE tt.taxonomy = %s",
+				$taxonomy_id
+			),
+			ARRAY_A
+		);
+
+		// If there are no results or events data is empty, return.
+		if (
+			empty( $results )
+			||
+			empty( $this->export_data['events'] )
+		) {
+			return;
+		}
+
+		// Get the post terms relationship and relate it to event data.
+		$post_terms = [];
+
+		foreach ( $results as $result ) {
+			$post_terms[ $result['event_id'] ][] = intval( $result['tag_id'] );
+		}
+
+		foreach ( $this->export_data['events'] as $index => $event ) {
+
+			if ( isset( $post_terms[ $event->post_id ] ) ) {
+				$this->export_data['events'][ $index ]->tags = $post_terms[ $event->post_id ];
+			}
+		}
 	}
 }

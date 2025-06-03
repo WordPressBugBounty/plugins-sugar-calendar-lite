@@ -7,6 +7,7 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Event;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Frontend Loader.
@@ -67,7 +68,7 @@ class Loader {
 			'sc-event-ticketing-frontend-single-event',
 			get_url( 'css' ) . '/frontend/single-event' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_enqueue_style( 'sc-event-ticketing-frontend-single-event' );

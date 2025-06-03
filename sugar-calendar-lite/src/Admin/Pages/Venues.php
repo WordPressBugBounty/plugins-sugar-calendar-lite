@@ -86,10 +86,10 @@ class Venues extends VenuesAbstract {
 			esc_html__( 'Venue Events List', 'sugar-calendar-lite' ),
 		];
 		?>
-			<div id="sugar-calendar-venues-education" class="wrap sugar-calendar-admin-wrap">
-				<div class="sugar-calendar-admin-content sugar-calendar-admin-content-venue">
+			<div id="sugar-calendar-venues-education" class="wrap sugar-calendar-admin-wrap sugar-calendar-admin-page-education">
+				<div class="sugar-calendar-admin-page-education__content sugar-calendar-admin-content sugar-calendar-admin-content-venue">
 
-					<div class="sugar-calendar-venues-education-header">
+					<div class="sugar-calendar-admin-page-education__content__header sugar-calendar-venues-education-header">
 
 						<h1 class="screen-reader-text"><?php echo self::get_label(); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h1>
 
@@ -105,6 +105,25 @@ class Venues extends VenuesAbstract {
 						<p class="description">
 							<?php esc_html_e( 'Help your visitors with detailed information and a map of your venues where you are hosting your events. Sugar Calendar Venues will simplify your venues/locations management and your event attendees will have all the information they need.', 'sugar-calendar-lite' ); ?>
 						</p>
+
+						<?php
+							UI::button(
+								[
+									'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+									'class'  => 'sugar-calendar-admin-page-education__content__header__buy-pro-btn',
+									'size'   => 'lg',
+									'link'   => esc_url(
+										Helpers::get_upgrade_link(
+											[
+												'medium'  => 'venues',
+												'content' => 'Upgrade to Sugar Calendar Pro Top',
+											]
+										)
+									),
+									'target' => '_blank',
+								]
+							);
+						?>
 					</div>
 
 					<div class="sugar-calendar-education-preview">
@@ -138,7 +157,14 @@ class Venues extends VenuesAbstract {
 							[
 								'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
 								'size'   => 'lg',
-								'link'   => esc_url( Helpers::get_upgrade_link( [ 'medium' => 'venues', 'content' => 'Upgrade to Sugar Calendar Pro' ] ) ),
+								'link'   => esc_url(
+									Helpers::get_upgrade_link(
+										[
+											'medium'  => 'venues',
+											'content' => 'Upgrade to Sugar Calendar Pro Bottom',
+										]
+									)
+								),
 								'target' => '_blank',
 							]
 						);

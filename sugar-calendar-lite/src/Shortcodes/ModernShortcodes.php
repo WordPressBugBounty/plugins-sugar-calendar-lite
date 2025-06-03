@@ -22,6 +22,7 @@ class ModernShortcodes {
 	 * Initialize the shortcodes loader.
 	 *
 	 * @since 3.4.0
+	 * @since 3.7.0 Removed venues attribute.
 	 */
 	public function init() {
 
@@ -49,8 +50,8 @@ class ModernShortcodes {
 						'default'         => [],
 						'type'            => 'array_int',
 					],
-					'venues'                    => [
-						'block_attribute' => 'venues',
+					'tags'                      => [
+						'block_attribute' => 'tags',
 						'default'         => [],
 						'type'            => 'array_int',
 					],
@@ -122,8 +123,8 @@ class ModernShortcodes {
 						'default'         => [],
 						'type'            => 'array_int',
 					],
-					'venues'                    => [
-						'block_attribute' => 'venues',
+					'tags'                      => [
+						'block_attribute' => 'tags',
 						'default'         => [],
 						'type'            => 'array_int',
 					],
@@ -218,6 +219,16 @@ class ModernShortcodes {
 				],
 			],
 		];
+
+		/**
+		 * Filters the modern shortcodes configuration.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array             $shortcodes Array of shortcode configurations.
+		 * @param ModernShortcodes  $this       Instance of ModernShortcodes.
+		 */
+		$this->shortcodes = apply_filters( 'sugar_calendar_shortcodes_modern_shortcodes', $this->shortcodes, $this );
 
 		// Register hooks.
 		$this->hooks();

@@ -12,11 +12,14 @@ use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Pages\Settings as PageSettings;
+use Sugar_Calendar\Admin\Pages\Settings\SingleEmailConfig;
+use Sugar_Calendar\Admin\Pages\SettingsEmailConfig;
 
 /**
  * Register page ids.
  *
  * @since 1.2.0
+ * @since 3.7.0 Added support for Emails tab.
  *
  * @param string|null $page_id Current page id.
  */
@@ -31,7 +34,11 @@ function admin_area_current_page_id( $page_id ) {
 				break;
 
 			case 'tickets':
-				$page_id = 'settings_tickets';
+				$page_id = 'settings_emails';
+				break;
+
+			case 'emails':
+				$page_id = 'settings_emails';
 				break;
 		}
 	}
@@ -43,6 +50,7 @@ function admin_area_current_page_id( $page_id ) {
  * Register page classes.
  *
  * @since 1.2.0
+ * @since 3.7.0 Added support to Emails tab.
  *
  * @return PageInterface[]
  */
@@ -50,6 +58,7 @@ function admin_area_pages( $pages ) {
 
 	$pages['settings_payments'] = $pages['settings'];
 	$pages['settings_tickets']  = $pages['settings'];
+	$pages['settings_emails']   = $pages['settings'];
 
 	return $pages;
 }
@@ -58,6 +67,7 @@ function admin_area_pages( $pages ) {
  * Return the URL used for the section.
  *
  * @since 1.0.0
+ * @since 3.7.0 Change the default to `payment`.
  *
  * @param array $args
  *
@@ -68,7 +78,7 @@ function get_section_url( $args = [] ) {
 	// Parse arguments
 	$r = wp_parse_args( $args, [
 		'page'    => PageSettings::get_slug(),
-		'section' => 'tickets',
+		'section' => 'payments',
 	] );
 
 	// Return the URL with query args
@@ -76,9 +86,10 @@ function get_section_url( $args = [] ) {
 }
 
 /**
- * Add the "Feeds" section to the settings sections array.
+ * Add the "Payments" and "Emails" section to the settings sections array.
  *
  * @since 1.0.0
+ * @since 3.7.0 Renamed "Tickets" to "Emails".
  *
  * @param array $sections
  *
@@ -86,7 +97,6 @@ function get_section_url( $args = [] ) {
  */
 function add_section( $sections = [] ) {
 
-	// Add "Tickets" main section
 	$sections['payments'] = [
 		'id'   => 'payments',
 		'name' => esc_html__( 'Payments', 'sugar-calendar-lite' ),
@@ -98,13 +108,12 @@ function add_section( $sections = [] ) {
 		'func' => __NAMESPACE__ . '\\section',
 	];
 
-	// Add "Tickets" main section
-	$sections['tickets'] = [
-		'id'   => 'tickets',
-		'name' => esc_html__( 'Tickets', 'sugar-calendar-lite' ),
+	$sections['emails'] = [
+		'id'   => 'emails',
+		'name' => esc_html__( 'Emails', 'sugar-calendar-lite' ),
 		'url'  => get_section_url(
 			[
-				'section' => 'tickets',
+				'section' => 'emails',
 			]
 		),
 		'func' => __NAMESPACE__ . '\\section',
@@ -115,7 +124,7 @@ function add_section( $sections = [] ) {
 }
 
 /**
- * Add the "Feeds" section to the settings sections array.
+ * Add the subsections.
  *
  * @since 1.0.0
  *
@@ -125,7 +134,6 @@ function add_section( $sections = [] ) {
  */
 function add_subsection( $subsections = [] ) {
 
-	// Add "Payments" subsection
 	$subsections['payments']['payments'] = [
 		'id'   => 'payments',
 		'name' => esc_html__( 'Payments', 'sugar-calendar-lite' ),
@@ -133,8 +141,7 @@ function add_subsection( $subsections = [] ) {
 		'func' => __NAMESPACE__ . '\\payments_section',
 	];
 
-	// Add "Emails" subsection
-	$subsections['tickets']['emails'] = [
+	$subsections['emails']['emails'] = [
 		'id'   => 'emails',
 		'name' => esc_html__( 'Emails', 'sugar-calendar-lite' ),
 		'url'  => get_section_url( [ 'subsection' => 'main' ] ),
@@ -149,6 +156,7 @@ function add_subsection( $subsections = [] ) {
  * Render the payments section
  *
  * @since 1.0.0
+ * @since 3.7.0 Moved "Tickets" related settings here.
  */
 function payments_section() {
 
@@ -156,11 +164,6 @@ function payments_section() {
 	$pages        = get_pages();
 	$is_sandbox   = Functions\is_sandbox();
 	$is_constant  = defined( 'SC_GATEWAY_SANDBOX_MODE' ) && SC_GATEWAY_SANDBOX_MODE;
-	$receipt_page = Settings\get_setting( 'receipt_page' );
-
-	?>
-
-	<?php
 
 	UI::heading(
 		[
@@ -301,22 +304,63 @@ function payments_section() {
 
 	);
 
-	$receipt_pages = wp_list_pluck( $pages, 'post_title', 'ID' );
+	$pages = wp_list_pluck( $pages, 'post_title', 'ID' );
 
 	if ( empty( $pages ) ) {
-		$receipt_pages = [
+		$pages        = [
 			esc_html__( 'No pages found', 'sugar-calendar-lite' ),
 		];
+		$receipt_page = 0;
+		$ticket_page  = 0;
+
+	} else {
+		$receipt_page = Settings\get_setting( 'receipt_page' );
+		$ticket_page  = Settings\get_setting( 'ticket_page' );
 	}
+
+	UI::heading(
+		[
+			'title' => esc_html__( 'Pages Configuration', 'sugar-calendar-lite' ),
+		]
+	);
 
 	UI::select_input(
 		[
 			'id'          => 'receipt_page',
 			'name'        => 'receipt_page',
-			'options'     => $receipt_pages,
+			'options'     => $pages,
 			'value'       => $receipt_page,
 			'label'       => esc_html__( 'Payment Success Page', 'sugar-calendar-lite' ),
 			'description' => $receipt_page_description,
+		]
+	);
+
+	$ticket_page_description = sprintf( /* translators: %1$s - field description; %2$s - field directions; %3$s shortcode.*/
+		'%1$s.<br>%2$s<code>[sc_event_tickets_details]</code> %3$s.',
+		esc_html__( 'The page where customer will view the details of their ticket purchases', 'sugar-calendar-lite' ),
+		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
+		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
+	);
+
+	UI::select_input(
+		[
+			'id'          => 'sc_et_ticket_page',
+			'name'        => 'ticket_page',
+			'options'     => $pages,
+			'value'       => $ticket_page,
+			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' ),
+			'description' => $ticket_page_description,
+		]
+	);
+
+	// Attendee required fields.
+	UI::toggle_control(
+		[
+			'id'          => 'attendee_fields_is_required',
+			'name'        => 'attendee_fields_is_required',
+			'value'       => Settings\get_setting( 'attendee_fields_is_required', false ),
+			'label'       => esc_html__( 'Attendee Information is Required', 'sugar-calendar-lite' ),
+			'description' => __( "Visitors purchasing your event tickets will be required to provide Attendee's information on checkout for every ticket they purchase.", 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -326,22 +370,15 @@ function payments_section() {
 function display_stripe_connect_field( $is_sandbox ) {
 
 	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
-
-	$stripe_connect_url = add_query_arg( [
-		'live_mode'         => urlencode( (int) ! $is_sandbox ),
-		'state'             => urlencode( str_pad( wp_rand( wp_rand(), PHP_INT_MAX ), 100, wp_rand(), STR_PAD_BOTH ) ),
-		'customer_site_url' => urlencode( $url_payment_settings ),
-	], 'https://sugarcalendar.com/?sc_gateway_connect_init=stripe_connect' );
+	$stripe_connect_url   = Functions\get_stripe_connect_url( $is_sandbox, $url_payment_settings );
 
 	$stripe_disconnect_url = add_query_arg( [
 		'sc-stripe-disconnect' => true,
 		'page'                 => PageSettings::get_slug(),
-		'section'              => 'tickets',
+		'section'              => 'payments',
 		'subsection'           => 'payments',
 		'_wpnonce'             => wp_create_nonce( 'sc-stripe-connect-disconnect' ),
 	], admin_url( 'admin.php' ) );
-
-	$stripe_connect_account_id = get_option( 'sc_stripe_connect_account_id' );
 
 	$test_text = _x( 'test', 'current value for sandbox mode', 'sugar-calendar-lite' );
 	$live_text = _x( 'live', 'current value for sandbox mode', 'sugar-calendar-lite' );
@@ -354,7 +391,7 @@ function display_stripe_connect_field( $is_sandbox ) {
 
 	ob_start();
 
-	if ( empty( $stripe_connect_account_id ) || ! Functions\get_stripe_publishable_key() || ! Functions\get_stripe_secret_key() ):
+	if ( ! Functions\stripe_is_connected() ):
 		?>
 
         <a href="<?php echo esc_url_raw( $stripe_connect_url ); ?>" class="sugar-calendar-stripe-connect">
@@ -404,53 +441,15 @@ function display_stripe_connect_field( $is_sandbox ) {
  *
  * @since 1.0.0
  * @since 3.6.0 Added `attendee_fields_is_required`.
+ * @since 3.7.0 Moved Ticket Details page to "Payments" tab and handle individual email config.
  */
 function emails_section() {
 
-	// Settings.
-	UI::heading(
-		[
-			'title' => esc_html__( 'Ticket Details', 'sugar-calendar-lite' ),
-		]
-	);
+	if ( ! empty( $_GET['email_cfg'] ) ) {
+		( new SingleEmailConfig() )->init( sanitize_key( $_GET['email_cfg'] ) );
 
-	// Ticket Details Page.
-	$pages                   = get_pages();
-	$ticket_pages            = [ esc_html__( 'No pages found', 'sugar-calendar-lite' ) ];
-	$ticket_page             = 0;
-	$ticket_page_description = sprintf( /* translators: %1$s - field description; %2$s - field directions; %3$s shortcode.*/
-		'%1$s.<br>%2$s<code>[sc_event_tickets_details]</code> %3$s.',
-		esc_html__( 'The page where customer will view the details of their ticket purchases', 'sugar-calendar-lite' ),
-		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
-		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
-	);
-
-	if ( ! empty( $pages ) ) {
-		$ticket_pages = wp_list_pluck( $pages, 'post_title', 'ID' );
-		$ticket_page  = Settings\get_setting( 'ticket_page' );
+		return;
 	}
-
-	UI::select_input(
-		[
-			'id'          => 'sc_et_ticket_page',
-			'name'        => 'ticket_page',
-			'options'     => $ticket_pages,
-			'value'       => $ticket_page,
-			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' ),
-			'description' => $ticket_page_description,
-		]
-	);
-
-	// Attendee required fields.
-	UI::toggle_control(
-		[
-			'id'          => 'attendee_fields_is_required',
-			'name'        => 'attendee_fields_is_required',
-			'value'       => Settings\get_setting( 'attendee_fields_is_required', false ),
-			'label'       => esc_html__( 'Attendee Information is Required', 'sugar-calendar-lite' ),
-			'description' => __( "Visitors purchasing your event tickets will be required to provide Attendee's information on checkout for every ticket they purchase.", 'sugar-calendar-lite' ),
-		]
-	);
 
 	UI::heading(
 		[
@@ -486,117 +485,7 @@ function emails_section() {
 		]
 	);
 
-	UI::heading(
-		[
-			'title' => esc_html__( 'Order Receipt Email', 'sugar-calendar-lite' ),
-		]
-	);
-
-	// Order Receipt Subject.
-	$subject = Settings\get_setting( 'receipt_subject' );
-
-	UI::text_input(
-		[
-			'id'          => 'sc_et_receipt_email_subject',
-			'name'        => 'receipt_subject',
-			'value'       => $subject,
-			'placeholder' => esc_html__( 'Ticket Purchase Receipt', 'sugar-calendar-lite' ),
-			'label'       => esc_html__( 'Order Receipt Subject', 'sugar-calendar-lite' ),
-			'description' => esc_html__( 'The subject line of emailed order receipts.', 'sugar-calendar-lite' ),
-		]
-	);
-
-	// Order Receipt Message.
-	UI::field_wrapper(
-		[
-			'label' => esc_html__( 'Order Receipt Message', 'sugar-calendar-lite' ),
-			'id'    => 'receipt-message',
-		],
-		display_receipt_message_editor()
-	);
-
-	// Ticket Receipt Email.
-	UI::heading(
-		[
-			'title' => esc_html__( 'Ticket Receipt Email', 'sugar-calendar-lite' ),
-		]
-	);
-
-	// Ticket Email Subject.
-	$t_subject = Settings\get_setting( 'ticket_subject' );
-
-	UI::text_input(
-		[
-			'id'          => 'sc_et_ticket_email_subject',
-			'name'        => 'ticket_subject',
-			'value'       => $t_subject,
-			'placeholder' => esc_html__( 'Ticket Email Subject', 'sugar-calendar-lite' ),
-			'label'       => esc_html__( 'Ticket Email Subject', 'sugar-calendar-lite' ),
-			'description' => esc_html__( 'The subject line used when emailing a ticket to an attendee.', 'sugar-calendar-lite' ),
-		]
-	);
-
-	// Ticket Email Message.
-	UI::field_wrapper(
-		[
-			'label' => esc_html__( 'Ticket Email Message', 'sugar-calendar-lite' ),
-			'id'    => 'ticket-message',
-		],
-		display_ticket_email_message_editor(),
-	);
-
 	do_action( 'sc_et_settings_emails_section_bottom' );
-}
-
-function display_receipt_message_editor() {
-
-	$message = Settings\get_setting( 'receipt_message' );
-
-	ob_start();
-
-	wp_editor( stripslashes( $message ), 'sc_et_settings_receipt_message', [ 'textarea_name' => 'sugar-calendar[receipt_message]' ] );
-	?>
-
-    <p class="desc">
-		<?php esc_html_e( 'The full message included in the emailed order receipts. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
-    </p>
-    <dl class="sc-et-email-tags-list">
-
-		<?php
-		echo Functions\get_emails_tags_list( 'order' );
-		echo Functions\get_emails_tags_list( 'event' );
-		?>
-
-    </dl>
-
-	<?php
-	return ob_get_clean();
-}
-
-function display_ticket_email_message_editor() {
-
-	$t_message = Settings\get_setting( 'ticket_message' );
-
-	ob_start();
-
-	wp_editor( stripslashes( $t_message ), 'sc_et_settings_ticket_message', [ 'textarea_name' => 'sugar-calendar[ticket_message]' ] );
-	?>
-
-    <p class="description">
-		<?php esc_html_e( 'The message sent when emailing a ticket to an attendee. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
-    </p>
-    <dl class="sc-et-email-tags-list">
-
-		<?php
-		echo Functions\get_emails_tags_list( 'ticket' );
-		echo Functions\get_emails_tags_list( 'event' );
-		echo Functions\get_emails_tags_list( 'attendee' );
-		?>
-
-    </dl>
-
-	<?php
-	return ob_get_clean();
 }
 
 /**
@@ -625,17 +514,11 @@ function process_stripe_connect_completion() {
 		return;
 	}
 
-	$is_sandbox = Functions\is_sandbox();
-
+	$is_sandbox           = Functions\is_sandbox();
 	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
-
-	$sc_credentials_url = add_query_arg( [
-		'live_mode'         => urlencode( (int) ! $is_sandbox ),
-		'state'             => urlencode( sanitize_text_field( $_GET['state'] ) ),
-		'customer_site_url' => urlencode( $url_payment_settings ),
-	], 'https://sugarcalendar.com/?sc_gateway_connect_credentials=stripe_connect' );
-
-	$response = wp_remote_get( esc_url_raw( $sc_credentials_url ) );
+	$state                = sanitize_text_field( $_GET['state'] );
+	$sc_credentials_url   = Functions\get_stripe_credentials_url( $is_sandbox, $state, $url_payment_settings );
+	$response             = wp_remote_get( esc_url_raw( $sc_credentials_url ) );
 
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! wp_remote_retrieve_body( $response ) ) {
 
@@ -663,15 +546,12 @@ function process_stripe_connect_completion() {
 	$response = json_decode( $response['body'], true );
 	$data     = $response['data'];
 
-	if ( true === $is_sandbox ) {
-		update_option( 'sc_stripe_test_publishable', sanitize_text_field( $data['publishable_key'] ), false );
-		update_option( 'sc_stripe_test_secret', sanitize_text_field( $data['secret_key'] ), false );
-	} else {
-		update_option( 'sc_stripe_live_publishable', sanitize_text_field( $data['publishable_key'] ), false );
-		update_option( 'sc_stripe_live_secret', sanitize_text_field( $data['secret_key'] ), false );
-	}
-
-	update_option( 'sc_stripe_connect_account_id', sanitize_text_field( $data['stripe_user_id'] ), false );
+	Functions\update_stripe_credentials(
+		$data['publishable_key'],
+		$data['secret_key'],
+		$data['stripe_user_id'],
+		$is_sandbox
+	);
 
 	$redirect = $url_payment_settings;
 
@@ -798,16 +678,16 @@ function get_setting_names() {
  * @since 3.1.0 Loop through the data instead of the settings.
  * @since 3.3.0 Decouple setting field names.
  * @since 3.6.0 Handling for attendee field checkbox.
+ * @since 3.7.0 Changed support from `tickets` to `emails` section.
  *
  * @param array $post_data Array containing the data to be saved.
  */
 function handle_post( $post_data ) {
 
-	// Work only in payments or tickets section.
 	if (
 		! isset( $_GET['section'] )
 		||
-		! in_array( $_GET['section'], [ 'payments', 'tickets' ], true )
+		! in_array( $_GET['section'], [ 'payments', 'emails' ], true )
 	) {
 		return;
 	}

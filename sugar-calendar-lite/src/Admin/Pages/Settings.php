@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Admin\Pages\Settings\EmailsConfigTab;
 use Sugar_Calendar\Admin\PageTabAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Plugin;
@@ -85,6 +86,7 @@ class Settings extends PageTabAbstract {
 	 * Initialize page.
 	 *
 	 * @since 3.0.0
+	 * @since 3.7.0 Added Emails configuration section.
 	 *
 	 * @return void
 	 */
@@ -96,6 +98,10 @@ class Settings extends PageTabAbstract {
 		if ( ! in_array( $section_id, $sections ) ) {
 			wp_safe_redirect( Plugin::instance()->get_admin()->get_page_url( 'settings_general' ) );
 			exit;
+		}
+
+		if ( $section_id === 'emails' ) {
+			( new EmailsConfigTab() )->hooks();
 		}
 	}
 
@@ -120,7 +126,11 @@ class Settings extends PageTabAbstract {
 						<?php
 						UI::button(
 							[
-								'text' => esc_html__( 'Save Settings', 'sugar-calendar-lite' ),
+								'text' => apply_filters(
+									'sugar_calendar_admin_settings_save_btn_label',
+									esc_html__( 'Save Settings', 'sugar-calendar-lite' ),
+									static::get_slug()
+								),
 							]
 						);
 						?>

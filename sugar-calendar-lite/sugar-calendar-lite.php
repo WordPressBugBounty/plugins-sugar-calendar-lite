@@ -11,10 +11,12 @@
  * Domain Path:       /assets/languages
  * Requires PHP:      7.4
  * Requires at least: 5.9
- * Version:           3.6.1
+ * Version:           3.7.0
  */
 
 // Exit if accessed directly.
+use Sugar_Calendar\Admin\Addons\Requirements;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
@@ -23,7 +25,7 @@ if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
 	 *
 	 * @since 3.0.0
 	 */
-	define( 'SC_PLUGIN_VERSION', '3.6.1' );
+	define( 'SC_PLUGIN_VERSION', '3.7.0' );
 }
 
 if ( ! defined( 'SC_PLUGIN_FILE' ) ) {
@@ -141,6 +143,21 @@ if ( ! class_exists( 'Sugar_Calendar\\Requirements_Check' ) ) {
 	// Invoke the checker
 	if ( class_exists( 'Sugar_Calendar\\Requirements_Check' ) ) {
 		new Sugar_Calendar\Requirements_Check( __FILE__ );
+	}
+}
+
+if ( ! function_exists( 'sugar_calendar_check_requirements' ) ) {
+
+	/**
+	 * Check addon requirements.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return bool
+	 */
+	function sugar_calendar_check_requirements( array $requirements ) {
+
+		return Requirements::get_instance()->validate( $requirements );
 	}
 }
 

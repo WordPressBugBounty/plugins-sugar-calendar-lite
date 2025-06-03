@@ -32,7 +32,7 @@
 			this.$allDay = $( '#all_day', this.$el );
 			this.$timezones = $( '.sugar-calendar-metabox__field-row--time-zone, .event-time-zone, .event-time', this.$el );
 			this.$submitButton = $( '#publish' );
-
+			this.$tagsSelect = $( '.sugar-calendar-column-tags-form select' );
 			// Bind events.
 			this.bindEvents();
 
@@ -69,8 +69,51 @@
 			$( '.choicesjs-select', this.$el ).each( ( i, el ) => {
 				new Choices( el, {
 					itemSelectText: '',
+					allowHTML: true,
 				} );
 			} );
+
+			this.initChoicesJSForTags();
+		},
+
+		/**
+		 * Initialize ChoicesJS for tags.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @return {void}
+		 */
+		initChoicesJSForTags: function () {
+
+			// Create configuration.
+			const
+				config = this.settings.choicesjs_config,
+				select = this.$tagsSelect[ 0 ];
+
+			// Set noResultsText to indicate users can add new tags.
+			config.noResultsText = this.settings.strings.add_new_tag;
+
+			const TagsSelect = new Choices(
+				select,
+				config
+			);
+
+			const currentValue = TagsSelect.getValue( true );
+
+			TagsSelect
+				.clearStore()
+				.setChoices(
+					this.settings.all_tags_choices,
+					'value',
+					'label',
+					true
+				)
+				.setChoiceByValue( currentValue );
+
+			$( select ).data( 'choicesjs', TagsSelect );
+
+			// Bind event for adding custom tags on keyboard input
+			$( select ).siblings( 'input' ).on( 'keydown', this.addCustomTagInput.bind( this ) );
 		},
 
 		initDatepickers: function () {
@@ -475,6 +518,78 @@
 				// Remove error message.
 				wp.data.dispatch( 'core/notices' ).removeNotice( errorLockName );
 			}
+		},
+
+		/**
+		 * Add custom tag on keyboard input
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param {object} event Event object.
+		 */
+		addCustomTagInput: function( event ) {
+
+			// Only process for Enter or comma key.
+			if ( [ 'Enter', ',' ].indexOf( event.key ) < 0 ) {
+				return;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			const $input = $( event.target );
+			const $select = $input.closest( '.choices' ).find( 'select' );
+			const choicesObj = $select.data( 'choicesjs' );
+
+			// Verify we have a Choices instance and input value.
+			if ( ! choicesObj || event.target.value.length === 0 ) {
+				return;
+			}
+
+			// Get the tag label and clean it - add escaping for security.
+			const tagLabel = _.escape( event.target.value.trim() );
+
+			// Skip if empty.
+			if ( tagLabel === '' ) {
+				choicesObj.clearInput();
+				return;
+			}
+
+			// Get existing tag labels more efficiently.
+			const existingLabels = _.map( choicesObj.getValue(), 'label' ).map( ( label ) => {
+				return label.toLowerCase().trim();
+			} );
+
+			// Skip if already exists.
+			if ( existingLabels.indexOf( tagLabel.toLowerCase() ) >= 0 ) {
+				choicesObj.clearInput();
+				return;
+			}
+
+			// Check if tag exists in all available tags first.
+			const existingTag = _.find( this.settings.all_tags_choices || [], {
+				label: tagLabel,
+			} );
+
+			if ( existingTag && existingTag.value ) {
+				// Use existing tag if found.
+				choicesObj.setChoiceByValue( existingTag.value );
+			} else {
+				// Add as new tag.
+				choicesObj.setChoices(
+					[ {
+						value: tagLabel,
+						label: tagLabel,
+						selected: true,
+					} ],
+					'value',
+					'label',
+					false
+				);
+			}
+
+			// Clear the input field.
+			choicesObj.clearInput();
 		},
 	};
 

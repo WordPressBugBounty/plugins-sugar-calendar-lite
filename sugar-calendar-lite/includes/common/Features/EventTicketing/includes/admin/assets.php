@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Assets;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Register assets.
@@ -25,14 +26,14 @@ function register() {
 		'sc-et-general',
 		Assets\get_url( 'js' ) . '/admin' . WP::asset_min() . '.js',
 		[ 'jquery' ],
-		SC_PLUGIN_VERSION
+		BaseHelpers::get_asset_version()
 	);
 
 	wp_register_style(
 		'sc-event-ticketing',
 		Assets\get_url( 'css' ) . "/{$path}general.css",
 		[],
-		SC_PLUGIN_VERSION
+		BaseHelpers::get_asset_version()
 	);
 }
 
@@ -53,13 +54,13 @@ function enqueue() {
 
 	if (
 		sugar_calendar()->get_admin()->is_page( 'settings_payments' )
-		|| sugar_calendar()->get_admin()->is_page( 'settings_tickets' )
+		|| sugar_calendar()->get_admin()->is_page( 'settings_emails' )
 	) {
 		wp_enqueue_style(
 			'sugar-calendar-ticketing-admin-settings',
 			Assets\get_url( 'css' ) . '/admin-settings' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 
@@ -71,7 +72,7 @@ function enqueue() {
 			'sugar-calendar-ticketing-admin-event-metabox',
 			Assets\get_url( 'css' ) . '/admin-event-metabox' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 }

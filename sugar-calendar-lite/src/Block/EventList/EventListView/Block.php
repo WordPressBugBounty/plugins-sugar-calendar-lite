@@ -508,4 +508,36 @@ class Block extends AbstractBlock {
 
 		return $this->upcoming_period;
 	}
+
+	/**
+	 * Get the display mode string.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return string
+	 */
+	public function get_display_mode_string() {
+
+		$string          = '';
+		$display_options = $this->get_display_options();
+		$display_mode    = $this->get_display_mode();
+
+		if ( array_key_exists( $display_mode, $display_options ) ) {
+			$string = ucwords( $display_options[ $display_mode ] );
+		}
+
+		/**
+		 * Filters display mode string.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param string $string       The display mode string.
+		 * @param string $display_mode The display mode.
+		 */
+		return apply_filters(
+			'sugar_calendar_block_event_list_event_list_view_block_display_mode_string',
+			$string,
+			$display_mode
+		);
+	}
 }

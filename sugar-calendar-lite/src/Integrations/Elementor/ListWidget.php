@@ -9,6 +9,7 @@ use Sugar_Calendar\Block\EventList\EventListView\Block;
 use Sugar_Calendar\Block\EventList\EventListView\GridView;
 use Sugar_Calendar\Block\EventList\EventListView\ListView;
 use Sugar_Calendar\Block\EventList\EventListView\PlainView;
+use Sugar_Calendar\Features\Tags\Common\Helpers;
 
 /**
  * Sugar Calendar Event List widget for Elementor.
@@ -138,6 +139,23 @@ class ListWidget extends Widget_Base {
 					[
 						'hide_empty' => false,
 						'taxonomy'   => 'sc_event_category',
+						'fields'     => 'id=>name',
+					]
+				),
+				'type'     => Controls_Manager::SELECT2,
+			]
+		);
+
+		$this->add_control(
+			'tags',
+			[
+				'default'  => [],
+				'label'    => esc_html__( 'Tags', 'sugar-calendar-lite' ),
+				'multiple' => true,
+				'options'  => get_terms(
+					[
+						'hide_empty' => false,
+						'taxonomy'   => Helpers::get_tags_taxonomy_id(),
 						'fields'     => 'id=>name',
 					]
 				),
@@ -387,6 +405,7 @@ class ListWidget extends Widget_Base {
 	protected function render() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
+		$tags                          = $this->get_settings_for_display( 'tags' );
 		$group_events_by_week          = $this->get_settings_for_display( 'group_events_by_week' );
 		$events_per_page               = $this->get_settings_for_display( 'events_per_page' );
 		$maximum_events_to_show        = $this->get_settings_for_maximum_events_to_show( $events_per_page );
@@ -406,6 +425,7 @@ class ListWidget extends Widget_Base {
 		$attr = [
 			'blockId'                => $this->get_id(),
 			'calendars'              => ! empty( $calendars ) ? array_map( 'absint', $calendars ) : [],
+			'tags'                   => ! empty( $tags ) ? array_map( 'absint', $tags ) : [],
 			'groupEventsByWeek'      => ! empty( $group_events_by_week ) && $group_events_by_week === 'yes',
 			'eventsPerPage'          => ! empty( $events_per_page ) ? absint( $events_per_page ) : 10,
 			'maximumEventsToShow'    => ! empty( $maximum_events_to_show ) ? absint( $maximum_events_to_show ) : 10,

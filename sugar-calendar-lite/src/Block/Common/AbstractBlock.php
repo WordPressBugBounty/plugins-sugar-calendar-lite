@@ -7,6 +7,7 @@ use DateInterval;
 use DatePeriod;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Helpers\Helpers as FeatureHelpers;
 
 /**
  * Abstract Block Class.
@@ -256,6 +257,7 @@ abstract class AbstractBlock {
 	 * Get venue filter.
 	 *
 	 * @since 3.5.0
+	 * @since 3.7.0 Fixed blocks filter bug.
 	 *
 	 * @return array
 	 */
@@ -264,7 +266,7 @@ abstract class AbstractBlock {
 		$attributes = $this->get_attributes();
 		$venue_ids  = ! empty( $attributes['venues'] ) ? $attributes['venues'] : [];
 
-		if ( empty( $venues ) && ! empty( $attributes['venuesFilter'] ) ) {
+		if ( empty( $venue_ids ) && ! empty( $attributes['venuesFilter'] ) ) {
 			$venue_ids = $attributes['venuesFilter'];
 		}
 
@@ -276,6 +278,61 @@ abstract class AbstractBlock {
 		 * @param array $venue_ids Venue IDs.
 		 */
 		return apply_filters( 'sugar_calendar_blocks_get_venues_filter', $venue_ids );
+	}
+
+	/**
+	 * Get speaker filter.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return array
+	 */
+	public function get_speakers() {
+
+		$attributes  = $this->get_attributes();
+		$speaker_ids = ! empty( $attributes['speakers'] ) ? $attributes['speakers'] : [];
+
+		if ( empty( $speaker_ids ) && ! empty( $attributes['speakersFilter'] ) ) {
+			$speaker_ids = $attributes['speakersFilter'];
+		}
+
+		/**
+		 * Filter the speaker IDs.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $speaker_ids Speaker IDs.
+		 */
+		return apply_filters( 'sugar_calendar_blocks_get_speakers_filter', $speaker_ids );
+	}
+
+	/**
+	 * Array containing the tag IDs.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return array
+	 */
+	public function get_tags() {
+
+		$attributes = $this->get_attributes();
+		$tags       = ! empty( $attributes['tags'] ) ? $attributes['tags'] : [];
+
+		if ( empty( $tags ) && ! empty( $attributes['tagsFilter'] ) ) {
+			$tags = $attributes['tagsFilter'];
+		}
+
+		// Apply absint to each tag ID.
+		$tags = array_map( 'absint', $tags );
+
+		/**
+		 * Filter the tag IDs.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $tags Tag IDs.
+		 */
+		return apply_filters( 'sugar_calendar_block_common_abstract_block_get_tags', $tags );
 	}
 
 	/**
@@ -613,6 +670,54 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get the tags for the filter.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return WP_Term[]
+	 */
+	public function get_tags_for_filter() {
+
+		// Get the tags taxonomy ID.
+		$tags_taxonomy = FeatureHelpers::get_tags_slug();
+
+		// If no tags taxonomy ID, return empty array.
+		if ( empty( $tags_taxonomy ) ) {
+			return [];
+		}
+
+		$tags = get_terms(
+			[
+				'taxonomy'   => $tags_taxonomy,
+				'hide_empty' => false,
+			]
+		);
+
+		if ( empty( $tags ) ) {
+			return [];
+		}
+
+		// Display all tags if no tags are selected from block settings.
+		if ( empty( $this->get_tags() ) ) {
+			return $tags;
+		}
+
+		$selected_tags = array_filter(
+			$tags,
+			function ( $tag ) {
+				return in_array( $tag->term_id, $this->get_tags(), true );
+			}
+		);
+
+		// If only one tag is selected, we don't need to display the filter.
+		if ( count( $selected_tags ) <= 1 ) {
+			return [];
+		}
+
+		return $selected_tags;
+	}
+
+	/**
 	 * Get the classes for the block.
 	 *
 	 * @since 3.0.0
@@ -631,6 +736,8 @@ abstract class AbstractBlock {
 	 * @since 3.1.2 Added support for visitor timezone conversion.
 	 * @since 3.5.0 Added support for filtering by venues.
 	 * @since 3.6.0 Added filter hook `sugar_calendar_block_common_abstract_block_get_week_events`.
+	 * @since 3.7.0 Added support for filtering by tags.
+	 * @since 3.7.0 Filter the number of events to load.
 	 *
 	 * @return Event[]
 	 */
@@ -651,21 +758,29 @@ abstract class AbstractBlock {
 
 		$block_categories = array_map( 'absint', $this->get_calendars() );
 		$search_term      = $this->get_search_term();
+		$block_tags       = $this->get_tags();
+		$block_venues     = $this->get_venues();
+		$block_speakers   = $this->get_speakers();
 
 		// Get all the events on the calendar period.
-		$calendar_events = sc_get_events_for_calendar_with_custom_range(
-			$start_period_range,
-			$end_period_range,
-			$block_categories,
-			$search_term,
-			null,
-			$this->get_venues()
+		$calendar_events = sugar_calendar_get_events_within_range(
+			[
+				'start_range' => $start_period_range,
+				'end_range'   => $end_period_range,
+				'category'    => $block_categories,
+				'search'      => $search_term,
+				'number'      => $this->get_max_events_count(),
+				'venues'      => $block_venues,
+				'tags'        => $block_tags,
+				'speakers'    => $block_speakers,
+			]
 		);
 
 		/**
 		 * Filter the events for the calendar block - week view.
 		 *
 		 * @since 3.6.0
+		 * @since 3.7.0 Added support for filtering by tags.
 		 *
 		 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
 		 * @param \DateTimeImmutable      $start_period_range The start period range.
@@ -673,6 +788,8 @@ abstract class AbstractBlock {
 		 * @param int[]                   $block_categories   The calendars to filter the occurrences.
 		 * @param string                  $search_term        The search term.
 		 * @param int[]                   $venues             The venues to filter the occurrences.
+		 * @param int[]                   $tags               The tags to filter the occurrences.
+		 * @param int[]                   $speakers           The speakers to filter the occurrences.
 		 */
 		$calendar_events = apply_filters(
 			'sugar_calendar_block_common_abstract_block_get_week_events',
@@ -681,7 +798,9 @@ abstract class AbstractBlock {
 			$end_period_range,
 			$block_categories,
 			$search_term,
-			$this->get_venues()
+			$block_venues,
+			$block_tags,
+			$block_speakers
 		);
 
 		$this->has_events_for_week = ! empty( $calendar_events );
@@ -871,6 +990,28 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get the maximum events count for the blocks.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return int
+	 */
+	public function get_max_events_count() {
+
+		/**
+		 * Filter the maximum events count for the blocks.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param int $max_events_count The maximum events count.
+		 */
+		return apply_filters(
+			'sugar_calendar_block_common_abstract_block_get_max_events_count',
+			999
+		);
+	}
+
+	/**
 	 * Get the display options.
 	 *
 	 * @since 3.0.0
@@ -905,4 +1046,13 @@ abstract class AbstractBlock {
 	 * @return string
 	 */
 	abstract public function get_previous_pagination_display();
+
+	/**
+	 * Get the display mode string.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return string
+	 */
+	abstract public function get_display_mode_string();
 }

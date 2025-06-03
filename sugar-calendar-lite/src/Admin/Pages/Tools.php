@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\PageTabAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Tools Page.
@@ -56,7 +57,7 @@ class Tools extends PageTabAbstract {
 			'sugar-calendar-admin-importers',
 			SC_PLUGIN_ASSETS_URL . 'admin/js/sc-admin-importers' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-vendor-jquery-confirm' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -67,7 +68,7 @@ class Tools extends PageTabAbstract {
 			[
 				'sugar-calendar-vendor-jquery-confirm',
 			],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 

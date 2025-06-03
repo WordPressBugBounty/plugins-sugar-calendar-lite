@@ -165,32 +165,93 @@ function sugar_calendar_pre_get_events_by_taxonomy( $query ) {
 }
 
 /**
- * Filter events queries and maybe JOIN by taxonomy term relationships
+ * Check if the query_vars contains taxonomies.
+ *
+ * @since 3.7.0
+ *
+ * @param object|Query $query Query object.
+ *
+ * @return bool
+ */
+function sugar_calendar_query_vars_contains_taxonomies( $query = false ) {
+
+	// Bail if query is not an instance of \Sugar_Calendar\Event_Query.
+	if ( ! $query instanceof \Sugar_Calendar\Event_Query ) {
+		return false;
+	}
+
+	// Bail if query_vars is not set.
+	if ( ! property_exists( $query, 'query_vars' ) ) {
+		return false;
+	}
+
+	/**
+	 * Allowed taxonomies filter.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $taxonomies Supported taxonomies for queries.
+	 *
+	 * @return array
+	 */
+	$taxonomies = (array) apply_filters(
+		'sugar_calendar_query_vars_contains_taxonomies',
+		[
+			'sc_event_category',
+		]
+	);
+
+	// Get the query_vars.
+	$query_vars = $query->query_vars;
+
+	// Check intersection of taxonomies and query_vars.
+	$intersect = array_intersect( $taxonomies, array_keys( $query_vars ) );
+
+	// Return true if there is an intersection.
+	return ! empty( $intersect );
+}
+
+/**
+ * Filter events queries and maybe JOIN by taxonomy term relationships.
  *
  * @since 2.0.0
+ * @since 3.7.0 Add filter to support multiple taxonomies.
  *
- * @param array $clauses
- * @param object|Query $query
+ * @param array        $clauses SQL clauses.
+ * @param object|Query $query   Query object.
  *
  * @return array
  */
-function sugar_calendar_join_by_taxonomy_term( $clauses = array(), $query = false ) {
+function sugar_calendar_join_by_taxonomy_term( $clauses = [], $query = false ) {
 
 	// Default arguments.
 	$args = [];
 
 	// Support multiple taxonomies.
 	if (
-		$query instanceof \Sugar_Calendar\Event_Query &&
-		property_exists( $query, 'query_vars' ) &&
-		! empty( $query->query_vars['sc_event_category'] ) &&
-		is_array( $query->query_vars['sc_event_category'] )
+		sugar_calendar_query_vars_contains_taxonomies( $query )
 	) {
 
-		$args[] = [
-			'taxonomy' => 'sc_event_category',
-			'terms'    => $query->query_vars['sc_event_category'],
-		];
+		// Add the taxonomy and terms to the query.
+		if ( ! empty( $query->query_vars['sc_event_category'] ) ) {
+
+			$args[] = [
+				'taxonomy' => 'sc_event_category',
+				'terms'    => $query->query_vars['sc_event_category'],
+			];
+		}
+
+		/**
+		 * Filter the arguments for the taxonomy query.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array        $args  The query arguments.
+		 * @param object|Query $query The query object.
+		 *
+		 * @return array
+		 */
+		$args = apply_filters( 'sugar_calendar_join_by_taxonomy_term_args', $args, $query );
 
 	} else {
 		// Old usage.
@@ -230,23 +291,23 @@ function sugar_calendar_join_by_taxonomy_term( $clauses = array(), $query = fals
 		}
 	}
 
-	// Bail if no arguments
+	// Bail if no arguments.
 	if ( empty( $args ) ) {
 		return;
 	}
 
-	// Get a taxonomy query object
+	// Get a taxonomy query object.
 	$tax_query = new WP_Tax_Query( $args );
 
-	// Get clauses
+	// Get clauses.
 	$sql_clauses   = $tax_query->get_sql( 'sc_e', 'object_id' );
-	$join_clauses  = array( $clauses['join'],  $sql_clauses['join']  );
-	$where_clauses = array( $clauses['where'], $sql_clauses['where'] );
+	$join_clauses  = [ $clauses['join'], $sql_clauses['join']  ];
+	$where_clauses = [ $clauses['where'], $sql_clauses['where'] ];
 
-	// Join clauses
-	$clauses['join']  = implode( '', array_filter( $join_clauses  ) );
+	// Join clauses.
+	$clauses['join']  = implode( '', array_filter( $join_clauses ) );
 	$clauses['where'] = implode( '', array_filter( $where_clauses ) );
 
-	// Return new clauses
+	// Return new clauses.
 	return $clauses;
 }

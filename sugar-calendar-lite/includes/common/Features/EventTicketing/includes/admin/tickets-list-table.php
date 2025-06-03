@@ -63,6 +63,7 @@ class List_Table extends \WP_List_Table {
 	 * Display the bulk actions dropdown.
 	 *
 	 * @since 1.0.0
+	 * @since 3.7.0 Moved the event_id field to the extra_tablenav() method.
 	 *
 	 * @param string $which The location of the bulk actions: 'top' or 'bottom'.
 	 *                      This is designated as optional for backward compatibility.
@@ -73,9 +74,61 @@ class List_Table extends \WP_List_Table {
 			? absint( $_GET['event_id'] )
 			: '';
 
-		echo '<input type="hidden" name="event_id" value="' . esc_attr( $event_id ) . '"/>';
 		echo '<input type="submit" name="sc_et_export_tickets" class="button-secondary" id="sc-et-export-tickets" value="' . esc_html__( 'Export to CSV', 'sugar-calendar-lite' ) . '"/>';
 		echo wp_nonce_field( 'sc_et_export_nonce', 'sc_et_export_nonce' );
+	}
+
+	/**
+	 * Displays extra controls between bulk actions and pagination.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $which Whether top or bottom.
+	 */
+	protected function extra_tablenav( $which ) {
+
+		if ( $which !== 'top' ) {
+			return;
+		}
+
+		$option = '';
+
+		if ( ! empty( $_GET['event_id'] ) ) {
+			$event = sugar_calendar_get_event( absint( $_GET['event_id'] ) );
+
+			if ( ! empty( $event ) ) {
+				$option = sprintf(
+					'<option selected value="%1$d">%2$s</option>',
+					absint( $_GET['event_id'] ),
+					esc_html( $event->title )
+				);
+			}
+		}
+		?>
+		<div class="sugar-calendar-ticketing__admin__list__actions alignleft actions">
+			<span class="sugar-calendar-ticketing__admin__list__actions__choices-events choicesjs-select-wrap">
+				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select">
+					<?php
+						echo wp_kses(
+							$option,
+							[
+								'option' => [
+									'selected' => [],
+									'value'    => [],
+								],
+							]
+						);
+					?>
+				</select>
+			</span>
+			<?php
+			printf(
+				'<input type="submit" class="button" value="%1$s">',
+				esc_attr__( 'Filter', 'sugar-calendar-lite' )
+			);
+			?>
+		</div>
+		<?php
 	}
 
 	/**

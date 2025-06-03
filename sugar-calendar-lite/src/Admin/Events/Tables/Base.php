@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Event_Query;
 use Sugar_Calendar\Helper;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelper;
 use Sugar_Calendar\Pro\Features\AdvancedRecurring\Occurrence;
 use WP_List_Table;
 use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
@@ -854,6 +855,24 @@ class Base extends WP_List_Table {
 	}
 
 	/**
+	 * Return tag IDs.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return array
+	 */
+	protected function get_tags() {
+
+		$tags_value = $this->get_request_var( 'sc_event_tags' );
+
+		if ( empty( $tags_value ) ) {
+			return [];
+		}
+
+		return TagsHelper::validate_tags_term_ids( explode( ',', $tags_value ) );
+	}
+
+	/**
 	 * Return a human-readable time difference as a string.
 	 *
 	 * @since 2.0.0
@@ -1595,6 +1614,14 @@ class Base extends WP_List_Table {
 		// Parse the arguments.
 		$r = wp_parse_args( $args, $defaults );
 
+		// Check tags query var.
+		$tags = $this->get_tags();
+
+		// Add tags to query args.
+		if ( ! empty( $tags ) ) {
+			$r['sc_event_tags'] = $tags;
+		}
+
 		// Return parsed arguments.
 		return $r;
 	}
@@ -1790,6 +1817,7 @@ class Base extends WP_List_Table {
 	 * Return the HTML for linking to an event.
 	 *
 	 * @since 2.0.3
+	 * @since 3.7.0 Added the `sugar_calendar_admin_events_table_event_title_url` filter.
 	 *
 	 * @param object $event Event object.
 	 *
@@ -1805,8 +1833,19 @@ class Base extends WP_List_Table {
 		// Get the cell.
 		$cell = $this->get_current_cell( 'index' );
 
-		// Get the edit url.
-		$event_edit_url = $this->get_event_edit_url( $event );
+		/**
+		 * Filter the event edit url.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param string $url   The event edit url.
+		 * @param Event  $event The event object.
+		 */
+		$event_edit_url = apply_filters(
+			'sugar_calendar_admin_events_table_event_title_url',
+			$this->get_event_edit_url( $event ),
+			$event
+		);
 
 		// Get the event title.
 		$event_title = $this->get_event_title( $event );
@@ -3174,6 +3213,7 @@ class Base extends WP_List_Table {
 	 * Output the options menu.
 	 *
 	 * @since 3.0.0
+	 * @since 3.7.0 Title is now mandatory in screen options.
 	 *
 	 * @return void
 	 */
@@ -3216,10 +3256,25 @@ class Base extends WP_List_Table {
 							?>
 
                             <label>
-                                <input type="checkbox"
-                                       name="sugar-calendar[columns][]"
-                                       value="<?php echo esc_attr( $column_key ); ?>"
-									<?php checked( ! in_array( $column_key, $hidden, true ) ); ?>>
+								<?php if ( $column_key === 'title' ) : ?>
+
+									<input
+										type="checkbox"
+										value="<?php echo esc_attr( $column_key ); ?>"
+										checked
+										disabled
+									>
+									<input type="hidden" name="sugar-calendar[columns][]" value="<?php echo esc_attr( $column_key ); ?>">
+
+								<?php else : ?>
+
+									<input
+										type="checkbox"
+										name="sugar-calendar[columns][]"
+										value="<?php echo esc_attr( $column_key ); ?>"
+										<?php checked( ! in_array( $column_key, $hidden, true ) ); ?>>
+								<?php endif; ?>
+
 								<?php
 								echo wp_strip_all_tags( $column_display_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								?>
@@ -3653,6 +3708,7 @@ class Base extends WP_List_Table {
 	 * Displays a taxonomy drop-downs for filtering in the bar table navigation.
 	 *
 	 * @since 3.0.0
+	 * @since 3.7.0 Added filter for registered taxonomies.
 	 *
 	 * @return false|string|void
 	 */
@@ -3666,10 +3722,19 @@ class Base extends WP_List_Table {
 			return;
 		}
 
-		// Get taxonomies for this post type.
-		$taxonomies = sugar_calendar_get_object_taxonomies(
-			$post_type,
-			'objects'
+		/**
+		 * Filter taxonomies for this post type.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $taxonomies Taxonomies.
+		 */
+		$taxonomies = apply_filters(
+			'sugar_calendar_admin_events_tables_base_dropdown_taxonomies',
+			sugar_calendar_get_object_taxonomies(
+				$post_type,
+				'objects'
+			)
 		);
 
 		// Bail if no taxonomies.

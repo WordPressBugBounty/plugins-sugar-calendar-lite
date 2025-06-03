@@ -6,6 +6,7 @@ use Elementor\Controls_Manager;
 use Elementor\Plugin;
 use Elementor\Widget_Base;
 use Sugar_Calendar\Block\Calendar\CalendarView;
+use Sugar_Calendar\Features\Tags\Common\Helpers;
 
 /**
  * Sugar Calendar widget for Elementor.
@@ -135,6 +136,23 @@ class CalendarWidget extends Widget_Base {
 					[
 						'hide_empty' => false,
 						'taxonomy'   => 'sc_event_category',
+						'fields'     => 'id=>name',
+					]
+				),
+				'type'     => Controls_Manager::SELECT2,
+			]
+		);
+
+		$this->add_control(
+			'tags',
+			[
+				'default'  => [],
+				'label'    => esc_html__( 'Tags', 'sugar-calendar-lite' ),
+				'multiple' => true,
+				'options'  => get_terms(
+					[
+						'hide_empty' => false,
+						'taxonomy'   => Helpers::get_tags_taxonomy_id(),
 						'fields'     => 'id=>name',
 					]
 				),
@@ -283,6 +301,7 @@ class CalendarWidget extends Widget_Base {
 		$show_search                   = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_search' ) : '';
 		$accent_color                  = $this->get_settings_for_display( 'accent_color' );
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
+		$tags                          = $this->get_settings_for_display( 'tags' );
 		$appearance                    = $this->get_settings_for_display( 'appearance' );
 
 		$attr = [
@@ -290,6 +309,7 @@ class CalendarWidget extends Widget_Base {
 			'display'                => ! empty( $display ) ? $display : 'month',
 			'accentColor'            => ! empty( $accent_color ) ? $accent_color : '#5685BD',
 			'calendars'              => ! empty( $calendars ) ? array_map( 'absint', $calendars ) : [],
+			'tags'                   => ! empty( $tags ) ? array_map( 'absint', $tags ) : [],
 			'groupEventsByWeek'      => true,
 			'showBlockHeader'        => ! empty( $show_block_header ) && $show_block_header === 'yes',
 			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',

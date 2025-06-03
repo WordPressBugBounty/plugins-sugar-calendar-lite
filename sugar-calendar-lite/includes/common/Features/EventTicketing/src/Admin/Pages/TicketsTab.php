@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelpers;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
 
 /**
@@ -86,7 +87,29 @@ class TicketsTab extends Tickets {
 			'sugar-calendar-ticketing-admin-tickets',
 			get_url( 'css' ) . '/admin-tickets' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
+		);
+
+		// Enqueue admin ticketing script.
+		wp_enqueue_script(
+			'sugar-calendar-ticketing-admin',
+			SC_PLUGIN_ASSETS_URL . 'admin/js/sc-admin-ticketing' . WP::asset_min() . '.js',
+			[ 'jquery', 'sugar-calendar-vendor-choices' ],
+			BaseHelpers::get_asset_version(),
+			true
+		);
+
+		// Localize script.
+		wp_localize_script(
+			'sugar-calendar-ticketing-admin',
+			'sc_admin_ticketing',
+			[
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'sc-admin-ticketing-list' ),
+				'strings' => [
+					'select_event' => esc_html__( 'Event', 'sugar-calendar-lite' ),
+				],
+			]
 		);
 	}
 }

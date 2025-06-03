@@ -41,10 +41,12 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			total_number_to_import: {
 				events: null,
 				venues: null,
+				speakers: null,
 				tickets: null,
 				orders: null,
 				attendees: null,
 				categories: null,
+				tags: null,
 			},
 
 			/**
@@ -55,10 +57,12 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			number_of_success_import: {
 				events: 0,
 				venues: 0,
+				speakers: 0,
 				tickets: 0,
 				orders: 0,
 				attendees: 0,
 				categories: 0,
+				tags: 0,
 			},
 
 			/**
@@ -496,10 +500,10 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 						return;
 					}
 
-					app.showLogs( response.data.importer.process, response.data.importer.progress, response.data.importer.total_number_to_import );
+					app.showLogs( response.data.importer.process, response.data.importer.progress, response.data.importer.total_number_to_import, response.data.importer.process_status );
 
 					if ( response.data.importer.attendees_count ) {
-						app.showLogs( 'attendees', response.data.importer.attendees_count, response.data.importer.attendees_total_count );
+						app.showLogs( 'attendees', response.data.importer.attendees_count, response.data.importer.attendees_total_count, response.data.importer.process_status );
 					}
 
 					app.runImporter();
@@ -602,8 +606,9 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 		 * @param {string} process_context                The import context.
 		 * @param {number} progress_count                 The progress of the import.
 		 * @param {mixed}  context_total_number_to_import The total number of items to import for the context
+		 * @param {string} process_status                 The process status.
 		 */
-		showLogs( process_context, progress_count, context_total_number_to_import ) {
+		showLogs( process_context, progress_count, context_total_number_to_import, process_status ) {
 
 			// Update the number of success imports.
 			app.runtime_vars.number_of_success_import[ process_context ] += progress_count;
@@ -644,7 +649,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			}
 
 			// Check if the migration of the context is complete.
-			if ( successful_import_count >= app.runtime_vars.total_number_to_import[ process_context ]  ) {
+			if ( successful_import_count >= app.runtime_vars.total_number_to_import[ process_context ] || process_status === 'complete' ) {
 				const $status = $( `#sc-admin-importer-tec-logs__process-${process_context}` )
 					.find( '.sc-admin-tools-migrate-context__status' );
 

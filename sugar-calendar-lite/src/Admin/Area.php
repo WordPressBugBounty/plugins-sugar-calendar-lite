@@ -4,17 +4,20 @@ namespace Sugar_Calendar\Admin;
 
 use Sugar_Calendar\Admin\Events\Events as AdminEvents;
 use Sugar_Calendar\Admin\Events\Metaboxes;
+use Sugar_Calendar\Admin\Pages\Addons;
 use Sugar_Calendar\Admin\Pages\CalendarEdit;
 use Sugar_Calendar\Admin\Pages\CalendarNew;
 use Sugar_Calendar\Admin\Pages\Calendars;
 use Sugar_Calendar\Admin\Pages\EventEdit;
 use Sugar_Calendar\Admin\Pages\EventNew;
 use Sugar_Calendar\Admin\Pages\Events;
+use Sugar_Calendar\Admin\Pages\Rsvp;
 use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Admin\Pages\SettingsFeedsTab;
 use Sugar_Calendar\Admin\Pages\SettingsGeneralTab;
 use Sugar_Calendar\Admin\Pages\SettingsMapsTab;
 use Sugar_Calendar\Admin\Pages\SettingsMiscTab;
+use Sugar_Calendar\Admin\Pages\SettingsRsvpTab;
 use Sugar_Calendar\Admin\Pages\SettingsZapierTab;
 use Sugar_Calendar\Admin\Pages\Tools;
 use Sugar_Calendar\Admin\Pages\ToolsExportTab;
@@ -22,6 +25,8 @@ use Sugar_Calendar\Admin\Pages\ToolsImportTab;
 use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
 use Sugar_Calendar\Admin\Pages\Venues;
 use Sugar_Calendar\Admin\Pages\Welcome;
+use Sugar_Calendar\Admin\Pages\Speakers;
+use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
@@ -72,6 +77,89 @@ class Area {
 	protected $current_page;
 
 	/**
+	 * AJAX Handler for updating hand holding status.
+	 *
+	 * @since 3.7.0
+	 */
+	public function ajax_update_hand_holding_status() {
+
+		if ( ! check_ajax_referer( 'sc_hand_holding_status', 'nonce' ) ) {
+			wp_send_json_error( esc_html__( 'Invalid request!', 'sugar-calendar-lite' ) );
+		}
+
+		if ( empty( $_POST['status'] ) ) {
+			wp_send_json_error( esc_html__( 'Status is required', 'sugar-calendar-lite' ) );
+		}
+
+		$status = sanitize_key( wp_unslash( $_POST['status'] ) );
+
+		if ( ! in_array( $status, [ 'start', 'exit-browser', 'cancel', 'draft', 'publish', 'complete' ], true ) ) {
+			wp_send_json_error( esc_html__( 'Status invalid!', 'sugar-calendar-lite' ) );
+		}
+
+		$step = ! empty( $_POST['step'] ) ? sanitize_key( wp_unslash( $_POST['step'] ) ) : '';
+
+		$this->update_hand_holding_status( $status, $step );
+
+		wp_send_json_success( $status );
+	}
+
+	/**
+	 * Update the hand holding status.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $status The new status.
+	 * @param string $step   Current step.
+	 */
+	private function update_hand_holding_status( $status, $step = '' ) {
+
+		$data = [];
+
+		switch ( $status ) {
+			case 'start':
+				$data = [
+					'start_time' => time(),
+					'status'     => 'start',
+				];
+				break;
+
+			default:
+				$data = [
+					'end_time'   => time(),
+					'status'     => $status,
+					'step'       => $step,
+				];
+				break;
+		}
+
+		if ( empty( $data ) ) {
+			return;
+		}
+
+		// Get current hand holding data.
+		$hand_holding_status = get_option( 'sc_hand_holding_status', [
+			'status'     => '',
+			'start_time' => 0,
+			'end_time'   => 0,
+			'step'       => '',
+		] );
+
+		$new_data = [];
+
+		foreach ( $hand_holding_status as $key => $val ) {
+
+			if ( array_key_exists( $key, $data ) ) {
+				$new_data[ $key ] = $data[ $key ];
+			} else {
+				$new_data[ $key ] = $val;
+			}
+		}
+
+		update_option( 'sc_hand_holding_status', $new_data );
+	}
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 3.0.0
@@ -80,6 +168,8 @@ class Area {
 	 * @return void
 	 */
 	public function hooks() {
+
+		add_action( 'wp_ajax_sc_hand_holding_status', [ $this, 'ajax_update_hand_holding_status' ] );
 
 		( new AdminEvents() )->hooks();
 
@@ -149,6 +239,8 @@ class Area {
 				return $page_id;
 			}
 		);
+
+		$this->handle_rsvp_pages();
 	}
 
 	/**
@@ -158,6 +250,7 @@ class Area {
 	 * @since 3.0.1 Apply filter on Sugar Calendar Menu capability.
 	 * @since 3.3.0 Added 'Tools' submenu.
 	 * @since 3.5.0 Added 'Venues' submenu.
+	 * @since 3.7.0 Added 'RSVP' submenu.
 	 *
 	 * @return void
 	 */
@@ -242,6 +335,26 @@ class Area {
 
 		add_submenu_page(
 			self::SLUG,
+			Speakers::get_title(),
+			Speakers::get_title(),
+			Speakers::get_capability(),
+			Speakers::get_slug(),
+			sugar_calendar()->is_pro() ? '' : [ $this, 'display' ],
+			Speakers::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
+			Rsvp::get_title(),
+			Rsvp::get_title(),
+			Rsvp::get_capability(),
+			Rsvp::get_slug(),
+			[ $this, 'display' ],
+			Rsvp::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
 			Settings::get_title(),
 			Settings::get_title(),
 			Settings::get_capability(),
@@ -258,6 +371,16 @@ class Area {
 			Tools::get_slug(),
 			[ $this, 'display' ],
 			Tools::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
+			Addons::get_title(),
+			Addons::get_title(),
+			Addons::get_capability(),
+			Addons::get_slug(),
+			[ $this, 'display' ],
+			Addons::get_priority()
 		);
 
 		add_submenu_page(
@@ -286,6 +409,15 @@ class Area {
 				)
 			);
 		}
+
+		/**
+		 * Action to add a new submenu page.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param Area $area Admin area instance.
+		 */
+		do_action( 'sugar_calendar_admin_area_add_submenu_page', $this );
 	}
 
 	/**
@@ -348,6 +480,7 @@ class Area {
 	 * @since 3.0.0
 	 * @since 3.3.0 Added support for Tools page and its tabs.
 	 * @since 3.5.0 Added support for Venues page.
+	 * @since 3.7.0 Added support for RSVP page.
 	 *
 	 * @return string|null
 	 */
@@ -415,8 +548,21 @@ class Area {
 					case Venues::get_slug():
 						$page_id = 'venues';
 						break;
+
+					case Speakers::get_slug():
+						$page_id = 'speakers';
+						break;
+
+					case Rsvp::get_slug():
+						$page_id = 'rsvp';
+						break;
+
+					case Addons::get_slug():
+						$page_id = 'addons';
+						break;
 				}
 			}
+
 		} elseif ( WP::is_doing_ajax() && isset( $_REQUEST['page_id'] ) ) {
 
 			// Ajax requests.
@@ -505,6 +651,7 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 * @since 3.5.0 Added support for Venues page.
+	 * @since 3.7.0 Added support for RSVP page.
 	 *
 	 * @return PageInterface[]
 	 */
@@ -518,6 +665,7 @@ class Area {
 			'calendars'        => Calendars::class,
 			'calendar_new'     => CalendarNew::class,
 			'calendar_edit'    => CalendarEdit::class,
+			'tags'             => Tags::class,
 			'settings'         => Settings::class,
 			'settings_general' => SettingsGeneralTab::class,
 			'settings_feeds'   => SettingsFeedsTab::class,
@@ -528,6 +676,9 @@ class Area {
 			'tools_export'     => ToolsExportTab::class,
 			'tools_migrate'    => ToolsMigrateTab::class,
 			'venues'           => Venues::class,
+			'speakers'         => Speakers::class,
+			'rsvp'             => Rsvp::class,
+			'addons'           => Addons::class,
 		];
 
 		/**
@@ -659,7 +810,7 @@ class Area {
 			return;
 		}
 
-		wp_safe_redirect( Welcome::get_url() );
+		wp_safe_redirect( sugar_calendar()->get_setup_wizard()->get_url() );
 		exit;
 	}
 
@@ -859,7 +1010,7 @@ class Area {
 			'sugar-calendar-admin-menu',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-menu' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		// Dependencies.
@@ -902,7 +1053,7 @@ class Area {
 			'sugar-calendar-admin-confirm',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-alerts' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		// Admin assets.
@@ -910,21 +1061,21 @@ class Area {
 			'sugar-calendar-admin-settings',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-settings' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_register_style(
 			'sugar-calendar-admin-education',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-education' . WP::asset_min() . '.css',
 			[ 'sugar-calendar-vendor-lity' ],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_register_script(
 			'sugar-calendar-admin-education',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-education' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-vendor-lity' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -932,7 +1083,7 @@ class Area {
 			'sugar-calendar-admin-event-meta-box',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-event-metabox' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_register_script(
@@ -946,7 +1097,7 @@ class Area {
 				'wp-i18n',
 				'jquery-ui-autocomplete',
 			],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -954,14 +1105,14 @@ class Area {
 			'sugar-calendar-admin-calendar',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendar' . WP::asset_min() . '.css',
 			[ 'wp-color-picker' ],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 
 		wp_register_script(
 			'sugar-calendar-admin-calendar',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-calendar' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-vendor-choices', 'wp-color-picker' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -969,7 +1120,7 @@ class Area {
 			'sugar-calendar-admin-settings',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-settings' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-vendor-choices' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -977,7 +1128,7 @@ class Area {
 			'sugar-calendar-admin-common',
 			SC_PLUGIN_ASSETS_URL . 'admin/js/common' . WP::asset_min() . '.js',
 			[ 'jquery' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 
@@ -985,7 +1136,8 @@ class Area {
 			'sugar-calendar-admin-common',
 			'sugar_calendar_admin_common',
 			[
-				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+				'tags_slug' => Helpers::get_tags_slug(),
 			]
 		);
 
@@ -1090,15 +1242,19 @@ class Area {
 	 */
 	public function product_education_current_page_id( $page_id ) {
 
-		if ( $page_id === 'settings' && isset( $_GET['section'] ) ) {
+		if (
+			$page_id !== 'settings' ||
+			! isset( $_GET['section'] )
+		) {
+			return $page_id;
+		}
 
-			if (
-				! is_plugin_active( 'sc-zapier/sc-zapier.php' )
-				&& ( $_GET['section'] === 'zapier' )
-			) {
+		if (
+			! is_plugin_active( 'sc-zapier/sc-zapier.php' )
+			&& ( $_GET['section'] === 'zapier' )
+		) {
 
-				$page_id = 'settings_zapier';
-			}
+			$page_id = 'settings_zapier';
 		}
 
 		return $page_id;
@@ -1133,5 +1289,77 @@ class Area {
 	public function is_sc_admin_page() {
 
 		return ! empty( $this->current_page ) && $this->current_page instanceof PageInterface;
+	}
+
+	/**
+	 * Handle the RSVP pages integration for both lite and pro
+	 * but without the RSVP add-on.
+	 *
+	 * @since 3.7.0
+	 */
+	private function handle_rsvp_pages() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+
+		add_filter( 'sugar_calendar_admin_area_pages', [ $this, 'product_education_get_rsvp' ] );
+		add_filter( 'sugar_calendar_admin_area_current_page_id', [ $this, 'product_education_current_rsvp_page_id' ] );
+		add_filter( 'sugar_calendar_admin_pages_settings_get_tabs', [ $this, 'product_education_settings_rsvp_page_tab' ] );
+	}
+
+	/**
+	 * Register the RSVP education page.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $pages Registered pages.
+	 *
+	 * @return array
+	 */
+	public function product_education_get_rsvp( $pages ) {
+
+		if ( ! sugar_calendar()->is_rsvp_addon_active() ) {
+			$pages['settings_rsvp'] = SettingsRsvpTab::class;
+		}
+
+		return $pages;
+	}
+
+	/**
+	 * Register the RSVP page ID.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $page_id Current page id.
+	 *
+	 * @return null|string
+	 */
+	public function product_education_current_rsvp_page_id( $page_id ) {
+
+		if (
+			$page_id === 'settings' &&
+			isset( $_GET['section'] ) &&
+			$_GET['section'] === 'rsvp' &&
+			! sugar_calendar()->is_rsvp_addon_active()
+		) {
+			$page_id = 'settings_rsvp';
+		}
+
+		return $page_id;
+	}
+
+	/**
+	 * Register Settings the RSVP page tab id.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $tabs Array of tabs.
+	 *
+	 * @return array
+	 */
+	public function product_education_settings_rsvp_page_tab( $tabs ) {
+
+		if ( ! sugar_calendar()->is_rsvp_addon_active() ) {
+			$tabs[] = 'settings_rsvp';
+		}
+
+		return $tabs;
 	}
 }

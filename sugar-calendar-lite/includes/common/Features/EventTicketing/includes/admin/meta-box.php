@@ -48,15 +48,27 @@ function metabox_section( $event = null ) {
 		<div class="sugar-calendar-metabox__field">
 			<?php
 			UI::toggle_control(
-				[
-					'id'            => 'enable_tickets',
-					'name'          => 'enable_tickets',
-					'value'         => $enabled,
-					'toggle_labels' => [
-						esc_html__( 'ON', 'sugar-calendar-lite' ),
-						esc_html__( 'OFF', 'sugar-calendar-lite' ),
+				/**
+				 * Filter the enable tickets toggle args.
+				 *
+				 * @since 3.7.0
+				 *
+				 * @param array                 $args  Args for the UI toggle.
+				 * @param \Sugar_Calendar\Event $event The Event object.
+				 */
+				apply_filters(
+					'sc_et_enable_tickets_toggle_args',
+					[
+						'id'            => 'enable_tickets',
+						'name'          => 'enable_tickets',
+						'value'         => $enabled,
+						'toggle_labels' => [
+							esc_html__( 'ON', 'sugar-calendar-lite' ),
+							esc_html__( 'OFF', 'sugar-calendar-lite' ),
+						],
 					],
-				],
+					$event
+				),
 				true
 			);
 			?>

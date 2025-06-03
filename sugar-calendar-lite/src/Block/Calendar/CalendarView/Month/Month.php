@@ -59,6 +59,8 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 * @since 3.1.2 Added support for visitor timezone conversion.
 	 * @since 3.5.0 Added support for filter by venues.
 	 * @since 3.6.0 Added filter hook `sugar_calendar_block_calendar_view_month_events`.
+	 * @since 3.7.0 Added support for filtering by tags.
+	 * @since 3.7.0 Filter the number of events to load.
 	 *
 	 * @return array
 	 *
@@ -115,20 +117,34 @@ class Month implements InterfaceBaseView, InterfaceView {
 			$search_term      = $this->block->get_search_term();
 			$block_categories = ! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [];
 
+			// Get the venues.
+			$block_venues = $this->block->get_venues();
+
+			// Get the tags.
+			$block_tags = $this->block->get_tags();
+
+			// Get the speakers.
+			$block_speakers = $this->block->get_speakers();
+
 			// Get all the events on the calendar period.
-			$calendar_events = sc_get_events_for_calendar_with_custom_range(
-				$start_period_range,
-				$end_period_range,
-				$block_categories,
-				$search_term,
-				null,
-				$this->block->get_venues()
+			$calendar_events = sugar_calendar_get_events_within_range(
+				[
+					'start_range' => $start_period_range,
+					'end_range'   => $end_period_range,
+					'category'    => $block_categories,
+					'search'      => $search_term,
+					'number'      => $this->block->get_max_events_count(),
+					'venues'      => $block_venues,
+					'tags'        => $block_tags,
+					'speakers'    => $block_speakers,
+				]
 			);
 
 			/**
 			 * Filter the events for the month block.
 			 *
 			 * @since 3.6.0
+			 * @since 3.7.0 Added support for filtering by tags.
 			 *
 			 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
 			 * @param \DateTimeImmutable      $start_period_range The start period range.
@@ -136,6 +152,8 @@ class Month implements InterfaceBaseView, InterfaceView {
 			 * @param int[]                   $block_categories   The calendars to filter the occurrences.
 			 * @param string                  $search_term        The search term.
 			 * @param int[]                   $venues             The venues to filter the occurrences.
+			 * @param int[]                   $block_tags         The tags to filter the occurrences.
+			 * @param int[]                   $speakers           The speakers to filter the occurrences.
 			 */
 			$calendar_events = apply_filters(
 				'sugar_calendar_block_calendar_view_month_events',
@@ -144,7 +162,9 @@ class Month implements InterfaceBaseView, InterfaceView {
 				$end_period_range,
 				$block_categories,
 				$search_term,
-				$this->block->get_venues()
+				$block_venues,
+				$block_tags,
+				$block_speakers
 			);
 		}
 

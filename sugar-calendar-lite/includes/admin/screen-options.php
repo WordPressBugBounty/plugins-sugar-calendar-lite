@@ -90,13 +90,7 @@ function preferences() {
 	 *
 	 * @param string[] $default_date_formats Array of default date formats.
 	 */
-	$date_formats = array_unique( apply_filters( 'date_formats', array(
-		'F j, Y',
-		'Y-m-d',
-		'm/d/Y',
-		'd/m/Y',
-		'jS F, Y'
-	) ) );
+	$date_formats = array_unique( sugar_calendar_date_formats() );
 
 	// Is custom date checked?
 	$custom_date_checked = ! in_array( $sc_date_format, $date_formats, true );
@@ -106,11 +100,7 @@ function preferences() {
 	 *
 	 * @param string[] $default_time_formats Array of default time formats.
 	 */
-	$time_formats = array_unique( apply_filters( 'time_formats', array(
-		esc_html__( 'g:i a', 'sugar-calendar-lite' ),
-		'g:i A',
-		'H:i'
-	) ) );
+	$time_formats = array_unique( sugar_calendar_time_formats() );
 
 	// Is custom time checked?
 	$custom_time_checked = ! in_array( $sc_time_format, $time_formats, true );

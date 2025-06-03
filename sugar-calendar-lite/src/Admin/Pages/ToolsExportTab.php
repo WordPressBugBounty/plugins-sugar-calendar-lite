@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Tools\Exporter;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 
 /**
  * Calendar Export Tools tab.
@@ -27,11 +28,13 @@ class ToolsExportTab extends Tools {
 	 * Need pro keys.
 	 *
 	 * @since 3.6.0
+	 * @since 3.7.0 Add speakers.
 	 *
 	 * @var array
 	 */
 	const NEED_PRO_KEYS = [
 		'_venues',
+		'_speakers',
 	];
 
 	/**
@@ -58,7 +61,7 @@ class ToolsExportTab extends Tools {
 			'sugar-calendar-admin-exporter',
 			SC_PLUGIN_ASSETS_URL . 'admin/js/sc-admin-exporter' . WP::asset_min() . '.js',
 			[ 'jquery' ],
-			SC_PLUGIN_VERSION,
+			Helpers::get_asset_version(),
 			true
 		);
 	}
@@ -158,6 +161,7 @@ class ToolsExportTab extends Tools {
 		 * Filter for export modules.
 		 *
 		 * @since 3.6.0
+		 * @since 3.7.0 Add speakers.
 		 *
 		 * @param array $data_checkboxes Array of data checkboxes.
 		 */
@@ -168,7 +172,9 @@ class ToolsExportTab extends Tools {
 				'custom_fields' => __( 'Custom Fields', 'sugar-calendar-lite' ),
 				'calendars'     => __( 'Calendars', 'sugar-calendar-lite' ),
 				'orders'        => __( 'Tickets, Orders and Attendees', 'sugar-calendar-lite' ),
+				'tags'          => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
 				'_venues'       => __( 'Venues', 'sugar-calendar-lite' ),
+				'_speakers'     => __( 'Speakers', 'sugar-calendar-lite' ),
 			]
 		);
 		?>

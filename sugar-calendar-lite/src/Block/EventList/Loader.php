@@ -149,7 +149,7 @@ class Loader {
 			'sc-frontend-blocks-event-list-js',
 			SC_PLUGIN_ASSETS_URL . "js/frontend/blocks/event-list{$min}.js",
 			$sc_block_deps,
-			SC_PLUGIN_VERSION
+			Helpers::get_asset_version()
 		);
 
 		wp_localize_script(

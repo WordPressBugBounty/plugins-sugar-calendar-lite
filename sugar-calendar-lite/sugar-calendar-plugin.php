@@ -7,14 +7,18 @@
 
 namespace Sugar_Calendar;
 
+use Sugar_Calendar\Admin\Addons\Addons;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Notifications;
 use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Block\Loader;
 use Sugar_Calendar\Migrations\Migrations;
+use Sugar_Calendar\SetupWizard\SetupWizard;
 use Sugar_Calendar\Tasks\Tasks;
 use Sugar_Calendar\UsageTracking\UsageTracking;
+use Sugar_Calendar\Features\Loader as FeaturesLoader;
 use Sugar_Calendar\Shortcodes\ModernShortcodes;
+use Sugar_Calendar\Admin\Tools\DashboardWidget;
 
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
@@ -194,34 +198,38 @@ final class Plugin {
 	}
 
 	/**
-	 * Setup the rest of the application
+	 * Setup the rest of the application.
 	 *
 	 * @since 2.0.0
+	 * @since 3.7.0 Move the modern shortcodes to load last.
 	 */
 	private function setup_application() {
 
-		// Database tables
+		// Database tables.
 		new Events_Table();
 		new Meta_Table();
 
-		// Backwards Compatibility
+		// Backwards Compatibility.
 		new Posts\Meta\Back_Compat();
 
-		// Taxonomy Features
+		// Taxonomy Features.
 		new Term_Timezones( $this->file );
 		new Term_Colors( $this->file );
 
 		// Load the common Features.
 		$this->get_common_features();
 
+		// Load the common src Features.
+		$this->get_src_features();
+
 		// Load the Block.
 		$this->get_blocks();
 
-		// Load the Shortcodes.
-		$this->get_modern_shortcodes();
-
 		// Load the integrations.
 		$this->get_integrations();
+
+		// Load the Setup Wizard.
+		$this->get_setup_wizard();
 
 		if ( is_admin() ) {
 			$this->get_admin();
@@ -233,6 +241,12 @@ final class Plugin {
 		}
 
 		$this->get_frontend();
+
+		// Load the Shortcodes.
+		$this->get_modern_shortcodes();
+
+		// Load the Dashboard Widget.
+		$this->get_dashboard_widget();
 	}
 
 	/**
@@ -255,6 +269,29 @@ final class Plugin {
 			 * @param Common\Features\Loader $loader The common Features loader.
 			 */
 			$features = apply_filters( 'sugar_calendar_get_common_features', new Common\Features\Loader() );
+
+			if ( method_exists( $features, 'init' ) ) {
+				$features->init();
+			}
+		}
+
+		return $features;
+	}
+
+	/**
+	 * Load the common src Features.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @return Sugar_Calendar\Features\Loader
+	 */
+	public function get_src_features() {
+
+		static $features;
+
+		if ( ! isset( $features ) ) {
+
+			$features = new FeaturesLoader();
 
 			if ( method_exists( $features, 'init' ) ) {
 				$features->init();
@@ -534,6 +571,8 @@ final class Plugin {
 
 		// Priority is 99 so it runs after the main upgrade routine.
 		add_action( 'init', [ $this, 'perform_post_upgrade' ], 99 );
+
+		add_action( 'init', [ $this, 'get_addons' ] );
 	}
 
 	/**
@@ -868,6 +907,27 @@ final class Plugin {
 	}
 
 	/**
+	 * Get the Dashboard Widget.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return DashboardWidget
+	 */
+	public function get_dashboard_widget() {
+
+		static $dashboard_widget;
+
+		if ( ! isset( $dashboard_widget ) ) {
+
+			$dashboard_widget = new DashboardWidget();
+
+			$dashboard_widget->init();
+		}
+
+		return $dashboard_widget;
+	}
+
+	/**
 	 * Get the Integrations.
 	 *
 	 * @since 3.2.0
@@ -953,12 +1013,81 @@ final class Plugin {
 	 */
 	public function maybe_flush_rewrite_rules() {
 
-		if ( version_compare( SC_PLUGIN_VERSION, '3.6.0', '<=' ) ) {
+		if ( version_compare( SC_PLUGIN_VERSION, '3.7.0', '<=' ) ) {
 			// Flush rewrite rules.
 			flush_rewrite_rules();
 
 			// To flush the rules in DB (without .htaccess).
 			flush_rewrite_rules( false );
 		}
+	}
+
+	/**
+	 * Get the Setup Wizard.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return SetupWizard
+	 */
+	public function get_setup_wizard() {
+
+		static $setup_wizard;
+
+		if ( ! isset( $setup_wizard ) ) {
+			$setup_wizard = new SetupWizard();
+
+			if ( method_exists( $setup_wizard, 'hooks' ) ) {
+				$setup_wizard->hooks();
+			}
+		}
+
+		return $setup_wizard;
+	}
+
+	/**
+	 * Check if the RSVP addon is active.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return bool
+	 */
+	public function is_rsvp_addon_active() {
+
+		static $is_rsvp_addon_active;
+
+		if ( ! isset( $is_rsvp_addon_active ) ) {
+			$is_rsvp_addon_active = is_plugin_active( 'sc-rsvp/sc-rsvp.php' );
+		}
+
+		return $is_rsvp_addon_active;
+	}
+
+	/**
+	 * Get the addons.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return Addons
+	 */
+	public function get_addons() {
+
+		static $addons;
+
+		if ( ! isset( $addons ) ) {
+			/**
+			 * Filters the Addons loader.
+			 *
+			 * @since 3.7.0
+			 *
+			 * @param Addons $addons The Addons loader.
+			 */
+			$addons = apply_filters( 'sugar_calendar_get_addons', new Addons() );
+
+			if ( method_exists( $addons, 'hooks' ) ) {
+				$addons->hooks();
+			}
+		}
+
+		return $addons;
 	}
 }

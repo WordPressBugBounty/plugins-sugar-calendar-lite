@@ -304,15 +304,10 @@ class Event implements MetaboxInterface {
 	 * @param array $tabs Section tabs.
 	 */
 	private function display_all_section_links( $tabs = [] ) {
-
 		?>
-
-        <div class="sugar-calendar-metabox__navigation">
-
+		<div class="sugar-calendar-metabox__navigation">
 			<?php echo $this->get_all_section_links( $tabs ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-
-        </div>
-
+		</div>
 		<?php
 	}
 
@@ -383,14 +378,13 @@ class Event implements MetaboxInterface {
 		foreach ( $sections as $section ) :
 			$selected = $this->is_current_section( $section->id ) ? ' selected' : '';
 			?>
-
-            <button type="button"
-                    class="sugar-calendar-metabox__navigation__button<?php echo esc_attr( $selected ); ?>"
-                    data-id="<?php echo esc_attr( $section->id ); ?>">
-                <i class="dashicons dashicons-<?php echo esc_attr( $section->icon ); ?>"></i>
-                <span class="label" id="sc-label-<?php echo esc_attr( $section->id ); ?>"><?php echo esc_attr( $section->label ); ?></span>
-            </button>
-
+			<button type="button"
+				id="sugar-calendar-metabox__navigation__button-<?php echo esc_attr( $section->id ); ?>"
+				class="sugar-calendar-metabox__navigation__button<?php echo esc_attr( $selected ); ?>"
+				data-id="<?php echo esc_attr( $section->id ); ?>">
+					<i class="dashicons dashicons-<?php echo esc_attr( $section->icon ); ?>"></i>
+					<span class="label" id="sc-label-<?php echo esc_attr( $section->id ); ?>"><?php echo esc_attr( $section->label ); ?></span>
+			</button>
 		<?php
 		endforeach;
 
@@ -1321,9 +1315,15 @@ class Event implements MetaboxInterface {
 
 		wp_enqueue_script( 'sugar-calendar-admin-event-meta-box' );
 
-		wp_localize_script(
-			'sugar-calendar-admin-event-meta-box',
-			'sugar_calendar_admin_event_meta_box',
+		/**
+		 * Filter the localize script for the admin event meta box.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array $localize_script Localize script.
+		 */
+		$admin_event_meta_box_localize_script = apply_filters(
+			'sugar_calendar_admin_events_metaboxes_event_localize_script',
 			[
 				'start_of_week' => sugar_calendar_get_user_preference( 'start_of_week' ),
 				'date_format'   => sugar_calendar_get_user_preference( 'date_format' ),
@@ -1332,6 +1332,12 @@ class Event implements MetaboxInterface {
 				'timezone_type' => sugar_calendar_get_user_preference( 'timezone_type' ),
 				'clock_type'    => sugar_calendar_get_clock_type(),
 			]
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-event-meta-box',
+			'sugar_calendar_admin_event_meta_box',
+			$admin_event_meta_box_localize_script
 		);
 	}
 

@@ -22,8 +22,11 @@ var SugarCalendarBlocks = window.SugarCalendarBlocks || ( function( document, wi
 		 * Document ready.
 		 *
 		 * @since 3.1.0
+		 * @since 3.7.0 Added datepicker i18n.
 		 */
 		ready() {
+
+			app.setupDatepickerI18n();
 
 			$( 'body' ).on( 'click', app.events.closePopoversOnBodyClick );
 		},
@@ -92,6 +95,25 @@ var SugarCalendarBlocks = window.SugarCalendarBlocks || ( function( document, wi
 				.removeClass( 'sugar-calendar-block__controls__settings__btn_active' );
 
 			$body.removeClass( 'sugar-calendar-block__popovers__active' );
+		},
+
+		/**
+		 * Setup the datepicker i18n.
+		 *
+		 * @since 3.7.0
+		 */
+		setupDatepickerI18n() {
+
+			// Get the current locale.
+			let locale = sc_frontend_blocks_common_obj.settings.locale;
+
+			$.fn.scbootdatepicker.dates[ locale ] = {
+				days: sc_frontend_blocks_common_obj.settings.i18n.days,
+				daysShort: sc_frontend_blocks_common_obj.settings.i18n.daysShort,
+				daysMin: sc_frontend_blocks_common_obj.settings.i18n.daysMin,
+				months: sc_frontend_blocks_common_obj.settings.i18n.months,
+				monthsShort: sc_frontend_blocks_common_obj.settings.i18n.monthsShort,
+			}
 		}
 	}
 
@@ -106,6 +128,7 @@ SugarCalendarBlocks.init();
  *
  * @since 3.1.0
  * @since 3.5.0 Added the trigger for filter by venue.
+ * @since 3.7.0 Added the trigger for filter by tag.
  */
 SugarCalendarBlocks.Controls = SugarCalendarBlocks.Controls || function( $blockContainer ) {
 
@@ -141,6 +164,14 @@ SugarCalendarBlocks.Controls = SugarCalendarBlocks.Controls || function( $blockC
 	// Venue Selector.
 	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue' )
 		.on( 'click', this.onSelectVenue.bind( this ) );
+
+	// Speaker Selector.
+	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__speaker' )
+		.on( 'click', this.onSelectSpeaker.bind( this ) );
+
+	// Tag Selector.
+	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__tag' )
+		.on( 'click', this.onSelectTag.bind( this ) );
 
 	// Day Selector.
 	this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__day' )
@@ -311,14 +342,14 @@ SugarCalendarBlocks.Controls.prototype.onChangeDisplay = function( e ) {
 
 	let $el = jQuery( e.target ),
 		display = $el.text().trim(),
-		displayLower = display.toLowerCase();
+		displayMode = $el.data( 'mode' );
 
-	if ( displayLower === this.getDisplayMode() ) {
+	if ( displayMode === this.getDisplayMode() ) {
 		return;
 	}
 
 	// Update the form value.
-	this.$formContainer.find( 'input[name="sc_display"]' ).val( displayLower );
+	this.$formContainer.find( 'input[name="sc_display"]' ).val( displayMode );
 	this.$blockContainer.find( '.sugar-calendar-block__controls__right__view__btn span' ).text( display );
 
 	this.update( { update_display: true } );
@@ -398,6 +429,57 @@ SugarCalendarBlocks.Controls.prototype.onSelectVenue = function() {
 }
 
 /**
+ * Get the speaker IDs that are checked.
+ *
+ * @since 3.7.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getSpeakerIds = function() {
+	const $checkedSpeakers = this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__speaker:checked' );
+
+	if ( $checkedSpeakers.length <= 0 ) {
+		return [];
+	}
+
+	return $checkedSpeakers.map( function() {
+		return this.value;
+	} ).get();
+}
+
+/**
+ * Get the speaker IDs that are filtered from block settings.
+ *
+ * @since 3.7.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getSpeakersFilter = function() {
+	const $speakerFilters = this.$formContainer.find( 'input[name="sc_speakers_filter"]' );
+
+	if ( $speakerFilters.length <= 0 ) {
+		return [];
+	}
+
+	const speakerFilters = $speakerFilters.val();
+
+	if ( speakerFilters.length <= 0 ) {
+		return [];
+	}
+
+	return speakerFilters.split( ',' );
+}
+
+/**
+ * Event callback for selecting a speaker to display.
+ *
+ * @since 3.7.0
+ */
+SugarCalendarBlocks.Controls.prototype.onSelectSpeaker = function() {
+	this.update( {} );
+}
+
+/**
  * Event callback for searching events.
  *
  * @since 3.1.0
@@ -417,6 +499,57 @@ SugarCalendarBlocks.Controls.prototype.onSearch = function( e ) {
 	} else {
 		this.$searchClear.hide();
 	}
+}
+
+/**
+ * Get the tag IDs that are checked.
+ *
+ * @since 3.7.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getTagIds = function() {
+	const $checkedTags = this.$blockContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__tag:checked' );
+
+	if ( $checkedTags.length <= 0 ) {
+		return [];
+	}
+
+	return $checkedTags.map( function() {
+		return this.value;
+	} ).get();
+}
+
+/**
+ * Get the tag IDs that are filtered from block settings.
+ *
+ * @since 3.7.0
+ *
+ * @return {string[]}
+ */
+SugarCalendarBlocks.Controls.prototype.getTagsFilter = function() {
+	const $tagFilters = this.$formContainer.find( 'input[name="sc_tags_filter"]' );
+
+	if ( $tagFilters.length <= 0 ) {
+		return [];
+	}
+
+	const tagFilters = $tagFilters.val();
+
+	if ( tagFilters.length <= 0 ) {
+		return [];
+	}
+
+	return tagFilters.split( ',' );
+}
+
+/**
+ * Event callback for selecting a tag to display.
+ *
+ * @since 3.7.0
+ */
+SugarCalendarBlocks.Controls.prototype.onSelectTag = function() {
+	this.update( {} );
 }
 
 /**
@@ -506,7 +639,8 @@ SugarCalendarBlocks.Controls.prototype.initDatePicker = function() {
 				'<path d="M0.5625 0.414062C0.679688 0.296875 0.84375 0.296875 0.960938 0.414062L5.88281 5.3125C5.97656 5.42969 5.97656 5.59375 5.88281 5.71094L0.960938 10.6094C0.84375 10.7266 0.679688 10.7266 0.5625 10.6094L0.09375 10.1641C0 10.0469 0 9.85938 0.09375 9.76562L4.33594 5.5L0.09375 1.25781C0 1.16406 0 0.976562 0.09375 0.859375L0.5625 0.414062Z" fill="currentColor"/>' +
 				'</svg>'
 		},
-		weekStart: sc_frontend_blocks_common_obj.settings.sow
+		weekStart: sc_frontend_blocks_common_obj.settings.sow,
+		language: sc_frontend_blocks_common_obj.settings.locale,
 	});
 
 	let $year = this.$formContainer.find( 'input[name="sc_year"]' ),

@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "sugar-calendar/block",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Events Calendar",
   "category": "sugar-calendar",
   "description": "Sugar Calendar block for displaying the events calendar.",
@@ -16,7 +16,15 @@
       "type": "array",
       "default": []
     },
+    "tags": {
+      "type": "array",
+      "default": []
+    },
     "venues": {
+      "type": "array",
+      "default": []
+    },
+    "speakers": {
       "type": "array",
       "default": []
     },

@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Tools\Importers;
 
 use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagHelpers;
 
 /**
  * Sugar Calendar importer.
@@ -29,6 +30,15 @@ class SugarCalendar extends Importer {
 	 * @var array
 	 */
 	public $imported_event_ids = [];
+
+	/**
+	 * Imported tag ids to record old and new tag ids.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @var array
+	 */
+	public $imported_tag_ids = [];
 
 	/**
 	 * Display the default import display.
@@ -119,7 +129,7 @@ class SugarCalendar extends Importer {
 			</p>
 			<div class="sc-admin-tools-import-summary__wrap">
 				<?php
-				foreach ( [ 'events', 'venues', 'calendars', 'tickets', 'orders', 'attendees' ] as $context ) {
+				foreach ( [ 'events', 'venues', 'speakers', 'calendars', 'tickets', 'orders', 'attendees', 'categories', 'tags' ] as $context ) {
 					if ( ! array_key_exists( $context, $this->importer_data ) ) {
 						continue;
 					}
@@ -292,25 +302,35 @@ class SugarCalendar extends Importer {
 
 		/*
 		 * Importing should be done in specific order.
-		 * 1. Calendars.
+		 * Calendars.
 		 */
 		if ( array_key_exists( 'calendars', $data ) ) {
 			$this->import_calendars( $data['calendars'] );
 			$imported_data['calendars'] = absint( $this->imported_calendars_count );
 		}
 
-		// 2. Attendees.
+		// Tags.
+		if ( array_key_exists( 'tags', $data ) ) {
+			$imported_data['tags'] = absint( $this->import_tags( $data['tags'] ) );
+		}
+
+		// Attendees.
 		if ( array_key_exists( 'attendees', $data ) ) {
 			$this->import_attendees( $data['attendees'] );
 			$imported_data['attendees'] = absint( $this->imported_attendees_count );
 		}
 
-		// 3. Events.
+		// Events.
 		if ( array_key_exists( 'events', $data ) ) {
 			$imported_data['events'] = $this->import_events( $data['events'] );
 		}
 
-		// 4. Orders.
+		// Events tags relationship - process directly from events data.
+		if ( array_key_exists( 'events', $data ) && array_key_exists( 'tags', $data ) ) {
+			$imported_data['events_tags_related'] = $this->relate_events_to_imported_tags( $data, $this );
+		}
+
+		// Orders.
 		if ( array_key_exists( 'orders', $data ) ) {
 			// If we have this then it means that the SC export was exported with "events" data.
 			// So we import these orders without associating them to any events.
@@ -319,7 +339,7 @@ class SugarCalendar extends Importer {
 			}
 		}
 
-		// 5. Extra orders.
+		// Extra orders.
 		if ( array_key_exists( 'extra_orders', $data ) ) {
 			// The orders data here isn't associated to any events on the SC export source.
 			foreach ( $data['extra_orders'] as $order ) {
@@ -327,7 +347,7 @@ class SugarCalendar extends Importer {
 			}
 		}
 
-		// 6. Extra tickets.
+		// Extra tickets.
 		if ( array_key_exists( 'extra_tickets', $data ) ) {
 			// The orders data here isn't associated to any events or orders on the SC export source.
 			foreach ( $data['extra_tickets'] as $ticket ) {
@@ -483,5 +503,138 @@ class SugarCalendar extends Importer {
 	public function is_ajax() {
 
 		return false;
+	}
+
+	/**
+	 * Import tags.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $tags_data The tags data.
+	 *
+	 * @return int Returns the number of tags imported.
+	 */
+	private function import_tags( $tags_data ) {
+
+		$imported_count = 0;
+
+		$taxonomy = TagHelpers::get_tags_taxonomy_id();
+
+		foreach ( $tags_data as $tag ) {
+
+			// Check if tag already exists.
+			$existing_term = get_term_by( 'slug', $tag['slug'], $taxonomy );
+
+			if ( $existing_term && ! is_wp_error( $existing_term ) ) {
+
+				// Use existing term.
+				$this->imported_tag_ids[ $tag['id'] ] = $existing_term->term_id;
+
+				++$imported_count;
+
+				continue;
+			}
+
+			// Create new tag.
+			$term = wp_insert_term(
+				$tag['name'],
+				$taxonomy,
+				[
+					'slug'        => $tag['slug'],
+					'description' => isset( $tag['description'] ) ? $tag['description'] : '',
+				]
+			);
+
+			// If tag creation failed, skip.
+			if ( is_wp_error( $term ) ) {
+				continue;
+			}
+
+			// Record the imported tag ID.
+			$this->imported_tag_ids[ $tag['id'] ] = $term['term_id'];
+
+			++$imported_count;
+		}
+
+		// Return number of imported tags.
+		return $imported_count;
+	}
+
+	/**
+	 * Relate events to imported tags.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array                                              $data     The data to import.
+	 * @param Sugar_Calendar\Admin\Tools\Importers\SugarCalendar $importer The importer object.
+	 *
+	 * @return int Number of events related to imported tags.
+	 */
+	private function relate_events_to_imported_tags( $data, $importer ) {
+
+		// Count how many relationships were created.
+		$events_tags_related = 0;
+
+		// Map to collect tag IDs for each event.
+		$event_tag_map = [];
+
+		// Process events with tags.
+		foreach ( $data['events'] as $event ) {
+
+			// Skip if the event has no tags or wasn't imported successfully.
+			if (
+				empty( $event['tags'] ) ||
+				empty( $importer->imported_event_ids[ $event['id'] ] )
+			) {
+				continue;
+			}
+
+			$old_event_id = intval( $event['id'] );
+
+			$new_event_post_id = $importer->imported_event_ids[ $old_event_id ]['sc_event_post_id'];
+
+			// Initialize the array for this event if not exists.
+			if ( ! isset( $event_tag_map[ $new_event_post_id ] ) ) {
+				$event_tag_map[ $new_event_post_id ] = [];
+			}
+
+			// Process each tag ID for this event.
+			foreach ( $event['tags'] as $old_tag_id ) {
+
+				// Skip if we don't have mapping for the tag.
+				if ( empty( $this->imported_tag_ids[ $old_tag_id ] ) ) {
+					continue;
+				}
+
+				// Include only valid tag IDs.
+				if ( TagHelpers::is_valid_tags_term_id( $this->imported_tag_ids[ $old_tag_id ] ) ) {
+					$event_tag_map[ $new_event_post_id ][] = $this->imported_tag_ids[ $old_tag_id ];
+				}
+			}
+		}
+
+		// Create all the relationships.
+		foreach ( $event_tag_map as $new_event_post_id => $new_tag_ids ) {
+
+			// Skip if no tags for this event.
+			if ( empty( $new_tag_ids ) ) {
+				continue;
+			}
+
+			// Set the terms for this post.
+			$result = wp_set_object_terms(
+				$new_event_post_id,
+				$new_tag_ids,
+				TagHelpers::get_tags_taxonomy_id(),
+				true // Append to existing tags.
+			);
+
+			// If successful, increment the counter.
+			if ( ! is_wp_error( $result ) && ! empty( $result ) ) {
+				$events_tags_related += count( $new_tag_ids );
+			}
+		}
+
+		return $events_tags_related;
 	}
 }

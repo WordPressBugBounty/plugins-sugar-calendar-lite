@@ -8,8 +8,8 @@ License:           GNU General Public License v2 or later
 Tags:              events, calendar, event calendar, event management, event tickets
 Requires PHP:      7.4
 Requires at least: 5.9
-Tested up to:      6.7
-Stable tag:        3.6.1
+Tested up to:      6.8
+Stable tag:        3.7.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -101,8 +101,10 @@ To get all awesome Sugar Calendar features you need, please check our [premium l
 
 If you purchase a premium license to Sugar Calendar you have access to:
 
+- RSVP addon (if you select the Plus, Pro or Elite license)
 - Event Ticketing addon (if you select the Plus, Pro or Elite license)
 - Zapier addon (if you select the Plus, Pro or Elite license)
+- Speakers
 - Recurring / repeating events
 - Event Venues
 - Frontend Event Submissions
@@ -118,6 +120,7 @@ If you purchase an [Plus, Pro or Elite license](https://sugarcalendar.com/pricin
 
 - **[Event Ticketing](https://sugarcalendar.com/downloads/event-tickets/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticketing)** - This addon allows you to easily sell tickets to your events via WooCommerce, whether they are virtual or in-person events. Easily integrates with WooCommerce to allow event tickets to be purchased through existing WooCommerce checkout pages.
 - **[Zapier](https://sugarcalendar.com/downloads/zapier/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=zapier)** - This addon allows you to integrate Sugar Calendar with over 7000 other apps via Zapier. The plugin includes 3 triggers: New Event, New Ticket Order, and New Attendee.
+- **[RSVP](https://sugarcalendar.com/downloads/sc-rsvp/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=rsvp)** - This addon allows you to simplify your event management and boost attendance like never before! The RSVP Addon is packed with everything you need to effortlessly manage your guest lists and create a smooth experience for your attendees.
 
 Sugar Calendar is a verified member of the [Stripe partner program](https://stripe.com/accept-payments/sugar-calendar). This program recognizes software that meets Stripe's strict quality requirements and provides users of Sugar Calendar and Stripe with the confidence they need to trust us both with their payment integrations.
 
@@ -194,10 +197,16 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
-= 3.6.1, 2025-04-07 =
-- Fixed: Support custom event slug in recurring events.
-- Fixed: Free tickets (0 price) are not working.
-- Fixed: Enhanced security when purchasing event tickets.
+= 3.7.0 - 2025-06-03 =
+- Added: Support internationalization in the datepicker in our blocks.
+- Added: Dashboard Widget: Quickly access your upcoming events from within the Dashboard.
+- Added: Tags: Organize your events better using tags.
+- Fixed: Event List block not showing current on-going events.
+- Fixed: PHP warning when filtering events by calendars in Event blocks.
+- Fixed: Overriding template for calendar archive is not working.
+- Fixed: Display mode on blocks are not working on non-english sites.
+- Fixed: Blocks not loading all events.
+- Changed: Made more strings translatable.
 
 = 3.6.0 - 2025-03-13 =
 - Added: Ability to set Event Ticket Attendee information as required.

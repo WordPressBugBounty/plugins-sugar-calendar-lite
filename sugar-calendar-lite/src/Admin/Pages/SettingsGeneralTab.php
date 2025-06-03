@@ -143,16 +143,7 @@ class SettingsGeneralTab extends Settings {
 		 *
 		 * @param string[] $default_date_formats Array of default date formats.
 		 */
-		$date_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-			'date_formats',
-			[
-				'F j, Y',
-				'Y-m-d',
-				'm/d/Y',
-				'd/m/Y',
-				'jS F, Y',
-			]
-		);
+		$date_formats = sugar_calendar_date_formats();
 		$date_formats = array_unique( $date_formats );
 		$date_format  = sc_get_date_format();
 
@@ -174,14 +165,7 @@ class SettingsGeneralTab extends Settings {
 		 *
 		 * @param string[] $default_time_formats Array of default time formats.
 		 */
-		$time_formats = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-			'time_formats',
-			[
-				esc_html__( 'g:i a', 'sugar-calendar-lite' ),
-				'g:i A',
-				'H:i',
-			]
-		);
+		$time_formats = sugar_calendar_time_formats();
 		$time_formats = array_unique( $time_formats );
 		$time_format  = sc_get_time_format();
 

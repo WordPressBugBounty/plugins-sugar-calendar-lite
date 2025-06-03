@@ -472,6 +472,36 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Event callback for selecting a tag to display.
+	 *
+	 * @since 3.7.0
+	 */
+	ControlEvents.prototype.onSelectTag = function() {
+
+		this.calendarBlock.update();
+	}
+
+	/**
+	 * Event callback for selecting a venue to display.
+	 *
+	 * @since 3.7.0
+	 */
+	ControlEvents.prototype.onSelectVenue = function() {
+
+		this.calendarBlock.update();
+	}
+
+	/**
+	 * Event callback for selecting a speaker to display.
+	 *
+	 * @since 3.7.0
+	 */
+	ControlEvents.prototype.onSelectSpeaker = function() {
+
+		this.calendarBlock.update();
+	}
+
+	/**
 	 * Event callback for "This Month", "This Week", or "Today" button.
 	 *
 	 * @since 3.0.0
@@ -496,16 +526,16 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		let $el = $( e.target ),
 			display = $el.text().trim(),
-			displayLower = display.toLowerCase();
+			displayMode = $el.data( 'mode' );
 
-		if ( displayLower === this.calendarBlock.getDisplay() ) {
+		if ( displayMode === this.calendarBlock.getDisplay() ) {
 			return;
 		}
 
 		this.calendarBlock.$mainContainer.removeClass( `sugar-calendar-block__${this.calendarBlock.getDisplay()}-view` );
-		this.calendarBlock.$mainContainer.addClass( `sugar-calendar-block__${displayLower}-view` );
+		this.calendarBlock.$mainContainer.addClass( `sugar-calendar-block__${displayMode}-view` );
 
-		this.calendarBlock.$formContainer.find( 'input[name="sc_display"]' ).val( displayLower );
+		this.calendarBlock.$formContainer.find( 'input[name="sc_display"]' ).val( displayMode );
 		this.calendarBlock.update( true );
 		this.calendarBlock.$mainContainer.find( '.sugar-calendar-block__controls__right__view__btn span' ).text( display );
 	}
@@ -544,6 +574,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Initialize the Datepicker.
 	 *
 	 * @since 3.0.0
+	 * @since 3.7.0 Added datepicker i18n.
 	 */
 	CalendarBlock.prototype.initDatePicker = function() {
 
@@ -557,6 +588,9 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			minViewMode = 1;
 		}
 
+		// Setup scbootdatepicker i18n.
+		this.setupDatepickerI18n();
+
 		this.$datePicker.scbootdatepicker({
 			minViewMode: minViewMode,
 			maxViewMode: 2,
@@ -568,7 +602,8 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 					'<path d="M0.5625 0.414062C0.679688 0.296875 0.84375 0.296875 0.960938 0.414062L5.88281 5.3125C5.97656 5.42969 5.97656 5.59375 5.88281 5.71094L0.960938 10.6094C0.84375 10.7266 0.679688 10.7266 0.5625 10.6094L0.09375 10.1641C0 10.0469 0 9.85938 0.09375 9.76562L4.33594 5.5L0.09375 1.25781C0 1.16406 0 0.976562 0.09375 0.859375L0.5625 0.414062Z" fill="currentColor"/>' +
 					'</svg>'
 			},
-			weekStart: sugar_calendar_obj.settings.sow
+			weekStart: sugar_calendar_obj.settings.sow,
+			language: sugar_calendar_obj.settings.locale
 		});
 
 		let $year = this.$formContainer.find( 'input[name="sc_year"]' ),
@@ -651,6 +686,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 *
 	 * @since 3.0.0
 	 * @since 3.5.0 Add venue filter trigger.
+	 * @since 3.7.0 Add tag filter trigger.
 	 */
 	CalendarBlock.prototype.initControls = function() {
 
@@ -688,7 +724,15 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		// Venues selector.
 		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue' )
-			.on( 'change', this.controlEvents.onSelectCalendar.bind( this.controlEvents ) );
+			.on( 'change', this.controlEvents.onSelectVenue.bind( this.controlEvents ) );
+
+		// Speaker selector.
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__speaker' )
+			.on( 'click', this.controlEvents.onSelectSpeaker.bind( this.controlEvents ) );
+
+		// Tags selector.
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__tag' )
+			.on( 'change', this.controlEvents.onSelectTag.bind( this.controlEvents ) );
 
 		// Day selector.
 		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__day' )
@@ -777,6 +821,24 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Get the speaker IDs that are checked.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getSpeakerIds = function() {
+		let speakerIds = [];
+
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__speaker:checked' )
+			.each( function() {
+				speakerIds.push( $( this ).val() );
+			});
+
+		return speakerIds;
+	}
+
+	/**
 	 * Get the calendar IDs that are filtered from block settings.
 	 *
 	 * @since 3.2.0
@@ -823,6 +885,70 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Get the speaker IDs that are filtered from block settings.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getSpeakersFilter = function() {
+		const $speakerFilters = this.$formContainer.find( 'input[name="sc_speakers_filter"]' );
+
+		if ( $speakerFilters.length <= 0 ) {
+			return [];
+		}
+
+		const speakerFilters = $speakerFilters.val();
+
+		if ( speakerFilters.length <= 0 ) {
+			return [];
+		}
+
+		return speakerFilters.split( ',' );
+	}
+
+	/**
+	 * Get the tag IDs that are checked.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getTagIds = function() {
+		let tagIds = [];
+
+		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__tag:checked' )
+			.each( function() {
+				tagIds.push( $( this ).val() );
+			});
+
+		return tagIds;
+	}
+
+	/**
+	 * Get the tag IDs that are filtered from block settings.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return {string[]}
+	 */
+	CalendarBlock.prototype.getTagsFilter = function() {
+		const $tagFilters = this.$formContainer.find( 'input[name="sc_tags_filter"]' );
+
+		if ( $tagFilters.length <= 0 ) {
+			return [];
+		}
+
+		const tagFilters = $tagFilters.val();
+
+		if ( tagFilters.length <= 0 ) {
+			return [];
+		}
+
+		return tagFilters.split( ',' );
+	}
+
+	/**
 	 * Get the display mode.
 	 *
 	 * @since 3.0.0
@@ -839,6 +965,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * @since 3.0.0
 	 * @since 3.5.0 Add accessibility label for previous and next left control buttons.
 	 * @since 3.5.0 Add `venues` and `venuesFilter` parameters.
+	 * @since 3.7.0 Add `tags` and `tagsFilter` parameters.
 	 *
 	 * @param {boolean} updateDisplay Whether the request is updating the display mode.
 	 * @param {string} action         The action to perform, e.g., next_day, previous_day, etc.
@@ -858,9 +985,13 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			id: this.id,
 			attributes: this.$mainContainer.data( 'attributes' ),
 			calendars: this.getCalendarIds(),
-			calendarsFilter: this.getCalendarsFilter(),
 			venues: this.getVenuesIds(),
+			speakers: this.getSpeakerIds(),
+			calendarsFilter: this.getCalendarsFilter(),
 			venuesFilter: this.getVenuesFilter(),
+			speakersFilter: this.getSpeakersFilter(),
+			tags: this.getTagIds(),
+			tagsFilter: this.getTagsFilter(),
 			day: parseInt( this.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.$formContainer.find( 'input[name="sc_year"]' ).val() ),
@@ -1215,6 +1346,25 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 				$evt.addClass( 'sugar-calendar-block__calendar-month__cell-hide' );
 			}
 		} );
+	}
+
+	/**
+	 * Setup the datepicker i18n.
+	 *
+	 * @since 3.7.0
+	 */
+	CalendarBlock.prototype.setupDatepickerI18n = function() {
+
+		// Get the current locale.
+		let locale = sugar_calendar_obj.settings.locale;
+
+		$.fn.scbootdatepicker.dates[ locale ] = {
+			days: sugar_calendar_obj.settings.i18n.days,
+			daysShort: sugar_calendar_obj.settings.i18n.daysShort,
+			daysMin: sugar_calendar_obj.settings.i18n.daysMin,
+			months: sugar_calendar_obj.settings.i18n.months,
+			monthsShort: sugar_calendar_obj.settings.i18n.monthsShort,
+		}
 	}
 
 	let app = {

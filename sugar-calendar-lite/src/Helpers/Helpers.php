@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Helpers;
 
 use Sugar_Calendar\Plugin;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -135,5 +136,40 @@ class Helpers {
 	public static function generate_random_hex_color() {
 
 		return sprintf( '#%06X', wp_rand( 0, 0xFFFFFF ) );
+	}
+
+	/**
+	 * Get tags slug.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return string
+	 */
+	public static function get_tags_slug() {
+
+		return TagsHelpers::get_tags_taxonomy_id();
+	}
+
+	/**
+	 * Get comma-separated string from an array of words.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param array $words Words array.
+	 * @param bool  $sep   Separator of the last element.
+	 *
+	 * @return string
+	 */
+	public static function array_string_list( $words, $sep = true ) {
+
+		$separator = $sep ?
+			__( 'and', 'sugar-calendar-lite' ) :
+			__( 'or', 'sugar-calendar-lite' );
+
+		$last  = array_slice( $words, - 1 );
+		$first = implode( ', ', array_slice( $words, 0, - 1 ) );
+		$both  = array_filter( array_merge( [ $first ], $last ) );
+
+		return implode( ' ' . $separator . ' ', $both );
 	}
 }

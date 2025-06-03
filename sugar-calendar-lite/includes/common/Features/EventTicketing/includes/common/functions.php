@@ -1169,39 +1169,6 @@ function send_ticket_email( $ticket_id = 0 ) {
 }
 
 /**
- * Get a formatted HTML list of all available tags
- *
- * @since 1.0.0
- * @param $object_type The tag type to return; order, ticket, event or attendee
- * @return string $list HTML formatted list
- */
-function get_emails_tags_list( $object_type = 'order' ) {
-
-	// The list
-	$list = '';
-
-	// Get all tags
-	$emails     = new \Sugar_Calendar\AddOn\Ticketing\Emails;
-	$email_tags = $emails->get_tags( $object_type );
-
-	// Check
-	if ( count( $email_tags ) > 0 ) :
-		foreach ( $email_tags as $email_tag ) : ?>
-		<dt>
-			<code>{<?php echo $email_tag['tag']; ?>}</code>
-		</dt>
-		<dd>
-			<?php echo $email_tag['description']; ?>
-		</dd>
-		<?php endforeach;
-	endif;
-
-	// Return the list
-	return $list;
-}
-
-
-/**
  * Email template tag: name
  *
  * @since 1.0.0
@@ -1578,5 +1545,97 @@ function should_display_tickets( $event ) {
 		'sc_et_should_display_tickets',
 		get_stripe_publishable_key() && get_stripe_secret_key(),
 		$event
+	);
+}
+
+/**
+ * Return Stripe connect URL.
+ *
+ * @since 3.7.0
+ *
+ * @param bool   $is_sandbox           Whether Stripe is in sandbox mode.
+ * @param string $url_payment_settings Payment settings URL.
+ *
+ * @return string
+ */
+function get_stripe_connect_url( $is_sandbox, $url_payment_settings ) {
+
+	$stripe_connect_url = add_query_arg(
+		[
+			'live_mode'         => rawurlencode( (int) ! $is_sandbox ),
+			'state'             => rawurlencode( str_pad( wp_rand( wp_rand(), PHP_INT_MAX ), 100, wp_rand(), STR_PAD_BOTH ) ),
+			'customer_site_url' => rawurlencode( $url_payment_settings ),
+		],
+		'https://sugarcalendar.com/?sc_gateway_connect_init=stripe_connect'
+	);
+
+	return $stripe_connect_url;
+}
+
+/**
+ * Return Stripe credentials URL.
+ *
+ * @since 3.7.0
+ *
+ * @param bool   $is_sandbox           Whether Stripe is in sandbox mode.
+ * @param string $state                Stripe state auth parameter.
+ * @param string $url_payment_settings Payment settings URL.
+ *
+ * @return string
+ */
+function get_stripe_credentials_url( $is_sandbox, $state, $url_payment_settings ) {
+
+	$sc_credentials_url = add_query_arg(
+		[
+			'live_mode'         => rawurlencode( (int) ! $is_sandbox ),
+			'state'             => rawurlencode( $state ),
+			'customer_site_url' => rawurlencode( $url_payment_settings ),
+		],
+		'https://sugarcalendar.com/?sc_gateway_connect_credentials=stripe_connect'
+	);
+
+	return $sc_credentials_url;
+}
+
+/**
+ * Update Stripe credentials.
+ *
+ * @since 3.7.0
+ *
+ * @param string     $publishable_key Stripe publishable key.
+ * @param string     $secret_key      Stripe secret key.
+ * @param int|string $user_id         Current user ID.
+ * @param bool       $is_sandbox      Whether Stripe is in sandbox mode.
+ *
+ * @return void
+ */
+function update_stripe_credentials( $publishable_key, $secret_key, $user_id, $is_sandbox ) {
+
+	if ( $is_sandbox === true ) {
+		update_option( 'sc_stripe_test_publishable', sanitize_text_field( $publishable_key ), false );
+		update_option( 'sc_stripe_test_secret', sanitize_text_field( $secret_key ), false );
+	} else {
+		update_option( 'sc_stripe_live_publishable', sanitize_text_field( $publishable_key ), false );
+		update_option( 'sc_stripe_live_secret', sanitize_text_field( $secret_key ), false );
+	}
+
+	update_option( 'sc_stripe_connect_account_id', sanitize_text_field( $user_id ), false );
+}
+
+/**
+ * Whether Stripe is connected.
+ *
+ * @since 3.7.0
+ *
+ * @return bool
+ */
+function stripe_is_connected() {
+
+	$stripe_connect_account_id = get_option( 'sc_stripe_connect_account_id' );
+
+	return (
+		! empty( $stripe_connect_account_id ) &&
+		get_stripe_publishable_key() &&
+		get_stripe_secret_key()
 	);
 }

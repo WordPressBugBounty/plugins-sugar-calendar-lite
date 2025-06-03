@@ -4,6 +4,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
 use Sugar_Calendar\Helpers\WP;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Orders page.
@@ -86,7 +87,7 @@ class OrdersTab extends Tickets {
 			'sugar-calendar-ticketing-admin-orders',
 			get_url( 'css' ) . '/admin-orders' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 }

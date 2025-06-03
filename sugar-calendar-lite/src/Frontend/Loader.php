@@ -61,7 +61,7 @@ class Loader {
 			'sc-frontend-single-event',
 			SC_PLUGIN_ASSETS_URL . 'css/frontend/single-event' . Helpers\WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			Helpers::get_asset_version()
 		);
 
 		wp_enqueue_style( 'sc-frontend-single-event' );

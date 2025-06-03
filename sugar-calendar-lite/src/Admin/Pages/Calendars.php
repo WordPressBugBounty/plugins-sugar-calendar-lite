@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use WP_Term;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Calendars page.
@@ -343,7 +344,7 @@ class Calendars extends PageAbstract {
 			'sugar-calendar-admin-calendars',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendars' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 

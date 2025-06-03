@@ -492,6 +492,20 @@ class Query extends Base {
 			$key = "{$date}_query";
 			$this->query_var_defaults[ $key ] = false;
 		}
+
+		/**
+		 * Filter for default query vars.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param array  $query_var_defaults Default query vars.
+		 * @param object $query              The query object.
+		 */
+		$this->query_var_defaults = apply_filters(
+			'sugar_calendar_database_query_default_variables',
+			$this->query_var_defaults,
+			$this
+		);
 	}
 
 	/**
@@ -747,7 +761,7 @@ class Query extends Base {
 	 *
 	 * @return string Default "id", Primary column name if not empty
 	 */
-	private function get_primary_column_name() {
+	protected function get_primary_column_name() {
 		return $this->get_column_field( array( 'primary' => true ), 'name', 'id' );
 	}
 
@@ -974,6 +988,8 @@ class Query extends Base {
 		/**
 		 * Filters the item query clauses.
 		 *
+		 * Default name is sc_events_query_clauses.
+		 *
 		 * @since 1.0.0
 		 *
 		 * @param array $query A compacted array of item query clauses.
@@ -1154,7 +1170,7 @@ class Query extends Base {
 	 *
 	 * @since 1.0.0
 	 */
-	private function parse_where() {
+	public function parse_where() {
 
 		// Defaults
 		$where = $join = $searchable = $date_query = array();

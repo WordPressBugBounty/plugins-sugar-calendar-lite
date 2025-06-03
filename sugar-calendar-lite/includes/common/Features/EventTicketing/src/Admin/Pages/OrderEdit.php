@@ -7,6 +7,7 @@ use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Description
@@ -406,7 +407,7 @@ class OrderEdit {
 			'sugar-calendar-ticketing-admin-order',
 			get_url( 'css' ) . '/admin-order' . WP::asset_min() . '.css',
 			[],
-			SC_PLUGIN_VERSION
+			BaseHelpers::get_asset_version()
 		);
 	}
 }

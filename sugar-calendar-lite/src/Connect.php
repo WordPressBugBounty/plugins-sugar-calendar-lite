@@ -6,6 +6,7 @@ use Plugin_Upgrader;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\PluginsInstallSkin;
+use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Sugar Calendar Connect.
@@ -42,7 +43,7 @@ class Connect {
 			'sugar-calendar-admin-connect',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-connect' . WP::asset_min() . '.js',
 			[ 'sugar-calendar-vendor-jquery-confirm' ],
-			SC_PLUGIN_VERSION,
+			BaseHelpers::get_asset_version(),
 			true
 		);
 

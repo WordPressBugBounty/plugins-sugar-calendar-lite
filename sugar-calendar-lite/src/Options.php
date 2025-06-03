@@ -213,4 +213,18 @@ class Options {
 
 		return update_option( static::OPTION_NAME, static::$settings, false );
 	}
+
+	/**
+	 * Get all settings.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return array
+	 */
+	public static function all() {
+
+		static::populate();
+
+		return wp_parse_args( static::$settings, static::get_defaults() );
+	}
 }

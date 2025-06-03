@@ -182,6 +182,7 @@ class EventView {
 	 * Get the date and time to display.
 	 *
 	 * @since 3.1.0
+	 * @since 3.7.0 Make the output string filterable.
 	 *
 	 * @return string
 	 */
@@ -219,13 +220,32 @@ class EventView {
 		);
 
 		/*
-		 * translators: 1: start date, 2: start time, 3: end time
+		 * translators: 1: start date, 2. at, 3: start time, 4: end time
 		 */
-		return sprintf(
-			'%1$s <span>at</span> %2$s - %3$s',
+		$output = sprintf(
+			'%1$s <span>%2$s</span> %3$s - %4$s',
 			'<span class="sc-frontend-single-event__details__val-date">' . $event_date . '</span>',
+			esc_html__( 'at', 'sugar-calendar-lite' ),
 			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format ) . '</span>',
 			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format, 'end' ) . '</span>'
+		);
+
+		/**
+		 * Filter the output date time display.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param string                $output      Output string.
+		 * @param \Sugar_Calendar\Event $event       Event object.
+		 * @param string                $event_date  The event date.
+		 * @param string                $time_format Time format.
+		 */
+		return apply_filters(
+			'sugar_calendar_block_event_list_event_list_view_event_view_dt_display',
+			$output,
+			$this->event,
+			$event_date,
+			$time_format
 		);
 	}
 
