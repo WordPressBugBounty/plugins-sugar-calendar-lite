@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.8
-Stable tag:        3.7.0
+Stable tag:        3.7.1
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -40,6 +40,8 @@ Most event calendar plugins are either way too simple, or overly complex and blo
 **Event Ticketing** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticekting-addon) - Extend the functionality of our Event Ticketing feature which is available in the free version of our plugin. With this addon you will be able to process payments with the WooCommerce integration.
 
 **Zapier Integration** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=zapier-addon) - Integrate with over 7000 other apps via Zapier, with 3 Sugar Calendar zapier triggers: New Event, New Ticket Order, and New Attendee.
+
+**RSVP** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=rsvp-addon) - Simplify your event management and boost attendance like never before! The RSVP Addon is packed with everything you need to effortlessly manage your guest lists and create a smooth experience for your attendees.
 
 **Unique Calendars** - Assign individual events to a specific Calendar. Visitors will be able to filter the events based on the calendar they are interested in.
 
@@ -197,13 +199,18 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.7.1 - 2025-06-04 =
+- Fixed: Fatal error on PHP 7.4.
+
 = 3.7.0 - 2025-06-03 =
 - Added: Support internationalization in the datepicker in our blocks.
 - Added: Dashboard Widget: Quickly access your upcoming events from within the Dashboard.
 - Added: Tags: Organize your events better using tags.
+- Fixed: Filtering with category in the admin backend calendar isn't working with recurring events.
 - Fixed: Event List block not showing current on-going events.
 - Fixed: PHP warning when filtering events by calendars in Event blocks.
 - Fixed: Overriding template for calendar archive is not working.
+- Fixed: Add trailing slash in recurring event URLs to prevent 301 redirection.
 - Fixed: Display mode on blocks are not working on non-english sites.
 - Fixed: Blocks not loading all events.
 - Changed: Made more strings translatable.

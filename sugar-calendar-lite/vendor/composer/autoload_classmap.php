@@ -513,6 +513,7 @@ return array(
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Frontend' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Frontend.php',
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Helpers' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Helpers.php',
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Integrations\\EventTicketing' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Integrations/EventTicketing.php',
+    'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Integrations\\WPSeo' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Integrations/WPSeo.php',
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Loader' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Loader.php',
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Occurrence' => $baseDir . '/src/Pro/Features/AdvancedRecurring/Occurrence.php',
     'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\OccurrenceAction' => $baseDir . '/src/Pro/Features/AdvancedRecurring/OccurrenceAction.php',

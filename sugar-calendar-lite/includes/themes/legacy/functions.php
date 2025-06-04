@@ -125,7 +125,7 @@ function sc_get_events_for_calendar_with_custom_range(
 	$category = '',
 	$search = '',
 	$number = null,
-	$venues = [],
+	$venues = []
 ) {
 
 	// Trigger deprecation notice.

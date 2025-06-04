@@ -548,6 +548,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Frontend' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Frontend.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Helpers' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Helpers.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Integrations\\EventTicketing' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Integrations/EventTicketing.php',
+        'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Integrations\\WPSeo' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Integrations/WPSeo.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Loader' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Loader.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\Occurrence' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/Occurrence.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\OccurrenceAction' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/OccurrenceAction.php',
