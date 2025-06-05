@@ -216,6 +216,7 @@ function sugar_calendar_query_vars_contains_taxonomies( $query = false ) {
  *
  * @since 2.0.0
  * @since 3.7.0 Add filter to support multiple taxonomies.
+ * @since 3.7.2 Fix issue with legacy shortcode.
  *
  * @param array        $clauses SQL clauses.
  * @param object|Query $query   Query object.
@@ -235,10 +236,16 @@ function sugar_calendar_join_by_taxonomy_term( $clauses = [], $query = false ) {
 		// Add the taxonomy and terms to the query.
 		if ( ! empty( $query->query_vars['sc_event_category'] ) ) {
 
-			$args[] = [
+			$sc_event_cat_args = [
 				'taxonomy' => 'sc_event_category',
 				'terms'    => $query->query_vars['sc_event_category'],
 			];
+
+			if ( is_string( $sc_event_cat_args['terms'] ) ) {
+				$sc_event_cat_args['field'] = 'slug';
+			}
+
+			$args[] = $sc_event_cat_args;
 		}
 
 		/**

@@ -26,7 +26,7 @@ final class Events_Table extends Table {
 	/**
 	 * @var string Database version
 	 */
-	protected $version = 201902040006;
+	protected $version = 202506040001;
 
 	/**
 	 * @var string Table schema
@@ -40,13 +40,14 @@ final class Events_Table extends Table {
 	 * @since 2.0.0
 	 * @var array
 	 */
-	protected $upgrades = array(
+	protected $upgrades = [
 		'201901090003' => 201901090003,
 		'201901220001' => 201901220001,
 		'201902040004' => 201902040004,
 		'201902040005' => 201902040005,
 		'201902040006' => 201902040006,
-	);
+		'202506040001' => 202506040001,
+	];
 
 	/**
 	 * Setup the database schema.
@@ -66,9 +67,9 @@ final class Events_Table extends Table {
 			content longtext NOT NULL,
 			status varchar(20) NOT NULL default '',
 			start datetime NOT NULL default '0000-00-00 00:00:00',
-			start_tz varchar(20) NOT NULL default '',
+			start_tz varchar(155) NOT NULL default '',
 			end datetime NOT NULL default '0000-00-00 00:00:00',
-			end_tz varchar(20) NOT NULL default '',
+			end_tz varchar(155) NOT NULL default '',
 			all_day tinyint(1) NOT NULL default '0',
 			recurrence varchar(20) NOT NULL default '',
 			recurrence_interval bigint(20) unsigned NOT NULL default '0',
@@ -219,6 +220,23 @@ final class Events_Table extends Table {
 		}
 
 		// Return success/fail.
+		return $this->is_success( true );
+	}
+
+	/**
+	 * Upgrade to version 202506040001.
+	 * - Modify the `start_tz` and `end_tz` columns to have a length of 155.
+	 *
+	 * @since 3.7.2
+	 *
+	 * @return bool True if upgrade was successful, false otherwise.
+	 */
+	protected function __202506040001() {
+
+		$this->get_db()->query( "ALTER TABLE {$this->table_name} MODIFY COLUMN `start_tz` varchar(155) NOT NULL default '';" );
+		$this->get_db()->query( "ALTER TABLE {$this->table_name} MODIFY COLUMN `end_tz` varchar(155) NOT NULL default '';" );
+
+		// Return success/fail
 		return $this->is_success( true );
 	}
 }

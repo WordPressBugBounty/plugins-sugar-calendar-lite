@@ -690,14 +690,14 @@ class Metaboxes {
 		foreach ( $toggles as $toggle ) {
 			?>
 			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--education">
-				<label for="sc-event-url-redirect"><?php echo esc_html( $toggle['label'] ); ?></label>
+				<label><?php echo esc_html( $toggle['label'] ); ?></label>
 
 				<div class="sugar-calendar-metabox__field">
 					<span class="sugar-calendar-toggle-control">
-						<input type="checkbox" id="sc-event-url-redirect" name="" value="1" disabled="disabled">
-						<label class="sugar-calendar-toggle-control-icon" for="sc-event-url-redirect"></label>
-						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-on" for="sc-event-url-redirect">ON</label>
-						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off" for="sc-event-url-redirect">OFF</label>
+						<input type="checkbox" name="" value="1" disabled="disabled">
+						<label class="sugar-calendar-toggle-control-icon"></label>
+						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-on">ON</label>
+						<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off">OFF</label>
 					</span>
 
 					<?php

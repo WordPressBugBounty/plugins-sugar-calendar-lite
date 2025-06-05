@@ -680,6 +680,7 @@ class Helpers {
 	 * @since 3.6.0 Changed the method signature to accept an array of arguments.
 	 * @since 3.7.0 Fixed issue with not displaying on-going events.
 	 * @since 3.7.0 Added support for the 'tags' parameter.
+	 * @since 3.7.2 Fixed issue with non-array calendar args.
 	 *
 	 * @param array $args       The arguments to get the events.
 	 * @param array $attributes The block attributes.
@@ -742,6 +743,11 @@ class Helpers {
 
 		// Get the category left join and where queries if necessary.
 		if ( ! empty( $args['calendar_ids'] ) ) {
+
+			if ( ! is_array( $args['calendar_ids'] ) ) {
+				$args['calendar_ids'] = [ $args['calendar_ids'] ];
+			}
+
 			$term_taxonomy_ids = array_filter( array_map( 'absint', $args['calendar_ids'] ) );
 
 			if ( ! empty( $term_taxonomy_ids ) ) {

@@ -5,6 +5,8 @@
  * @package Plugins/Site/Events/Functions
  */
 
+use Sugar_Calendar\Options;
+
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
@@ -42,6 +44,8 @@ function sugar_calendar_get_timezone( $args = array() ) {
  * Is the current time zone preference floating?
  *
  * @since 2.1.2
+ * @since 3.7.2 If Time Zone is turned off, then the timezone is floating.
+ *
  * @return bool
  */
 function sugar_calendar_is_timezone_floating() {
@@ -49,11 +53,9 @@ function sugar_calendar_is_timezone_floating() {
 	// Default to true
 	$retval = true;
 
-	// Get the time zone and type
-	$tz = sugar_calendar_get_timezone();
-
-	// Maybe not floating
-	if ( ! empty( $tz ) ) {
+	if ( Options::get( 'timezone_type', 'off' ) === 'off' ) {
+		$retval = true;
+	} elseif ( ! empty( sugar_calendar_get_timezone() ) ) {
 		$retval = false;
 	}
 

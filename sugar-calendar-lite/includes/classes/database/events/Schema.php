@@ -17,6 +17,7 @@ use Sugar_Calendar\Database\Schema;
  * Event Schema Class.
  *
  * @since 2.0
+ * @since 3.7.2 Changed `start_tz` and `end_tz` length to `155`.
  */
 final class Event_Schema extends Schema {
 
@@ -108,7 +109,7 @@ final class Event_Schema extends Schema {
 		array(
 			'name'       => 'start_tz',
 			'type'       => 'varchar',
-			'length'     => '20',
+			'length'     => '155',
 			'default'    => ''
 		),
 
@@ -125,7 +126,7 @@ final class Event_Schema extends Schema {
 		array(
 			'name'       => 'end_tz',
 			'type'       => 'varchar',
-			'length'     => '20',
+			'length'     => '155',
 			'default'    => ''
 		),
 

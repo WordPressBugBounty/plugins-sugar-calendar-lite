@@ -95,9 +95,29 @@ function sc_get_events_list( $display = 'upcoming', $category = null, $number = 
 	} elseif ( $display === 'upcoming_with_recurring' ) {
 
 		$get_upcoming_events_args = [
-			'number'       => $number,
-			'calendar_ids' => $category,
+			'number' => $number,
 		];
+
+		if ( ! empty( $category ) ) {
+
+			$category     = is_array( $category ) ? $category : explode( ',', $category );
+			$calendar_ids = [];
+
+			// Get term by slug.
+			foreach ( $category as $cat ) {
+
+				$term = get_term_by( 'slug', $cat, 'sc_event_category' );
+
+				if ( $term && isset( $term->term_id ) ) {
+
+					$calendar_ids[] = $term->term_id;
+				}
+			}
+
+			if ( $calendar_ids ) {
+				$get_upcoming_events_args['calendar_ids'] = $calendar_ids;
+			}
+		}
 
 		$events = Helpers::get_upcoming_events_list_with_recurring( $get_upcoming_events_args, [] );
 		$args   = [];
