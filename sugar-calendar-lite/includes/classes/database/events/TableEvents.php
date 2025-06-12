@@ -83,7 +83,7 @@ final class Events_Table extends Table {
 			PRIMARY KEY (id),
 			KEY `object` (object_id,object_type,object_subtype),
 			KEY `event_status` (status),
-			KEY `event_times` (start,end,start_tz,end_tz),
+			KEY `event_times` (start,end,start_tz(50),end_tz(50)),
 			KEY `event_recur` (recurrence),
 			KEY `event_recur_times` (recurrence_end,recurrence_end_tz),
 			KEY `event_venue` (venue_id)";

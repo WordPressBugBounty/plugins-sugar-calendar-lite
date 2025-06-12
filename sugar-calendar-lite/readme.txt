@@ -9,126 +9,183 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.8
-Stable tag:        3.7.2
+Stable tag:        3.7.3
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
 == Description ==
 
-We believe that it should be easy to manage events on your website! Sugar Calendar will quickly and easily enable you to do that.
+We believe event management should be simple\! Sugar Calendar is a powerful yet lightweight **events management** plugin for WordPress that makes it easy to create **event calendars**, manage event registrations, and sell tickets, without the bloat.
 
-Would you like to sell tickets for your events? No problem, Sugar Calendar has you covered with a Stripe integration for our Event Ticketing feature, which you can use in the free version of our plugin!
+With Sugar Calendar, you get just the features you need for handling events of all types without a complicated setup or slow interface. You can easily manage in-person, virtual, one-time, and recurring events with just a few clicks.
 
-Most event calendar plugins are either way too simple, or overly complex and bloated. Sugar Calendar is lightweight and provides the major features you need for event management.
+**Ready to unlock advanced event management features like recurring events, venues, RSVP system, frontend submissions, and much more?** [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-top)
 
-= Features =
+## Key Features at a Glance
 
-**Simple events management** - Forget about complicated, cumbersome interfaces and do more with less. Our beautiful admin calendar interface will delight admins and clients on your website’s back-end.
+The core free version of Sugar Calendar provides a comprehensive toolkit for creating a functional event calendar and managing basic event registration and ticketing right away. It's the perfect starting point for straightforward event management.
 
-**Events Calendar WordPress block** - Place our Events Calendar WP block on your page and your visitors will have an awesome experience filtering, selecting and viewing your events in a beautiful calendar view. They can change the view of the calendar to display all events of the month, week or just a single day.
+### Simple Event Creation & Management
 
-**Events List WordPress block** - Add our Events List WP block on your page or in the sidebar and your visitors will have an awesome experience filtering, selecting and viewing your events in a beautiful list, grid or plain view.
+New to event management? Our intuitive step-by-step guide walks you through creating your first event. From adding the event name and description to setting the duration, recurrence, and venue, we make the process seamless.
 
-**Shortcodes** - Sugar Calendar provides shortcodes for displaying the beautiful Events Calendar and Events List, so if you are not using the Gutenberg editor, you can still use our blocks.
+Create events effortlessly within your WordPress dashboard using our clean, clutter-free interface. Define event details like dates and times (including all-day or multi-day options), and manage your events calendar entries just like standard posts.
 
-**Elementor blocks** - Sugar Calendar also provides two Elementor blocks: Events Calendar and Events List, so you can easily add them in your Elementor editor.
+### Calendar and List View Displays
 
-**The Events Calendar one-click migration** - Easily migrate your events from The Events Calendar plugin to Sugar Calendar with a single click.
+Showcase your events effectively with multiple display options. Embed a monthly event calendar view or an upcoming events list anywhere using Gutenberg blocks, Elementor widgets, or shortcodes.
 
-**Google Maps Integration** - Display a Google Maps map of the event location on the event details page.
+Visitors can easily switch between month, week, or day views for optimal browsing of your events calendar.  Both calendar and list layouts are fully responsive (and even support an optional dark mode).
 
-**Event Ticketing** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticekting-addon) - Extend the functionality of our Event Ticketing feature which is available in the free version of our plugin. With this addon you will be able to process payments with the WooCommerce integration.
+### Sell Tickets with Stripe
 
-**Zapier Integration** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=zapier-addon) - Integrate with over 7000 other apps via Zapier, with 3 Sugar Calendar zapier triggers: New Event, New Ticket Order, and New Attendee.
+Monetize your events without needing extra extensions\! Sugar Calendar integrates directly with Stripe, enabling secure credit card payments for paid event registration.
 
-**RSVP** [[Addon]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=rsvp-addon) - Simplify your event management and boost attendance like never before! The RSVP Addon is packed with everything you need to effortlessly manage your guest lists and create a smooth experience for your attendees.
+As a [verified Stripe partner](https://stripe.com/accept-payments/sugar-calendar), we ensure a reliable payment integration for your event management needs
 
-**Unique Calendars** - Assign individual events to a specific Calendar. Visitors will be able to filter the events based on the calendar they are interested in.
+This program recognizes software that meets Stripe’s strict quality requirements and provides users of Sugar Calendar and Stripe with the confidence they need to trust us both with their payment integrations.
 
-**Calendars Feeds** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=calendar-feeds-pro) - Visitors can subscribe to calendar feeds of your events, so they can easily get event updates to their personal calendar. Supported calendar feeds: Apple Calendar, Google Calendar, Microsoft Outlook, and more.
+### Multiple Calendars (Event Categories)
 
-**Start and end times** - All events can be assigned a starting and end time, or you can also configure all-day or multi-day events.
+Structure your events by organizing them into distinct calendars or categories. Create unique calendars for different event types, departments, or topics, and empower visitors to filter events, improving their experience with your events calendar.
 
-**Recurring Events** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=recurring-events-pro) - Sugar Calendar supports recurring events, even with super complex schedules.
+### Migrating from The Events Calendar?
 
-**Event Venues** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=venues-pro) - Add additional location information to your events with our Venues feature. Manage your venues in a quick and simple way, allowing your visitors to get all the needed information (address, google map, phone number, website, etc.) about the event location.
+Are you migrating away from *The Events Calendar* plugin and want an easy events management solution to migrate to? Don’t worry, we've got you covered. It’s as easy as a single click of a button to migrate all your events and other details in *The Events Calendar* plugin to Sugar Calendar.
 
-**Customize date and time format** - Display dates and times however you want, you can select from all the most common formats, or customize it to your exact liking.
+### Calendar Feeds (iCal/Google Calendar Sync)
 
-**Export and Import Events** - Easily export and import your Sugar Calendar events, tickets, attendees, calendars and more, from one WordPress site to another.
+Let your users subscribe to your events calendar in their personal calendar apps. Sugar Calendar provides iCal/ICS calendar feeds and offers attendees convenient "Add to Calendar" options for Google Calendar, Microsoft Outlook, Apple Calendar, or direct .ics download.
 
-**Dark Mode** - You can switch the Event Calendar or Events List WP block to dark mode, to match your dark styled theme.
+### Google Maps Integration
 
-**Event Link** [[Pro]](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-link-pro) - Configure a custom URL for each event. This can be used to redirect to an external website, if needed.
+Display a Google Map for your event venue/location on the event details page. Just enter the event address, and Sugar Calendar will show an interactive map, helping attendees easily find your event.
 
-**Translation ready** - Sugar Calendar is fully localized and ready for your language. It has been translated into 10 languages and is ready for more!
+### Event Tags for Filtering
 
-= Elevate your Events with Sugar Calendar Pro =
+Organize and categorize your events using customizable tags, similar to WordPress post tags. Assign relevant tags to events, allowing visitors to easily filter the events calendar on the frontend to find exactly what they're looking for. This adds another layer to your event management strategy.
 
-To get all awesome Sugar Calendar features you need, please check our [premium license plans](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=premium-license-plans) and you'll find the right one for you. The premium versions of Sugar Calendar include:
+### Attendee Management & Export
 
-- Manage your event locations with the Venues feature.
-- Use your existing WooCommerce integration to improve selling your event tickets.
-- Integrate with over 7000 other apps via Zapier
-- Allow your community to submit events with Frontend Event Submissions feature (WPForms, Gravity Forms, and Formidable Forms)
-- Enable your visitors to subscribe to calendar feeds of your events
-- Manage recurring/repeating events
-- Duplicate an event with a single click
-- And get priority support from our globally distributed full-time support team experts
+Keep track of attendees and ticket orders in your WordPress dashboard. For each event, you can view the list of attendees/ticket holders and their details. Need to share or analyze data? Export attendees or event lists to CSV with one click.
 
-= Full Sugar Calendar Lite features list =
+### Import/Export Events
 
-- Simple Event Management
-- Sell Event Tickets with Stripe
-- Beautiful Admin Interface
-- Events Calendar WordPress block
-- Events List WordPress block
-- Elementor blocks: Events Calendar and Events List
-- Shortcode for displaying the Events Calendar and the Events List
-- The Events Calendar one-click migration
-- Google Maps Integration
-- Customize date and time format/display
-- Events Custom Post Type
-- Event Calendar Custom Taxonomy
-- Simple Event Configuration
-- Easily Set Event Dates
-- Easily Set Event Start and End Time
-- Events Archive, Listed by Start Date
-- Widgets for displaying calendars and event filters
-- Sugar Calendar exporter and importer
-- Dark mode support for the Event Calendar, Event List blocks, and single event page
-- Large and small calendar views
+Migrate or back up your event data easily. Sugar Calendar can help export your events and other data by compiling a JSON file that can be downloaded to your computer. You can also import events from a JSON export file.
 
-= Premium features =
+### Custom Date and Time Formats
 
-If you purchase a premium license to Sugar Calendar you have access to:
+Customize how event dates and times are displayed to match your locale or preference. Choose from common date/time formats or use your own format – perfect for international sites.
 
-- RSVP addon (if you select the Plus, Pro or Elite license)
-- Event Ticketing addon (if you select the Plus, Pro or Elite license)
-- Zapier addon (if you select the Plus, Pro or Elite license)
-- Speakers
-- Recurring / repeating events
-- Event Venues
-- Frontend Event Submissions
-- Calendar Feeds
-- Event URLs
-- Event duplication
-- All future pro features
-- Priority support
+### Dashboard Events Widget
 
-= Pro addons =
+Get a quick overview of upcoming events directly from your WordPress dashboard. The handy widget keeps your schedule visible, ensuring efficient event management at a glance. (Pro users see enhanced details like venue and RSVP attendees.)
 
-If you purchase an [Plus, Pro or Elite license](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=plus-pro-elite-license) to Sugar Calendar you get access to all current and future pro addons.
+### Gutenberg Blocks & Elementor Widgets
 
-- **[Event Ticketing](https://sugarcalendar.com/downloads/event-tickets/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticketing)** - This addon allows you to easily sell tickets to your events via WooCommerce, whether they are virtual or in-person events. Easily integrates with WooCommerce to allow event tickets to be purchased through existing WooCommerce checkout pages.
-- **[Zapier](https://sugarcalendar.com/downloads/zapier/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=zapier)** - This addon allows you to integrate Sugar Calendar with over 7000 other apps via Zapier. The plugin includes 3 triggers: New Event, New Ticket Order, and New Attendee.
-- **[RSVP](https://sugarcalendar.com/downloads/sc-rsvp/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=rsvp)** - This addon allows you to simplify your event management and boost attendance like never before! The RSVP Addon is packed with everything you need to effortlessly manage your guest lists and create a smooth experience for your attendees.
+Seamlessly integrate your event calendar or events list anywhere on your site. Dedicated blocks for the Gutenberg editor and widgets for Elementor and other popular builders make adding your events calendar to pages, posts, or sidebars incredibly simple. Shortcodes are also available for other editors.
 
-Sugar Calendar is a verified member of the [Stripe partner program](https://stripe.com/accept-payments/sugar-calendar). This program recognizes software that meets Stripe's strict quality requirements and provides users of Sugar Calendar and Stripe with the confidence they need to trust us both with their payment integrations.
+### Modern, Lightweight Design
 
-= Get help =
+Sugar Calendar is optimized for speed and efficiency, ensuring it won’t slow down your site. The admin interface is intuitive and beautifully designed, making event management a breeze.
 
-Sugar Calendar is backed by top-notch technical support from our globally distributed full-time support team. We also have an extensive [documentation site](https://sugarcalendar.com/docs/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=documentation-site) available. If you’re looking for faster support via email, we encourage you to purchase a [premium Sugar Calendar license](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=premium-sugar-calendar-license).
+Your frontend event calendar naturally inherits your theme's styles and even supports dark mode for a seamless look.
+
+### Translation Ready
+
+Fully localized and ready for translation. Sugar Calendar has already been translated into 10+ languages and can be easily translated into your language, so your events calendar can serve audiences worldwide.
+
+## Sugar Calendar Pro Features
+
+Want to unlock more advanced **event management** capabilities? Sugar Calendar Pro (available with a [premium license](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=premium-license-plans)) includes all the free features plus many powerful enhancements to help you stay organized and grow your events:
+
+### Advanced Event Registration & RSVP Management
+
+Take control of your guest lists with our sophisticated RSVP system, included as part of Sugar Calendar Pro via the dedicated RSVP Addon. This feature introduces a dedicated "RSVP" tab within the Sugar Calendar menu in your WordPress dashboard.
+
+This takes you directly to a comprehensive attendee management screen, where event organizers can effortlessly track guest responses, viewing a detailed list of everyone who has indicated they are "Going" or "Not Going" to an event.
+
+### Recurring Events
+
+**Schedule events** to repeat automatically on a daily, weekly, monthly, or custom schedule. Save time by creating recurring events (including complex recurrence patterns like the first Monday of the month or every other Thursday) instead of manually duplicating events in your events calendar.
+
+### Event Venues & Locations
+
+Create and manage reusable venue profiles. Store addresses, maps, contact details, and website links for each location.
+
+Assign venues to events to display rich location information (and a Google Map) easily, perfect for recurring events at the same place and enhancing your overall events management.
+
+### Speakers Management
+
+Easily add speaker or performer profiles to your events. Include names, titles, bios, photos, and social links to highlight who will be featured, enhancing your event listings.
+
+### Frontend Event Submissions
+
+Accept event submissions from your community or team without giving them backend access. Sugar Calendar Pro integrates with popular form plugins (WPForms, Gravity Forms, Formidable Forms) to allow frontend event submission forms.
+
+Visitors can submit events through a form on your site, and you can review/publish them at your convenience. Perfect for community calendars and user-submitted events.
+
+### Event Duplication
+
+Clone any existing event with one click to use it as a template. This handy feature allows you to quickly duplicate events (including all details and settings) and then just make minor edits, instead of recreating similar events from scratch, saving you significant time in your event management workflow.
+
+### Import Events from Google, Apple, Outlook, and other 3rd party Calendars
+
+Sugar Calendar Pro lets you import events from any 3rd party calendar with an ICS URL. It works with Apple, Google, Microsoft, and other calendars. All it requires is simply pasting the ICS URL in the import tool.
+
+### Enhanced Dashboard Widget
+
+Pro users see more details in the dashboard widget, including event venues, assigned speakers/performers, and quick-access icons for recurring events and RSVP/ticket attendee lists, offering a richer overview for effective event management.
+
+### Event Link (Custom Event URLs)
+
+Need to redirect an event to an external page or ticketing site? Pro allows you to set a custom URL for each event. Use this to link out to external event pages, third-party ticketing platforms, or any URL instead of the default event detail page for specialized event registration.
+
+### Priority Support
+
+Get access to our top-notch support team with prioritized email support for Pro users. Need help or have questions? [Pro license holders](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=premium-sugar-calendar-license) receive fast, dedicated support from the Sugar Calendar team via email
+
+**Take Your Events to the Next Level\!** Experience effortless event management with powerful Pro features including recurring events scheduling, event venue management, frontend event submissions, and seamless calendar imports. [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-bottom)
+
+## Sugar Calendar Pro Addons
+
+Sugar Calendar also offers official addons to extend functionality even further. These addons integrate Sugar Calendar with other platforms and tools. If you purchase a [Plus, Pro, or Elite license](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=plus-pro-elite-license) to Sugar Calendar, you get access to all current and future addons.
+
+* [**RSVP**](https://sugarcalendar.com/downloads/sc-rsvp/) **–** Enhance your event management capabilities with the integrated RSVP Addon. This addon allows you to monitor attendee responses ("Going" / "Not Going") directly in the WordPress dashboard. This centralized system for event registration data allows for efficient tracking and management of guest lists, forming a vital component of the advanced events management tools available in Sugar Calendar Pro.
+
+* [**Event Ticketing**](https://sugarcalendar.com/downloads/event-tickets/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=event-ticketing) **–** Connects your events calendar to WooCommerce, allowing you to create tickets as WooCommerce products. Take advantage of WooCommerce’s payment gateways (PayPal, credit cards, etc.), cart system, and email receipts for your event ticket sales. Perfect if you want to use WooCommerce to manage checkout and payment processing for event registrations. Using Event Ticketing also removes the 3% Stripe fee in the lite version.
+
+* [**Zapier**](https://sugarcalendar.com/downloads/zapier/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=zapier) **–** Connect your events and tickets to 8,000+ apps through Zapier. The Zapier Addon provides triggers for New Event, New Ticket Order, and New Attendee, so you can automate tasks and workflows. For example, automatically add attendees to a Google Sheet, sync events to Google Calendar, send notification emails via Gmail or Mailchimp when someone registers, and much more.
+
+## Use Cases
+
+Sugar Calendar is a versatile events management platform trusted by users for efficient event calendar creation and event registration handling. It’s an ideal solution for:
+
+* **Event Organizers & Planners –** Manage conferences, concerts, workshops, meetups, or fundraisers with ease. Easily handle event registration, sell tickets, and display comprehensive event details on a clean events calendar.
+
+* **Businesses & Non-Profits –** Promote your upcoming events, classes, or fundraisers on a public event calendar. Easy enough for non-technical staff to **add events**, and convenient for visitors to find events by category or date.
+
+* **Educational Institutions & Tutors –** Schedule courses, webinars, and training sessions with robust event management tools. Handle recurring classes or multi-day seminars effortlessly. Manage enrollment through event registration, RSVPs, or ticket sales.
+
+* **Community Groups & Clubs –** Allow members to submit their own events (with approval) and maintain a community calendar. Great for clubs, sports leagues, open mic sessions, or local groups needing collaborative event management.
+
+* **Musicians & Venues –** List upcoming shows and tours on a dedicated events calendar. Use the Google Maps integration to show where you’re playing with the exact location and details. Sell tickets directly from your site.
+
+* **Bloggers & Content Creators –** Plan and show an editorial calendar or live stream schedule to your audience. Keep readers in the loop about what’s coming up.
+
+Whatever your niche, if you need a reliable system for displaying and managing events in WordPress, Sugar Calendar’s focus on clean design and efficient events management provides a superior event calendar and event registration experience.
+
+## Additional Advantages
+
+Beyond the core features, Sugar Calendar offers significant benefits for your event management needs:
+
+* **Excellent Documentation –** We provide [extensive documentation](https://sugarcalendar.com/docs/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=documentation-site) and tutorials on our website to guide you through every feature. New to event plugins? Check out our step-by-step [Getting Started](https://sugarcalendar.com/categories/docs/getting-started/) guide, and you’ll be publishing events in minutes. For developers, our docs cover hooks, functions, and sample code for customizations.
+
+* **Active Development & Support –** Sugar Calendar is actively maintained by the team behind popular plugins like WPForms, WP Mail SMTP, and AIOSEO. You can trust that we bring years of WordPress experience. We’re here to help in the support forums, and we listen to feedback for new event management features.
+
+* **Works With Your Theme –** Sugar Calendar is designed to adopt your theme’s styles for calendars and event pages, so it looks like a natural part of your website. You can further customize styling via the built-in stylesheet or override templates in your theme. It’s developer-friendly if you want to tweak the design or layout.
+
+* **Internal Linking & SEO –** The plugin outputs JSON-LD structured data for events (improving SEO for **event listings**, just like Google likes to see dates and venues). Plus, you can enable pretty URLs for event archives and utilize category pages for a hierarchical structure that search engines can crawl.
 
 = What's Next =
 
@@ -199,6 +256,10 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.7.3 - 2025-06-12 =
+- Fixed: Fatal error on TEC Tags migration
+- Fixed: Upcoming events timezone issue
+
 = 3.7.2 - 2025-06-05 =
 - Fixed: Legacy event list shortcode not showing events.
 - Fixed: Timezone is being applied in the Admin Calendar even when turned off.

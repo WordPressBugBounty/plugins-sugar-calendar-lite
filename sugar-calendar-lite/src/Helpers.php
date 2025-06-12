@@ -765,7 +765,9 @@ class Helpers {
 			$select_query .= ' ' . $calendars_left_join;
 		}
 
-		$now   = sugar_calendar_get_request_time( 'mysql' );
+		$tz  = sugar_calendar_get_timezone_type() === 'off' ? 'UTC' : sugar_calendar_get_timezone();
+		$now = sugar_calendar_get_request_time( 'mysql', $tz );
+
 		$today = gmdate( 'Y-m-d 00:00:00', strtotime( $now ) );
 
 		$where_query = $wpdb->prepare(

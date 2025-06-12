@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.7.2\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.7.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-06-05T15:02:56+00:00\n"
+"POT-Creation-Date: 2025-06-12T11:58:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.8.1\n"
+"X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: sugar-calendar-lite\n"
 
 #. Plugin Name of the plugin
@@ -2273,8 +2273,8 @@ msgid "-"
 msgstr ""
 
 #: includes/common/time-zones.php:207
-#: includes/common/time.php:198
-#: includes/common/time.php:232
+#: includes/common/time.php:218
+#: includes/common/time.php:252
 msgid "%s hour"
 msgid_plural "%s hours"
 msgstr[0] ""
@@ -2293,69 +2293,69 @@ msgstr ""
 msgid "UTC Manual Offsets"
 msgstr ""
 
-#: includes/common/time.php:186
+#: includes/common/time.php:206
 msgid "%s year"
 msgid_plural "%s years"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:189
-#: includes/common/time.php:223
+#: includes/common/time.php:209
+#: includes/common/time.php:243
 msgid "%s month"
 msgid_plural "%s months"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:192
-#: includes/common/time.php:226
+#: includes/common/time.php:212
+#: includes/common/time.php:246
 msgid "%s week"
 msgid_plural "%s weeks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:195
-#: includes/common/time.php:229
+#: includes/common/time.php:215
+#: includes/common/time.php:249
 msgid "%s day"
 msgid_plural "%s days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:201
-#: includes/common/time.php:235
+#: includes/common/time.php:221
+#: includes/common/time.php:255
 msgid "%s minute"
 msgid_plural "%s minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:204
-#: includes/common/time.php:238
+#: includes/common/time.php:224
+#: includes/common/time.php:258
 msgid "%s second"
 msgid_plural "%s seconds"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/time.php:219
+#: includes/common/time.php:239
 msgctxt "Separator in time since"
 msgid ","
 msgstr ""
 
-#: includes/common/time.php:274
+#: includes/common/time.php:294
 msgid "Daily"
 msgstr ""
 
-#: includes/common/time.php:275
+#: includes/common/time.php:295
 msgid "Weekly"
 msgstr ""
 
-#: includes/common/time.php:276
+#: includes/common/time.php:296
 msgid "Monthly"
 msgstr ""
 
-#: includes/common/time.php:277
+#: includes/common/time.php:297
 msgid "Yearly"
 msgstr ""
 
-#: includes/common/time.php:552
+#: includes/common/time.php:572
 msgid "g:i a"
 msgstr ""
 
@@ -4946,15 +4946,15 @@ msgstr ""
 msgid "%1$s - %2$s"
 msgstr ""
 
-#: src/Helpers.php:1118
+#: src/Helpers.php:1120
 msgid "There are no events to display."
 msgstr ""
 
-#: src/Helpers.php:1122
+#: src/Helpers.php:1124
 msgid "There are no upcoming events to display."
 msgstr ""
 
-#: src/Helpers.php:1126
+#: src/Helpers.php:1128
 msgid "There are no past events to display."
 msgstr ""
 

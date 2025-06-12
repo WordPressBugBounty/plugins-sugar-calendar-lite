@@ -28,6 +28,7 @@ defined( 'ABSPATH' ) || exit;
  * If $gmt is false, the output is adjusted with the GMT offset in the WordPress option.
  *
  * @since 2.0.3
+ * @since 3.7.3 Set offset to int.
  *
  * @param string $type     Type of time to retrieve. Accepts 'mysql',
  *                         'timestamp', or PHP date format string (e.g. 'Y-m-d').
@@ -39,52 +40,71 @@ function sugar_calendar_get_request_time( $type = 'timestamp', $timezone = 'UTC'
 
 	global $timestart;
 
-	// Should never be empty, but just in case...
-	if ( empty( $timestart ) ) {
-		$timestart = microtime( true );
+	// Get timestart, avoid overriding the global.
+	$current_timestart = (int) ( empty( $timestart ) ? microtime( true ) : $timestart );
+
+	// Safeguard for 32-bit systems.
+	$current_timestart = $current_timestart > PHP_INT_MAX
+		? PHP_INT_MAX
+		: $current_timestart;
+
+	// Ensure that timezone is set.
+	$timezone = empty( $timezone ) ? 'UTC' : $timezone;
+
+	// Get the offset if not UTC.
+	$is_utc = $timezone === 'UTC';
+	$offset = 0;
+
+	if (
+		! $is_utc
+		&&
+		$current_timestart !== PHP_INT_MAX
+	) {
+
+		$offset = (int) sugar_calendar_get_timezone_offset(
+			[
+				'time'     => $current_timestart,
+				'timezone' => $timezone,
+				'format'   => 'seconds',
+			]
+		);
 	}
 
-	// Get the offset if not UTC
-	if ( 'UTC' !== $timezone ) {
-		$offset = sugar_calendar_get_timezone_offset( [
-			'time'     => (int) $timestart,
-			'timezone' => $timezone,
-			'format'   => 'seconds',
-		] );
-	}
-
-	// What type of
+	// What type of.
 	switch ( $type ) {
-
-		// 'Y-m-d H:i:s'
-		case 'mysql' :
-		case 'Y-m-d H:i:s' :
-			$retval = ( 'UTC' === $timezone )
+		// 'Y-m-d H:i:s'.
+		case 'mysql':
+		case 'Y-m-d H:i:s':
+			$retval = $is_utc
 				? gmdate( 'Y-m-d H:i:s' )
-				: gmdate( 'Y-m-d H:i:s', ( $timestart + $offset ) );
+				: gmdate( 'Y-m-d H:i:s', ( $current_timestart + $offset ) );
 			break;
 
-		// Unix timestamp
-		case 'timestamp' :
-		case '' :
-			$retval = ( 'UTC' === $timezone )
-				? $timestart
-				: $timestart + $offset;
+		// Unix timestamp.
+		case 'timestamp':
+		case '':
+			$retval = $is_utc
+				? $current_timestart
+				: $current_timestart + $offset;
 			break;
 
-		// Mixed string
-		default :
-			$retval = ( 'UTC' === $timezone )
+		// Mixed string.
+		default:
+			$retval = $is_utc
 				? gmdate( $type )
-				: gmdate( $type, ( $timestart + $offset ) );
+				: gmdate( $type, ( $current_timestart + $offset ) );
 			break;
 	}
 
 	if ( is_numeric( $retval ) ) {
 		$retval = intval( $retval );
+
+		// Safeguard for 32-bit systems.
+		if ( $retval > PHP_INT_MAX ) {
+			$retval = PHP_INT_MAX;
+		}
 	}
 
-	// Return
 	return $retval;
 }
 

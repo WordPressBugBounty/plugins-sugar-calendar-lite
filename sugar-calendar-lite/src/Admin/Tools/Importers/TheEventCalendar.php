@@ -3161,18 +3161,6 @@ class TheEventCalendar extends Importer {
 
 		$successful_migrations = 0;
 
-		/**
-		 * Debugging with Ray.
-		 *
-		 * @TODO: Remove before commit.
-		 */
-		ray(
-			[
-				'name' => __FUNCTION__,
-				'tec_tags' => $tec_tags,
-			]
-		);
-
 		foreach ( $tec_tags as $tec_tag ) {
 			if ( $this->migrate_tag( $tec_tag ) ) {
 				++$successful_migrations;
