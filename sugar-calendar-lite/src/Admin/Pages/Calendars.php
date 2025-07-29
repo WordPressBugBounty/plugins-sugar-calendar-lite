@@ -93,7 +93,9 @@ class Calendars extends PageAbstract {
 	 */
 	public function hooks() {
 
-		add_filter( 'screen_options_show_screen', '__return_false' );
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+
+		add_filter( 'screen_options_show_screen', '__return_true' );
 		add_action( 'in_admin_header', [ $this, 'display_admin_subheader' ] );
 		add_filter( 'tag_row_actions', [ $this, 'row_actions' ], 10, 2 );
 		add_filter( 'get_edit_term_link', [ $this, 'get_edit_term_link' ], 10, 4 );
@@ -105,6 +107,26 @@ class Calendars extends PageAbstract {
 
 		// Set Calendar updated messages.
 		add_filter( 'term_updated_messages', [ $this, 'get_calendar_updated_messages' ] );
+	}
+
+	/**
+	 * Filter the help URL in the calendars list page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return BaseHelpers\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/organizing-events-with-calendars/',
+			[
+				'content' => 'Help',
+				'medium'  => 'calendars-list',
+			]
+		);
 	}
 
 	/**

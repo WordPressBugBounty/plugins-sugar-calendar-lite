@@ -165,9 +165,11 @@ abstract class EventAbstract extends PageAbstract {
 			return;
 		}
 		?>
-        <div class="sugar-calendar-admin-subheader">
-            <h4><?php echo esc_html( static::get_label() ); ?></h4>
-        </div>
+		<div class="sugar-calendar-admin-subheader">
+			<?php
+			printf( '<h4>%s</h4>', esc_html( static::get_label() ) );
+			?>
+		</div>
 		<?php
 	}
 

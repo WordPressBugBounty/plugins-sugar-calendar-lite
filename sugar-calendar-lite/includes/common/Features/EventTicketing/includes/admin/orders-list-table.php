@@ -25,6 +25,15 @@ class List_Table extends \WP_List_Table {
 	public $query;
 
 	/**
+	 * User saved preferences.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @var array
+	 */
+	public $user_saved_pref = false;
+
+	/**
 	 * Get things started.
 	 *
 	 * @since 1.0.0
@@ -137,14 +146,95 @@ class List_Table extends \WP_List_Table {
 			),
 		];
 
+		// Get the count of trashed orders.
+		$trash_count = Functions\count_orders( [ 'status' => 'trash' ] );
+
+		// Add Trash view if there are trashed orders.
+		if ( $trash_count > 0 ) {
+			$trash_count_html = '&nbsp;<span class="count">(' . number_format_i18n( $trash_count ) . ')</span>';
+
+			$views['trash'] = sprintf(
+				'<a href="%s"%s>%s</a>',
+				add_query_arg(
+					[
+						'status' => 'trash',
+						'paged'  => false,
+					]
+				),
+				$current === 'trash' ? ' class="current"' : '',
+				wp_kses(
+					Functions\order_status_label( 'trash' ) . $trash_count_html,
+					[
+						'span' => [
+							'class' => [],
+						],
+					]
+				)
+			);
+		}
+
 		// Filter & return.
 		return apply_filters( 'sc_event_tickets_list_table_views', $views );
+	}
+
+	/**
+	 * Displays extra controls between bulk actions and pagination.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $which Whether top or bottom.
+	 */
+	protected function extra_tablenav( $which ) {
+
+		if ( $which !== 'top' ) {
+			return;
+		}
+
+		$option = '';
+
+		if ( ! empty( $_GET['event_id'] ) ) {
+			$event = sugar_calendar_get_event( absint( $_GET['event_id'] ) );
+
+			if ( ! empty( $event ) ) {
+				$option = sprintf(
+					'<option selected value="%1$d">%2$s</option>',
+					absint( $_GET['event_id'] ),
+					esc_html( $event->title )
+				);
+			}
+		}
+		?>
+		<div class="sugar-calendar-ticketing__admin__list__actions alignleft actions">
+			<span class="sugar-calendar-ticketing__admin__list__actions__choices-events choicesjs-select-wrap">
+				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select">
+					<?php
+						echo wp_kses(
+							$option,
+							[
+								'option' => [
+									'selected' => [],
+									'value'    => [],
+								],
+							]
+						);
+					?>
+				</select>
+			</span>
+			<?php
+			printf(
+				'<input type="submit" class="button" value="%1$s">',
+				esc_attr__( 'Filter', 'sugar-calendar-lite' )
+			);
+			?>
+		</div>
+		<?php
 	}
 
 	/**
 	 * Show the search field.
 	 *
 	 * @since 1.0.0
+	 * @since 3.8.0 Add placeholder to search box.
 	 *
 	 * @param string $text Label for the search box
 	 * @param string $input_id ID of the search box
@@ -172,8 +262,15 @@ class List_Table extends \WP_List_Table {
 		<p class="search-box">
 			<?php do_action( 'sc_event_tickets_list_table_search_box' ); ?>
 			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
-			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" />
-			<?php submit_button( $text, 'button', false, false, array('ID' => 'search-submit') ); ?><br/>
+			<input
+				type="search"
+				id="<?php echo esc_attr( $input_id ); ?>"
+				name="s"
+				value="<?php _admin_search_query(); ?>"
+				placeholder="<?php esc_attr_e( 'Search Customer...', 'sugar-calendar-lite' ); ?>"
+			/>
+			<input type="hidden" name="tab" value="orders" />
+			<?php submit_button( $text, 'button', false, false, [ 'id' => 'search-submit' ] ); ?>
 		</p><?php
 	}
 
@@ -196,38 +293,57 @@ class List_Table extends \WP_List_Table {
 	 * Status column
 	 *
 	 * @since 1.0.0
+	 * @since 3.8.0 Wrap status text.
 	 *
 	 * @param Order $item Order object
 	 * @return string
 	 */
 	public function column_status( $item = null ) {
-		return Functions\order_status_label( $item->status );
+
+		// Get status label
+		$status_label = Functions\order_status_label( $item->status );
+
+		// Return status with span wrapper
+		return wp_kses_post(
+			sprintf(
+				'<span class="column-status__%s">%s</span>',
+				esc_attr( $item->status ),
+				$status_label
+			)
+		);
 	}
 
 	/**
 	 * Date column.
 	 *
 	 * @since 1.0.0
+	 * @since 3.8.0 Update date and time display.
 	 *
-	 * @param Order $item Order object
+	 * @param Order $item Order object.
+	 *
 	 * @return string
 	 */
 	public function column_date( $item = null ) {
 
-		// Get Event
+		// Get Event.
 		$event = sugar_calendar_get_event( $item->event_id );
 
-		// Bail if no Event
+		// Bail if no Event.
 		if ( empty( $event ) ) {
 			return '&mdash;';
 		}
 
-		// Format
 		$start_date = $event->format_date( sc_get_date_format(), $event->start );
 		$start_time = $event->format_date( sc_get_time_format(), $event->start );
 
-		// Return
-		return esc_html( $start_date ) . '<br>' . esc_html( $start_time );
+		return wp_kses_post(
+			wp_sprintf(
+				'%1$s %2$s %3$s',
+				esc_html( $start_date ),
+				esc_html__( 'at', 'sugar-calendar-lite' ),
+				esc_html( $start_time )
+			)
+		);
 	}
 
 	/**
@@ -321,34 +437,196 @@ class List_Table extends \WP_List_Table {
 	 * Total column.
 	 *
 	 * @since 1.0.0
+	 * @since 3.8.0 Add additional support actions.
 	 *
-	 * @param Order $item Order object
+	 * @param Order $item Order object.
+	 *
 	 * @return string
 	 */
 	public function column_total( $item = null ) {
+
 		$retval = '<strong>' . Functions\currency_filter( $item->total ) . '</strong>';
 
-		// Setup URL
+		// Setup URL.
 		$url = add_query_arg(
-			array(
-				'page'    => 'sc-event-ticketing',
-				'order_id'=> $item->id
-			),
+			[
+				'page'     => 'sc-event-ticketing',
+				'order_id' => $item->id,
+			],
 			admin_url( 'admin.php' )
 		);
 
-		// Filter URL
-		$link = apply_filters( 'sc_et_tickets_list_table_order_view_link', $url, $item );
+		/**
+		 * Filter URL.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param string $url  The URL.
+		 * @param object $item The current item.
+		 */
+		$link = apply_filters( 'sugar_calendar_add_on_ticketing_admin_orders_list_table_order_view_link', $url, $item );
 
-		// Setup HTML
-		$retval .= $this->row_actions(
-			array(
-				'view' => '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'Edit order', 'sugar-calendar-lite' ) . '">' . esc_html__( 'Edit', 'sugar-calendar-lite' ) . '</a>'
-			)
-		);
+		// Get status.
+		$is_trashed = $item->status === 'trash';
 
-		// Return HTML
+		// Actions.
+		$actions = [
+			'view' => '<a href="' . esc_url( $link ) . '" title="' . esc_attr__( 'Edit order', 'sugar-calendar-lite' ) . '">' . esc_html__( 'Edit', 'sugar-calendar-lite' ) . '</a>',
+		];
+
+		// Different actions based on trash status.
+		if ( $is_trashed ) {
+
+			// Restore.
+			$actions['restore'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url(
+					wp_nonce_url(
+						add_query_arg(
+							[
+								'page'   => 'sc-event-ticketing',
+								'action' => 'restore',
+								'order'  => [ $item->id ],
+								'tab'    => 'orders',
+							],
+							admin_url( 'admin.php' )
+						),
+						'bulk-event-tickets'
+					)
+				),
+				esc_html__( 'Restore', 'sugar-calendar-lite' )
+			);
+
+			// Delete Permanently.
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete" onclick="return confirm(\'%s\');">%s</a>',
+				esc_url(
+					wp_nonce_url(
+						add_query_arg(
+							[
+								'page'   => 'sc-event-ticketing',
+								'action' => 'delete',
+								'order'  => [ $item->id ],
+								'tab'    => 'orders',
+							],
+							admin_url( 'admin.php' )
+						),
+						'bulk-event-tickets'
+					)
+				),
+				esc_attr__( 'Are you sure you want to permanently delete this order? This action cannot be undone.', 'sugar-calendar-lite' ),
+				esc_html__( 'Delete Permanently', 'sugar-calendar-lite' )
+			);
+		} else {
+			// Trash.
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete" title="%s">%s</a>',
+				esc_url(
+					wp_nonce_url(
+						add_query_arg(
+							[
+								'page'   => 'sc-event-ticketing',
+								'action' => 'trash',
+								'order'  => [ $item->id ],
+								'tab'    => 'orders',
+							],
+							admin_url( 'admin.php' )
+						),
+						'bulk-event-tickets'
+					)
+				),
+				esc_attr__( 'Move this order to the Trash', 'sugar-calendar-lite' ),
+				esc_html__( 'Trash', 'sugar-calendar-lite' )
+			);
+		}
+
+		// Setup HTML.
+		$retval .= $this->row_actions( $actions );
+
+		// Return HTML.
 		return $retval;
+	}
+
+	/**
+	 * Checkbox column.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param object $item The current item.
+	 *
+	 * @return string
+	 */
+	public function column_cb( $item ) {
+		return sprintf(
+			'<input type="checkbox" name="order[]" value="%d" />',
+			absint( $item->id )
+		);
+	}
+
+	/**
+	 * Display the bulk actions dropdown.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $which The location of the bulk actions: 'top' or 'bottom'.
+	 */
+	protected function bulk_actions( $which = '' ) {
+		if ( is_null( $this->_actions ) ) {
+			$this->_actions = $this->get_bulk_actions();
+		}
+
+		if ( empty( $this->_actions ) ) {
+			return;
+		}
+
+		?>
+		<label for="bulk-action-selector-<?php echo esc_attr( $which ); ?>" class="screen-reader-text"><?php echo esc_html__( 'Select bulk action', 'sugar-calendar-lite' ); ?></label>
+		<select name="action<?php echo $which === 'bottom' ? '2' : ''; ?>" id="bulk-action-selector-<?php echo esc_attr( $which ); ?>">
+			<option value="-1"><?php echo esc_html__( 'Bulk actions', 'sugar-calendar-lite' ); ?></option>
+			<?php foreach ( $this->_actions as $key => $value ) : ?>
+				<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $value ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<input type="hidden" name="tab" value="orders" />
+
+		<?php
+		submit_button(
+			__( 'Apply', 'sugar-calendar-lite' ),
+			'action',
+			'',
+			false,
+			[
+				'id' => 'doaction' . ( $which === 'bottom' ? '2' : '' ),
+			]
+		);
+	}
+
+	/**
+	 * Get bulk actions.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return array
+	 */
+	public function get_bulk_actions() {
+
+		// Get current view.
+		$current_view = isset( $_GET['status'] )
+			? sanitize_key( $_GET['status'] )
+			: '';
+
+		// Default actions.
+		$actions = [];
+
+		// Different actions based on view.
+		if ( $current_view === 'trash' ) {
+			$actions['restore'] = __( 'Restore', 'sugar-calendar-lite' );
+			$actions['delete']  = __( 'Delete Permanently', 'sugar-calendar-lite' );
+		} else {
+			$actions['trash'] = __( 'Move to Trash', 'sugar-calendar-lite' );
+		}
+
+		return $actions;
 	}
 
 	/**
@@ -362,6 +640,7 @@ class List_Table extends \WP_List_Table {
 
 		// Columns
 		$columns = array(
+			'cb'       => '<input type="checkbox" />',
 			'total'    => esc_html__( 'Total',      'sugar-calendar-lite' ),
 			'tickets'  => esc_html__( 'Tickets',    'sugar-calendar-lite' ),
 			'status'   => esc_html__( 'Status',     'sugar-calendar-lite' ),
@@ -432,86 +711,184 @@ class List_Table extends \WP_List_Table {
 		$this->total_count    = $this->paid_count + $this->pending_count + $this->refunded_count;
 	}
 
+	/**
+	 * Search for orders by customer name.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $search Search string.
+	 *
+	 * @return array Results.
+	 */
+	private function sc_search_orders( $search ) {
+		global $wpdb;
+
+		$like = '%' . $wpdb->esc_like( $search ) . '%';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$query = "
+			SELECT id
+			FROM {$wpdb->prefix}sc_orders
+			WHERE
+				first_name LIKE %s OR
+				last_name LIKE %s OR
+				CONCAT(first_name, ' ', last_name) LIKE %s
+		";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prepared = $wpdb->prepare(
+			$query,
+			[
+				$like,
+				$like,
+				$like,
+			]
+		);
+
+		// Get IDs as a flat array and ensure they're all integers.
+		$ids = wp_list_pluck( $wpdb->get_results( $prepared ), 'id' );
+
+		return array_map( 'absint', $ids );
+	}
+
 	/** Query *****************************************************************/
 
 	/**
 	 * Setup the final data for the table.
 	 *
 	 * @since 1.0.0
-	 *
-	 * @return array
+	 * @since 3.8.0 Respect the user preference for per page items.
+	 * @since 3.8.0 Revise usage of status.
+	 * @since 3.8.0 Add support for searching by customer name.
 	 */
 	public function prepare_items() {
 
-		// Columns
-		$columns               = $this->get_columns();
-		$sortable              = $this->get_sortable_columns();
-		$hidden                = array();
-		$this->_column_headers = array( $columns, $hidden, $sortable );
+		// Columns.
+		$columns  = $this->get_columns();
+		$sortable = $this->get_sortable_columns();
+		$hidden   = [];
 
-		// Sanitize status
+		$this->_column_headers = [ $columns, $hidden, $sortable ];
+
+		// Sanitize status.
 		$status = isset( $_GET['status'] )
 			? sanitize_key( $_GET['status'] )
 			: 'any';
 
-		// Sanitize search
+		// Sanitize search.
 		$search = ! empty( $_GET['s'] )
-			? sanitize_text_field( $_GET['s'] )
+			? sanitize_text_field( wp_unslash( $_GET['s'] ) )
 			: '';
 
-		// Default arguments
-		$args = array(
+		// Set the per page limit.
+		if ( ! empty( $this->user_saved_pref['pagination_per_page'] ) ) {
+			$per_page = absint( $this->user_saved_pref['pagination_per_page'] );
+
+			if ( ! empty( $per_page ) ) {
+				$this->per_page = $per_page;
+			}
+		}
+
+		// Default arguments..
+		$args = [
 			'number' => $this->per_page,
 			'offset' => $this->per_page * ( $this->get_paged() - 1 ),
-			'search' => $search
-		);
+		];
 
-		// Set status
-		if ( 'any' !== $status ) {
+		// Set status.
+		if ( in_array( $status, [ 'any', 'pending', 'paid', 'refunded' ], true ) ) {
+			$args['not_in'] = [ 'trash' ];
+		}
+
+		if ( $status === 'any' ) {
+			$args['status'] = [
+				'pending',
+				'paid',
+				'refunded',
+			];
+		} else {
 			$args['status'] = $status;
 		}
 
-		// Sanitize orderby
+		// Search.
+		if ( ! empty( $search ) ) {
+			$orders = $this->sc_search_orders( $search );
+
+			if ( ! empty( $orders ) ) {
+				$args['id__in'] = $orders;
+			}
+		}
+
+		// Event filtering
+		if ( ! empty( $_GET['event_id'] ) ) {
+			$args['event_id'] = absint( $_GET['event_id'] );
+		}
+
+		// Sanitize orderby.
 		if ( ! empty( $_GET['orderby'] ) ) {
 			$args['orderby'] = sanitize_key( $_GET['orderby'] );
 		} else {
 			$args['orderby'] = 'date_created';
 		}
 
-		// Sanitize order
-		if ( ! empty( $_GET['order'] ) && in_array( $_GET['order'], array( 'asc', 'desc' ), true ) ) {
+		// Sanitize order.
+		if ( ! empty( $_GET['order'] ) && in_array( $_GET['order'], [ 'asc', 'desc' ], true ) ) {
 			$args['order'] = sanitize_key( $_GET['order'] );
 		}
 
-		// Query
+		// Query.
 		$this->query = new Database\Order_Query( $args );
 
-		// Items
+		// Items.
 		$this->items = $this->query->items;
 
-		// Set total items
+		// Set total items.
 		switch ( $status ) {
 			case 'paid':
 				$total_items = $this->paid_count;
 				break;
+
 			case 'pending':
 				$total_items = $this->pending_count;
 				break;
+
 			case 'refunded':
 				$total_items = $this->refunded_count;
 				break;
+
 			case 'any':
 			default:
 				$total_items = $this->total_count;
 				break;
 		}
 
-		// Set paginations
-		$this->set_pagination_args( array(
-			'total_items' => $total_items,
-			'per_page'    => $this->per_page,
-			'total_pages' => ceil( $total_items / $this->per_page )
-		) );
+		// Set paginations.
+		$this->set_pagination_args(
+			[
+				'total_items' => $total_items,
+				'per_page'    => $this->per_page,
+				'total_pages' => ceil( $total_items / $this->per_page ),
+			]
+		);
+	}
+	/**
+	 * Message to be displayed when there are no items.
+	 *
+	 * @since 3.8.0
+	 */
+	public function no_items() {
+		?>
+		<tr class="no-orders">
+			<td class="colspanchange" colspan="<?php echo esc_attr( $this->get_column_count() ); ?>">
+				<div class="no-orders__content">
+					<div class="no-orders__content__icon">
+						<i class="fa-solid fa-ticket"></i>
+					</div>
+					<span><?php esc_html_e( 'No Orders detected!', 'sugar-calendar-lite' ); ?></span>
+				</div>
+			</td>
+		</tr>
+		<?php
 	}
 }
 

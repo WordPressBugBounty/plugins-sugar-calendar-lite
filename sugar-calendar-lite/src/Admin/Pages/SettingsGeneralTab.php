@@ -220,7 +220,7 @@ class SettingsGeneralTab extends Settings {
 					'dark'  => esc_html__( 'Dark', 'sugar-calendar-lite' ),
 				],
 				'value'       => Editor\get_single_event_appearance_mode(),
-				'label'       => esc_html__( 'Single Event Page Appearance', 'sugar-calendar-lite' ),
+				'label'       => esc_html__( 'Event Page Appearance', 'sugar-calendar-lite' ),
 				'description' => __( 'Adjust the frontend display of event single page.', 'sugar-calendar-lite' ),
 			]
 		);
@@ -268,7 +268,7 @@ class SettingsGeneralTab extends Settings {
 				'id'          => 'custom_fields',
 				'name'        => 'custom_fields',
 				'value'       => $fields,
-				'label'       => esc_html__( 'Enable Custom Fields', 'sugar-calendar-lite' ),
+				'label'       => esc_html__( 'Custom Fields', 'sugar-calendar-lite' ),
 				'description' => __( 'Allow developers to extend post types that support <code>events</code>.', 'sugar-calendar-lite' ),
 			]
 		);

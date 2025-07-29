@@ -1721,6 +1721,7 @@ class Base extends WP_List_Table {
 	 * Get events for a given cell.
 	 *
 	 * @since 2.0.0
+	 * @since 3.8.0 Sort the events in the cell by ascending order.
 	 *
 	 * @return string
 	 */
@@ -1736,6 +1737,19 @@ class Base extends WP_List_Table {
 		if ( empty( $items ) ) {
 			return $retval;
 		}
+
+		// Sort items by start_dto in ascending order.
+		usort(
+			$items,
+			function ( $a, $b ) {
+				if ( ! isset( $a->start_dto ) || ! isset( $b->start_dto ) ) {
+					return 0;
+				}
+
+				// Compare DateTime objects.
+				return $a->start_dto <=> $b->start_dto;
+			}
+		);
 
 		// Loop through today's events.
 		foreach ( $items as $item ) {

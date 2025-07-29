@@ -30,8 +30,9 @@ final class Tickets_Table extends Table {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Updated to `202501150001`.
+	 * @since 3.6.0 Updated to `202506130001`.
 	 */
-	protected $version = 202501150001;
+	protected $version = 202506130001;
 
 	/**
 	 * @var string Table schema
@@ -52,6 +53,7 @@ final class Tickets_Table extends Table {
 		'202010270002' => 202010270002,
 		'202010270003' => 202010270003,
 		'202501150001' => 202501150001,
+		'202506130001' => 202506130001,
 	];
 
 	/**
@@ -65,9 +67,11 @@ final class Tickets_Table extends Table {
 		$this->schema = "id bigint(20) unsigned NOT NULL auto_increment,
 			order_id varchar(20) NOT NULL default '0',
 			event_id bigint(20) unsigned NOT NULL default '0',
+			ticket_type_id bigint(20) unsigned NOT NULL default '0',
 			occurrence_id bigint(20) unsigned NOT NULL default 0,
 			attendee_id bigint(20) unsigned default '0',
 			code varchar(20) NOT NULL default '',
+			status varchar(20) NOT NULL default 'active',
 			event_date datetime NOT NULL default '0000-00-00 00:00:00',
 			date_created datetime NOT NULL default '0000-00-00 00:00:00',
 			date_modified datetime NOT NULL default '0000-00-00 00:00:00',
@@ -175,6 +179,47 @@ final class Tickets_Table extends Table {
 			$result = $this->get_db()->query( "ALTER TABLE {$this->table_name} ADD COLUMN `occurrence_id` bigint(20) unsigned NOT NULL default 0 AFTER `event_id`;" );
 		}
 
+		return $this->is_success( $result );
+	}
+
+	/**
+	 * Upgrade to version 202506130001.
+	 *
+	 * - Add the `ticket_type_id` column
+	 * - Add the `status` varchar column
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return boolean
+	 */
+	protected function __202506130001() {
+
+		// Look for columns to add.
+		$ticket_type_exists = $this->column_exists( 'ticket_type_id' );
+		$status_exists      = $this->column_exists( 'status' );
+
+		// Build ALTER TABLE query if needed.
+		if ( ! $ticket_type_exists || ! $status_exists ) {
+			$sql = "ALTER TABLE {$this->table_name}";
+
+			if ( ! $ticket_type_exists ) {
+				$sql .= " ADD COLUMN `ticket_type_id` bigint(20) unsigned NOT NULL default '0' AFTER `event_id`";
+
+				if ( ! $status_exists ) {
+					$sql .= ',';
+				}
+			}
+
+			if ( ! $status_exists ) {
+				$sql .= " ADD COLUMN `status` varchar(20) NOT NULL default 'active' AFTER `code`";
+			}
+
+			$result = $this->get_db()->query( $sql . ';' );
+		} else {
+			$result = true;
+		}
+
+		// Return success/fail.
 		return $this->is_success( $result );
 	}
 }

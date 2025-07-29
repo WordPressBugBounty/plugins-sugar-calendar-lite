@@ -9,63 +9,72 @@ namespace Sugar_Calendar\AddOn\Ticketing\Common;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Process request to email a ticket to an attendee
+ * Process request to email a ticket to an attendee.
  *
  * @since 1.0
- *
- * @return int
+ * @since 3.8.0 Added event check.
  */
 function email_ticket() {
 
-	// Bail if not the correct action
-	if ( ! isset( $_GET['sc_et_action'] ) || ( 'email_ticket' !== $_GET['sc_et_action'] ) ) {
+	// Bail if not running the email_ticket action.
+	if ( ! isset( $_GET['sc_et_action'] ) || $_GET['sc_et_action'] !== 'email_ticket' ) {
 		return;
 	}
 
-	// Bail if no nonce
+	// Bail if no nonce.
 	if ( ! isset( $_GET['_wpnonce'] ) ) {
 		return;
 	}
 
-	// Default to no ticket
+	// Get ticket based on code or ID.
 	$ticket = false;
 
-	// Get ticket by code
 	if ( ! empty( $_GET['ticket_code'] ) ) {
-		$code   = sanitize_text_field( $_GET['ticket_code'] );
+		$code   = sanitize_text_field( wp_unslash( $_GET['ticket_code'] ) );
 		$ticket = Functions\get_ticket_by_code( $code );
-
-		// Get ticket by ID
 	} elseif ( ! empty( $_GET['ticket_id'] ) ) {
 		$id     = absint( $_GET['ticket_id'] );
 		$ticket = Functions\get_ticket( $id );
 	}
 
-	// Bail if no ticket with that code
+	// Bail if no valid ticket found.
 	if ( empty( $ticket ) ) {
 		return;
 	}
 
-	// Bail if nonce fails
-	if ( ! wp_verify_nonce( $_GET['_wpnonce'], $ticket->code ) ) {
+	// Verify nonce.
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), $ticket->code ) ) {
 		return;
 	}
 
-	// Send the ticket email
-	$notice_type = Functions\send_ticket_email( $ticket->id )
-		? 'updated'
-		: 'error';
+	// Check if event exists.
+	$event = sugar_calendar_get_event( $ticket->event_id );
 
-	// Setup URL
-	$url = add_query_arg(
-		[
-			'sc-notice-id'   => 'email-send',
-			'sc-notice-type' => $notice_type,
-		],
-		wp_get_referer()
+	if ( empty( $event ) ) {
+		wp_safe_redirect(
+			add_query_arg(
+				[
+					'sc-notice-id'   => 'event-missing',
+					'sc-notice-type' => 'error',
+				],
+				wp_get_referer()
+			)
+		);
+		exit;
+	}
+
+	// Send email and set notice type.
+	$notice_type = Functions\send_ticket_email( $ticket->id ) ? 'updated' : 'error';
+
+	// Redirect with status.
+	wp_safe_redirect(
+		add_query_arg(
+			[
+				'sc-notice-id'   => 'email-send',
+				'sc-notice-type' => $notice_type,
+			],
+			wp_get_referer()
+		)
 	);
-
-	// Redirect
-	wp_safe_redirect( $url );
 	exit;
 }

@@ -71,7 +71,7 @@ function output() {
 		: false; ?>
 
 	<head>
-		<link rel="stylesheet" href="<?php echo SC_ET_PLUGIN_URL . 'includes/frontend/assets/css/print.css'; ?>" />
+		<link rel="stylesheet" href="<?php echo SC_PLUGIN_URL . 'assets/css/features/event-ticketing/frontend/print.css'; ?>" />
 	</head>
 	<body onload="window.print()">
 		<div id="main">

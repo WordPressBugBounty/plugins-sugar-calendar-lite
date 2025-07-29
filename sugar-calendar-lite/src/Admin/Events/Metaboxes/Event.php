@@ -397,6 +397,7 @@ class Event implements MetaboxInterface {
 	 *
 	 * @since 2.0.0
 	 * @since 3.6.0 Added DOM ID on each section.
+	 * @since 3.8.0 Added filterable classes variable.
 	 *
 	 * @param array $sections Metabox sections.
 	 *
@@ -409,10 +410,34 @@ class Event implements MetaboxInterface {
 		// Loop through sections.
 		foreach ( $sections as $section ) :
 			$selected = $this->is_current_section( $section->id ) ? ' selected' : '';
+
+			// Build section classes.
+			$classes = [
+				'sugar-calendar-metabox__section',
+			];
+
+			// Add selected class if current section.
+			if ( $selected ) {
+				$classes[] = 'selected';
+			}
+
+			/**
+			 * Filter the CSS classes for a metabox section.
+			 *
+			 * @since 3.8.0
+			 *
+			 * @param array        $classes CSS classes array.
+			 * @param EventSection $section Section object.
+			 * @param Event        $metabox Metabox instance.
+			 */
+			$classes = apply_filters( 'sugar_calendar_admin_events_metaboxes_event_section_classes', $classes, $section, $this );
+
+			// Convert classes array to string.
+			$classes = implode( ' ', array_unique( array_filter( $classes ) ) );
 			?>
 
 			<div id="sugar-calendar-metabox__section__<?php echo esc_attr( $section->id ); ?>" data-id="<?php echo esc_attr( $section->id ); ?>"
-				class="sugar-calendar-metabox__section<?php echo esc_attr( $selected ); ?>">
+				class="<?php echo esc_attr( $classes ); ?>">
 
 				<?php $this->get_section_contents( $section ); ?>
 
@@ -1319,6 +1344,7 @@ class Event implements MetaboxInterface {
 		 * Filter the localize script for the admin event meta box.
 		 *
 		 * @since 3.7.0
+		 * @since 3.8.0 Added Help URL context.
 		 *
 		 * @param array $localize_script Localize script.
 		 */
@@ -1331,6 +1357,13 @@ class Event implements MetaboxInterface {
 				'timezone'      => sugar_calendar_get_user_preference( 'timezone' ),
 				'timezone_type' => sugar_calendar_get_user_preference( 'timezone_type' ),
 				'clock_type'    => sugar_calendar_get_clock_type(),
+				'help_url'      => [
+					'duration'       => 'Duration',
+					'adv-recurrence' => 'Recurrence',
+					'venue'          => 'Venue',
+					'url'            => 'Link',
+					'tickets'        => 'Tickets',
+				],
 			]
 		);
 

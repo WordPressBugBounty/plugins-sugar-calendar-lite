@@ -13,7 +13,6 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Pages\Settings as PageSettings;
 use Sugar_Calendar\Admin\Pages\Settings\SingleEmailConfig;
-use Sugar_Calendar\Admin\Pages\SettingsEmailConfig;
 
 /**
  * Register page ids.
@@ -243,6 +242,7 @@ function payments_section() {
 	UI::heading(
 		[
 			'title'       => esc_html__( 'Stripe', 'sugar-calendar-lite' ),
+			'id'          => 'stripe-connection',
 			'description' => sprintf( /* translators: %1$s - Stripe connect description; %2$s - Stripe documentation URL; %3$s - Stripe documentation link. */
 				'%1$s <a href="%2$s" target="_blank">%3$s</a>.',
 				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar-lite' ),
@@ -456,6 +456,13 @@ function emails_section() {
 			'title' => esc_html__( 'Email Sender', 'sugar-calendar-lite' ),
 		]
 	);
+
+	/**
+	 * Fires a hook after the Email section's title.
+	 *
+	 * @since 3.8.0
+	 */
+	do_action( 'sc_et_settings_emails_section_top' );
 
 	// From Email Address.
 	$from_email = Settings\get_setting( 'receipt_from_email' );
@@ -802,4 +809,28 @@ function handle_post_ajax() {
 
 	// Return the response.
 	wp_send_json( $response );
+}
+
+/**
+ * Filter the help URL in the Settings page -> Payments tab.
+ *
+ * @since 3.8.0
+ *
+ * @param string $help_url The help URL.
+ *
+ * @return string
+ */
+function help_url( $help_url ) {
+
+	if ( ! sugar_calendar()->get_admin()->is_page( 'settings_payments' ) ) {
+		return $help_url;
+	}
+
+	return Helpers::get_utm_url(
+		'https://sugarcalendar.com/docs/setting-up-event-ticketing-with-sugar-calendar-lite/#connecting-stripe',
+		[
+			'content' => 'Help',
+			'medium'  => 'plugin-settings-payments',
+		]
+	);
 }

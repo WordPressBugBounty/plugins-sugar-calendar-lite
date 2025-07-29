@@ -153,7 +153,17 @@ abstract class AbstractBlock {
 		// In case this is the initial request or we failed to get the timestamp for the ajax.
 		if ( empty( $timestamp ) ) {
 
-			$timestamp = sugar_calendar_get_request_time();
+			/**
+			 * Filter the timestamp that will be used as the time start of the block.
+			 *
+			 * @since 3.8.0
+			 *
+			 * @param int $timestamp Timestamp to be used.
+			 */
+			$timestamp = apply_filters(
+				'sugar_calendar_block_common_abstract_block_timestamp',
+				sugar_calendar_get_request_time( 'timestamp', sugar_calendar_get_timezone() )
+			);
 
 			if ( $this->get_display_mode() === 'month' ) {
 				$this->cal_month = gmdate( 'n', $timestamp );

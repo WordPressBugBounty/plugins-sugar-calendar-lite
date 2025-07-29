@@ -85,6 +85,7 @@ function render_event_date_time( $event ) {
  *
  * @since 1.0.0
  * @since 3.6.0 Modify optional description for attendee information based on settings.
+ * @since 3.8.0 Add filter to check if the event is free.
  */
 function display() {
 
@@ -134,14 +135,39 @@ function display() {
 		__( 'Enter the name and email of all attendees%s.', 'sugar-calendar-lite' ),
 		Settings\get_setting( 'attendee_fields_is_required', false ) ? '' : ' (optional)'
 	);
+
+	/**
+	 * Filter to determine if the event has multiple tickets.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param bool   $is_multiple_tickets Whether the event has multiple tickets.
+	 * @param Event  $event               The event object.
+	 * @param string $post_id             The post ID.
+	 */
+	$is_multiple_tickets = apply_filters( 'sc_et_is_multiple_tickets', false, $event, get_the_ID() );
+
+	if ( $is_multiple_tickets ) {
+
+		/**
+		 * Filter to determine if the event is free when the event is multiple tickets.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param bool   $is_ticket_free Whether the event is free.
+		 * @param Event  $event          The event object.
+		 * @param string $post_id        The post ID.
+		 */
+		$is_ticket_free = apply_filters( 'sc_et_is_ticket_free_multiple_tickets', $is_ticket_free, $event, get_the_ID() );
+	}
 	?>
 
-	<div class="modal fade" id="sc-event-ticketing-modal" tabindex="-1" role="dialog" aria-labelledby="sc-event-ticketing-modalLabel" aria-hidden="true">
+	<div class="modal fade" id="sc-event-ticketing-modal" tabindex="-1" role="dialog" aria-labelledby="sc-event-ticketing-modalLabel" aria-hidden="true" data-backdrop="static">
 		<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-			<div class="modal-content">
+			<div class="modal-content sc-et-modal-content">
 				<form id="sc-event-ticketing-checkout" method="post">
 
-					<div class="modal-header">
+					<div class="modal-header sc-et-modal-header">
 						<h3 class="modal-title" id="sc-event-ticketing-modalLabel"><?php esc_html_e( 'Event Tickets', 'sugar-calendar-lite' ); ?></h3>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -159,17 +185,17 @@ function display() {
 
 									<div class="sc-event-ticketing-modal-billing-fieldset__names">
 										<div class="sc-et-form-group">
-											<label class="sc-et-label" for="sc-event-ticketing-first-name"><?php esc_html_e( 'First Name', 'sugar-calendar-lite' ); ?></label>
+											<label class="sc-et-label" for="sc-event-ticketing-first-name"><?php esc_html_e( 'First Name', 'sugar-calendar-lite' ); ?>*</label>
 											<input type="text" class="sc-et-form-control" name="first_name" id="sc-event-ticketing-first-name" value="" placeholder="<?php esc_attr_e( 'Your first name', 'sugar-calendar-lite' ); ?>" />
 										</div>
 										<div class="sc-et-form-group">
-											<label class="sc-et-label" for="sc-event-ticketing-last-name"><?php esc_html_e( 'Last Name', 'sugar-calendar-lite' ); ?></label>
+											<label class="sc-et-label" for="sc-event-ticketing-last-name"><?php esc_html_e( 'Last Name', 'sugar-calendar-lite' ); ?>*</label>
 											<input type="text" class="sc-et-form-control" name="last_name" id="sc-event-ticketing-last-name" value="" placeholder="<?php esc_attr_e( 'Your last name', 'sugar-calendar-lite' ); ?>" />
 										</div>
 									</div>
 
 									<div class="sc-event-ticketing-modal-billing-fieldset__email sc-et-form-group">
-										<label class="sc-et-label" for="sc-event-ticketing-email"><?php esc_html_e( 'Email Address', 'sugar-calendar-lite' ); ?></label>
+										<label class="sc-et-label" for="sc-event-ticketing-email"><?php esc_html_e( 'Email Address', 'sugar-calendar-lite' ); ?>*</label>
 										<input type="email" class="sc-et-form-control" name="email" id="sc-event-ticketing-email" value="" placeholder="<?php esc_attr_e( 'Enter email address', 'sugar-calendar-lite' ); ?>" />
 									</div>
 								</fieldset>
@@ -177,28 +203,43 @@ function display() {
 								<fieldset id="sc-event-ticketing-modal-attendee-fieldset" class="sc-et-fieldset">
 									<legend class="sc-et-legend"><?php esc_html_e( 'Attendee Information', 'sugar-calendar-lite' ); ?></legend>
 									<p><?php echo esc_html( $field_attendee_info_description ); ?> <a href="#" id="sc-event-ticketing-copy-billing-attendee"><?php esc_html_e( 'Copy from Billing Details.', 'sugar-calendar-lite' ); ?></a></p>
-									<div id="sc-event-ticketing-modal-attendee-list">
-										<div class="sc-et-form-group sc-event-ticketing-attendee" data-key="1" attendee-key="1">
-											<div class="sc-event-ticketing-attendee__input-group sc-et-input-group">
-												<div class="sc-et-input-group-prepend">
-													<span class="sc-et-input-group-text sc-event-ticketing-attendee__input-group__attendee-label" id=""><?php esc_html_e( 'Attendee 1', 'sugar-calendar-lite' ); ?></span>
-												</div>
-												<input type="text" class="sc-event-ticketing-attendee__input-first-name sc-et-form-control" name="attendees[1][first_name]" placeholder="<?php esc_attr_e( 'First name', 'sugar-calendar-lite' ); ?>">
-												<input type="text" class="sc-event-ticketing-attendee__input-last-name sc-et-form-control" name="attendees[1][last_name]" placeholder="<?php esc_attr_e( 'Last name', 'sugar-calendar-lite' ); ?>">
-												<input type="text" class="sc-event-ticketing-attendee__input-email sc-et-form-control" name="attendees[1][email]" placeholder="<?php esc_attr_e( 'Email', 'sugar-calendar-lite' ); ?>">
 
-												<div class="sc-event-ticketing-attendee-controls-group">
-													<svg class="sc-event-ticketing-add-attendee" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-														<path d="M12 8V9C12 9.21875 11.8125 9.375 11.625 9.375H8.875V12.125C8.875 12.3438 8.6875 12.5 8.5 12.5H7.5C7.28125 12.5 7.125 12.3438 7.125 12.125V9.375H4.375C4.15625 9.375 4 9.21875 4 9V8C4 7.8125 4.15625 7.625 4.375 7.625H7.125V4.875C7.125 4.6875 7.28125 4.5 7.5 4.5H8.5C8.6875 4.5 8.875 4.6875 8.875 4.875V7.625H11.625C11.8125 7.625 12 7.8125 12 8ZM15.75 8.5C15.75 12.7812 12.2812 16.25 8 16.25C3.71875 16.25 0.25 12.7812 0.25 8.5C0.25 4.21875 3.71875 0.75 8 0.75C12.2812 0.75 15.75 4.21875 15.75 8.5ZM14.25 8.5C14.25 5.0625 11.4375 2.25 8 2.25C4.53125 2.25 1.75 5.0625 1.75 8.5C1.75 11.9688 4.53125 14.75 8 14.75C11.4375 14.75 14.25 11.9688 14.25 8.5Z" fill="currentColor"/>
-													</svg>
+									<?php if ( $is_multiple_tickets ) : ?>
 
-													<svg class="sc-event-ticketing-remove-attendee sc-event-ticketing-control-inactive" role="button" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-														<path d="M4.375 9.375C4.15625 9.375 4 9.21875 4 9V8C4 7.8125 4.15625 7.625 4.375 7.625H11.625C11.8125 7.625 12 7.8125 12 8V9C12 9.21875 11.8125 9.375 11.625 9.375H4.375ZM15.75 8.5C15.75 12.7812 12.2812 16.25 8 16.25C3.71875 16.25 0.25 12.7812 0.25 8.5C0.25 4.21875 3.71875 0.75 8 0.75C12.2812 0.75 15.75 4.21875 15.75 8.5ZM14.25 8.5C14.25 5.0625 11.4375 2.25 8 2.25C4.53125 2.25 1.75 5.0625 1.75 8.5C1.75 11.9688 4.53125 14.75 8 14.75C11.4375 14.75 14.25 11.9688 14.25 8.5Z" fill="currentColor"/>
-													</svg>
+										<?php
+										/**
+										 * Action hook to add additional fields for ticket types.
+										 *
+										 * @since 3.8.0
+										 *
+										 * @param Event $event The event object.
+										 */
+										do_action( 'sc_et_modal_attendee_fields_after', $event );
+										?>
+
+									<?php else : ?>
+
+										<div id="sc-event-ticketing-modal-attendee-list">
+											<div class="sc-et-form-group sc-event-ticketing-attendee" data-key="1" attendee-key="1">
+												<div class="sc-event-ticketing-attendee__input-group sc-et-input-group">
+													<input type="text" class="sc-event-ticketing-attendee__input-full-name sc-et-form-control" name="attendees[1][full_name]" placeholder="<?php esc_attr_e( 'Full name', 'sugar-calendar-lite' ); ?>">
+													<input type="text" class="sc-event-ticketing-attendee__input-email sc-et-form-control" name="attendees[1][email]" placeholder="<?php esc_attr_e( 'Email', 'sugar-calendar-lite' ); ?>">
+													<input type="hidden" class="sc-event-ticketing-attendee__input-first-name" name="attendees[1][first_name]">
+													<input type="hidden" class="sc-event-ticketing-attendee__input-last-name" name="attendees[1][last_name]">
+
+													<div class="sc-event-ticketing-attendee-controls-group">
+														<svg class="sc-event-ticketing-add-attendee" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+															<path d="M12 8V9C12 9.21875 11.8125 9.375 11.625 9.375H8.875V12.125C8.875 12.3438 8.6875 12.5 8.5 12.5H7.5C7.28125 12.5 7.125 12.3438 7.125 12.125V9.375H4.375C4.15625 9.375 4 9.21875 4 9V8C4 7.8125 4.15625 7.625 4.375 7.625H7.125V4.875C7.125 4.6875 7.28125 4.5 7.5 4.5H8.5C8.6875 4.5 8.875 4.6875 8.875 4.875V7.625H11.625C11.8125 7.625 12 7.8125 12 8ZM15.75 8.5C15.75 12.7812 12.2812 16.25 8 16.25C3.71875 16.25 0.25 12.7812 0.25 8.5C0.25 4.21875 3.71875 0.75 8 0.75C12.2812 0.75 15.75 4.21875 15.75 8.5ZM14.25 8.5C14.25 5.0625 11.4375 2.25 8 2.25C4.53125 2.25 1.75 5.0625 1.75 8.5C1.75 11.9688 4.53125 14.75 8 14.75C11.4375 14.75 14.25 11.9688 14.25 8.5Z" fill="currentColor"/>
+														</svg>
+
+														<svg class="sc-event-ticketing-remove-attendee sc-event-ticketing-control-inactive" role="button" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+															<path d="M4.375 9.375C4.15625 9.375 4 9.21875 4 9V8C4 7.8125 4.15625 7.625 4.375 7.625H11.625C11.8125 7.625 12 7.8125 12 8V9C12 9.21875 11.8125 9.375 11.625 9.375H4.375ZM15.75 8.5C15.75 12.7812 12.2812 16.25 8 16.25C3.71875 16.25 0.25 12.7812 0.25 8.5C0.25 4.21875 3.71875 0.75 8 0.75C12.2812 0.75 15.75 4.21875 15.75 8.5ZM14.25 8.5C14.25 5.0625 11.4375 2.25 8 2.25C4.53125 2.25 1.75 5.0625 1.75 8.5C1.75 11.9688 4.53125 14.75 8 14.75C11.4375 14.75 14.25 11.9688 14.25 8.5Z" fill="currentColor"/>
+														</svg>
+													</div>
 												</div>
 											</div>
 										</div>
-									</div>
+									<?php endif; ?>
 								</fieldset>
 
 								<?php
@@ -255,7 +296,7 @@ function display() {
 									</fieldset>
 								</div>
 
-								<div class="sc-event-ticketing-checkout-totals__summary-block">
+								<div class="sc-event-ticketing-checkout-totals__summary-block sc-event-ticketing-checkout-totals__summary-block-prices">
 									<fieldset class="sc-et-fieldset">
 										<legend class="sc-et-legend"><?php esc_html_e( 'Order Summary', 'sugar-calendar-lite' ); ?></legend>
 										<p>

@@ -14,6 +14,38 @@ use Sugar_Calendar\Helpers\UI;
 class SettingsFeedsTab extends Settings {
 
 	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Settings page -> Feeds tab.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/using-calendar-feeds/',
+			[
+				'content' => 'Help',
+				'medium'  => 'plugin-settings-feeds',
+			]
+		);
+	}
+
+	/**
 	 * Page tab slug.
 	 *
 	 * @since 3.0.0

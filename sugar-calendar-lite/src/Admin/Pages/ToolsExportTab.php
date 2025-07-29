@@ -7,6 +7,7 @@ use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\Helper;
 
 /**
  * Calendar Export Tools tab.
@@ -48,6 +49,26 @@ class ToolsExportTab extends Tools {
 
 		add_action( 'admin_init', [ $this, 'handle_export' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Tools page -> Export tab.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/importing-and-exporting-events/#Exporting_Events',
+			[
+				'content' => 'Help',
+				'medium'  => 'tools-export',
+			]
+		);
 	}
 
 	/**

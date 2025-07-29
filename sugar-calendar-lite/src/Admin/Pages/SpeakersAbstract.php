@@ -77,7 +77,7 @@ abstract class SpeakersAbstract extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-speakers',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-speakers' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-admin-settings', 'sugar-calendar-admin-education' ],
+			[ 'sugar-calendar-admin-settings', 'sugar-calendar-admin-education', 'sugar-calendar-admin-fontawesome' ],
 			BaseHelpers::get_asset_version()
 		);
 	}

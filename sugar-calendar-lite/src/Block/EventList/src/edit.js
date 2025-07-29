@@ -48,6 +48,8 @@ import './editor.scss';
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
  *
+ * @since 3.8.0 Do not manipulate events per page and max events to show set by the user.
+ *
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes, clientId } ) {
@@ -104,29 +106,19 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 	};
 
 	const onEventsPerPage = (eventsPerPage) => {
+
 		eventsPerPage = parseInt(eventsPerPage) || 0;
 
 		let newAttributes = { eventsPerPage: eventsPerPage };
-
-		if (eventsPerPage > attributes.maximumEventsToShow) {
-			newAttributes.maximumEventsToShow = eventsPerPage;
-		}
 
 		setAttributes(newAttributes);
 	};
 
 	const onMaximumEventsToShow = (maximumEventsToShow) => {
+
 		maximumEventsToShow = parseInt(maximumEventsToShow) || 0;
+
 		let newAttributes = { maximumEventsToShow: maximumEventsToShow };
-
-		// Adjust eventsPerPage if it's higher than maximumEventsToShow
-		if (maximumEventsToShow < attributes.eventsPerPage) {
-			newAttributes.eventsPerPage = maximumEventsToShow;
-		}
-
-		if (attributes.eventsPerPage === 0 && maximumEventsToShow > 0) {
-			newAttributes.eventsPerPage = maximumEventsToShow;
-		}
 
 		setAttributes(newAttributes);
 	};

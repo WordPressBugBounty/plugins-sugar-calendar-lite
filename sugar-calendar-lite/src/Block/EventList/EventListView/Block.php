@@ -408,6 +408,7 @@ class Block extends AbstractBlock {
 	 *
 	 * @since 3.4.0
 	 * @since 3.6.0 Optimize the method to get the upcoming events.
+	 * @since 3.8.0 Respect the maximum events to show set by the user.
 	 *
 	 * @return Event[]
 	 */
@@ -422,18 +423,35 @@ class Block extends AbstractBlock {
 		// Search term if any.
 		$search_term = $this->get_search_term();
 
+		$max_number_of_events = 30;
+
+		if ( ! empty( $settings_attrs['maximumEventsToShow'] ) ) {
+			$max_number_of_events = $settings_attrs['maximumEventsToShow'];
+		}
+
+		// Handle various edge cases.
+		if (
+			// If events per page isn't provided, use the maximum number of events to show.
+			( empty( $events_per_page ) && ! empty( $max_number_of_events ) ) ||
+			// If events per page is greater than the maximum number of events to show, use the maximum number of events to show.
+			( ! empty( $events_per_page ) && $events_per_page > $max_number_of_events )
+		) {
+			$events_per_page = $max_number_of_events;
+		}
+
 		/**
 		 * Filter the maximum number of events to show in the upcoming events block.
 		 *
 		 * @since 3.4.0
 		 * @since 3.6.0 Changed the value to use `$settings_attrs['maximumEventsToShow']`.
+		 * @since 3.8.0 Allow `$max_number_of_events` to be any int > 0.
 		 *
 		 * @param int   $quantity       The quantity of different events to fetch.
 		 * @param array $settings_attrs The block attributes.
 		 */
 		$max_number_of_events = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_event_list_block_upcoming_events_max_number_of_events',
-			max( 30, $settings_attrs['maximumEventsToShow'] ),
+			$settings_attrs['maximumEventsToShow'],
 			$settings_attrs
 		);
 

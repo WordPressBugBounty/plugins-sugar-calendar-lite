@@ -111,7 +111,7 @@
 				sc_admin_ticketing.ajaxurl,
 				{
 					body: new URLSearchParams({
-						action: 'fetch_ticketing_events_choices',
+						action: sc_admin_ticketing.action,
 						nonce: sc_admin_ticketing.nonce,
 						searchTerm: searchTerm,
 						isAdminList: 1,

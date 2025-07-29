@@ -6,6 +6,7 @@ use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\OrderEdit;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\OrdersTab;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\Tickets;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\TicketsTab;
+use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\Event;
 use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
 
 
@@ -16,12 +17,43 @@ use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
  */
 class Area {
 
+	/**
+	 * Event page instance.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @var Event
+	 */
+	public $page_event;
+
+	/**
+	 * Initialize the class.
+	 *
+	 * @since 3.8.0
+	 */
+	public function init() {
+
+		$this->page_event = new Event();
+	}
+
+	/**
+	 * Run hooks.
+	 *
+	 * @since 1.0.0
+	 * @since 3.8.0 Add Event page hooks.
+	 *
+	 * @return void
+	 */
 	public function hooks() {
+
+		// Run Event page hooks.
+		$this->page_event->hooks();
 
 		add_action( 'admin_menu', [ $this, 'admin_menu' ], 30 );
 		add_filter( 'sugar_calendar_admin_area_current_page_id', [ $this, 'admin_area_current_page_id' ] );
 		add_filter( 'sugar_calendar_admin_area_pages', [ $this, 'admin_area_pages' ] );
 		add_action( 'wp_ajax_fetch_ticketing_events_choices', [ $this, 'ajax_fetch_events_choices' ] );
+		add_action( 'wp_ajax_fetch_ticketing_orders_events_choices', [ $this, 'ajax_fetch_orders_events_choices' ] );
 
 	}
 
@@ -130,6 +162,51 @@ class Area {
 				FROM {$wpdb->prefix}sc_events e
 				INNER JOIN {$wpdb->prefix}sc_tickets t ON e.id = t.event_id
 				WHERE e.status = 'publish' AND e.title LIKE %s
+				ORDER BY e.title ASC",
+				$like_search_term
+			)
+		);
+
+		if ( ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				$choices[] = [
+					'value' => $result->id,
+					'label' => $result->title,
+				];
+			}
+		}
+
+		wp_send_json_success( $choices );
+	}
+
+	/**
+	 * AJAX handler for fetching events with orders for the dropdown.
+	 *
+	 * @since 3.8.0
+	 */
+	public function ajax_fetch_orders_events_choices() {
+
+		check_ajax_referer( 'sc-admin-ticketing-list', 'nonce' );
+
+		$search_term = '';
+
+		if ( ! empty( $_POST['searchTerm'] ) ) {
+			$search_term = sanitize_text_field( wp_unslash( $_POST['searchTerm'] ) );
+		}
+
+		$choices = [];
+
+		// Get search title for events with orders.
+		global $wpdb;
+
+		$like_search_term = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+		$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT DISTINCT e.id, e.title
+				FROM {$wpdb->prefix}sc_events e
+				INNER JOIN {$wpdb->prefix}sc_orders o ON e.id = o.event_id
+				WHERE e.status = 'publish' AND o.status != 'trash' AND e.title LIKE %s
 				ORDER BY e.title ASC",
 				$like_search_term
 			)

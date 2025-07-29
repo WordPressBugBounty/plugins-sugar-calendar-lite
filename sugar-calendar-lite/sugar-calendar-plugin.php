@@ -10,6 +10,7 @@ namespace Sugar_Calendar;
 use Sugar_Calendar\Admin\Addons\Addons;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Notifications;
+use Sugar_Calendar\Admin\ScreenOptions;
 use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Block\Loader;
 use Sugar_Calendar\Migrations\Migrations;
@@ -1089,5 +1090,30 @@ final class Plugin {
 		}
 
 		return $addons;
+	}
+
+	/**
+	 * Get the admin Screen Options setup.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return ScreenOptions
+	 */
+	public function get_admin_screen_options() {
+
+		static $admin_screen_options;
+
+		if ( ! isset( $admin_screen_options ) ) {
+			/**
+			 * Filters the Admin Screen Options loader.
+			 *
+			 * @since 3.8.0
+			 *
+			 * @param ScreenOptions $admin_screen_options Screen Options.
+			 */
+			$admin_screen_options = apply_filters( 'sugar_calendar_get_admin_screen_options', new ScreenOptions() );
+		}
+
+		return $admin_screen_options;
 	}
 }

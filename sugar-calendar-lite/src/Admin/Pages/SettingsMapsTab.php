@@ -66,6 +66,28 @@ class SettingsMapsTab extends Settings {
 
 		// Handle POST requests.
 		add_action( 'sugar_calendar_ajax_verify_maps_api_key', [ $this, 'handle_verify_maps_api_key' ] );
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Settings page -> Maps tab.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/using-google-maps-to-display-event-location/',
+			[
+				'content' => 'Help',
+				'medium'  => 'plugin-settings-maps',
+			]
+		);
 	}
 
 	/**

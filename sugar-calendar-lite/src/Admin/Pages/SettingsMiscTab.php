@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
+use Sugar_Calendar\Helpers as BaseHelper;
 
 /**
  * General Settings tab.
@@ -13,6 +14,38 @@ use Sugar_Calendar\Options;
  * @since 3.0.0
  */
 class SettingsMiscTab extends Settings {
+
+	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Settings page -> Misc tab.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return BaseHelper\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/',
+			[
+				'content' => 'Help',
+				'medium'  => 'plugin-settings-misc',
+			]
+		);
+	}
 
 	/**
 	 * Page tab slug.

@@ -195,7 +195,9 @@ class Checkout {
 			? absint( $_POST['sc_et_event_id'] )
 			: 0;
 
-		$available = get_event_meta( $event_id, 'ticket_quantity', true );
+		// Check if capacity limitation is enabled.
+		$limit_capacity = absint( get_event_meta( $event_id, 'ticket_limit_capacity', true ) );
+		$available      = get_event_meta( $event_id, 'ticket_quantity', true );
 
 		if ( empty( $_POST['first_name'] ) ) {
 			$this->add_error( 'missing_first_name', esc_html__( 'Please enter your first name.', 'sugar-calendar-lite' ), '#sc-event-ticketing-first-name' );
@@ -209,7 +211,9 @@ class Checkout {
 			$this->add_error( 'missing_email', esc_html__( 'Please enter a valid email address.', 'sugar-calendar-lite' ), '#sc-event-ticketing-email' );
 		}
 
-		if ( $qty > $available ) {
+		// Only validate quantity if capacity limitation is enabled.
+		if ( $limit_capacity && $qty > $available ) {
+			/* translators: %d: number of available tickets. */
 			$this->add_error( 'insufficient_quantity', sprintf( esc_html__( 'Only %d tickets are available. Please reduce your purchase quantity.', 'sugar-calendar-lite' ), $available ), '#sc-event-ticketing-modal-attendee-fieldset' );
 		}
 
@@ -228,9 +232,7 @@ class Checkout {
 
 				// Check if any required field is missing or invalid.
 				if (
-					empty( $attendee['first_name'] )
-					||
-					empty( $attendee['last_name'] )
+					empty( $attendee['full_name'] )
 					||
 					empty( $attendee['email'] )
 					||
@@ -329,6 +331,18 @@ class Checkout {
 	}
 
 	/**
+	 * Remove error by key from the errors array.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $error_id The error ID.
+	 */
+	public function remove_error( $error_id = '' ) {
+
+		unset( $this->errors[ $error_id ] );
+	}
+
+	/**
 	 * Complete the purchase.
 	 *
 	 * @since 3.1.0
@@ -340,6 +354,9 @@ class Checkout {
 
 		// Maybe create attendees.
 		$stored_attendees = [];
+
+		// Anonymous attendees.
+		$anonymous_attendees = [];
 
 		$attendees = ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] )
 			? $_POST['attendees']
@@ -383,7 +400,9 @@ class Checkout {
 
 				$maybe_new = $this->maybe_create_attendee( $attendee );
 
-				if ( ! empty( $maybe_new->id ) ) {
+				if ( empty( $maybe_new->id ) ) {
+					$anonymous_attendees[] = $attendee;
+				} else {
 					$stored_attendees[] = $maybe_new;
 				}
 			}
@@ -398,9 +417,11 @@ class Checkout {
 			 * Filter the ticket data before saving.
 			 *
 			 * @since 3.6.0
+			 * @since 3.8.0 Add attendee object to filter.
 			 *
-			 * @param array $ticket_data Ticket data.
-			 * @param array $order_data  Order data.
+			 * @param array  $ticket_data Ticket data.
+			 * @param array  $order_data  Order data.
+			 * @param object $attendee    Attendee object.
 			 */
 			$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 				'sc_et_checkout_complete_ticket_data_before_save_ticket',
@@ -410,29 +431,28 @@ class Checkout {
 					'attendee_id' => $attendee->id,
 					'order_id'    => $order_id,
 				],
-				$order_data
+				$order_data,
+				$attendee
 			);
 
 			Functions\add_ticket( $ticket_data );
 		}
 
-		$quantity = max( $quantity, count( $attendees ) );
-
-		if ( count( $stored_attendees ) < $quantity ) {
+		if ( ! empty( $anonymous_attendees ) ) {
 
 			// Create tickets for unnamed attendees.
 
-			$to_create = $quantity - count( $stored_attendees );
-
-			for ( $i = 0; $i < $to_create; $i++ ) {
+			foreach ( $anonymous_attendees as $attendee ) {
 
 				/**
 				 * Filter the ticket data before saving.
 				 *
 				 * @since 3.6.0
+				 * @since 3.8.0 Add attendee object to filter.
 				 *
-				 * @param array $ticket_data Ticket data.
-				 * @param array $order_data  Order data.
+				 * @param array  $ticket_data Ticket data.
+				 * @param array  $order_data  Order data.
+				 * @param object $attendee    Attendee object.
 				 */
 				$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 					'sc_et_checkout_complete_ticket_data_before_save_ticket',
@@ -441,7 +461,8 @@ class Checkout {
 						'event_date' => $event_date,
 						'order_id'   => $order_id,
 					],
-					$order_data
+					$order_data,
+					$attendee
 				);
 
 				Functions\add_ticket( $ticket_data );
@@ -474,36 +495,77 @@ class Checkout {
 		return floatval( Functions\sanitize_amount( $price ) );
 	}
 
+	/**
+	 * Create an attendee if it doesn't exist.
+	 *
+	 * @since 1.0.0
+	 * @since 3.8.0 Lint fixes and add filter to support custom attendee fields.
+	 *
+	 * @param object $attendee Attendee object.
+	 *
+	 * @return object Attendee object.
+	 */
 	private function maybe_create_attendee( $attendee ) {
 
-		// Bail if no email
+		/**
+		 * Filter the attendee object before creating an attendee.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param object $attendee Attendee object.
+		 */
+		$attendee = apply_filters(
+			'sugar_calendar_add_on_ticketing_gateways_checkout_attendee_before_create',
+			$attendee
+		);
+
+		// Bail if no email.
 		if ( empty( $attendee->email ) ) {
 			return $attendee;
 		}
 
-		// See if we already have an attendee created for this email
-		$found_attendee = Functions\get_attendees( array(
-			'number'     => 1,
-			'email'      => $attendee->email,
-			'first_name' => $attendee->first_name,
-			'last_name'  => $attendee->last_name,
-		) );
-
-		// Attendee found so use it's ID
-		if ( ! empty( $found_attendee ) ) {
-			$attendee_id = $found_attendee[ 0 ]->id;
-
-		// No attendee was found, create a new one
-		} else {
-			$attendee_id = Functions\add_attendee( array(
+		// See if we already have an attendee created for this email.
+		$found_attendee = Functions\get_attendees(
+			[
+				'number'     => 1,
 				'email'      => $attendee->email,
 				'first_name' => $attendee->first_name,
 				'last_name'  => $attendee->last_name,
-			) );
+			]
+		);
+
+		// Attendee found so use it's ID.
+		if ( ! empty( $found_attendee ) ) {
+
+			$attendee_id = $found_attendee[0]->id;
+
+		} else { // No attendee was found, create a new one.
+
+			$attendee_id = Functions\add_attendee(
+				[
+					'email'      => $attendee->email,
+					'first_name' => $attendee->first_name,
+					'last_name'  => $attendee->last_name,
+				]
+			);
 		}
 
-		// Return attendee
-		return Functions\get_attendee( $attendee_id );
+		// Get attendee object.
+		$attendee_object = Functions\get_attendee( $attendee_id );
+
+		/**
+		 * Filter the attendee object after retrieval.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param object $attendee     The attendee object.
+		 * @param int    $attendee_id  The attendee ID.
+		 */
+		return apply_filters(
+			'sugar_calendar_add_on_ticketing_gateways_checkout_attendee_after_create',
+			$attendee_object,
+			$attendee
+		);
 	}
 
 	private function send_to_gateway() {

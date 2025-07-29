@@ -50,6 +50,27 @@ class Addons extends PageAbstract {
 		add_action( 'admin_notices', [ $this, 'display_upgrade_notice' ] );
 		add_action( 'in_admin_header', [ $this, 'display_admin_subheader' ] );
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Addons page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/categories/docs/addons/',
+			[
+				'content' => 'Help',
+				'medium'  => 'addons',
+			]
+		);
 	}
 
 	/**

@@ -18,6 +18,15 @@
 			this.settings = settings;
 			this.$settingsMetabox = $( '#calendar_settings' );
 
+			let $tagDom = $( 'input#tag-name' );
+
+			if ( $tagDom.length <= 0 ) {
+				// If we're then we are editing an existing calendar.
+				$tagDom = $( 'input#name' );
+			}
+
+			this.$tagDom = $tagDom;
+
 			this.bindEvents();
 
 			// Initialize ChoiceJS dropdowns.
@@ -27,9 +36,16 @@
 			this.initColorPickers();
 		},
 
+		/**
+		 * Bind events.
+		 *
+		 * @since 3.8.0 Added auto slug Calendar name on blur.
+		 */
 		bindEvents: function () {
 
 			$( 'button.handlediv', this.$settingsMetabox ).on( 'click', this.toggleMetabox.bind( this ) );
+
+			this.$tagDom.on( 'blur', this.generateSlugFromName.bind( this ) );
 		},
 
 		initChoicesJS: function () {
@@ -49,6 +65,46 @@
 
 		toggleMetabox: function () {
 			this.$settingsMetabox.toggleClass( 'closed' );
+		},
+
+		/**
+		 * Generate slug from tag name field when it loses focus.
+		 * 
+		 * @since 3.8.0
+		 */
+		generateSlugFromName: function () {
+
+			const $tagSlug = $( '#tag-slug' );
+
+			if ( $tagSlug.val().length > 0 ) {
+				return;
+			}
+
+			$tagSlug.val( this.createSlug( this.$tagDom.val() ) );
+		},
+
+		/**
+		 * Create a URL-friendly slug from text.
+		 * 
+		 * @since 3.8.0
+		 *
+		 * @param {string} text - The text to convert to a slug
+		 *
+		 * @returns {string} The slug
+		 */
+		createSlug: function ( text ) {
+			if ( ! text ) {
+				return '';
+			}
+
+			return text
+				.toLowerCase()
+				.trim()
+				.replace( /[\s\-_]+/g, '-' )  // Replace spaces, hyphens, and underscores with single hyphen
+				.replace( /[^\w\-]+/g, '' )   // Remove all non-word characters except hyphens
+				.replace( /\-\-+/g, '-' )     // Replace multiple hyphens with single hyphen
+				.replace( /^-+/, '' )         // Remove leading hyphens
+				.replace( /-+$/, '' );        // Remove trailing hyphens
 		},
 	};
 

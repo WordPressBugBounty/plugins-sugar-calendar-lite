@@ -14,6 +14,38 @@ use Sugar_Calendar\Helpers\Helpers;
 class Speakers extends SpeakersAbstract {
 
 	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Speakers education page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/creating-and-managing-event-speakers/',
+			[
+				'content' => 'Help',
+				'medium'  => 'speakers-education',
+			]
+		);
+	}
+
+	/**
 	 * Page slug.
 	 *
 	 * @since 3.7.0
@@ -22,11 +54,7 @@ class Speakers extends SpeakersAbstract {
 	 */
 	public static function get_slug() {
 
-		$speaker_slug = defined( 'SC_SPEAKER_POST_TYPE' )
-			? SC_SPEAKER_POST_TYPE
-			: 'speakers';
-
-		$slug = sugar_calendar()->is_pro() ? "edit.php?post_type=$speaker_slug" : 'sugar-calendar-speaker';
+		$slug = 'sugar-calendar-speaker';
 
 		return esc_attr( $slug );
 	}

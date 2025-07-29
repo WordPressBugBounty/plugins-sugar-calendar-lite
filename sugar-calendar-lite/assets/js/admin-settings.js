@@ -82,6 +82,44 @@
 
 			// Initialize onChange events for sandbox toggle control.
 			this.initSandboxToggleListener();
+
+			this.maybeInitDismissEmailWpMailSmtpNotice();
+		},
+
+		/**
+		 * Initialize dismiss email WP Mail SMTP notice.
+		 *
+		 * @since 3.8.0
+		 */
+		maybeInitDismissEmailWpMailSmtpNotice: function() {
+
+			const $smtpNotice = $( '.sugar-calendar-settings__emails__wpmailsmtp__notice' ).first();
+
+			if ( $smtpNotice.length <= 0 ) {
+				return;
+			}
+
+			const $smtpDismissBtn = $smtpNotice.find( '.sugar-calendar-settings__emails__wpmailsmtp__notice__close' ).first();
+
+			if (
+				$smtpDismissBtn.length <= 0 ||
+				! $smtpDismissBtn.data( 'nonce' )
+			) {
+				return;
+			}
+
+			$smtpDismissBtn.on( 'click', ( e ) => {
+
+				$smtpNotice.hide();
+
+				$.post(
+					sugar_calendar_admin_common.ajaxurl,
+					{
+						action: 'dismiss_email_wp_mail_smtp_notice',
+						nonce: $smtpDismissBtn.data( 'nonce' ),
+					}
+				)
+			} );
 		},
 
 		initChoicesJS: function () {

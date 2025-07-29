@@ -106,6 +106,7 @@
 			background: rgba(0, 0, 0, 0.50);
 			border: 1px solid $border-color-dark-secondary;
 			color: $text-color-dark-secondary;
+			cursor: pointer;
 
 			&:hover {
 				background: $border-hover-color-dark;
@@ -232,6 +233,7 @@
 			border: 1px solid $border-color-secondary;
 			border-radius: $radius-lg;
 			color: $text-color-secondary;
+			cursor: pointer;
 			display: flex;
 			font-size: 14px;
 			font-style: normal;

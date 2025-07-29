@@ -100,7 +100,11 @@ class Feature extends FeatureAbstract {
 
 		$this->slurp( 'admin' );
 
-		( new Area() )->hooks();
+		$area = new Area();
+
+		$area->init();
+
+		$area->hooks();
 	}
 
 	/**
@@ -176,6 +180,7 @@ class Feature extends FeatureAbstract {
 		// Export.
 		require_once $dir . 'utilities/csv-export.php';
 		require_once $dir . 'export/tickets.php';
+		require_once $dir . 'export/orders.php';
 	}
 
 	/**

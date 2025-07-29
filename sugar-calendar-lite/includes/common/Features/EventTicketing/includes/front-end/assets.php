@@ -67,7 +67,7 @@ function register() {
 	wp_register_script(
 		'sc-event-ticketing-stripe',
 		Assets\get_url( 'js' ) . "/frontend/stripe{$min}.js",
-		[ 'jquery', 'sc-et-general', 'sandhills-stripe-js-v3' ],
+		[ 'jquery', 'sandhills-stripe-js-v3' ],
 		Helpers::get_asset_version()
 	);
 
@@ -85,6 +85,7 @@ function register() {
  *
  * @since 1.0.0
  * @since 3.6.0 Added localized variables.
+ * @since 3.8.0 Added script handle filter.
  */
 function enqueue() {
 
@@ -126,13 +127,34 @@ function enqueue() {
 
 	wp_enqueue_script( 'sc-et-bootstrap' );
 	wp_enqueue_script( 'sc-et-popper' );
-	wp_enqueue_script( 'sc-et-general' );
 
-	wp_enqueue_script( 'sc-event-ticketing-stripe' );
+	/**
+	 * Filter the script handle to use for event ticketing.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $handle  The script handle.
+	 * @param Event  $event   The event object.
+	 */
+	$script_handle = apply_filters( 'sc_et_frontend_script_handle', 'sc-et-general', $event );
+
+	wp_enqueue_script( $script_handle );
+
+	/**
+	 * Filter the script handle to use for event ticketing Stripe.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $handle  The script handle.
+	 * @param Event  $event   The event object.
+	 */
+	$stripe_script_handle = apply_filters( 'sc_et_frontend_stripe_script_handle', 'sc-event-ticketing-stripe', $event );
+
+	wp_enqueue_script( $stripe_script_handle );
 	wp_enqueue_script( 'sandhills-stripe-js-v3' );
 
 	wp_localize_script(
-		'sc-event-ticketing-stripe',
+		$stripe_script_handle,
 		'sc_event_ticket_stripe_vars',
 		/**
 		 * Filter the Stripe variables to be localized.
@@ -152,19 +174,64 @@ function enqueue() {
 }
 
 /**
- * Localize scripts
+ * Localize scripts.
  *
  * @since 1.0.1
+ * @since 3.8.0 Added script handle filter.
  */
 function localize() {
-	wp_localize_script(
-		'sc-et-general',
-		'sc_event_ticket_vars',
-		array(
+
+	// Bail if not Event or Receipt page.
+	if ( ! is_singular( sugar_calendar_get_event_post_type_id() ) && ! is_page( Settings\get_setting( 'receipt_page' ) ) ) {
+		return;
+	}
+
+	/**
+	 * Filter the Event object to be used in the enqueueing of the Event Ticketing assets.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param \Sugar_Calendar\Event $event The Event object.
+	 */
+	$event = apply_filters(
+		'sugar_calendar_addon_ticketing_enqueue_event_object',
+		sugar_calendar_get_event_by_object( get_the_ID() )
+	);
+
+	/**
+	 * Filter the script handle to use for event ticketing.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $handle  The script handle.
+	 * @param Event  $event   The event object.
+	 */
+	$script_handle = apply_filters( 'sc_et_frontend_script_handle', 'sc-et-general', $event );
+
+	/**
+	 * Filter the sc_event_ticket_vars variables to be localized.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param array  $vars          Variables to be available in the frontend.
+	 * @param Event  $event         The event object.
+	 * @param string $script_handle The script handle.
+	 */
+	$sc_event_ticket_vars = apply_filters(
+		'sc_et_frontend_script_vars',
+		[
 			'ajaxurl'           => admin_url( 'admin-ajax.php' ),
 			'test_mode'         => Functions\is_sandbox(),
 			'publishable_key'   => Functions\get_stripe_publishable_key(),
-			'qty_limit_reached' => esc_html__( 'You have reached the maximum number of tickets available to be purchased. No more tickets are available.', 'sugar-calendar-lite' )
-		)
+			'qty_limit_reached' => esc_html__( 'You have reached the maximum number of tickets available to be purchased. No more tickets are available.', 'sugar-calendar-lite' ),
+		],
+		$event,
+		$script_handle
+	);
+
+	wp_localize_script(
+		$script_handle,
+		'sc_event_ticket_vars',
+		$sc_event_ticket_vars
 	);
 }

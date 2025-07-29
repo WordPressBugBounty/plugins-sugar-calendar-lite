@@ -83,7 +83,7 @@ class SugarCalendarIcs extends Importer {
 				sprintf(
 					/* translators: %s: Sugar Calendar Pro pricing page URL. */
 					__(
-						'Import events from your Apple, Google, Microsoft, or other calendars, by pasting your ICS URL below. <a target="_blank" href="%1$s">Upgrade to Sugar Calendar Pro.</a>.',
+						'Import events from your Apple, Google, Microsoft, or other calendars, by pasting your ICS URL below. <a target="_blank" href="%1$s">Upgrade to Sugar Calendar Pro</a>.',
 						'sugar-calendar-lite'
 					),
 					$description_utm

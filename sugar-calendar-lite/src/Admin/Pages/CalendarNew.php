@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Pages;
 use stdClass;
 use Sugar_Calendar\Helpers\UI;
 use WP_Term;
+use Sugar_Calendar\Helpers\Helpers;
 
 /**
  * New Calendar page.
@@ -21,6 +22,38 @@ class CalendarNew extends CalendarAbstract {
 	 * @var WP_Term
 	 */
 	protected $term;
+
+	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the add calendar page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/organizing-events-with-calendars/#Creating_a_Calendar',
+			[
+				'content' => 'Help',
+				'medium'  => 'add-new-calendar',
+			]
+		);
+	}
 
 	/**
 	 * Page slug.
@@ -109,7 +142,7 @@ class CalendarNew extends CalendarAbstract {
 				'name'        => 'tag-name',
 				'id'          => 'tag-name',
 				'value'       => $this->term->name,
-				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar-lite' ),
+				'placeholder' => esc_html__( 'Name', 'sugar-calendar-lite' ),
 				'required'    => true,
 			],
 			true

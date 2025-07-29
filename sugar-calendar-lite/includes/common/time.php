@@ -435,7 +435,7 @@ function sugar_calendar_time_dropdown( $args = [] ) {
 		'selected'    => '',
 		'multi'       => false,
 		'echo'        => true,
-		'width'       => 55,
+		'width'       => 66,
 	] );
 
 	// Is multi?

@@ -82,7 +82,7 @@ class Stripe extends Checkout {
 	 * @since 3.6.1
 	 */
 	public function display_checkout_error() {
-		
+
 		if ( empty( $_GET['error_code'] ) ) {
 			return;
 		}
@@ -124,7 +124,7 @@ class Stripe extends Checkout {
 			case self::ERROR_MISSING_EVENT:
 				$error_msg = __( 'Invalid Event!', 'sugar-calendar-lite' );
 				break;
-			
+
 			default:
 				// We don't want to provide too much information.
 				$error_msg = __( 'Unable to process your payment! Please try again.', 'sugar-calendar-lite' );
@@ -139,13 +139,79 @@ class Stripe extends Checkout {
 	 *
 	 * @since 3.6.0
 	 * @since 3.6.1 Support free tickets.
+	 * @since 3.8.0 Support multiple tickets from cart data.
 	 */
 	public function ajax_fetch_data() {
 
 		check_ajax_referer( Checkout::NONCE_KEY, 'nonce' );
 
+		// If no event id, return.
+		if ( empty( $_POST['event_id'] ) ) {
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Missing event ID.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		// Get event.
+		$event_id = absint( $_POST['event_id'] );
+
+		/**
+		 * Filter to get the event object.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param Event  $event    The event object.
+		 * @param int    $event_id The event ID.
+		 */
+		$event = apply_filters(
+			'sugar_calendar_add_on_ticketing_gateways_stripe',
+			sugar_calendar_get_event( $event_id ),
+			$event_id
+		);
+
+		if ( empty( $event ) ) {
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Event not found!', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		/**
+		 * Check if multiple tickets are enabled.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param bool   $is_multiple_tickets Whether multiple tickets are enabled.
+		 * @param Event  $event               The event object.
+		 * @param int    $post_id             The post ID.
+		 */
+		$is_multiple_tickets = apply_filters( 'sc_et_is_multiple_tickets', false, $event, $event->object_id );
+
+		if ( $is_multiple_tickets ) {
+
+			/**
+			 * Action to handle multiple tickets.
+			 *
+			 * @since 3.8.0
+			 *
+			 * @param Event  $event The event object.
+			 * @param Stripe $this  The Stripe object.
+			 */
+			do_action( 'sugar_calendar_add_on_ticketing_gateways_stripe_multiple_tickets', $event, $this );
+
+			// Do not continue, since we should have ran the process for multiple tickets.
+			// If we're here, then it means that the process for multiple tickets is not installed.
+			wp_send_json_error(
+				[
+					'error_msg' => esc_html__( 'Invalid data.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
 		if (
-			empty( $_POST['event_id'] ) ||
 			empty( $_POST['quantity'] ) ||
 			empty( $_POST['email'] )
 		) {
@@ -156,7 +222,6 @@ class Stripe extends Checkout {
 			);
 		}
 
-		$event_id = absint( $_POST['event_id'] );
 		$quantity = absint( $_POST['quantity'] );
 
 		if ( empty( $event_id ) || empty( $quantity ) ) {
@@ -167,24 +232,14 @@ class Stripe extends Checkout {
 			);
 		}
 
-		$event = sugar_calendar_get_event( $event_id );
-
-		if ( empty( $event ) ) {
-			wp_send_json_error(
-				[
-					'error_msg' => esc_html__( 'Event not found!', 'sugar-calendar-lite' ),
-				]
-			);
-		}
-
 		$name = '';
 
 		if ( ! empty( $_POST['first_name'] ) ) {
-			$name = sanitize_text_field( $_POST['first_name'] );
+			$name = sanitize_text_field( wp_unslash( $_POST['first_name'] ) );
 		}
 
 		if ( ! empty( $_POST['last_name'] ) ) {
-			$name .= ' ' . sanitize_text_field( $_POST['last_name'] );
+			$name .= ' ' . sanitize_text_field( wp_unslash( $_POST['last_name'] ) );
 		}
 
 		$ticket_price = $this->get_ticket_price( $event_id );
@@ -202,7 +257,7 @@ class Stripe extends Checkout {
 			$this->get_amount( $event_id, $quantity ),
 			[
 				'name'  => trim( $name ),
-				'email' => sanitize_email( $_POST['email'] ),
+				'email' => sanitize_email( wp_unslash( $_POST['email'] ) ),
 			]
 		);
 
@@ -477,7 +532,7 @@ class Stripe extends Checkout {
 
 		$retrieve = false;
 		$is_valid = false;
-		
+
 		try {
 			$retrieve = \Stripe\PaymentIntent::retrieve( $intent );
 

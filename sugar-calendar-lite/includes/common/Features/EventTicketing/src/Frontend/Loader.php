@@ -105,6 +105,7 @@ class Loader {
 		 * Filters the "Buy Now" text.
 		 *
 		 * @since 3.1.0
+		 * @since 3.8.0 Added filter for the "Buy Now" button.
 		 *
 		 * @param string $label The "Buy Now" label.
 		 * @param Event  $event The event object.
@@ -150,12 +151,31 @@ class Loader {
 					]
 				);
 			} else {
-				echo wp_kses(
+
+				/**
+				 * Filter the template for the single event buy now button.
+				 *
+				 * @since 3.8.0
+				 *
+				 * @param string $btn_template_single_event_buy_now The template for the single event buy now button.
+				 * @param Event  $event                             The event object.
+				 * @param string $svg                               The SVG icon.
+				 * @param string $buy_now_label                     The "Buy Now" label.
+				 */
+				$btn_single_event_buy_now = apply_filters(
+					'sugar_calendar_add_on_ticketing_frontend_loader_single_event_buy_now_button_template',
 					sprintf(
 						'<button data-toggle="modal" data-target="#sc-event-ticketing-modal" class="sugar_calendar_event_ticketing_frontend_single_event__buy_now">%1$s %2$s</button>',
 						$svg,
 						$buy_now_label
 					),
+					$event,
+					$svg,
+					$buy_now_label
+				);
+
+				echo wp_kses(
+					$btn_single_event_buy_now,
 					[
 						'button' => [
 							'data-target' => [],

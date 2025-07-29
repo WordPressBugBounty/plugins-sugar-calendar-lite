@@ -456,8 +456,12 @@ class DashboardWidget {
 			return $event_data;
 		}
 
+		// Get ticket limit capacity.
+		$ticket_limit_capacity = absint( get_event_meta( $event->id, 'ticket_limit_capacity', true ) );
+		$ticket_limit_capacity = $ticket_limit_capacity === 1;
+
 		// Get ticket total.
-		$event_data['ticket_total'] = intval( get_event_meta( $event->id, 'ticket_quantity', true ) );
+		$event_data['ticket_total'] = $ticket_limit_capacity ? intval( get_event_meta( $event->id, 'ticket_quantity', true ) ) : 0;
 
 		// Get tickets purchased.
 		$event_data['tickets_purchased'] = max( 0, count_tickets( [ 'event_id' => $event->id ] ) );
@@ -485,10 +489,10 @@ class DashboardWidget {
 	 */
 	public function is_event_tickets_enabled( $event_id ) {
 
-		$tickets_enabled  = boolval( intval( get_event_meta( $event_id, 'tickets', true ) ) );
-		$tickets_quantity = intval( get_event_meta( $event_id, 'ticket_quantity', true ) );
+		$tickets_enabled = boolval( intval( get_event_meta( $event_id, 'tickets', true ) ) );
+		$tickets_price   = intval( get_event_meta( $event_id, 'ticket_price', true ) );
 
-		return $tickets_enabled && $tickets_quantity > 0;
+		return $tickets_enabled && $tickets_price > 0;
 	}
 
 	/**

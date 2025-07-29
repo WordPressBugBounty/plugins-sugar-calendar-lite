@@ -64,6 +64,13 @@ class Loader {
 			Helpers::get_asset_version()
 		);
 
+		wp_register_style(
+			'sugar-calendar-frontend-fontawesome',
+			SC_PLUGIN_ASSETS_URL . 'css/font-awesome-min.css',
+			[],
+			'6.5.0'
+		);
+
 		wp_enqueue_style( 'sc-frontend-single-event' );
 	}
 

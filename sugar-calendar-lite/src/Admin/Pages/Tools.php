@@ -24,6 +24,7 @@ class Tools extends PageTabAbstract {
 
 		add_action( 'admin_init', [ $this, 'init' ] );
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
 	}
 
 	/**

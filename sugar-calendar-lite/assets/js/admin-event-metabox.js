@@ -12,6 +12,7 @@
 		 * Initialize.
 		 *
 		 * @since 3.0.0
+		 * @since 3.8.0 Added Help URL context.
 		 */
 		init: function ( settings ) {
 
@@ -33,6 +34,19 @@
 			this.$timezones = $( '.sugar-calendar-metabox__field-row--time-zone, .event-time-zone, .event-time', this.$el );
 			this.$submitButton = $( '#publish' );
 			this.$tagsSelect = $( '.sugar-calendar-column-tags-form select' );
+			this.$helpUrl = $( '#sugar-calendar-header-help' );
+			this.helpUrl = false;
+
+			const scHelpHref = this.$helpUrl.attr( 'href' );
+
+			if ( scHelpHref && scHelpHref.length > 0 ) {
+				try {
+					this.helpUrl = new URL( scHelpHref );
+				} catch ( error ) {
+					this.helpUrl = false;
+				}
+			}
+
 			// Bind events.
 			this.bindEvents();
 
@@ -51,6 +65,14 @@
 			this.$submitButton.on( 'click', this.validateDates.bind( this ) );
 		},
 
+		/**
+		 * On section button click.
+		 *
+		 * @since 3.0.0
+		 * @since 3.8.0 Update the Help URL's fragment based on the section.
+		 *
+		 * @param {Event} e Event object.
+		 */
 		onSectionButtonClick: function ( e ) {
 
 			const $button = $( e.currentTarget );
@@ -62,6 +84,17 @@
 
 			$button.addClass( 'selected' );
 			$section.addClass( 'selected' );
+
+			if ( this.helpUrl ) {
+				if ( sugar_calendar_admin_event_meta_box.help_url[ id ] ) {
+					this.helpUrl.hash = sugar_calendar_admin_event_meta_box.help_url[ id ];
+				} else {
+					this.helpUrl.hash = '';
+				}
+
+				// Update the Help URL.
+				this.$helpUrl.attr( 'href', this.helpUrl.toString() );
+			}
 		},
 
 		initChoicesJS: function () {

@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.8
-Stable tag:        3.7.3
+Stable tag:        3.8.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,17 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.8.0 - 2025-07-29 =
+- Added: Screen Options in various admin pages for better management.
+- Changed: Upcoming Events block - ongoing events will be included.
+- Changed: Replaced "Help" URL with correct doc pages.
+- Fixed: Design consistency and quality of life improvements in the Admin side.
+- Fixed: Blocks date does not reflect the selected timezone which causes some edge case issues.
+- Fixed: Events in the Admin Calendar (Month view) not sorted chronologically.
+- Fixed: PHP error when sending ticket email for a deleted event.
+- Fixed: "Events Per Page" field in Event List block is overridden automatically by "Maximum Events To Show".
+- Fixed: Bug fixes for the ticketing admin pages.
+
 = 3.7.3 - 2025-06-12 =
 - Fixed: Fatal error on TEC Tags migration
 - Fixed: Upcoming events timezone issue

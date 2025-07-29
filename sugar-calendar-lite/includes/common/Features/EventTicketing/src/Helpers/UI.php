@@ -53,6 +53,7 @@ class UI {
 	 * Render a tab navigation menu.
 	 *
 	 * @since 1.2.0
+	 * @since 3.8.0 Added class support.
 	 *
 	 * @param array  $tabs     List of tabs.
 	 * @param string $selected Selected tab id.
@@ -106,9 +107,22 @@ class UI {
 
 			<?php foreach ( $tabs as $nav_id => $nav ) : ?>
 
-                <li>
-                    <a href="<?php echo esc_url( $nav['url'] ); ?>"
-                       class="<?php echo esc_attr( ( $selected === $nav_id ) ? 'active' : '' ); ?>"><?php echo esc_html( $nav['name'] ); ?></a>
+				<?php
+					// Class support for the link.
+					$link_classes  = isset( $nav['class'] ) ? $nav['class'] : '';
+					$link_classes .= ( $selected === $nav_id ) ? ' active' : '';
+				?>
+
+                <li
+					<?php echo isset( $nav['wrapper_class'] ) ? 'class="' . esc_attr( $nav['wrapper_class'] ) . '"' : ''; ?>
+				>
+                    <a
+						href="<?php echo esc_url( $nav['url'] ); ?>"
+						<?php echo isset( $nav['id'] ) ? 'id="' . esc_attr( $nav['id'] ) . '"' : ''; ?>
+						class="<?php echo esc_attr( $link_classes ); ?>"
+					>
+						<?php echo esc_html( $nav['name'] ); ?>
+					</a>
                 </li>
 
 			<?php endforeach; ?>
@@ -487,6 +501,7 @@ class UI {
 					esc_html__( 'On', 'sugar-calendar-lite' ),
 					esc_html__( 'Off', 'sugar-calendar-lite' ),
 				],
+				'is_multiple'   => false,
 			]
 		);
 
@@ -496,7 +511,7 @@ class UI {
 			$id = "sugar-calendar-setting-{$id}";
 		}
 
-		$name = sanitize_key( $args['name'] );
+		$name = $args['is_multiple'] ? $args['name'] : sanitize_key( $args['name'] );
 
 		if ( ! empty( $name ) && ! $bare ) {
 			$name = "sugar-calendar[$name]";

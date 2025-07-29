@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\Tools\Importers;
+use Sugar_Calendar\Helpers as BaseHelper;
 
 /**
  * Calendar Import Tools tab.
@@ -21,6 +22,26 @@ class ToolsImportTab extends Tools {
 		parent::hooks();
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Tools page -> Import tab.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return BaseHelper\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/importing-and-exporting-events/#Importing_Events',
+			[
+				'content' => 'Help',
+				'medium'  => 'tools-import',
+			]
+		);
 	}
 
 	/**

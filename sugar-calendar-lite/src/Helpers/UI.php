@@ -38,15 +38,31 @@ class UI {
 	 */
 	public static function header() {
 
+		/**
+		 * Filter the help URL.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param string $help_url The help URL.
+		 */
+		$help_url = apply_filters(
+			'sugar_calendar_helpers_ui_help_url',
+			Helpers::get_utm_url(
+				'https://sugarcalendar.com/docs/',
+				[
+					'content' => 'Help',
+				]
+			)
+		);
 		?>
-        <div id="sugar-calendar-header" class="sugar-calendar-header">
-            <img class="sugar-calendar-header-logo"
-                 src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
-                 alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar-lite' ); ?>"/>
-            <a href="<?php echo esc_url( Helpers::get_utm_url( 'https://sugarcalendar.com/docs/', [ 'content' => 'Help' ] ) ); ?>" target="_blank" id="sugar-calendar-header-help">
-				<?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?>
-            </a>
-        </div>
+		<div id="sugar-calendar-header" class="sugar-calendar-header">
+			<img class="sugar-calendar-header-logo"
+				src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
+				alt="<?php esc_attr_e( 'Sugar Calendar Logo', 'sugar-calendar-lite' ); ?>"/>
+				<a href="<?php echo esc_url( $help_url ); ?>" target="_blank" id="sugar-calendar-header-help">
+					<?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?>
+				</a>
+		</div>
 		<?php
 	}
 
@@ -91,7 +107,7 @@ class UI {
 		do_action( 'sugar_calendar_admin_nav_before_wrapper', $tabs, $selected ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 		?>
 
-        <ul class="sugar-calendar-admin-tabs">
+		<ul class="sugar-calendar-admin-tabs">
 			<?php
 
 			/**
@@ -107,14 +123,14 @@ class UI {
 
 			<?php foreach ( $tabs as $nav_id => $nav ) : ?>
 
-                <li>
-                    <a href="<?php echo esc_url( $nav['url'] ); ?>"
-                       class="<?php echo esc_attr( ( $selected === $nav_id ) ? 'active' : '' ); ?>"><?php echo esc_html( $nav['name'] ); ?></a>
-                </li>
+				<li>
+					<a href="<?php echo esc_url( $nav['url'] ); ?>"
+					   class="<?php echo esc_attr( ( $selected === $nav_id ) ? 'active' : '' ); ?>"><?php echo esc_html( $nav['name'] ); ?></a>
+				</li>
 
 			<?php endforeach; ?>
 
-        </ul>
+		</ul>
 
 		<?php
 		/**
@@ -176,19 +192,19 @@ class UI {
 		}
 		?>
 
-        <div id="<?php echo esc_attr( $row_id ); ?>" class="<?php echo esc_attr( $classes ); ?>">
+		<div id="<?php echo esc_attr( $row_id ); ?>" class="<?php echo esc_attr( $classes ); ?>">
 
 			<?php if ( ! empty( $args['label'] ) ) : ?>
 
-                <span class="sugar-calendar-setting-label">
-                    <label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $args['label'] ); ?></label>
-                </span>
+				<span class="sugar-calendar-setting-label">
+					<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $args['label'] ); ?></label>
+				</span>
 
 			<?php endif; ?>
 
-            <span class="sugar-calendar-setting-field"><?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			<span class="sugar-calendar-setting-field"><?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 
-        </div>
+		</div>
 
 		<?php
 	}
@@ -206,7 +222,7 @@ class UI {
 
 		<?php if ( ! empty( $args['description'] ) ) : ?>
 
-            <p class="desc"><?php echo wp_kses_post( $args['description'] ); ?></p>
+			<p class="desc"><?php echo wp_kses_post( $args['description'] ); ?></p>
 
 		<?php endif; ?>
 
@@ -273,14 +289,14 @@ class UI {
 
 		<?php if ( $choicejs ) : ?>
 
-            <span class="choicesjs-select-wrap">
+			<span class="choicesjs-select-wrap">
 
 		<?php endif; ?>
 
-        <select name="<?php echo esc_attr( $name ); ?>"
-                id="<?php echo esc_attr( $id ); ?>"
-                class="<?php echo sanitize_html_class( $class ); ?>"
-                <?php echo $multiple ? 'multiple' : ''; ?>>
+		<select name="<?php echo esc_attr( $name ); ?>"
+				id="<?php echo esc_attr( $id ); ?>"
+				class="<?php echo sanitize_html_class( $class ); ?>"
+				<?php echo $multiple ? 'multiple' : ''; ?>>
 
 			<?php foreach ( $options as $option_value => $option_label ) : ?>
 
@@ -292,17 +308,17 @@ class UI {
 				}
 				?>
 
-                <option value="<?php echo esc_attr( $option_value ); ?>"
-                    <?php disabled( ! (bool) $option_enabled ); ?>
+				<option value="<?php echo esc_attr( $option_value ); ?>"
+					<?php disabled( ! (bool) $option_enabled ); ?>
 					<?php echo in_array( $option_value, $value ) ? 'selected' : ''; ?>><?php echo esc_html( $option_label ); ?></option>
 
 			<?php endforeach; ?>
 
-        </select>
+		</select>
 
 		<?php if ( $choicejs ) : ?>
 
-            </span>
+			</span>
 
 		<?php endif; ?>
 
@@ -356,14 +372,14 @@ class UI {
 		ob_start();
 		?>
 
-        <input type="number"
-               name="<?php echo esc_attr( $name ); ?>"
-               value="<?php echo esc_attr( $value ); ?>"
-               id="<?php echo esc_attr( $id ); ?>"
-               inputMode="<?php echo esc_attr( $input_mode ); ?>"
-               step="<?php echo esc_attr( $step ); ?>"
-               min="<?php echo esc_attr( $min ); ?>"
-               max="<?php echo esc_attr( $max ); ?>"/>
+		<input type="number"
+			   name="<?php echo esc_attr( $name ); ?>"
+			   value="<?php echo esc_attr( $value ); ?>"
+			   id="<?php echo esc_attr( $id ); ?>"
+			   inputMode="<?php echo esc_attr( $input_mode ); ?>"
+			   step="<?php echo esc_attr( $step ); ?>"
+			   min="<?php echo esc_attr( $min ); ?>"
+			   max="<?php echo esc_attr( $max ); ?>"/>
 
 		<?php
 		self::field_description( $args );
@@ -417,17 +433,17 @@ class UI {
 			$date     = sugar_calendar_format_date_i18n( $format, null, $timezone );
 			?>
 
-            <span class="sugar-calendar-settings-field-radio-wrapper">
-                <input type="radio"
-                       name="<?php echo esc_attr( $name ); ?>"
-                       id="<?php echo esc_attr( $id ); ?>_<?php echo esc_attr( $i ); ?>"
-                       value="<?php echo esc_attr( $format ); ?>"
-                    <?php checked( $format, $value ); ?>>
-                <label for="<?php echo esc_attr( $id ); ?>_<?php echo esc_attr( $i ); ?>">
-                    <span data-format-i18n><?php echo esc_html( $date ); ?></span>
-                    <code><?php echo esc_html( $format ); ?></code>
-                </label>
-            </span>
+			<span class="sugar-calendar-settings-field-radio-wrapper">
+				<input type="radio"
+					   name="<?php echo esc_attr( $name ); ?>"
+					   id="<?php echo esc_attr( $id ); ?>_<?php echo esc_attr( $i ); ?>"
+					   value="<?php echo esc_attr( $format ); ?>"
+					<?php checked( $format, $value ); ?>>
+				<label for="<?php echo esc_attr( $id ); ?>_<?php echo esc_attr( $i ); ?>">
+					<span data-format-i18n><?php echo esc_html( $date ); ?></span>
+					<code><?php echo esc_html( $format ); ?></code>
+				</label>
+			</span>
 
 			<?php $i++; ?>
 
@@ -438,26 +454,26 @@ class UI {
 		$looks_like     = sugar_calendar_format_date_i18n( $value, null, $timezone );
 		?>
 
-        <span class="sugar-calendar-settings-field-radio-wrapper">
-            <input type="radio"
-                   name="<?php echo esc_attr( $name ); ?>"
-                   id="<?php echo esc_attr( $id ); ?>_custom"
-                   value="custom" <?php checked( $custom_checked ); ?>
-                   data-custom-option/>
-            <label for="<?php echo esc_attr( $id ); ?>_custom"><?php esc_html_e( 'Custom', 'sugar-calendar-lite' ); ?></label>
-            <input type="text"
-                   name="<?php echo esc_attr( $name ); ?>"
-                   id="<?php echo esc_attr( $id ); ?>_custom_format"
-                   class="sugar-calendar-custom-date-time-format"
-                   value="<?php echo esc_attr( $value ); ?>"
-                   data-custom-field/>
-        </span>
+		<span class="sugar-calendar-settings-field-radio-wrapper">
+			<input type="radio"
+				   name="<?php echo esc_attr( $name ); ?>"
+				   id="<?php echo esc_attr( $id ); ?>_custom"
+				   value="custom" <?php checked( $custom_checked ); ?>
+				   data-custom-option/>
+			<label for="<?php echo esc_attr( $id ); ?>_custom"><?php esc_html_e( 'Custom', 'sugar-calendar-lite' ); ?></label>
+			<input type="text"
+				   name="<?php echo esc_attr( $name ); ?>"
+				   id="<?php echo esc_attr( $id ); ?>_custom_format"
+				   class="sugar-calendar-custom-date-time-format"
+				   value="<?php echo esc_attr( $value ); ?>"
+				   data-custom-field/>
+		</span>
 
-        <p class="desc">
-            <strong><?php esc_html_e( 'Looks Like:', 'sugar-calendar-lite' ); ?></strong>
-            <span data-format-example><?php echo esc_html( $looks_like ); ?></span>
-            <span class="spinner" data-spinner></span>
-        </p>
+		<p class="desc">
+			<strong><?php esc_html_e( 'Looks Like:', 'sugar-calendar-lite' ); ?></strong>
+			<span data-format-example><?php echo esc_html( $looks_like ); ?></span>
+			<span class="spinner" data-spinner></span>
+		</p>
 
 		<?php
 		self::field_wrapper( $args, ob_get_clean() );
@@ -511,16 +527,16 @@ class UI {
 		ob_start();
 		?>
 
-        <span class="sugar-calendar-toggle-control">
+		<span class="sugar-calendar-toggle-control">
 			<input type="checkbox"
-                   id="<?php echo esc_attr( $id ); ?>"
-                   name="<?php echo esc_attr( $name ); ?>"
-                   value="1"
-                <?php disabled( $disabled ); ?>
+				   id="<?php echo esc_attr( $id ); ?>"
+				   name="<?php echo esc_attr( $name ); ?>"
+				   value="1"
+				<?php disabled( $disabled ); ?>
 				<?php checked( $value ); ?>>
 			<label class="sugar-calendar-toggle-control-icon" for="<?php echo esc_attr( $id ); ?>"></label>
-            <label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-on" for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $toggle_label_on ); ?></label>
-            <label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off" for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $toggle_label_off ); ?></label>
+			<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-on" for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $toggle_label_on ); ?></label>
+			<label class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off" for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $toggle_label_off ); ?></label>
 		</span>
 
 		<?php
@@ -616,11 +632,11 @@ class UI {
 		ob_start();
 		?>
 
-        <span class="choicesjs-select-wrap">
+		<span class="choicesjs-select-wrap">
 
-            <?php sugar_calendar_timezone_dropdown( $args ); ?>
+			<?php sugar_calendar_timezone_dropdown( $args ); ?>
 
-        </span>
+		</span>
 
 		<?php
 		self::field_description( $args );
@@ -663,7 +679,7 @@ class UI {
 		ob_start();
 		?>
 
-        <h4 id="<?php echo esc_attr( $id ); ?>"><?php echo wp_kses_post( $args['title'] ); ?></h4>
+		<h4 id="<?php echo esc_attr( $id ); ?>"><?php echo wp_kses_post( $args['title'] ); ?></h4>
 
 		<?php
 		self::field_description( $args );
@@ -721,13 +737,13 @@ class UI {
 		ob_start();
 		?>
 
-        <input type="<?php echo esc_attr( $type ); ?>"
-               name="<?php echo esc_attr( $name ); ?>"
-               value="<?php echo esc_attr( $value ); ?>"
-               id="<?php echo esc_attr( $id ); ?>"
-               placeholder="<?php echo esc_attr( $placeholder ); ?>"
+		<input type="<?php echo esc_attr( $type ); ?>"
+			   name="<?php echo esc_attr( $name ); ?>"
+			   value="<?php echo esc_attr( $value ); ?>"
+			   id="<?php echo esc_attr( $id ); ?>"
+			   placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			<?php echo( $args['required'] ? esc_attr( 'required' ) : '' ); ?>
-        />
+		/>
 
 		<?php
 
@@ -794,11 +810,11 @@ class UI {
 		ob_start();
 		?>
 
-        <textarea name="<?php echo esc_attr( $name ); ?>"
-                  id="<?php echo esc_attr( $id ); ?>"
-                  cols="<?php echo esc_attr( $cols ); ?>"
-                  rows="<?php echo esc_attr( $rows ); ?>"
-                  placeholder="<?php echo esc_attr( $placeholder ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<textarea name="<?php echo esc_attr( $name ); ?>"
+				  id="<?php echo esc_attr( $id ); ?>"
+				  cols="<?php echo esc_attr( $cols ); ?>"
+				  rows="<?php echo esc_attr( $rows ); ?>"
+				  placeholder="<?php echo esc_attr( $placeholder ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
 
 		<?php
 
@@ -887,26 +903,26 @@ class UI {
 
 		<?php if ( empty( $link ) ) : ?>
 
-            <button
-                    type="<?php echo esc_attr( $submit ); ?>"
-                    name="<?php echo esc_attr( $name ); ?>"
-                    id="<?php echo esc_attr( $id ); ?>"
-                    class="<?php echo esc_attr( $class ); ?>"
+			<button
+					type="<?php echo esc_attr( $submit ); ?>"
+					name="<?php echo esc_attr( $name ); ?>"
+					id="<?php echo esc_attr( $id ); ?>"
+					class="<?php echo esc_attr( $class ); ?>"
 				<?php if ( ! empty( $args['data'] ) ) : ?>
 					<?php foreach ( $args['data'] as $key => $value ) : ?>
-                        data-<?php echo esc_attr( $key ); ?>="<?php echo esc_attr( $value ); ?>"
+						data-<?php echo esc_attr( $key ); ?>="<?php echo esc_attr( $value ); ?>"
 					<?php endforeach; ?>
 				<?php endif; ?>
-            ><?php echo esc_html( $text ); ?></button>
+			><?php echo esc_html( $text ); ?></button>
 
 		<?php else : ?>
 
-            <a
-                    href="<?php echo esc_url( $link ); ?>"
-                    id="<?php echo esc_attr( $id ); ?>"
-                    target="<?php echo esc_attr( $target ); ?>"
-                    class="<?php echo esc_attr( $class ); ?>"
-            ><?php echo esc_html( $text ); ?></a>
+			<a
+					href="<?php echo esc_url( $link ); ?>"
+					id="<?php echo esc_attr( $id ); ?>"
+					target="<?php echo esc_attr( $target ); ?>"
+					class="<?php echo esc_attr( $class ); ?>"
+			><?php echo esc_html( $text ); ?></a>
 
 		<?php endif; ?>
 		<?php
@@ -1064,5 +1080,84 @@ class UI {
 	public static function get_inline_icon( string $name ): string {
 
 		return sprintf( '<i class="sugar-calendar-icon sugar-calendar-icon--%1$s" aria-hidden="true"></i>', esc_attr( $name ) );
+	}
+
+	/**
+	 * Output the table screen options.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param array $args Arguments.
+	 * - string table_name: The identifier name of the table.
+	 * - array table_columns: The default columns of the table.
+	 * - array table_required_columns: The required columns of the table that cannot be hidden.
+	 */
+	public static function table_screen_options( $args ) {
+
+		if ( empty( $args['table_name'] ) || empty( $args['table_columns'] ) ) {
+			return;
+		}
+
+		$table_name             = $args['table_name'];
+		$table_columns          = $args['table_columns'];
+		$table_required_columns = empty( $args['table_required_columns'] ) ? [] : $args['table_required_columns'];
+
+		$active_columns = get_user_meta( get_current_user_id(), $table_name . '_active_columns', true );
+		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $table_columns );
+
+		?>
+		<div class="sugar-calendar-table-screen-options">
+			<button id="sugar-calendar-table-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button" title="<?php esc_attr_e( 'Change columns to display', 'sugar-calendar-lite' ); ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 19">
+					<path d="M18,11l-2.18,0c-0.17,0.7 -0.44,1.35 -0.81,1.93l1.54,1.54l-2.1,2.1l-1.54,-1.54c-0.58,0.36 -1.23,0.63 -1.91,0.79l0,2.18l-3,0l0,-2.18c-0.68,-0.16 -1.33,-0.43 -1.91,-0.79l-1.54,1.54l-2.12,-2.12l1.54,-1.54c-0.36,-0.58 -0.63,-1.23 -0.79,-1.91l-2.18,0l0,-2.97l2.17,0c0.16,-0.7 0.44,-1.35 0.8,-1.94l-1.54,-1.54l2.1,-2.1l1.54,1.54c0.58,-0.37 1.24,-0.64 1.93,-0.81l0,-2.18l3,0l0,2.18c0.68,0.16 1.33,0.43 1.91,0.79l1.54,-1.54l2.12,2.12l-1.54,1.54c0.36,0.59 0.64,1.24 0.8,1.94l2.17,0l0,2.97Zm-8.5,1.5c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3Z"></path>
+				</svg>
+			</button>
+
+			<div class="sugar-calendar-table-screen-options-menu" style="display: none;">
+				<form action="" method="post">
+
+					<?php wp_nonce_field( 'sugar-calendar-table-active-columns', 'sugar-calendar-table-active-columns-nonce' ); ?>
+
+					<input type="hidden" name="sugar-calendar-table-active-columns[table_name]" value="<?php echo esc_attr( $table_name ); ?>">
+
+					<fieldset>
+						<legend><?php esc_html_e( 'Columns', 'sugar-calendar-lite' ); ?></legend>
+						<?php
+						foreach ( $table_columns as $column_key => $column_display_name ) :
+							// Skip if column is cb (checkbox).
+							if ( $column_key === 'cb' ) {
+								continue;
+							}
+
+							$is_required = in_array( $column_key, $table_required_columns, true );
+							?>
+
+							<label>
+								<?php if ( $is_required ) : ?>
+
+									<input type="checkbox" checked disabled>
+
+								<?php else : ?>
+
+									<input
+										type="checkbox"
+										name="sugar-calendar-table-active-columns[columns][]"
+										value="<?php echo esc_attr( $column_key ); ?>"
+										<?php checked( in_array( $column_key, $active_columns, true ) ); ?>
+									>
+								<?php endif; ?>
+
+								<?php echo esc_html( wp_strip_all_tags( $column_display_name ) ); ?>
+							</label>
+						<?php endforeach; ?>
+					</fieldset>
+
+					<p class="submit">
+						<button type="submit" name="sugar-calendar-table-active-columns-submit" value="submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar-lite' ); ?></button>
+					</p>
+				</form>
+			</div>
+		</div>
+		<?php
 	}
 }

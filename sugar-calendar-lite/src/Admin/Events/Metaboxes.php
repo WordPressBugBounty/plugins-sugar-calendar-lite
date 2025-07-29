@@ -26,6 +26,7 @@ class Metaboxes {
 	 */
 	public function hooks() {
 
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ], 10, 2 );
 		add_filter( 'register_taxonomy_args', [ $this, 'taxonomy_args' ], 10, 2 );
 		add_filter( 'wp_terms_checklist_args', [ $this, 'checklist_args' ] );
@@ -34,6 +35,38 @@ class Metaboxes {
 
 		// Education.
 		add_action( 'sugar_calendar_admin_meta_box_setup_sections', [ $this, 'event_metabox_education' ] );
+	}
+
+	/**
+	 * Filter the help URL in the create/edit event page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		$screen = get_current_screen();
+
+		if ( ! $screen || $screen->post_type !== sugar_calendar_get_event_post_type_id() ) {
+			return $help_url;
+		}
+
+		if ( ! empty( $_GET['post_type'] ) && $_GET['post_type'] === sugar_calendar_get_event_post_type_id() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$medium = 'create-event';
+		} else {
+			$medium = 'edit-event';
+		}
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/creating-events/',
+			[
+				'content' => 'Help',
+				'medium'  => $medium,
+			]
+		);
 	}
 
 	/**

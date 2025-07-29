@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Helpers\UI;
 use WP_Term;
+use Sugar_Calendar\Helpers\Helpers;
 
 /**
  * Edit Calendar page.
@@ -11,6 +12,38 @@ use WP_Term;
  * @since 3.0.0
  */
 class CalendarEdit extends CalendarAbstract {
+
+	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the edit calendar page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/organizing-events-with-calendars/',
+			[
+				'content' => 'Help',
+				'medium'  => 'edit-calendar',
+			]
+		);
+	}
 
 	/**
 	 * Page slug.
@@ -108,7 +141,7 @@ class CalendarEdit extends CalendarAbstract {
 				'name'        => 'name',
 				'id'          => 'name',
 				'value'       => $this->term->name,
-				'placeholder' => esc_html__( 'Name this Calendar', 'sugar-calendar-lite' ),
+				'placeholder' => esc_html__( 'Name', 'sugar-calendar-lite' ),
 			],
 			true
 		);

@@ -31,6 +31,8 @@ use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;
+use WP_Exception;
+
 use function Sugar_Calendar\Admin\Settings\get_sections;
 
 /**
@@ -164,10 +166,13 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 * @since 3.2.0 Added the Admin\Events hooks.
+	 * @since 3.8.0 Added the `early_init` hook.
 	 *
 	 * @return void
 	 */
 	public function hooks() {
+
+		add_action( 'init', [ $this, 'early_init' ] );
 
 		add_action( 'wp_ajax_sc_hand_holding_status', [ $this, 'ajax_update_hand_holding_status' ] );
 
@@ -191,6 +196,8 @@ class Area {
 
 		// Handle POST requests.
 		add_action( 'admin_init', [ $this, 'handle_post' ] );
+
+		add_action( 'admin_init', [ $this, 'handle_table_column_post' ] );
 
 		// Handle AJAX requests.
 		add_action( 'wp_ajax_' . self::SLUG, [ $this, 'handle_ajax' ] );
@@ -240,7 +247,39 @@ class Area {
 			}
 		);
 
+		add_action( 'wp_ajax_dismiss_email_wp_mail_smtp_notice', [ $this, 'dismiss_email_wp_mail_smtp_notice' ] );
+
 		$this->handle_rsvp_pages();
+	}
+
+	/**
+	 * Dismiss the WP Mail SMTP notice.
+	 *
+	 * @since 3.8.0
+	 */
+	public function dismiss_email_wp_mail_smtp_notice() {
+
+		if ( ! check_ajax_referer( Settings::DISMISS_NONCE_EMAIL_WP_MAIL_SMTP_NOTICE, 'nonce' ) ) {
+			wp_send_json_error();
+		}
+
+		add_option( Settings::DISMISS_NONCE_EMAIL_WP_MAIL_SMTP_NOTICE, true, '', false );
+	}
+
+	/**
+	 * Run the `early_init()` method of the page.
+	 *
+	 * This method is used for actions/filters that needs to be hooked before `admin_init`.
+	 *
+	 * @since 3.8.0
+	 */
+	public function early_init() {
+
+		$page = $this->get_current_page();
+
+		if ( ! empty( $page ) && method_exists( $page, 'early_init' ) ) {
+			$page->early_init();
+		}
 	}
 
 	/**
@@ -269,7 +308,7 @@ class Area {
 			apply_filters( 'sugar_calendar_admin_area_capability', 'edit_events' ),
 			self::SLUG,
 			[ $this, 'display' ],
-			'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTciIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNyAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjYwNjI3IDAuNzg1MjQxQzMuNjA2MjcgMC41ODIwMDggMy42OTg2NSAwLjM3ODc3NCAzLjg0NjQ1IDAuMjMwOTY4QzQuMDEyNzMgMC4wODMxNjI0IDQuMjE1OTcgLTAuMDA5MjE2MzEgNC40Mzc2OCAtMC4wMDkyMTYzMUM0LjY1OTM5IC0wLjAwOTIxNjMxIDQuODgxMDkgMC4wODMxNjI0IDUuMDI4OSAwLjIzMDk2OEM1LjE3NjcxIDAuMzc4Nzc0IDUuMjY5MDkgMC41NjM1MzIgNS4yNjkwOSAwLjc4NTI0MUgxMC43NzQ5QzEwLjc3NDkgMC41ODIwMDggMTAuODY3MiAwLjM3ODc3NCAxMS4wMTUgMC4yMzA5NjhDMTEuMTYyOCAwLjA4MzE2MjQgMTEuMzg0NiAtMC4wMDkyMTYzMSAxMS42MDYzIC0wLjAwOTIxNjMxQzExLjgyOCAtMC4wMDkyMTYzMSAxMi4wNDk3IDAuMDgzMTYyNCAxMi4xOTc1IDAuMjMwOTY4QzEyLjM0NTMgMC4zNzg3NzQgMTIuNDM3NyAwLjU2MzUzMiAxMi40Mzc3IDAuNzg1MjQxSDEyLjcxNDhDMTQuNTQzOSAwLjc4NTI0MSAxNi4wMjIgMi4yNjMzIDE2LjAyMiA0LjA5MjRWMTIuNjY1MUMxNi4wMjIgMTQuNDk0MiAxNC41NDM5IDE1Ljk3MjMgMTIuNzE0OCAxNS45NzIzSDMuMzI5MTNDMS41MDAwMyAxNS45NzIzIDAuMDIxOTcyNyAxNC40OTQyIDAuMDIxOTcyNyAxMi42NjUxVjQuMDkyNEMwLjAyMTk3MjcgMi4yNjMzIDEuNTAwMDMgMC43ODUyNDEgMy4zMjkxMyAwLjc4NTI0MUgzLjYwNjI3Wk0xMy45ODk2IDExLjg4OTJDMTMuOTg5NiAxMi40NjE5IDEzLjc2NzkgMTIuOTk3NyAxMy4zNjE1IDEzLjQwNDJDMTIuOTU1IDEzLjgxMDYgMTIuNDE5MiAxNC4wMzI0IDExLjg0NjUgMTQuMDMyNEg0LjE5NzQ5QzMuMDE1MDQgMTQuMDMyNCAyLjA1NDMxIDEzLjA3MTYgMi4wNTQzMSAxMS44ODkyVjExLjUwMTJDMi4wNTQzMSAxMS41MDEyIDIuMTA5NzMgMTEuMzcxOCAyLjE2NTE2IDExLjM3MThIOS45MjQ5N0MxMC40MDUzIDExLjM3MTggMTAuNzc0OSAxMS4wMDIzIDEwLjc3NDkgMTAuNTIyQzEwLjc3NDkgMTAuMDYwMSAxMC4zODY5IDkuNjcyMDggOS45MjQ5NyA5LjY3MjA4SDMuMDE1MDRDMi43NTYzOCA5LjY3MjA4IDIuNTE2MiA5LjU3OTcgMi4zMzE0NCA5LjM5NDk0QzIuMTQ2NjggOS4yMTAxOCAyLjA1NDMxIDguOTcgMi4wNTQzMSA4LjcyOTgxVjQuMjQwMjFDMi4wNTQzMSAzLjgzMzc0IDIuMjIwNTkgMy40NDU3NSAyLjQ5NzcyIDMuMTY4NjFDMi43NzQ4NiAyLjg5MTQ4IDMuMTYyODUgMi43MjUxOSAzLjU2OTMyIDIuNzI1MTlDMy41NjkzMiAyLjcyNTE5IDMuNTY5MzIgMi43MjUxOSAzLjU4Nzc5IDIuNzI1MTlDMy41ODc3OSAyLjcyNTE5IDMuNTg3NzkgMi43MjUxOSAzLjU4Nzc5IDIuNzQzNjdDMy41ODc3OSAzLjE1MDE0IDMuOTIwMzYgMy40ODI3IDQuMzI2ODIgMy40ODI3SDQuNTMwMDZDNC45MzY1MiAzLjQ4MjcgNS4yNjkwOSAzLjE1MDE0IDUuMjY5MDkgMi43NDM2N0M1LjI2OTA5IDIuNzQzNjcgNS4yNjkwOSAyLjcwNjcyIDUuMzA2MDQgMi43MDY3MkgxMC43Mzc5QzEwLjczNzkgMi43MDY3MiAxMC43NzQ5IDIuNzA2NzIgMTAuNzc0OSAyLjc0MzY3QzEwLjc3NDkgMy4xNTAxNCAxMS4xMDc0IDMuNDgyNyAxMS41MTM5IDMuNDgyN0gxMS43MTcxQzEyLjEyMzYgMy40ODI3IDEyLjQ1NjIgMy4xNTAxNCAxMi40NTYyIDIuNzQzNjdWMi43MjUxOUMxMi40NTYyIDIuNzI1MTkgMTIuNDU2MiAyLjcyNTE5IDEyLjQ3NDYgMi43MjUxOUMxMy4zMjQ1IDIuNzI1MTkgMTMuOTg5NiAzLjQwODggMTMuOTg5NiA0LjI0MDIxVjUuMjU2MzdDMTMuOTg5NiA1LjI1NjM3IDEzLjkzNDIgNS4zODU3IDEzLjg3ODggNS4zODU3SDYuMTM3NDVDNS42NzU1NSA1LjM4NTcgNS4yODc1NiA1Ljc1NTIyIDUuMjg3NTYgNi4yMzU1OUM1LjI4NzU2IDYuNjk3NDggNS42NzU1NSA3LjA4NTQ3IDYuMTM3NDUgNy4wODU0N0gxMy4wNDc0QzEzLjMwNiA3LjA4NTQ3IDEzLjU0NjIgNy4xNzc4NSAxMy43MzEgNy4zNjI2MUMxMy45MTU3IDcuNTQ3MzcgMTQuMDA4MSA3Ljc4NzU1IDE0LjAwODEgOC4wMjc3M1YxMS44ODkySDEzLjk4OTZaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
+			'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTciIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNyAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zLjYwNjI3IDAuNzg1MjQxQzMuNjA2MjcgMC41ODIwMDggMy42OTg2NSAwLjM3ODc3NCAzLjg0NjQ1IDAuMjMwOTY4QzQuMDEyNzMgMC4wODMxNjI0IDQuMjE1OTcgLTAuMDA5MjE2MzEgNC40Mzc2OCAtMC4wMDkyMTYzMUM0LjY1OTM5IC0wLjAwOTIxNjMxIDQuODgxMDkgMC4wODMxNjI0IDUuMDI4OSAwLjIzMDk2OEM1LjE3NjcxIDAuMzc4Nzc0IDUuMjY5MDkgMC41NjM1MzIgNS4yNjkwOSAwLjc4NTI0MUgxMC43NzQ5QzEwLjc3NDkgMC41ODIwMDggMTAuODY3MiAwLjM3ODc3NCAxMS4wMTUgMC4yMzA5NjhDMTEuMTYyOCAwLjA4MzE2MjQgMTEuMzg0NiAtMC4wMDkyMTYzMSAxMS42MDYzIC0wLjAwOTIxNjMxQzExLjgyOCAtMC4wMDkyMTYzMSAxMi4wNDk3IDAuMDgzMTYyNCAxMi4xOTc1IDAuMjMwOTY4QzEyLjM0NTMgMC4zNzg3NzQgMTIuNDM3NyAwLjU2MzUzMiAxMi40Mzc3IDAuNzg1MjQxSDEyLjcxNDhDMTQuNTQzOSAwLjc4NTI0MSAxNi4wMjIgMi4yNjMzIDE2LjAyMiA0LjA5MjRWMTIuNjY1MUMxNi4wMjIgMTQuNDk0MiAxNC41NDM5IDE1Ljk3MjMgMTIuNzE0OCAxNS45NzIzSDMuMzI5MTNDMS41MDAwMyAxNS45NzIzIDAuMDIxOTcyNyAxNC40OTQyIDAuMDIxOTcyNyAxMi42NjUxVjQuMDkyNEMwLjAyMTk3MjcgMi4yNjMzIDEuNTAwMDMgMC43ODUyNDEgMy4zMjkxMyAwLjc4NTI0MUgzLjYwNjI3Wk0xMy45ODk2IDExLjg4OTJDMTMuOTg5NiAxMi40NjE5IDEzLjc2NzkgMTIuOTk3NyAxMy4zNjE1IDEzLjQwNDJDMTIuOTU1IDEzLjgxMDYgMTIuNDE5MiAxNC4wMzI0IDExLjg0NjUgMTQuMDMyNEg0LjE5NzQ5QzMuMDE1MDQgMTQuMDMyNCAyLjA1NDMxIDEzLjA3MTYgMi4wNTQzMSAxMS44ODkyVjExLjUwMTJDMi4wNTQzMSAxMS41MDEyIDIuMTA5NzMgMTEuMzcxOCAyLjE2NTE2IDExLjM3MThIOS45MjQ5N0MxMC40MDUzIDExLjM3MTggMTAuNzc0OSAxMS4wMDIzIDEwLjc3NDkgMTAuNTIyQzEwLjc3NDkgMTAuMDYwMSAxMC4zODY5IDkuNjcyMDggOS45MjQ5NyA5LjY3MjA4SDMuMDE1MDRDMi43NTYzOCA5LjY3MjA4IDIuNTE2MiA5LjU3OTcgMi4zMzE0NCA5LjM5NDk0QzIuMTQ2NjggOS4yMTAxOCAyLjA1NDMxIDguOTcgMi4wNTQzMSA4LjcyOTgxVjQuMjQwMjFDMi4wNTQzMSAzLjgzMzc0IDIuMjIwNTkgMy40NDU3NSAyLjQ5NzcyIDMuMTY4NjFDMi43NzQ4NiAyLjg5MTQ4IDMuMTYyODUgMi43MjUxOSAzLjU2OTMyIDIuNzI1MTlDMy41NjkzMiAyLjcyNTE5IDMuNTY5MzIgMi43MjUxOSAzLjU4Nzc5IDIuNzI1MTlDMy41ODc3OSAyLjcyNTE5IDMuNTg3NzkgMi43MjUxOSAzLjU4Nzc5IDIuNzQzNjdDMy41ODc3OSAzLjE1MDE0IDMuOTIwMzYgMy40ODI3IDQuMzI2ODIgMy40ODI3SDQuNTMwMDZDNC45MzY1MiAzLjQ4MjcgNS4yNjkwOSAzLjE1MDE0IDUuMjY5MDkgMi43NDM2N0M1LjI2OTA5IDIuNzQzNjcgNS4yNjkwOSAyLjcwNjcyIDUuMzA2MDQgMi43MDY3MkgxMC43Mzc5QzEwLjc3NzkgMi43MDY3MiAxMC43NzQ5IDIuNzA2NzIgMTAuNzc0OSAyLjc0MzY3QzEwLjc3NDkgMy4xNTAxNCAxMS4xMDc0IDMuNDgyNyAxMS41MTM5IDMuNDgyN0gxMS43MTcxQzEyLjEyMzYgMy40ODI3IDEyLjQ1NjIgMy4xNTAxNCAxMi40NTYyIDIuNzQzNjdWMi43MjUxOUMxMi40NTYyIDIuNzI1MTkgMTIuNDU2MiAyLjcyNTE5IDEyLjQ3NDYgMi43MjUxOUMxMy4zMjQ1IDIuNzI1MTkgMTMuOTg5NiAzLjQwODggMTMuOTg5NiA0LjI0MDIxVjUuMjU2MzdDMTMuOTg5NiA1LjI1NjM3IDEzLjkzNDIgNS4zODU3IDEzLjg3ODggNS4zODU3SDYuMTM3NDVDNS42NzU1NSA1LjM4NTcgNS4yODc1NiA1Ljc1NTIyIDUuMjg3NTYgNi4yMzU1OUM1LjI4NzU2IDYuNjk3NDggNS42NzU1NSA3LjA4NTQ3IDYuMTM3NDUgNy4wODU0N0gxMy4wNDc0QzEzLjMwNiA3LjA4NTQ3IDEzLjU0NjIgNy4xNzc4NSAxMy43MzEgNy4zNjI2MUMxMy45MTU3IDcuNTQ3MzcgMTQuMDA4MSA3Ljc4NzU1IDE0LjAwODEgOC4wMjc3M1YxMS44ODkySDEzLjk4OTZaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
 			50
 		);
 
@@ -329,7 +368,7 @@ class Area {
 			Venues::get_title(),
 			Venues::get_capability(),
 			Venues::get_slug(),
-			sugar_calendar()->is_pro() ? '' : [ $this, 'display' ],
+			[ $this, 'display' ],
 			Venues::get_priority()
 		);
 
@@ -339,7 +378,7 @@ class Area {
 			Speakers::get_title(),
 			Speakers::get_capability(),
 			Speakers::get_slug(),
-			sugar_calendar()->is_pro() ? '' : [ $this, 'display' ],
+			[ $this, 'display' ],
 			Speakers::get_priority()
 		);
 
@@ -770,16 +809,37 @@ class Area {
 	 */
 	public function init() {
 
-		$page = $this->get_page( $this->get_current_page_id() );
+		$page = $this->get_current_page();
 
-		// Bail if the page doesn't exist.
-		if ( $page === null ) {
-			return;
+		if ( ! empty( $page ) ) {
+			$page->hooks();
+		}
+	}
+
+	/**
+	 * Get the current page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return PageInterface|false
+	 */
+	private function get_current_page() {
+
+		if ( ! is_null( $this->current_page ) ) {
+			return $this->current_page;
 		}
 
-		$this->current_page = new $page();
+		$page = false;
 
-		$this->current_page->hooks();
+		if ( empty( $this->current_page ) ) {
+			$page = $this->get_page( $this->get_current_page_id() );
+		}
+
+		if ( ! empty( $page ) ) {
+			$this->current_page = new $page();
+		}
+
+		return $this->current_page ?? false;
 	}
 
 	/**
@@ -873,6 +933,75 @@ class Area {
 
 		// Let 3rd party code handle the request.
 		do_action( 'sugar_calendar_admin_area_handle_post', $post_data );
+	}
+
+	/**
+	 * Handle post request coming from table_screen_options method on submission.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return void
+	 */
+	public function handle_table_column_post() {
+
+		// Bail if doing AJAX.
+		if ( WP::is_doing_ajax() ) {
+			return;
+		}
+
+		// Bail if not a table column form submission.
+		if ( empty( $_POST['sugar-calendar-table-active-columns-submit'] ) ) {
+			return;
+		}
+
+		// Verify nonce.
+		if ( ! isset( $_POST['sugar-calendar-table-active-columns-nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['sugar-calendar-table-active-columns-nonce'] ) ), 'sugar-calendar-table-active-columns' )
+		) {
+			WP::add_admin_notice(
+				esc_html__( 'Security check failed. Please try again.', 'sugar-calendar-lite' ),
+				'error'
+			);
+
+			add_action( 'admin_notices', [ $this, 'display_admin_notices' ], 5 );
+
+			return;
+		}
+
+		// Extract data from POST.
+		$post_data  = ! empty( $_POST['sugar-calendar-table-active-columns'] ) ? $_POST['sugar-calendar-table-active-columns'] : [];
+		$table_name = ! empty( $post_data['table_name'] ) ? sanitize_key( $post_data['table_name'] ) : '';
+		$columns    = ! empty( $post_data['columns'] ) ? array_map( 'sanitize_key', (array) $post_data['columns'] ) : [];
+
+		// Validate required data.
+		if ( empty( $table_name ) ) {
+			WP::add_admin_notice(
+				esc_html__( 'Missing required data. Please try again.', 'sugar-calendar-lite' ),
+				'error'
+			);
+
+			add_action( 'admin_notices', [ $this, 'display_admin_notices' ], 5 );
+
+			return;
+		}
+
+		// Construct user meta key.
+		$meta_key = "{$table_name}_active_columns";
+
+		// Store columns in user meta.
+		$result = update_user_meta( get_current_user_id(), $meta_key, $columns );
+
+		// Check if update was successful.
+		if ( $result === false ) {
+			WP::add_admin_notice(
+				esc_html__( 'Failed to save column preferences. Please try again.', 'sugar-calendar-lite' ),
+				'error'
+			);
+
+			add_action( 'admin_notices', [ $this, 'display_admin_notices' ], 5 );
+
+			return;
+		}
 	}
 
 	/**
@@ -993,6 +1122,8 @@ class Area {
 			return;
 		}
 
+		echo '<div id="sugar-calendar-admin-header-temp"></div>';
+
 		UI::header();
 	}
 
@@ -1005,6 +1136,13 @@ class Area {
 	 * @param string $hook The current admin page.
 	 */
 	public function enqueue_assets( $hook ) {
+
+		wp_register_style(
+			'sugar-calendar-admin-fontawesome',
+			SC_PLUGIN_ASSETS_URL . 'css/font-awesome-min.css',
+			[],
+			'6.5.0'
+		);
 
 		wp_enqueue_style(
 			'sugar-calendar-admin-menu',
@@ -1060,7 +1198,7 @@ class Area {
 		wp_register_style(
 			'sugar-calendar-admin-settings',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-settings' . WP::asset_min() . '.css',
-			[],
+			[ 'dashicons' ],
 			BaseHelpers::get_asset_version()
 		);
 
@@ -1123,6 +1261,28 @@ class Area {
 			BaseHelpers::get_asset_version(),
 			true
 		);
+
+		wp_register_script(
+			'sugar-calendar-admin-screen-options',
+			SC_PLUGIN_ASSETS_URL . 'admin/js/screen-options' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			BaseHelpers::get_asset_version(),
+			true
+		);
+
+		wp_register_script(
+			'sugar-calendar-admin-column-control',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-column-control' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			BaseHelpers::get_asset_version(),
+			true
+		);
+
+		// Only enqueue if Screen Options is displayed.
+		// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation, WPForms.PHP.ValidateHooks.InvalidHookName
+		if ( apply_filters( 'screen_options_show_screen', false ) ) {
+			wp_enqueue_script( 'sugar-calendar-admin-screen-options' );
+		}
 
 		wp_enqueue_script(
 			'sugar-calendar-admin-common',

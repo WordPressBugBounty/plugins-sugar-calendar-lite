@@ -62,6 +62,16 @@ final class Ticket_Schema extends Schema {
 			'sortable'   => true
 		),
 
+		// ticket_type_id
+		array(
+			'name'       => 'ticket_type_id',
+			'type'       => 'bigint',
+			'length'     => '20',
+			'unsigned'   => true,
+			'default'    => '0',
+			'sortable'   => true
+		),
+
 		// attendee_id
 		array(
 			'name'       => 'attendee_id',
@@ -81,6 +91,16 @@ final class Ticket_Schema extends Schema {
 			'default'    => '',
 			'searchable' => true,
 			'sortable'   => false
+		),
+
+		// status
+		array(
+			'name'       => 'status',
+			'type'       => 'varchar',
+			'length'     => '20',
+			'default'    => 'active',
+			'searchable' => true,
+			'sortable'   => true
 		),
 
 		// event_date

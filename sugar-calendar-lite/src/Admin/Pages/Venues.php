@@ -4,7 +4,6 @@ namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\Pages\VenuesAbstract;
 use Sugar_Calendar\Helpers\UI;
-use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers\Helpers;
 
 /**
@@ -15,6 +14,38 @@ use Sugar_Calendar\Helpers\Helpers;
 class Venues extends VenuesAbstract {
 
 	/**
+	 * Hooks.
+	 *
+	 * @since 3.8.0
+	 */
+	public function hooks() {
+
+		parent::hooks();
+
+		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Filter the help URL in the Venues education page.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/creating-and-managing-event-venues/',
+			[
+				'content' => 'Help',
+				'medium'  => 'venues-education',
+			]
+		);
+	}
+
+	/**
 	 * Page slug.
 	 *
 	 * @since 3.5.0
@@ -23,11 +54,7 @@ class Venues extends VenuesAbstract {
 	 */
 	public static function get_slug() {
 
-		$venue_slug = defined( 'SC_VENUE_POST_TYPE' )
-			? SC_VENUE_POST_TYPE
-			: 'venues';
-
-		$slug = sugar_calendar()->is_pro() ? "edit.php?post_type=$venue_slug" : 'sugar-calendar-venue';
+		$slug = 'sugar-calendar-venue';
 
 		return esc_attr( $slug );
 	}

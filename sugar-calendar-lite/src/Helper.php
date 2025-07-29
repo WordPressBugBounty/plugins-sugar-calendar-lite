@@ -4,6 +4,7 @@ namespace Sugar_Calendar;
 
 use DateTimeInterface;
 use Sugar_Calendar\Block\Calendar\CalendarView\Day\Day;
+use WP_List_Table;
 
 class Helper {
 
@@ -466,5 +467,87 @@ class Helper {
 		}
 
 		return get_permalink( $event->object_id );
+	}
+
+	/**
+	 * Display search reset functionality for list tables.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param int    $total_count Total count of items.
+	 * @param string $single      Single item label.
+	 * @param string $plural      Plural item label.
+	 * @param string $all         All items label.
+	 * @param string $return_url  Return URL.
+	 */
+	public static function display_search_reset( $total_count, $single, $plural, $all, $return_url = '' ) {
+
+		if ( empty( $_GET['s'] ) ) {
+			return;
+		}
+
+		$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ) );
+
+		$term = ( 1 === absint( $total_count ) ) ? $single : $plural;
+		?>
+		<div id="sugar-calendar-list__admin__reset-filter">
+			<?php
+			printf(
+				'Found <strong>%1$d %2$s</strong> containing <em>"%3$s"</em>',
+				absint( $total_count ),
+				esc_html( $term ),
+				esc_html( $search_term )
+			);
+
+			printf(
+				'<a href="%1$s"><i id="sugar-calendar-list__admin__reset-filter__icon" class="fa-solid fa-circle-xmark" title="%2$s"></i></a>',
+				esc_url( $return_url ),
+				/* translators: %s: All items label. */
+				esc_attr( sprintf( __( 'Clear search and return to All %s', 'sugar-calendar-lite' ), $all ) )
+			);
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Display placeholder row for list tables with no items.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param int    $column_count Number of columns to span.
+	 * @param string $icon_class   FontAwesome icon class (e.g., 'fa-user').
+	 * @param string $message      Message to display.
+	 * @param string $link_url     URL for the action link.
+	 * @param string $link_text    Text for the action link.
+	 * @param string $table_type   Table type for CSS class modifier.
+	 */
+	public static function display_placeholder_row( $column_count, $icon_class, $message, $link_url, $link_text, $table_type = '' ) {
+
+		$row_classes = 'sugar-calendar-table-no-items';
+
+		if ( ! empty( $table_type ) ) {
+			$row_classes .= ' sugar-calendar-table-no-items--' . sanitize_html_class( $table_type );
+		}
+
+		$icon_html = sprintf( '<i class="fa-solid %s"></i>', esc_attr( $icon_class ) );
+
+		printf(
+			'<tr class="%1$s">'
+				. '<td class="colspanchange" colspan="%2$s">'
+					. '<div class="sugar-calendar-table-no-items__content">'
+						. '<div class="sugar-calendar-table-no-items__content__icon">%3$s</div>'
+						. '<span>%4$s</span>'
+						. '<a href="%5$s">%6$s</a>'
+					. '</div>'
+				. '</td>'
+			. '</tr>',
+			esc_attr( $row_classes ),
+			esc_attr( $column_count ),
+			$icon_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			esc_html( $message ),
+			esc_url( $link_url ),
+			esc_html( $link_text )
+		);
 	}
 }

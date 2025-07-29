@@ -23,3 +23,6 @@ add_action( 'sc_et_checkout_pre_redirect', __NAMESPACE__ . '\\Common\\Functions\
 // Shortcodes
 add_shortcode( 'sc_event_tickets_receipt', __NAMESPACE__ . '\\Shortcodes\\receipt_shortcode' );
 add_shortcode( 'sc_event_tickets_details', __NAMESPACE__ . '\\Shortcodes\\ticket_shortcode' );
+
+// Migration.
+add_action( 'admin_init', __NAMESPACE__ . '\\Metadata\\maybe_migrate_ticket_limit_capacity' );

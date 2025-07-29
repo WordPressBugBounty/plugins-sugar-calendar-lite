@@ -218,17 +218,35 @@ abstract class CalendarAbstract extends PageAbstract {
 
 		$form_url = WP::admin_url( 'edit-tags.php' );
 		?>
-        <div class="sugar-calendar-admin-subheader">
-            <h4><?php echo esc_html( static::get_label() ); ?></h4>
-        </div>
+		<div class="sugar-calendar-admin-subheader">
+			<?php
+			printf( '<h4 class="sugar-calendar-title__with-action">%s</h4>', esc_html( static::get_label() ) );
 
-        <div id="sugar-calendar-calendar" class="wrap sugar-calendar-admin-wrap">
+			printf(
+				'<a href="%1$s" target="_self" class="sugar-calendar-btn sugar-calendar-btn__with-action sugar-calendar-btn-primary sugar-calendar-btn-sm">%2$s<span class="sugar-calendar-btn__with-action__text">%3$s</span></a>',
+				esc_url( admin_url( 'edit-tags.php?taxonomy=sc_event_category' ) ),
+				wp_kses(
+					'<svg viewBox="0 0 16 14" class="sugar-calendar-btn__with-action__icon"><path d="M16 6v2H4l4 4-1 2-7-7 7-7 1 2-4 4h12Z"></path></svg>',
+					[
+						'svg' => [
+							'viewbox' => true,
+							'class'   => true,
+						],
+						'path' => [
+							'd' => true,
+						],
+					]
+				),
+				esc_html__( 'Back to All Calendars', 'sugar-calendar-lite' )
+			);
+			?>
+		</div>
 
-            <div class="sugar-calendar-admin-content">
+		<div id="sugar-calendar-calendar" class="wrap sugar-calendar-admin-wrap">
+			<div class="sugar-calendar-admin-content">
+				<h1 class="screen-reader-text"><?php echo esc_html( static::get_label() ); ?></h1>
 
-                <h1 class="screen-reader-text"><?php echo esc_html( static::get_label() ); ?></h1>
-
-                <form method="post" action="<?php echo esc_url( $form_url ); ?>" class="sugar-calendar-calendar-form">
+				<form method="post" action="<?php echo esc_url( $form_url ); ?>" class="sugar-calendar-calendar-form">
 
 					<?php static::form_hidden_fields(); ?>
 
@@ -241,11 +259,9 @@ abstract class CalendarAbstract extends PageAbstract {
 					<?php do_meta_boxes( static::get_slug(), 'normal', null ); ?>
 
 					<?php static::form_submit(); ?>
-
-                </form>
-            </div>
-        </div>
-
+				</form>
+			</div>
+		</div>
 		<?php
 	}
 

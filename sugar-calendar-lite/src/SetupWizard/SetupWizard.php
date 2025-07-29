@@ -81,8 +81,20 @@ class SetupWizard {
 		add_action( 'rest_api_init', [ $this, 'initialize_api' ] );
 
 		if ( is_admin() ) {
-			add_filter( 'allowed_redirect_hosts', [ $this, 'get_redirect_hosts' ] );
+			add_action( 'admin_init', [ $this, 'register_allowed_hosts' ] );
 		}
+	}
+
+	/**
+	 * Register allowed redirect hosts filter.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return void
+	 */
+	public function register_allowed_hosts() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+
+		add_filter( 'allowed_redirect_hosts', [ $this, 'get_redirect_hosts' ] );
 	}
 
 	/**

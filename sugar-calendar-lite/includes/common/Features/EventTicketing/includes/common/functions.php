@@ -158,6 +158,10 @@ function order_status_label( $status = '' ) {
 			$label = esc_html__( 'Paid', 'sugar-calendar-lite' );
 			break;
 
+		case 'trash' :
+			$label = esc_html__( 'Trash', 'sugar-calendar-lite' );
+			break;
+
 		default :
 			$label = '&mdash;';
 			break;
@@ -351,6 +355,44 @@ function delete_ticket( $ticket_id = 0 ) {
 	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
 
 	return $tickets->delete_item( $ticket_id );
+}
+
+/**
+ * Trash a ticket (soft delete).
+ *
+ * @since 3.8.0
+ *
+ * @param int $ticket_id Ticket ID.
+ *
+ * @return bool Whether or not the ticket was trashed.
+ */
+function trash_ticket( $ticket_id = 0 ) {
+
+	return update_ticket(
+		$ticket_id,
+		[
+			'status' => 'trash',
+		]
+	);
+}
+
+/**
+ * Restore a trashed ticket.
+ *
+ * @since 3.8.0
+ *
+ * @param int $ticket_id Ticket ID.
+ *
+ * @return bool Whether or not the ticket was restored.
+ */
+function restore_ticket( $ticket_id = 0 ) {
+
+	return update_ticket(
+		$ticket_id,
+		[
+			'status' => 'active',
+		]
+	);
 }
 
 /**
@@ -1637,5 +1679,125 @@ function stripe_is_connected() {
 		! empty( $stripe_connect_account_id ) &&
 		get_stripe_publishable_key() &&
 		get_stripe_secret_key()
+	);
+}
+
+/**
+ * Get ticket data for a specific event and ticket type.
+ *
+ * @since 3.8.0
+ *
+ * @param Event $event          The event object.
+ * @param int   $ticket_type_id The ticket type ID.
+ *
+ * @return array Ticket data.
+ */
+function get_ticket_data( $event, $ticket_type_id = 0 ) {
+
+	/**
+	 * Filter the default ticket quantity.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param int $default_ticket_quantity The default ticket quantity.
+	 */
+	$default_ticket_quantity = apply_filters( 'sc_et_default_ticket_quantity', 100 );
+
+	// Default ticket data.
+	$ticket_data         = [];
+	$ticket_data_default = [
+		'ticket_price'          => 0,
+		'ticket_limit_capacity' => false,
+		'ticket_quantity'       => $default_ticket_quantity,
+	];
+
+	if ( $ticket_type_id === 0 ) {
+
+		// Get ticket price.
+		$ticket_data['ticket_price'] = get_event_meta( $event->ID, 'ticket_price', true );
+
+		// Limit capacity in boolean.
+		$ticket_data['ticket_limit_capacity'] = absint( get_event_meta( $event->ID, 'ticket_limit_capacity', true ) );
+		$ticket_data['ticket_limit_capacity'] = $ticket_data['ticket_limit_capacity'] === 1;
+
+		// Get raw quantity value.
+		$quantity = absint( get_event_meta( $event->ID, 'ticket_quantity', true ) );
+
+		// Use the default quantity if none set or zero.
+		$ticket_data['ticket_quantity'] = ! $quantity || $quantity === 0 ? $default_ticket_quantity : $quantity;
+	}
+
+	$ticket_data = wp_parse_args( $ticket_data, $ticket_data_default );
+
+	/**
+	 * Filter the ticket data.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param array $ticket_data    The ticket data.
+	 * @param Event $event          The event object.
+	 * @param int   $ticket_type_id The ticket type ID. (0 for general ticket).
+	 */
+	return apply_filters( 'sc_et_get_ticket_data', $ticket_data, $event, $ticket_type_id );
+}
+
+/**
+ * Get barebone ticket data for temporary tickets.
+ *
+ * @since 3.8.0
+ *
+ * @return array Barebone ticket data with defaults.
+ */
+function get_ticket_data_temporary() {
+
+	/**
+	 * Filter the default ticket quantity.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param int $default_ticket_quantity The default ticket quantity.
+	 */
+	$default_ticket_quantity = apply_filters( 'sc_et_default_ticket_quantity', 100 );
+
+	return [
+		'ticket_price'          => '',
+		'ticket_limit_capacity' => 0,
+		'ticket_quantity'       => $default_ticket_quantity,
+	];
+}
+
+/**
+ * Trash an order (soft delete).
+ *
+ * @since 3.8.0
+ *
+ * @param int $order_id Order ID.
+ *
+ * @return bool Whether or not the order was trashed.
+ */
+function trash_order( $order_id = 0 ) {
+	return update_order(
+		$order_id,
+		[
+			'status' => 'trash',
+		]
+	);
+}
+
+/**
+ * Restore a trashed order.
+ *
+ * @since 3.8.0
+ *
+ * @param int $order_id Order ID.
+ *
+ * @return bool Whether or not the order was restored.
+ */
+function restore_order( $order_id = 0 ) {
+	return update_order(
+		$order_id,
+		[
+			'status' => 'pending',
+		]
 	);
 }

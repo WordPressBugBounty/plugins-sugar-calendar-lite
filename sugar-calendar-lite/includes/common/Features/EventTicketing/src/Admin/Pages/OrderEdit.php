@@ -78,10 +78,10 @@ class OrderEdit {
 
 		$order_id = absint( $_GET['order_id'] ?? 0 );
 
-		// Order
+		// Order.
 		$order = Functions\get_order( $order_id );
 
-		// Bail if no order
+		// Bail if no order.
 		if ( empty( $order ) ) {
 			wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'sugar-calendar-lite' ) );
 		}
@@ -99,8 +99,8 @@ class OrderEdit {
 	public function display_admin_subheader() {
 
 		?>
-        <div class="sugar-calendar-admin-subheader">
-            <h4><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></h4>
+		<div class="sugar-calendar-admin-subheader">
+			<h4><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></h4>
 
 			<?php
 			UI::button(
@@ -112,7 +112,7 @@ class OrderEdit {
 				]
 			);
 			?>
-        </div>
+		</div>
 
 		<?php
 		/**
@@ -132,17 +132,17 @@ class OrderEdit {
 	 */
 	public function display() {
 
-		// Transactions may be empty
+		// Transactions may be empty.
 		$transaction = ! empty( $this->order->transaction_id )
 			? $this->order->transaction_id
 			: '&mdash;';
 
-		// Stripe URL
+		// Stripe URL.
 		$sandbox     = (bool) Settings\get_setting( 'sandbox' );
 		$test        = $sandbox ? 'test/' : '';
 		$payment_url = 'https://dashboard.stripe.com/' . $test . 'payments/' . $this->order->transaction_id;
 
-		// Form action
+		// Form action.
 		$form_action = add_query_arg(
 			[
 				'page'     => 'sc-event-ticketing',
@@ -151,20 +151,21 @@ class OrderEdit {
 			admin_url( 'admin.php' )
 		);
 
-		// Event
+		// Event.
 		$event  = sugar_calendar_get_event( $this->order->event_id );
 		$format = sc_get_date_format() . ' \a\t ' . sc_get_time_format();
 
-		// Tickets
-		$tickets = Functions\get_order_tickets( $this->order->id ); ?>
+		// Tickets.
+		$tickets = Functions\get_order_tickets( $this->order->id );
+		?>
 
-        <div id="sugar-calendar-order" class="wrap sugar-calendar-admin-wrap">
+		<div id="sugar-calendar-order" class="wrap sugar-calendar-admin-wrap">
 
-            <div class="sugar-calendar-admin-content">
+			<div class="sugar-calendar-admin-content">
 
-                <h1 class="screen-reader-text"><?php echo esc_html_e( 'Edit Ticket', 'sugar-calendar-lite' ); ?></h1>
+				<h1 class="screen-reader-text"><?php echo esc_html_e( 'Edit Ticket', 'sugar-calendar-lite' ); ?></h1>
 
-                <h2>
+				<h2>
 					<?php
 					echo esc_html(
 						sprintf(
@@ -175,222 +176,241 @@ class OrderEdit {
 						)
 					);
 					?>
-                </h2>
+				</h2>
 
-                <form id="edit-item-info" method="post" action="<?php echo esc_url( $form_action ); ?>">
-                    <div class="sugar-calendar-order-metabox">
-                        <div class="sugar-calendar-order-metabox__header">
-                            <h4><?php esc_html_e( 'Order Details', 'sugar-calendar-lite' ); ?></h4>
-                        </div>
-                        <div class="sugar-calendar-order-metabox__body">
+				<form id="edit-item-info" method="post" action="<?php echo esc_url( $form_action ); ?>">
+					<div class="sugar-calendar-order-metabox">
+						<div class="sugar-calendar-order-metabox__header">
+							<h4><?php esc_html_e( 'Order Details', 'sugar-calendar-lite' ); ?></h4>
+						</div>
+						<div class="sugar-calendar-order-metabox__body">
 
 							<?php do_action( 'sc_et_admin_order_top', $this->order ); ?>
 
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Order ID', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field"><?php echo esc_html( $this->order->id ); ?></div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Transaction ID', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
-                                    <a href="<?php echo esc_url( $payment_url ); ?>" target="_blank"><?php echo esc_html( $transaction ); ?></a>
-                                </div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Purchase Date', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Order ID', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field"><?php echo esc_html( $this->order->id ); ?></div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Transaction ID', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
+									<a href="<?php echo esc_url( $payment_url ); ?>" target="_blank"><?php echo esc_html( $transaction ); ?></a>
+								</div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Purchase Date', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
 									<?php echo esc_html( $this->order->date_created ); ?>
-                                </div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Customer', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
+								</div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Customer', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
 									<?php echo esc_html( $this->order->first_name . ' ' . $this->order->last_name ) . ' (' . make_clickable( $this->order->email ) . ')'; ?>
-                                </div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Total', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
+								</div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Total', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
 									<?php echo Functions\currency_filter( $this->order->total ); ?>
-                                </div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label for="sc-et-status"><?php esc_html_e( 'Status', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
-                                    <select name="status" id="sc-et-status">
-                                        <option value="pending"<?php selected( $this->order->status, 'pending' ); ?>><?php echo Functions\order_status_label( 'pending' ); ?></option>
-                                        <option value="paid"<?php selected( $this->order->status, 'paid' ); ?>><?php echo Functions\order_status_label( 'paid' ); ?></option>
-                                        <option value="refunded"<?php selected( $this->order->status, 'refunded' ); ?>><?php echo Functions\order_status_label( 'refunded' ); ?></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="sugar-calendar-metabox__field-row">
-                                <label><?php esc_html_e( 'Event', 'sugar-calendar-lite' ); ?></label>
-                                <div class="sugar-calendar-metabox__field">
+								</div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label for="sc-et-status"><?php esc_html_e( 'Status', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
+									<select name="status" id="sc-et-status">
+										<option value="pending"<?php selected( $this->order->status, 'pending' ); ?>><?php echo Functions\order_status_label( 'pending' ); ?></option>
+										<option value="paid"<?php selected( $this->order->status, 'paid' ); ?>><?php echo Functions\order_status_label( 'paid' ); ?></option>
+										<option value="refunded"<?php selected( $this->order->status, 'refunded' ); ?>><?php echo Functions\order_status_label( 'refunded' ); ?></option>
+										<option value="trash"<?php selected( $this->order->status, 'trash' ); ?>><?php echo Functions\order_status_label( 'trash' ); ?></option>
+									</select>
+								</div>
+							</div>
+							<div class="sugar-calendar-metabox__field-row">
+								<label><?php esc_html_e( 'Event', 'sugar-calendar-lite' ); ?></label>
+								<div class="sugar-calendar-metabox__field">
 									<?php if ( ! empty( $event ) ) : ?>
 
-                                        <a href="<?php echo esc_url( admin_url( 'post.php?action=edit&post=' . $event->object_id ) ); ?>">
+										<a href="<?php echo esc_url( admin_url( 'post.php?action=edit&post=' . $event->object_id ) ); ?>">
 											<?php echo esc_html( $event->title ); ?>
-                                        </a>
+										</a>
 
-                                        &mdash;
+										&mdash;
 
 										<?php echo esc_html( $event->format_date( $format, strtotime( $this->order->event_date ) ) ); ?>
 
 									<?php else : ?>
 
-                                        &mdash;
+										&mdash;
 
 									<?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="sugar-calendar-order-actions">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="sugar-calendar-order-actions">
 						<?php wp_nonce_field( 'sc_event_tickets', 'sc_event_tickets_nonce', false, true ); ?>
 
-                        <input type="hidden" name="order_id" value="<?php echo absint( $this->order->id ); ?>"/>
+						<input type="hidden" name="order_id" value="<?php echo absint( $this->order->id ); ?>"/>
 
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
 
-                            <input type="submit"
-                                   name="sc_et_update_order"
-                                   class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-secondary"
-                                   value="<?php esc_attr_e( 'Update Order', 'sugar-calendar-lite' ); ?>"/>
-
+							<input
+								type="submit"
+								name="sc_et_update_order"
+								class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-secondary"
+								value="<?php esc_attr_e( 'Update Order', 'sugar-calendar-lite' ); ?>"/>
 						<?php endif; ?>
 
-                        <input type="submit"
-                               name="sc_et_resend_receipt"
-                               class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-tertiary"
-                               value="<?php esc_attr_e( 'Resend Email Receipt', 'sugar-calendar-lite' ); ?>"/>
+						<?php if ( ! empty( $event ) ) : ?>
+							<input
+								type="submit"
+								name="sc_et_resend_receipt"
+								class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-tertiary"
+								value="<?php esc_attr_e( 'Resend Email Receipt', 'sugar-calendar-lite' ); ?>"/>
+						<?php endif; ?>
 
 						<?php if ( current_user_can( 'manage_options' ) ) : ?>
 
-                            <input type="submit"
-                                   name="sc_et_delete_order"
-                                   class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-delete-order"
-                                   value="<?php esc_attr_e( 'Delete Order', 'sugar-calendar-lite' ); ?>"/>
-
+							<input
+								type="submit"
+								name="sc_et_delete_order"
+								class="sugar-calendar-btn sugar-calendar-btn-md sugar-calendar-btn-delete-order"
+								value="<?php esc_attr_e( 'Delete Order', 'sugar-calendar-lite' ); ?>"/>
 						<?php endif; ?>
-                    </div>
-                </form>
+					</div>
+				</form>
 
-                <div class="sugar-calendar-order-metabox">
-                    <div class="sugar-calendar-order-metabox__header">
-                        <h4><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></h4>
-                    </div>
-                    <div class="sugar-calendar-order-metabox__body">
+				<div id="sugar-calendar-order__tickets" class="sugar-calendar-order-metabox">
+					<div class="sugar-calendar-order-metabox__header">
+						<h4><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></h4>
+					</div>
 
+					<div class="sugar-calendar-order-metabox__body">
 						<?php do_action( 'sc_et_admin_order_before_tickets', $this->order ); ?>
 
-                        <table class="widefat striped">
-                            <thead>
-                            <tr>
-                                <th><?php esc_html_e( 'ID', 'sugar-calendar-lite' ); ?></th>
-                                <th><?php esc_html_e( 'Code', 'sugar-calendar-lite' ); ?></th>
-                                <th><?php esc_html_e( 'Attendee', 'sugar-calendar-lite' ); ?></th>
-                            </tr>
-                            </thead>
+						<table class="widefat striped">
+							<thead>
+								<tr>
+									<th class="sugar-calendar-order__tickets__table-row__first-cell"><?php esc_html_e( 'ID', 'sugar-calendar-lite' ); ?></th>
+									<th><?php esc_html_e( 'Code', 'sugar-calendar-lite' ); ?></th>
+									<th class="sugar-calendar-order__tickets__table-row__last-cell"><?php esc_html_e( 'Attendee', 'sugar-calendar-lite' ); ?></th>
 
-                            <tbody>
+									<?php
+									/**
+									 * Action for extra columns.
+									 *
+									 * @since 3.8.0
+									 *
+									 * @param Order $order   The order object.
+									 * @param array $tickets The tickets array.
+									 * @param Event $event   The event object.
+									 */
+									do_action( 'sugar_calendar_add_on_ticketing_admin_pages_order_edit_tickets_table_header', $this->order, $tickets, $event );
+									?>
+								</tr>
+							</thead>
 
-							<?php
+							<tbody>
+								<?php
+								foreach ( $tickets as $ticket ) :
 
-							foreach ( $tickets as $ticket ) :
+									// Get the attendee.
+									$attendee = Functions\get_attendee( $ticket->attendee_id );
 
-								// Get the attendee
-								$attendee = Functions\get_attendee( $ticket->attendee_id );
+									// Try to put the name together.
+									$fname = ! empty( $attendee->first_name )
+										? $attendee->first_name
+										: '';
+									$lname = ! empty( $attendee->last_name )
+										? $attendee->last_name
+										: '';
+									$name  = ! empty( $fname . $lname )
+										? $fname . ' ' . $lname
+										: '&mdash;';
 
-								// Try to put the name together
-								$fname = ! empty( $attendee->first_name )
-									? $attendee->first_name
-									: '';
-								$lname = ! empty( $attendee->last_name )
-									? $attendee->last_name
-									: '';
-								$name  = ! empty( $fname . $lname )
-									? $fname . ' ' . $lname
-									: '&mdash;';
+									$print_url = wp_nonce_url(
+										add_query_arg(
+											[
+												'sc_et_action' => 'print',
+												'ticket_code'  => $ticket->code,
+											],
+											home_url()
+										),
+										$ticket->code
+									);
 
-								$print_url = wp_nonce_url(
-									add_query_arg(
-										[
-											'sc_et_action' => 'print',
-											'ticket_code'  => $ticket->code,
-										],
-										home_url()
-									),
-									$ticket->code
-								);
-
-								$email_url = wp_nonce_url(
-									add_query_arg(
-										[
-											'sc_et_action' => 'email_ticket',
-											'ticket_code'  => $ticket->code,
-										]
-									),
-									$ticket->code
-								);
-
+									$email_url = wp_nonce_url(
+										add_query_arg(
+											[
+												'sc_et_action' => 'email_ticket',
+												'ticket_code'  => $ticket->code,
+											]
+										),
+										$ticket->code
+									);
 								?>
-
-                                <tr>
-                                    <td>
-                                        <span class="row-title"><?php echo absint( $ticket->id ); ?></span>
-
-                                        <div class="row-actions">
-										<span class="print">
-											<a href="<?php echo esc_url( $print_url ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar-lite' ); ?></a>
-										</span>
-
-											<?php if ( ! empty( $attendee->email ) ) : ?>
-
-                                                |
-
-                                                <span class="email">
-												<a href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Resend Email', 'sugar-calendar-lite' ); ?></a>
+								<tr>
+									<td class="sugar-calendar-order__tickets__table-row__first-cell">
+										<span class="row-title"><?php echo absint( $ticket->id ); ?></span>
+										<div class="row-actions">
+											<span class="print">
+												<a href="<?php echo esc_url( $print_url ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar-lite' ); ?></a>
 											</span>
 
+											<?php if ( ! empty( $attendee->email ) && ! empty( $event ) ) : ?>
+												|
+												<span class="email">
+													<a href="<?php echo esc_url( $email_url ); ?>"><?php esc_html_e( 'Resend Email', 'sugar-calendar-lite' ); ?></a>
+												</span>
 											<?php endif; ?>
+										</div>
+									</td>
 
-                                        </div>
-                                    </td>
+									<td>
+										<span class="sc-et-ticket-code">
+											<code><?php echo esc_html( $ticket->code ); ?></code>
+										</span>
+									</td>
 
-                                    <td>
-                                        <code><?php echo esc_html( $ticket->code ); ?></code>
-                                    </td>
-
-                                    <td>
-										<?php echo esc_html( $name ); ?>
-
+									<td class="sugar-calendar-order__tickets__table-row__last-cell">
 										<?php
+										echo esc_html( $name );
 
 										if ( ! empty( $attendee->email ) ) :
 											echo '<br>' . make_clickable( $attendee->email );
 										endif;
-
 										?>
-                                    </td>
-                                </tr>
 
-							<?php endforeach; ?>
+										<?php
+										/**
+										 * Action for extra columns.
+										 *
+										 * @since 3.8.0
+										 *
+										 * @param Ticket   $ticket   The ticket object.
+										 * @param Attendee $attendee The attendee object.
+										 * @param Order    $order    The order object.
+										 * @param Event    $event    The event object.
+										 */
+										do_action( 'sugar_calendar_add_on_ticketing_admin_pages_order_edit_tickets_table_row', $ticket, $attendee, $this->order, $event );
+										?>
+									</td>
+								</tr>
 
-							<?php do_action( 'sc_et_admin_order_ticket_list', $this->order ); ?>
+								<?php endforeach; ?>
 
-                            </tbody>
-                        </table>
+								<?php do_action( 'sc_et_admin_order_ticket_list', $this->order ); ?>
+							</tbody>
+						</table>
 
 						<?php do_action( 'sc_et_admin_order_after_tickets', $this->order ); ?>
 
 						<?php do_action( 'sc_et_admin_order_bottom', $this->order ); ?>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
+					</div>
+				</div>
+			</div>
+		</div>
 		<?php
 	}
 

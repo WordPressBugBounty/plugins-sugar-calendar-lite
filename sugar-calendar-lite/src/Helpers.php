@@ -768,12 +768,9 @@ class Helpers {
 		$tz  = sugar_calendar_get_timezone_type() === 'off' ? 'UTC' : sugar_calendar_get_timezone();
 		$now = sugar_calendar_get_request_time( 'mysql', $tz );
 
-		$today = gmdate( 'Y-m-d 00:00:00', strtotime( $now ) );
-
 		$where_query = $wpdb->prepare(
 			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND '
-			. $wpdb->prefix . 'sc_events.`start` >= %s AND ' . $wpdb->prefix . 'sc_events.`end` >= %s' ,
-			$today,
+			. $wpdb->prefix . 'sc_events.`end` >= %s',
 			$now
 		);
 

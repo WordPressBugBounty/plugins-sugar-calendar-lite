@@ -83,6 +83,15 @@ interface PageInterface {
 	public static function get_priority();
 
 	/**
+	 * Early init.
+	 *
+	 * This method is used for actions/filters that needs to be hooked before `admin_init`.
+	 *
+	 * @since 3.8.0
+	 */
+	public function early_init();
+
+	/**
 	 * Register page hooks.
 	 *
 	 * @since 3.0.0

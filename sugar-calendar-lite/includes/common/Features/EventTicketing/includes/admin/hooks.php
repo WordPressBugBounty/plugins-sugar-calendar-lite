@@ -13,10 +13,11 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'admin_init', __NAMESPACE__ . '\\update', 30 );
 add_action( 'admin_init', __NAMESPACE__ . '\\delete', 30 );
 add_action( 'admin_init', __NAMESPACE__ . '\\resend_receipt', 30 );
-add_action( 'admin_init', __NAMESPACE__ . '\\export_tickets' );
+add_action( 'admin_init', __NAMESPACE__ . '\\maybe_export' );
 add_action( 'admin_init', __NAMESPACE__ . '\\Settings\\process_stripe_connect_completion' );
 add_action( 'admin_init', __NAMESPACE__ . '\\Settings\\process_stripe_disconnect' );
 add_action( 'admin_init', __NAMESPACE__ . '\\Assets\\register' );
+add_filter( 'sugar_calendar_helpers_ui_help_url', __NAMESPACE__ . '\\Settings\\help_url' );
 
 // Admin scripts
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\Assets\\enqueue' );
@@ -42,3 +43,8 @@ add_action( 'sugar_calendar_admin_nav_after_items', __NAMESPACE__ . '\\Nav\\stri
 
 // Admin ajax
 add_action( 'wp_ajax_sugar_calendar_admin_area_handle_post', __NAMESPACE__ . '\\Settings\\handle_post_ajax' );
+
+// Stripe connection validation.
+add_filter( 'sc_et_enable_tickets_toggle_args', __NAMESPACE__ . '\\Metabox\\filter_enable_tickets_args_for_stripe', 10, 2 );
+add_action( 'sc_et_metabox_after_toggle', __NAMESPACE__ . '\\Metabox\\render_stripe_connection_notice', 10, 2 );
+add_filter( 'sc_et_limit_capacity_toggle_args', __NAMESPACE__ . '\\Metabox\\filter_limit_capacity_toggle_args_for_stripe', 10, 3 );

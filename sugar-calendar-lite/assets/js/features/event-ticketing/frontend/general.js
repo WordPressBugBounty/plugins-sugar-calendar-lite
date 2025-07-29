@@ -135,7 +135,6 @@ jQuery( document ).ready( function( $ ) {
 	 * @param {boolean} clearInputs Clear inputs values.
 	 */
 	function setup_attendee_input_attributes( $attendee, index, clearInputs = false ) {
-
 		const intIndex = parseInt( index );
 		const $attendeeDOM = $( $attendee );
 
@@ -159,8 +158,6 @@ jQuery( document ).ready( function( $ ) {
 			}
 		});
 
-		// Update label.
-		$attendeeDOM.find( '.sc-event-ticketing-attendee__input-group__attendee-label' ).text( `Attendee ${intIndex}` );
 
 		// Update key.
 		$attendeeDOM.attr( 'attendee-key', intIndex );
@@ -193,7 +190,6 @@ jQuery( document ).ready( function( $ ) {
 		'click',
 		'.sc-event-ticketing-add-attendee',
 		function() {
-
 			let // Elements.
 				$current_attendee_row = $( this ).parents( '.sc-event-ticketing-attendee' ),
 				$insertAfterElement = $current_attendee_row.next( '.sc-et-error' ).length
@@ -261,13 +257,11 @@ jQuery( document ).ready( function( $ ) {
 	);
 
 	$( 'body' ).on( 'click', '.sc-event-ticketing-remove-attendee', function() {
-
 		const $attendee = $( this ).closest( '.sc-event-ticketing-attendee' );
 
 		let attendee_count = $( '.sc-event-ticketing-attendee' ).length;
 
 		if ( attendee_count > 1 ) {
-
 			// Delete next if it's an error.
 			$attendee.next( '.sc-et-error' ).remove();
 
@@ -278,9 +272,7 @@ jQuery( document ).ready( function( $ ) {
 				$( '.sc-event-ticketing-attendee-controls-group' ).find( '.sc-event-ticketing-remove-attendee' )
 					.addClass( 'sc-event-ticketing-control-inactive' );
 			}
-
 		} else {
-
 			// Clear the input fields
 			$( 'input', '.sc-event-ticketing-attendee' ).val( '' );
 		}
@@ -309,12 +301,16 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$( '#sc-event-ticketing-copy-billing-attendee' ).on( 'click', function (event) {
-
 		event.preventDefault();
 
-		$( 'input[name="attendees[1][first_name]"]', '.sc-event-ticketing-attendee' ).val( $( '#sc-event-ticketing-first-name' ).val() );
-		$( 'input[name="attendees[1][last_name]"]',  '.sc-event-ticketing-attendee' ).val( $( '#sc-event-ticketing-last-name'  ).val() );
-		$( 'input[name="attendees[1][email]"]',      '.sc-event-ticketing-attendee' ).val( $( '#sc-event-ticketing-email'      ).val() );
+		const billingFirstName = $( '#sc-event-ticketing-first-name' ).val();
+		const billingLastName = $( '#sc-event-ticketing-last-name' ).val();
+		const fullName = $.trim( billingFirstName + ' ' + billingLastName );
+
+		$( 'input[name="attendees[1][full_name]"]', '.sc-event-ticketing-attendee' ).val( fullName );
+		$( 'input[name="attendees[1][first_name]"]', '.sc-event-ticketing-attendee' ).val( billingFirstName );
+		$( 'input[name="attendees[1][last_name]"]', '.sc-event-ticketing-attendee' ).val( billingLastName );
+		$( 'input[name="attendees[1][email]"]', '.sc-event-ticketing-attendee' ).val( $( '#sc-event-ticketing-email' ).val() );
 	});
 
 	$( '#sc-event-ticketing-cancel' ).on( 'click', function () {
@@ -327,8 +323,22 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$checkoutForm.on( 'submit', function (event) {
-
 		event.preventDefault();
+
+		// Split full names into first/last names before submission
+		$( '.sc-event-ticketing-attendee' ).each( function() {
+			const $attendee = $( this );
+			const fullName = $attendee.find( '.sc-event-ticketing-attendee__input-full-name' ).val();
+
+			if ( fullName ) {
+				const nameParts = fullName.trim().split( /\s+/ );
+				const firstName = nameParts[0] || '';
+				const lastName = nameParts.slice(1).join(' ') || '';
+
+				$attendee.find( '.sc-event-ticketing-attendee__input-first-name' ).val( firstName );
+				$attendee.find( '.sc-event-ticketing-attendee__input-last-name' ).val( lastName );
+			}
+		});
 
 		let form = $( this );
 

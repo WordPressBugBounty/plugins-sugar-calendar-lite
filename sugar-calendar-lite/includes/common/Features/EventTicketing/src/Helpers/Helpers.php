@@ -17,6 +17,7 @@ class Helpers {
 	 * Get the remaining tickets for an event.
 	 *
 	 * @since 3.1.0
+	 * @since 3.8.0 Added filter to allow for customizing the remaining tickets calculation.
 	 *
 	 * @param \Sugar_Calendar\Event $event Event object.
 	 *
@@ -40,7 +41,17 @@ class Helpers {
 			return 0;
 		}
 
-		return ( Functions\get_available_tickets( $event->id ) ) >= 1;
+		$is_ticket_available = ( Functions\get_available_tickets( $event->id ) ) >= 1;
+
+		/**
+		 * Filter the remaining tickets for an event.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param bool                  $is_ticket_available Whether or not tickets are available.
+		 * @param \Sugar_Calendar\Event $event               The event object.
+		 */
+		return apply_filters( 'sugar_calendar_add_on_ticketing_helpers_get_event_remaining_tickets', $is_ticket_available, $event );
 	}
 
 	/**

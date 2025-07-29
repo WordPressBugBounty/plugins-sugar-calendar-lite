@@ -26,7 +26,7 @@ class EmailsConfigTab {
 
 	/**
 	 * Configure Emails section.
-	 * 
+	 *
 	 * @since 3.7.0
 	 */
 	public function configure_emails_section() {
@@ -84,9 +84,10 @@ class EmailsConfigTab {
 		?>
 
 		<div id="sugar-calendar-settings-emails-configuration-lists">
-			<?php
 
-			foreach ( $emails_to_configure as $id => $email_config ) {
+			<?php foreach ( $emails_to_configure as $id => $email_config ) : ?>
+
+				<?php
 				$email_config_url = add_query_arg(
 					[
 						'section'   => 'emails',
@@ -94,35 +95,47 @@ class EmailsConfigTab {
 					],
 					$admin_url
 				);
+
+				ob_start();
 				?>
-				<div class="sugar-calendar-settings-emails-configuration-lists__block">
-					<div class="sugar-calendar-settings-emails-configuration-lists__block__body">
-						<div class="sugar-calendar-settings-emails-configuration-lists__block__body__title">
-							<?php echo esc_html( $email_config['title'] ); ?>
-						</div>
-						<div class="sugar-calendar-settings-emails-configuration-lists__block__body__desc">
-							<?php echo esc_html( $email_config['description'] ); ?>
-						</div>
-					</div>
-					<div class="sugar-calendar-settings-emails-configuration-lists__block__edit">
-						<?php
-						if ( ! empty( $email_config['pro_only'] ) && $email_config['pro_only'] ) {
-							printf(
-								'<span class="sugar-calendar__badge__pro-only">PRO</span>'
-							);
-						} else {
-							printf(
-								'<a href="%1$s"><span class="dashicons dashicons-edit"></span></a>',
-								esc_url( $email_config_url )
-							);
-						}
-						?>
-					</div>
-				</div>
+
+				<span class="sugar-calendar-settings-emails-configuration-lists__block__body">
+					<span class="sugar-calendar-settings-emails-configuration-lists__block__body__title">
+						<?php echo esc_html( $email_config['title'] ); ?>
+					</span>
+					<span class="sugar-calendar-settings-emails-configuration-lists__block__body__desc">
+						<?php echo esc_html( $email_config['description'] ); ?>
+					</span>
+				</span>
+
+				<?php if ( ! empty( $email_config['pro_only'] ) ) : ?>
+
+					<span class="sugar-calendar__badge__pro-only">PRO</span>
+
+				<?php else: ?>
+
+					<span class="sugar-calendar-settings-emails-configuration-lists__block__edit__icon"></span>
+
+				<?php endif; ?>
+
 				<?php
-			}
-			?>
+				$email_block = ob_get_clean();
+
+				if ( ! empty( $email_config['pro_only'] ) ) :
+					?>
+
+					<div class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo $email_block; ?></div>
+
+				<?php else : ?>
+
+					<a href="<?php echo esc_url( $email_config_url ); ?>" class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo $email_block; ?></a>
+
+				<?php endif; ?>
+
+			<?php endforeach; ?>
+
 		</div>
+
 		<?php
 	}
 
@@ -221,15 +234,17 @@ class EmailsConfigTab {
 		);
 		?>
 
-		<p class="desc">
-			<?php esc_html_e( 'The full message included in the emailed order receipts. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
-		</p>
-		<dl class="sc-et-email-tags-list">
-		<?php
-		echo $this->get_emails_tags_list( 'order' );
-		echo $this->get_emails_tags_list( 'event' );
-		?>
-		</dl>
+		<div class="sc-admin__settings__emails__tags">
+			<p class="description">
+				<?php esc_html_e( 'Dynamic Placeholders', 'sc-rsvp' ); ?>
+			</p>
+			<div class="sc-admin__settings__emails__tags__list">
+				<?php
+				echo $this->get_emails_tags_list( 'order' );
+				echo $this->get_emails_tags_list( 'event' );
+				?>
+			</div>
+		</div>
 		<?php
 		return ob_get_clean();
 	}
@@ -253,16 +268,18 @@ class EmailsConfigTab {
 			]
 		);
 		?>
-		<p class="description">
-			<?php esc_html_e( 'The message sent when emailing a ticket to an attendee. The following dynamic placeholders can be used:', 'sugar-calendar-lite' ); ?>
-		</p>
-		<dl class="sc-et-email-tags-list">
-			<?php
-			echo $this->get_emails_tags_list( 'ticket' );
-			echo $this->get_emails_tags_list( 'event' );
-			echo $this->get_emails_tags_list( 'attendee' );
-			?>
-		</dl>
+		<div class="sc-admin__settings__emails__tags">
+			<p class="description">
+				<?php esc_html_e( 'Dynamic Placeholders', 'sc-rsvp' ); ?>
+			</p>
+			<div class="sc-admin__settings__emails__tags__list">
+				<?php
+				echo $this->get_emails_tags_list( 'ticket' );
+				echo $this->get_emails_tags_list( 'event' );
+				echo $this->get_emails_tags_list( 'attendee' );
+				?>
+			</div>
+		</div>
 		<?php
 
 		return ob_get_clean();
@@ -285,12 +302,14 @@ class EmailsConfigTab {
 
 		if ( count( $email_tags ) > 0 ) :
 			foreach ( $email_tags as $email_tag ) : ?>
-			<dt>
-				<code>{<?php echo $email_tag['tag']; ?>}</code>
-			</dt>
-			<dd>
-				<?php echo $email_tag['description']; ?>
-			</dd>
+				<div class="sc-admin__settings__emails__tags__list__item">
+					<div class="sc-admin__settings__emails__tags__list__item__tag">
+						<code>{<?php echo $email_tag['tag']; ?>}</code>
+					</div>
+					<div class="sc-admin__settings__emails__tags__list__item__desc">
+						<?php echo $email_tag['description']; ?>
+					</div>
+				</div>
 			<?php endforeach;
 		endif;
 
