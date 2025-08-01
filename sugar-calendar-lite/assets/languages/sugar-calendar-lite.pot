@@ -1,21 +1,21 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.8.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.8.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-07-29T11:37:38+00:00\n"
+"POT-Creation-Date: 2025-08-01T07:44:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: sugar-calendar-lite\n"
 
 #. Plugin Name of the plugin
 #. Author of the plugin
-#: src/Admin/Area.php:299
 #: src/Admin/Area.php:300
+#: src/Admin/Area.php:301
 #: src/Admin/Tools/DashboardWidget.php:120
 #: src/Block/Calendar/Loader.php:431
 msgid "Sugar Calendar"
@@ -3079,32 +3079,32 @@ msgstr ""
 msgid "%s addon"
 msgstr ""
 
-#: src/Admin/Area.php:89
+#: src/Admin/Area.php:90
 msgid "Invalid request!"
 msgstr ""
 
-#: src/Admin/Area.php:93
+#: src/Admin/Area.php:94
 msgid "Status is required"
 msgstr ""
 
-#: src/Admin/Area.php:99
+#: src/Admin/Area.php:100
 msgid "Status invalid!"
 msgstr ""
 
-#: src/Admin/Area.php:438
 #: src/Admin/Area.php:439
+#: src/Admin/Area.php:440
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: src/Admin/Area.php:962
+#: src/Admin/Area.php:963
 msgid "Security check failed. Please try again."
 msgstr ""
 
-#: src/Admin/Area.php:979
+#: src/Admin/Area.php:980
 msgid "Missing required data. Please try again."
 msgstr ""
 
-#: src/Admin/Area.php:997
+#: src/Admin/Area.php:998
 msgid "Failed to save column preferences. Please try again."
 msgstr ""
 

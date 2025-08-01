@@ -32,6 +32,7 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;
 use WP_Exception;
+use WP_Screen;
 
 use function Sugar_Calendar\Admin\Settings\get_sections;
 
@@ -1132,6 +1133,7 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 * @since 3.3.0 Add wp-date script as a dependency for admin-event-meta-box script.
+	 * @since 3.8.1 Change the usage of apply filters to check if screen options is shown.
 	 *
 	 * @param string $hook The current admin page.
 	 */
@@ -1278,9 +1280,10 @@ class Area {
 			true
 		);
 
+		$wp_screen = get_current_screen();
+
 		// Only enqueue if Screen Options is displayed.
-		// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation, WPForms.PHP.ValidateHooks.InvalidHookName
-		if ( apply_filters( 'screen_options_show_screen', false ) ) {
+		if ( $wp_screen instanceof WP_Screen && $wp_screen->show_screen_options() ) {
 			wp_enqueue_script( 'sugar-calendar-admin-screen-options' );
 		}
 
