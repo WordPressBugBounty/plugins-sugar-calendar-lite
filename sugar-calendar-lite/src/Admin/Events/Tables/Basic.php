@@ -953,6 +953,28 @@ class Basic extends Base {
 	}
 
 	/**
+	 * Get the search result count for List mode.
+	 *
+	 * Uses the same filtered/deduped list that is actually rendered so the
+	 * count in the search reset summary matches the visible rows.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return int
+	 */
+	protected function get_search_result_count() {
+
+		// Build the list with the same filter pipeline as display_mode().
+		$list_items = apply_filters(
+			'sugar_calendar_admin_events_tables_basic_items_display_before',
+			$this->filtered_items,
+			$this
+		);
+
+		return is_array( $list_items ) ? count( $list_items ) : 0;
+	}
+
+	/**
 	 * Message to be displayed when there are no items.
 	 *
 	 * @since 2.0.0

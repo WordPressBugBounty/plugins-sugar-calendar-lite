@@ -42,9 +42,6 @@ function register() {
 	// Admin
 //	wp_register_script( 'sugar_calendar_admin_general', "{$url}js/sc-admin.js", $chosen, $ver, false );
 
-	// Meta Box
-//	wp_register_script( 'sugar_calendar_admin_meta_box', "{$url}js/sc-meta-box.js", $general, $ver, false );
-
 	// Calendar
 	wp_register_script( 'sugar_calendar_admin_calendar', "{$url}js/sc-calendar.js", $dialog, $ver, false );
 
@@ -69,9 +66,6 @@ function register() {
 	// Calendar
 	wp_register_style( 'sugar_calendar_admin_calendar', "{$url}css/{$path}sc-calendar.css", $deps, $ver, 'all' );
 	wp_register_style( 'sugar_calendar_admin_datepicker', "{$url}css/{$path}sc-datepicker.css", $deps, $ver, 'all' );
-
-	// Meta-box
-//	wp_register_style( 'sugar_calendar_admin_meta_box', "{$url}css/{$path}sc-meta-box.css", $deps, $ver, 'all' );
 
 	// Settings
 //	wp_register_style( 'sugar_calendar_admin_settings', "{$url}css/{$path}sc-settings.css", $deps, $ver, 'all' );

@@ -1309,6 +1309,7 @@ class Base extends WP_List_Table {
 	 * Get the current term for a taxonomy.
 	 *
 	 * @since 2.0.0
+	 * @since 3.8.2 Add custom sanitization for tags.
 	 *
 	 * @param string $taxonomy_name Taxonomy name.
 	 * @param string $default       Default name.
@@ -1317,7 +1318,13 @@ class Base extends WP_List_Table {
 	 */
 	protected function get_tax_term( $taxonomy_name = '', $default = '' ) {
 
-		return $this->get_request_var( $taxonomy_name, 'sanitize_key', $default );
+		$sanitize_function = 'sanitize_key';
+
+		if ( $taxonomy_name === TagsHelper::get_tags_taxonomy_id() ) {
+			$sanitize_function = 'sanitize_text_field';
+		}
+
+		return $this->get_request_var( $taxonomy_name, $sanitize_function, $default );
 	}
 
 	/**
@@ -2295,6 +2302,34 @@ class Base extends WP_List_Table {
 	public function get_event_edit_link( $event = false, $link_text = '' ) {
 
 		/**
+		 * Allow filtering of the link text (e.g., preserve event title for recurrences).
+		 *
+		 * @since 3.8.2
+		 *
+		 * @param string $link_text Text of the link.
+		 * @param Event  $event     Event object.
+		 */
+		$link_text = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_events_table_event_edit_link_text',
+			$link_text,
+			$event
+		);
+
+		/**
+		 * Allow filtering of the link URL (e.g., preserve event title for recurrences).
+		 *
+		 * @since 3.8.2
+		 *
+		 * @param string $link_url  The event edit link.
+		 * @param Event  $event     Event object.
+		 */
+		$link_url = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_admin_events_table_event_edit_link_url',
+			$this->get_event_edit_url( $event ),
+			$event
+		);
+
+		/**
 		 * Filter the event edit link.
 		 *
 		 * @since 3.6.0
@@ -2304,7 +2339,7 @@ class Base extends WP_List_Table {
 		 */
 		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_admin_events_table_event_edit_link',
-			'<a href="' . esc_url( $this->get_event_edit_url( $event ) ) . '">' . $link_text . '</a>',
+			'<a href="' . esc_url( $link_url ) . '">' . $link_text . '</a>',
 			$event
 		);
 	}
@@ -3126,6 +3161,7 @@ class Base extends WP_List_Table {
 	 * Output an event filter form.
 	 *
 	 * @since 3.0.0
+	 * @since 3.8.2 Added tags parameter preservation for pagination.
 	 *
 	 * @param string $content Form contents.
 	 *
@@ -3175,6 +3211,15 @@ class Base extends WP_List_Table {
 
 			<?php endforeach; ?>
 
+			<?php
+			// Preserve tags filter parameter during form submission.
+			$tags = $this->get_tags();
+
+			if ( ! empty( $tags ) ) :
+			?>
+                <input type="hidden" name="sc_event_tags" value="<?php echo esc_attr( implode( ',', $tags ) ); ?>">
+			<?php endif; ?>
+
 			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </form>
 		<?php
@@ -3209,18 +3254,82 @@ class Base extends WP_List_Table {
 	 */
 	public function event_search() {
 
-		ob_start()
+		// Display search reset summary when a search is active.
+		$search_term = $this->get_search();
+
+		ob_start();
+
+		if ( ! empty( $search_term ) ) {
+
+			$total_count = $this->get_search_result_count();
+
+			Helper::display_search_reset(
+				$total_count,
+				strtolower( esc_html__( 'event', 'sugar-calendar-lite' ) ),
+				strtolower( esc_html__( 'events', 'sugar-calendar-lite' ) ),
+				esc_html__( 'Events', 'sugar-calendar-lite' ),
+				remove_query_arg( 's', $this->get_persistent_url() )
+			);
+		}
 		?>
 
         <p class="search-box">
             <label for="event-search-input" class="screen-reader-text"><?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?></label>
-            <input type="search" id="event-search-input" class="search" name="s" value="<?php _admin_search_query(); ?>">
+            <input type="search" id="event-search-input" class="search" placeholder="<?php esc_html_e( 'Search Event...', 'sugar-calendar-lite' ); ?>" name="s" value="<?php _admin_search_query(); ?>">
             <input type="submit" id="search-submit" class="button" value="<?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?>">
         </p>
 
 		<?php
 
 		$this->event_filter_form( ob_get_clean() );
+	}
+
+	/**
+	 * Get the search result count to display in the search reset summary.
+	 *
+	 * Subclasses can override to align the count with what is actually rendered
+	 * on screen for the current mode (e.g., list vs. calendar views).
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return int
+	 */
+	protected function get_search_result_count() {
+
+		// If searching and there are no prepared items at all, report 0.
+		$has_search  = ( $this->get_search() !== '' );
+		$no_filtered = empty( $this->filtered_items );
+		$no_all      = empty( $this->all_items );
+		$no_query    = ( ! isset( $this->query ) || empty( $this->query->items ) );
+
+		if ( $has_search && $no_filtered && $no_all && $no_query ) {
+			return 0;
+		}
+
+		if ( ! empty( $this->filtered_items ) && is_array( $this->filtered_items ) ) {
+
+			$ids = array_map( 'absint', wp_list_pluck( $this->filtered_items, 'id' ) );
+
+			return count( array_unique( $ids ) );
+		}
+
+		if ( ! empty( $this->all_items ) && is_array( $this->all_items ) ) {
+
+			$ids = array_map( 'absint', wp_list_pluck( $this->all_items, 'id' ) );
+
+			return count( array_unique( $ids ) );
+		}
+
+		if ( isset( $this->query ) && ! empty( $this->query->items ) && is_array( $this->query->items ) ) {
+
+			$ids = array_map( 'absint', wp_list_pluck( $this->query->items, 'id' ) );
+
+			return count( array_unique( $ids ) );
+		}
+
+		$counts = $this->get_item_counts();
+
+		return isset( $counts['total'] ) ? absint( $counts['total'] ) : 0;
 	}
 
 	/**
@@ -4333,5 +4442,17 @@ class Base extends WP_List_Table {
 	public function get_all_items() {
 
 		return $this->all_items;
+	}
+
+	/**
+	 * Get filtered items.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return Event[]
+	 */
+	public function get_filtered_items() {
+
+		return $this->filtered_items;
 	}
 }

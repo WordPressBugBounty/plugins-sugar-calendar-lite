@@ -8,7 +8,7 @@ use Sugar_Calendar\Event;
 
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket_data;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket_data_temporary;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\stripe_is_connected;
+use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\ticketing_provider_available_for_admin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -117,6 +117,7 @@ function metabox_section( $event = null ) {
  * Render the ticket fields section.
  *
  * @since 3.8.0
+ * @since 3.8.2 Changed: Disable fields unless a ticketing provider is available (Stripe connected or WooCommerce configured).
  *
  * @param Event $event          The event object.
  * @param int   $ticket_type_id The ticket type ID.
@@ -150,7 +151,7 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
 		? 'sugar-calendar-metabox__field-row--ticket_limit_capacity-enabled'
 		: 'sugar-calendar-metabox__field-row--ticket_limit_capacity-disabled';
 
-	$disabled = ! stripe_is_connected();
+	$disabled = ! ticketing_provider_available_for_admin();
 
 	/**
 	 * Fires before the ticket fields.
@@ -269,6 +270,7 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
  * Filter enable tickets toggle args to disable when Stripe is not connected.
  *
  * @since 3.8.0
+ * @since 3.8.2 Changed: Gate by ticketing provider availability (Stripe connected or WooCommerce configured).
  *
  * @param array $args  Args for the UI toggle.
  * @param Event $event The Event object.
@@ -277,7 +279,7 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
  */
 function filter_enable_tickets_args_for_stripe( $args, $event ) {
 
-	if ( ! stripe_is_connected() ) {
+	if ( ! ticketing_provider_available_for_admin() ) {
 		$args['disabled'] = true;
 	}
 
@@ -288,6 +290,7 @@ function filter_enable_tickets_args_for_stripe( $args, $event ) {
  * Render Stripe connection notice after the enable tickets toggle.
  *
  * @since 3.8.0
+ * @since 3.8.2 Add WooCommerce installed check.
  *
  * @param Event $event Event object.
  */
@@ -295,26 +298,37 @@ function render_stripe_connection_notice( $event ) {
 
 	$hide_class = '';
 
-	if ( stripe_is_connected() ) {
+	if ( ticketing_provider_available_for_admin() ) {
 		$hide_class = 'sugar-calendar-metabox__notice__hide';
 	}
 
 	$settings_url = admin_url( 'admin.php?page=sugarcalendar-settings&section=payments#sugar-calendar-setting-stripe-connection' );
+
+	/**
+	 * Filter the Stripe connection notice text.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param string $notice_text  The notice text.
+	 * @param string $settings_url The settings URL.
+	 *
+	 * @return string
+	 */
+	$notice_text = apply_filters(
+		'sc_et_stripe_connection_notice_text',
+		sprintf(
+			/* translators: %s - URL to payment settings page. */
+			__( 'Ticket Sales cannot be used until <a href="%s">Stripe is connected</a>.', 'sugar-calendar-lite' ),
+			esc_url( $settings_url )
+		),
+		$settings_url
+	);
+
 	?>
 	<div id="sugar-calendar-metabox__stripe-connection-notice" class="sugar-calendar-metabox__notice <?php echo esc_attr( $hide_class ); ?>">
 		<span class="dashicons dashicons-info-outline"></span>
 		<p>
-			<?php
-			printf(
-				/* translators: %s - URL to payment settings page. */
-				esc_html__( 'Ticket Sales cannot be used when %s.', 'sugar-calendar-lite' ),
-				sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( $settings_url ),
-					esc_html__( 'Stripe is not connected', 'sugar-calendar-lite' )
-				)
-			);
-			?>
+			<?php echo wp_kses( $notice_text, [ 'a' => [ 'href' => [] ] ] ); ?>
 		</p>
 	</div>
 	<?php
@@ -333,7 +347,7 @@ function render_stripe_connection_notice( $event ) {
  */
 function filter_limit_capacity_toggle_args_for_stripe( $args, $event, $ticket_type_id ) {
 
-	if ( ! stripe_is_connected() ) {
+	if ( ! ticketing_provider_available_for_admin() ) {
 		$args['disabled'] = true;
 	}
 

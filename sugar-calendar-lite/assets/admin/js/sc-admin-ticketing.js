@@ -29,13 +29,30 @@
 				eventsChoicesDom,
 				{
 					duplicateItemsAllowed: false,
-					itemSelectText: sc_admin_ticketing.strings.select_event,
+					itemSelectText: '',
 					placeholderValue: sc_admin_ticketing.strings.select_event,
 					removeItemButton: true,
 					removeItems: true,
 					searchFloor: 0,
 					searchPlaceholderValue: sc_admin_ticketing.strings.select_event,
 					shouldSort: false,
+					maxItemCount: 1,
+					closeDropdownOnSelect: true,
+					singleModeForMultiSelect: true,
+					noChoicesText: sc_admin_ticketing.strings.no_results_text,
+					loadingText: sc_admin_ticketing.strings.select_event,
+					callbackOnInit: function() {
+						const $selected = $( '.sugar-calendar-ticketing__admin__list__actions__choices-events > .choices .choices__list--multiple' ).first();
+						const $input = $( '.sugar-calendar-ticketing__admin__list__actions__choices-events .choices .choices__inner input.choices__input[type="search"]' ).first();
+
+						if ( $selected.length && ! $selected.is( ':empty' ) ) {
+							$input.attr( 'placeholder', '' );
+							$input.addClass( 'sc-et-hide-carat' );
+						} else {
+							$input.attr( 'placeholder', sc_admin_ticketing.strings.select_event );
+							$input.removeClass( 'sc-et-hide-carat' );
+						}
+					}
 				}
 			);
 
@@ -65,6 +82,23 @@
 				'search',
 				debouncedFetchEventsData
 			);
+
+			// Mirror RSVP UX: manage placeholder visibility when item added/removed.
+			eventsChoicesDom.addEventListener( 'addItem', function() {
+				const $input = $( '.sugar-calendar-ticketing__admin__list__actions__choices-events .choices .choices__inner input.choices__input[type="search"]' ).first();
+				$input.attr( 'placeholder', '' );
+				$input.addClass( 'sc-et-hide-carat' );
+			} );
+
+			eventsChoicesDom.addEventListener( 'removeItem', function() {
+				const $selected = $( '.sugar-calendar-ticketing__admin__list__actions__choices-events > .choices .choices__list--multiple' ).first();
+				const $input = $( '.sugar-calendar-ticketing__admin__list__actions__choices-events .choices .choices__inner input.choices__input[type="search"]' ).first();
+
+				if ( $selected.length && $selected.is( ':empty' ) ) {
+					$input.attr( 'placeholder', sc_admin_ticketing.strings.select_event );
+					$input.removeClass( 'sc-et-hide-carat' );
+				}
+			} );
 
 			/**
 			 * Update the Events choices.

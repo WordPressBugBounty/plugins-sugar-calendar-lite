@@ -620,6 +620,7 @@ final class Event extends Row {
 	 * Get the display time to be rendered.
 	 *
 	 * @since 3.1.2
+	 * @since 3.8.2 Updated to match EventView logic for consistency.
 	 *
 	 * @return string
 	 */
@@ -635,7 +636,13 @@ final class Event extends Row {
 
 		$time_format = Options::get( 'time_format' );
 
-		$start_time_output = Helpers::get_event_time_output( $this, $time_format );
+		$start_time_output = Helpers::get_event_time_output(
+			$this,
+			Helpers::maybe_remove_timezone_format( $time_format, 'time', $this ),
+			'start',
+			false,
+			( ! Helpers::event_has_multiple_timezones( $this ) ) // Hide the conversion timezone if the event has same timezone.
+		);
 
 		if ( empty( $this->end ) ) {
 			return $start_time_output;

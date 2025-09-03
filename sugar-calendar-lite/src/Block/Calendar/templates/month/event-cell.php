@@ -27,9 +27,10 @@ use Sugar_Calendar\Helper;
 			$context->get_event()->get_event_time(),
 			[
 				'time' => [
-					'datetime'      => true,
-					'title'         => true,
-					'data-timezone' => true,
+					'datetime'               => true,
+					'title'                  => true,
+					'data-timezone'          => true,
+					'data-conversion-format' => true,
 				],
 			]
 		);

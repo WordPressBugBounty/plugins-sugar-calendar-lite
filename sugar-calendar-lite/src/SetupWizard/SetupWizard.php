@@ -4,6 +4,7 @@ namespace Sugar_Calendar\SetupWizard;
 
 use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Admin\Pages\Welcome;
+use Sugar_Calendar\Helpers\WP;
 
 /**
  * Class SetupWizard.
@@ -125,6 +126,10 @@ class SetupWizard {
 		}
 
 		if ( empty( $_GET[ self::REDIRECT_PARAMETER ] ) ) {
+			return;
+		}
+
+		if ( WP::is_local_environment() ) {
 			return;
 		}
 

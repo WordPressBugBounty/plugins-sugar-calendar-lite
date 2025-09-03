@@ -115,9 +115,10 @@ class EventView {
 					'class' => true,
 				],
 				'time' => [
-					'datetime'      => true,
-					'title'         => true,
-					'data-timezone' => true,
+					'datetime'               => true,
+					'title'                  => true,
+					'data-timezone'          => true,
+					'data-conversion-format' => true,
 				],
 			]
 		);
@@ -168,14 +169,24 @@ class EventView {
 			Options::get( 'time_format', 'g:i a' )
 		);
 
-		return sprintf(
+		$output = sprintf(
 			/* translators: 1: start date, 2: start time, 3: end date, 4: end time. */
 			'%1$s at %2$s - %3$s at %4$s',
 			$start_date,
-			sugar_calendar_format_date_i18n( $time_format, $this->event->start ),
+			'<span class="sc-frontend-single-event__details__val-time">' .
+				Helpers::get_event_time_output(
+					$this->event,
+					Helpers::maybe_remove_timezone_format( $time_format, 'time', $this->event ),
+					'start',
+					false,
+					( ! Helpers::event_has_multiple_timezones( $this->event ) ) // Hide the conversion timezone if the event has same timezone.
+				) .
+			'</span>',
 			$end_date,
-			sugar_calendar_format_date_i18n( $time_format, $this->event->end )
+			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format, 'end' ) . '</span>'
 		);
+
+		return $output;
 	}
 
 	/**
@@ -183,6 +194,7 @@ class EventView {
 	 *
 	 * @since 3.1.0
 	 * @since 3.7.0 Make the output string filterable.
+	 * @since 3.8.2 Add support for timezone conversion format.
 	 *
 	 * @return string
 	 */
@@ -226,7 +238,15 @@ class EventView {
 			'%1$s <span>%2$s</span> %3$s - %4$s',
 			'<span class="sc-frontend-single-event__details__val-date">' . $event_date . '</span>',
 			esc_html__( 'at', 'sugar-calendar-lite' ),
-			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format ) . '</span>',
+			'<span class="sc-frontend-single-event__details__val-time">' .
+				Helpers::get_event_time_output(
+					$this->event,
+					Helpers::maybe_remove_timezone_format( $time_format, 'time', $this->event ),
+					'start',
+					false,
+					( ! Helpers::event_has_multiple_timezones( $this->event ) ) // Hide the conversion timezone if the event has same timezone.
+				) .
+			'</span>',
 			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format, 'end' ) . '</span>'
 		);
 

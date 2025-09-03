@@ -7,7 +7,7 @@ use WP_Term;
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
-
+use Sugar_Calendar\Helper;
 use Sugar_Calendar\Features\Tags\Common\Helpers;
 use Sugar_Calendar\Features\Tags\Admin\Pages\TagNew;
 use Sugar_Calendar\Helpers as BaseHelpers;
@@ -104,6 +104,7 @@ class Tags extends PageAbstract {
 	 * Enqueue assets.
 	 *
 	 * @since 3.7.0
+	 * @since 3.8.2 Enqueue styles and scripts for search reset.
 	 *
 	 * @return void
 	 */
@@ -112,8 +113,24 @@ class Tags extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-calendars',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendars' . WP::asset_min() . '.css',
-			[],
+			[ 'sugar-calendar-admin-fontawesome' ],
 			BaseHelpers::get_asset_version()
+		);
+
+		wp_enqueue_script(
+			'sugar-calendar-admin-tags',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-tags' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			BaseHelpers::get_asset_version()
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-tags',
+			'sugarCalendarAdminTags',
+			[
+				'searchTagsPlaceholder' => Helpers::get_tags_taxonomy_labels( 'search_items' ),
+				'searchTagsSubmit'      => Helpers::get_tags_taxonomy_labels( 'search_submit' ),
+			]
 		);
 	}
 
@@ -121,6 +138,7 @@ class Tags extends PageAbstract {
 	 * Display the subheader.
 	 *
 	 * @since 3.7.0
+	 * @since 3.8.2 Enqueue helper for search reset.
 	 *
 	 * @return void
 	 */
@@ -148,7 +166,37 @@ class Tags extends PageAbstract {
 		 *
 		 * @since 3.7.0
 		 */
-		do_action( 'sugar_calendar_admin_page_before' );
+		do_action( 'sugar_calendar_admin_page_before' ); //phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+		// Display search reset when searching calendars from taxonomy list screen.
+		if (
+			! empty( $_GET['s'] )
+			&&
+			isset( $_GET['taxonomy'] )
+			&&
+			Helpers::get_tags_taxonomy_id() === sanitize_key( wp_unslash( $_GET['taxonomy'] ) )
+		) {
+
+			$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ) );
+			$results     = get_terms(
+				[
+					'taxonomy'   => Helpers::get_tags_taxonomy_id(),
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'search'     => $search_term,
+				]
+			);
+
+			$total_count = is_wp_error( $results ) ? 0 : count( (array) $results );
+
+			Helper::display_search_reset(
+				$total_count,
+				'tag',
+				'tags',
+				__( 'Tags', 'sugar-calendar-lite' ),
+				admin_url( 'edit-tags.php?taxonomy=' . Helpers::get_tags_taxonomy_id() )
+			);
+		}
 	}
 
 	/**

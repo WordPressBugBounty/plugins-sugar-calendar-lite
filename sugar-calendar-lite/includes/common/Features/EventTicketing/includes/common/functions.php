@@ -1683,6 +1683,32 @@ function stripe_is_connected() {
 }
 
 /**
+ * Whether a ticketing provider is available for admin UI.
+ *
+ * True if Stripe is connected OR WooCommerce integration is configured.
+ *
+ * @since 3.8.2
+ *
+ * @return bool
+ */
+function ticketing_provider_available_for_admin() {
+
+    // Stripe path.
+    if ( stripe_is_connected() ) {
+        return true;
+    }
+
+	/**
+	 * Filter for third party ticketing providers.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param bool $available Whether the ticketing provider is available.
+	 */
+	return apply_filters( 'sc_et_ticketing_provider_available_for_admin', false );
+}
+
+/**
  * Get ticket data for a specific event and ticket type.
  *
  * @since 3.8.0

@@ -358,6 +358,15 @@ class Block extends AbstractBlock {
 			return true;
 		}
 
+		// If events are not loaded due to timezone conversion, show footer.
+		// Pagination should work when events load via JavaScript.
+		if ( $this->should_not_load_events() ) {
+			$events_per_page        = $this->get_settings_attribute_events_per_page();
+			$maximum_events_to_show = $this->get_settings_attributes()['maximumEventsToShow'];
+
+			return ! ( $events_per_page === $maximum_events_to_show );
+		}
+
 		if ( ! $this->has_upcoming_events() ) {
 			return false;
 		}
@@ -455,8 +464,13 @@ class Block extends AbstractBlock {
 			$settings_attrs
 		);
 
+		// Calculate remaining events to respect the maximum events limit.
+		$events_displayed_so_far = ( $page - 1 ) * $events_per_page;
+		$remaining_events        = max( 0, $max_number_of_events - $events_displayed_so_far );
+		$events_to_fetch         = min( $events_per_page, $remaining_events );
+
 		$args = [
-			'number'       => $events_per_page,
+			'number'       => $events_to_fetch,
 			'calendar_ids' => $this->get_calendars(),
 			'search'       => $search_term,
 			'offset'       => ( $page - 1 ) * $events_per_page,
@@ -475,8 +489,8 @@ class Block extends AbstractBlock {
 		/*
 		 * We set `$upcoming_events` to get an additional 1 entry to check if there are more events
 		 */
-		if ( count( $upcoming_events ) > $events_per_page ) {
-			$upcoming_events           = array_slice( $upcoming_events, 0, $events_per_page );
+		if ( count( $upcoming_events ) >= $events_to_fetch ) {
+			$upcoming_events           = array_slice( $upcoming_events, 0, $events_to_fetch );
 			$this->has_upcoming_events = true;
 		}
 
@@ -499,7 +513,10 @@ class Block extends AbstractBlock {
 		// Set pagination flags based on displayed events count.
 		$this->has_previous_events = ( $page > 1 );
 
-		if ( ( $page * $events_per_page ) >= $max_number_of_events ) {
+		// Check if we've reached the maximum events limit.
+		$total_events_displayed = $events_displayed_so_far + count( $upcoming_events );
+
+		if ( $total_events_displayed >= $max_number_of_events ) {
 			$this->has_upcoming_events = false;
 		}
 

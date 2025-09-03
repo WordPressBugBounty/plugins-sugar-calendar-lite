@@ -44,6 +44,7 @@ class Helpers {
 	 * Get the tags taxonomy labels.
 	 *
 	 * @since 3.7.0
+	 * @since 3.8.2 Add search placeholder and search submit.
 	 *
 	 * @param string $key The key of the label to get (optional).
 	 *
@@ -64,7 +65,8 @@ class Helpers {
 
 				'name'                       => esc_html__( 'Tags', 'sugar-calendar-lite' ),
 				'singular_name'              => esc_html__( 'Tag', 'sugar-calendar-lite' ),
-				'search_items'               => esc_html__( 'Search', 'sugar-calendar-lite' ),
+				'search_items'               => esc_html__( 'Search Tag..', 'sugar-calendar-lite' ),
+				'search_submit'              => esc_html__( 'Search', 'sugar-calendar-lite' ),
 				'popular_items'              => esc_html__( 'Popular Tags', 'sugar-calendar-lite' ),
 				'all_items'                  => esc_html__( 'All Tags', 'sugar-calendar-lite' ),
 				'parent_item'                => null,

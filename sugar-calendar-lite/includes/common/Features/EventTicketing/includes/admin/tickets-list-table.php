@@ -6,6 +6,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Database as Database;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\Helper;
 
 // Include the main list table class if it's not included
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -184,7 +185,7 @@ class List_Table extends \WP_List_Table {
 		?>
 		<div class="sugar-calendar-ticketing__admin__list__actions alignleft actions">
 			<span class="sugar-calendar-ticketing__admin__list__actions__choices-events choicesjs-select-wrap">
-				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select">
+				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select" multiple>
 					<?php
 						echo wp_kses(
 							$option,
@@ -246,6 +247,26 @@ class List_Table extends \WP_List_Table {
 			<input type="submit" id="search-submit" class="button" value="<?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?>">
 		</p>
 		<?php
+	}
+
+	/**
+	 * Display the search reset block.
+	 *
+	 * @since 3.8.2
+	 */
+	public function display_search_reset() {
+
+		if ( empty( $_GET['s'] ) ) {
+			return;
+		}
+
+		Helper::display_search_reset(
+			$this->total_count,
+			strtolower( esc_html__( 'ticket', 'sugar-calendar-lite' ) ),
+			strtolower( esc_html__( 'tickets', 'sugar-calendar-lite' ) ),
+			esc_html__( 'Tickets', 'sugar-calendar-lite' ),
+			admin_url( 'admin.php?page=sc-event-ticketing&tab=tickets' )
+		);
 	}
 
 	/** Columns ***************************************************************/
@@ -651,13 +672,25 @@ class List_Table extends \WP_List_Table {
 	 * @since 3.8.0 Respect the user preference for per page items.
 	 * @since 3.8.0 Fix the search for tickets by attendee name.
 	 * @since 3.8.0 Add support for trash status filtering.
+	 * @since 3.8.2 Separate prepare_items method.
 	 */
 	public function prepare_items() {
 
-		// Columns.
-		$columns               = $this->get_columns();
-		$sortable              = $this->get_sortable_columns();
-		$hidden                = [];
+		// Columns and hidden columns based on user preferences (cogwheel UI).
+		$columns  = $this->get_columns();
+		$sortable = $this->get_sortable_columns();
+
+		$active_columns = get_user_meta( get_current_user_id(), 'sugar_calendar_table_tickets_active_columns', true );
+		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $columns );
+
+		// Always include required columns.
+		$required_columns = [ 'cb', 'attendee', 'order' ];
+		$active_columns   = array_unique( array_merge( $required_columns, $active_columns ) );
+
+		// Compute hidden columns and ensure required are never hidden.
+		$hidden = array_diff( array_keys( $columns ), $active_columns );
+		$hidden = array_diff( $hidden, $required_columns );
+
 		$this->_column_headers = [ $columns, $hidden, $sortable ];
 
 		// Sanitize status.

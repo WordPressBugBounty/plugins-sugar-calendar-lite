@@ -337,7 +337,7 @@ class Events extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-events',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-events' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-vendor-tippy' ],
+			[ 'sugar-calendar-vendor-tippy', 'sugar-calendar-admin-fontawesome' ],
 			Helpers::get_asset_version()
 		);
 

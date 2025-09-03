@@ -150,8 +150,9 @@ class Loader {
 	 *
 	 * @since 3.1.0
 	 * @since 3.1.2 Render the time and date inside `<time>` tags.
+	 * @since 3.8.2 Add support for conversion format.
 	 *
-	 * @param \Sugar_Calendar\Event $event The event object.
+	 * @param Event $event The event object.
 	 */
 	public function render_event_date( $event ) {
 		?>
@@ -174,9 +175,10 @@ class Loader {
 							'class' => true,
 						],
 						'time' => [
-							'data-timezone' => true,
-							'datetime'      => true,
-							'title'         => true,
+							'data-timezone'          => true,
+							'data-conversion-format' => true,
+							'datetime'               => true,
+							'title'                  => true,
 						],
 					]
 				);
@@ -200,8 +202,9 @@ class Loader {
 	 * Render the event time.
 	 *
 	 * @since 3.1.0
+	 * @since 3.8.2 Add support for conversion format.
 	 *
-	 * @param \Sugar_Calendar\Event $event The event object.
+	 * @param Event $event The event object.
 	 */
 	public function render_event_time( $event ) {
 
@@ -220,9 +223,10 @@ class Loader {
 					Helpers::get_event_datetime( $event, 'time' ),
 					[
 						'time' => [
-							'data-timezone' => true,
-							'datetime'      => true,
-							'title'         => true,
+							'data-timezone'          => true,
+							'data-conversion-format' => true,
+							'datetime'               => true,
+							'title'                  => true,
 						],
 					]
 				);

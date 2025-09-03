@@ -167,6 +167,9 @@
 		.sugar-calendar-event-list-block__event__datetime {
 			color: $text-color-tertiary;
 			font-weight: 500;
+			display: flex;
+			gap: 4px;
+			align-items: center;
 
 			@include media('<tablet') {
 				font-size: 13px !important;
@@ -179,7 +182,7 @@
 			img {
 				display: inline;
 				height: 15px;
-				margin-left: 8px;
+				margin-left: 4px;
 				vertical-align: middle;
 			}
 

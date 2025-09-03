@@ -59,7 +59,7 @@
 						return;
 					}
 
-					this.$formatExample.text( response.data );
+					this.$formatExample.html( response.data );
 				} ).always( () => this.$spinner.removeClass( 'is-active' ) );
 			}, 400 );
 		}

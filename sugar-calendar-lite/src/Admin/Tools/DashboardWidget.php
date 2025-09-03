@@ -606,6 +606,15 @@ class DashboardWidget {
 			'install-plugin_' . $plugin['slug']
 		);
 
+		$more_url = Helpers::get_utm_url(
+			$plugin['more'],
+			[
+				'source'   => 'WordPress',
+				'medium'   => 'dashboard-widget',
+				'campaign' => 'sugar-calendar-events',
+				'content'  => 'Learn More',
+			]
+		);
 		?>
 		<div class="sugar-calendar-dash-widget-recommended-plugin-block sugar-calendar-dash-widget-block">
 
@@ -618,7 +627,7 @@ class DashboardWidget {
 						<a href="<?php echo esc_url( $install_url ); ?>"><?php esc_html_e( 'Install', 'sugar-calendar-lite' ); ?></a>
 						<span class="sep sep-vertical">&vert;</span>
 					<?php } ?>
-					<a href="<?php echo esc_url( $plugin['more'] ); ?>?utm_source=wpformsplugin&utm_medium=link&utm_campaign=wpformsdashboardwidget"><?php esc_html_e( 'Learn More', 'sugar-calendar-lite' ); ?></a>
+					<a href="<?php echo esc_url( $more_url ); ?>"><?php esc_html_e( 'Learn More', 'sugar-calendar-lite' ); ?></a>
 				</span>
 			</span>
 
@@ -692,72 +701,143 @@ class DashboardWidget {
 	}
 
 	/**
+	 * Check if any plugin in the provided list is active.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param array $plugin_files List of plugin basenames to check.
+	 *
+	 * @return bool
+	 */
+	protected function is_any_plugin_active( $plugin_files ) {
+
+		$plugin_files = (array) $plugin_files;
+
+		// Site-active plugins.
+		$active_plugins = (array) get_option( 'active_plugins', [] );
+
+		// Network-active plugins (Multisite).
+		$network_active_plugins = [];
+
+		if ( is_multisite() ) {
+			$network_active_plugins = array_keys( (array) get_site_option( 'active_sitewide_plugins', [] ) );
+		}
+
+		foreach ( $plugin_files as $plugin_file ) {
+			if ( in_array( $plugin_file, $active_plugins, true ) ) {
+				return true;
+			}
+			if ( in_array( $plugin_file, $network_active_plugins, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get the recommended plugin.
 	 *
-	 * @since 3.7.0
+	 * @since 3.8.2 Updated to add more detectors and recommend plugins.
 	 *
 	 * @return array
 	 */
 	public function get_recommended_plugin() {
 
-		$plugins = [
-			'wp-mail-smtp/wp_mail_smtp.php'               => [
-				'name' => __( 'WP Mail SMTP', 'sugar-calendar-lite' ),
-				'slug' => 'wp-mail-smtp',
-				'more' => 'https://wpmailsmtp.com/',
-				'pro'  => [
-					'file' => 'wp-mail-smtp-pro/wp_mail_smtp.php',
+		// Category-based recommendation map with priority order (SMTP → Forms → SEO).
+		$categories = [
+			'smtp'  => [
+				'detectors' => [
+					'wp-mail-smtp/wp_mail_smtp.php',
+					'fluent-smtp/fluent-smtp.php',
+					'post-smtp/postman-smtp.php',
+					'easy-wp-smtp/easy-wp-smtp.php',
+				],
+				'recommend' => [
+					'file' => 'wp-mail-smtp/wp_mail_smtp.php',
+					'name' => __( 'WP Mail SMTP', 'sugar-calendar-lite' ),
+					'slug' => 'wp-mail-smtp',
+					'more' => 'https://wpmailsmtp.com/',
+					'pro'  => [
+						'file' => 'wp-mail-smtp-pro/wp_mail_smtp.php',
+					],
 				],
 			],
-			'wpforms-lite/wpforms.php'                    => [
-				'name' => __( 'WP Forms', 'sugar-calendar-lite' ),
-				'slug' => 'wpforms-lite',
-				'more' => 'https://wpforms.com/',
-				'pro'  => [
-					'file' => 'wpforms/wpforms.php',
+			'forms' => [
+				'detectors' => [
+					'wpforms-lite/wpforms.php',
+					'wpforms/wpforms.php',
+					'contact-form-7/wp-contact-form-7.php',
+					'ninja-forms/ninja-forms.php',
+					'gravityforms/gravityforms.php',
+					'formidable/formidable.php',
+				],
+				'recommend' => [
+					'file' => 'wpforms-lite/wpforms.php',
+					'name' => __( 'WPForms', 'sugar-calendar-lite' ),
+					'slug' => 'wpforms-lite',
+					'more' => 'https://wpforms.com/',
+					'pro'  => [
+						'file' => 'wpforms/wpforms.php',
+					],
 				],
 			],
-			'google-analytics-for-wordpress/googleanalytics.php' => [
-				'name' => __( 'MonsterInsights', 'sugar-calendar-lite' ),
-				'slug' => 'google-analytics-for-wordpress',
-				'more' => 'https://www.monsterinsights.com/',
-				'pro'  => [
-					'file' => 'google-analytics-premium/googleanalytics-premium.php',
+			'seo'   => [
+				'detectors' => [
+					'all-in-one-seo-pack/all_in_one_seo_pack.php',
+					'all-in-one-seo-pack-pro/all_in_one_seo_pack.php',
+					'wordpress-seo/wp-seo.php',
+					'seo-by-rank-math/seo-by-rank-math.php',
+					'wp-seopress/seopress.php',
+					'autodescription/autodescription.php',
 				],
-			],
-			'all-in-one-seo-pack/all_in_one_seo_pack.php' => [
-				'name' => __( 'AIOSEO', 'sugar-calendar-lite' ),
-				'slug' => 'all-in-one-seo-pack',
-				'more' => 'https://aioseo.com/',
-				'pro'  => [
-					'file' => 'all-in-one-seo-pack-pro/all_in_one_seo_pack.php',
-				],
-			],
-			'coming-soon/coming-soon.php'                 => [
-				'name' => __( 'SeedProd', 'sugar-calendar-lite' ),
-				'slug' => 'coming-soon',
-				'more' => 'https://www.seedprod.com/',
-				'pro'  => [
-					'file' => 'seedprod-coming-soon-pro-5/seedprod-coming-soon-pro-5.php',
+				'recommend' => [
+					'file' => 'all-in-one-seo-pack/all_in_one_seo_pack.php',
+					'name' => __( 'AIOSEO', 'sugar-calendar-lite' ),
+					'slug' => 'all-in-one-seo-pack',
+					'more' => 'https://aioseo.com/',
+					'pro'  => [
+						'file' => 'all-in-one-seo-pack-pro/all_in_one_seo_pack.php',
+					],
 				],
 			],
 		];
 
 		$installed = get_plugins();
 
-		foreach ( $plugins as $id => $plugin ) {
+		foreach ( $categories as $category ) {
 
-			if ( isset( $installed[ $id ] ) ) {
-				unset( $plugins[ $id ] );
+			$detectors = isset( $category['detectors'] ) ? (array) $category['detectors'] : [];
+			$recommend = isset( $category['recommend'] ) ? (array) $category['recommend'] : [];
+
+			if ( empty( $recommend ) ) {
+				continue;
 			}
 
-			if ( isset( $plugin['pro']['file'], $installed[ $plugin['pro']['file'] ] ) ) {
-				unset( $plugins[ $id ] );
+			// Skip this category if any detector is active.
+			if ( ! empty( $detectors ) && $this->is_any_plugin_active( $detectors ) ) {
+				continue;
 			}
+
+			$recommend_file     = isset( $recommend['file'] ) ? $recommend['file'] : '';
+			$recommend_pro_file = isset( $recommend['pro']['file'] ) ? $recommend['pro']['file'] : '';
+
+			// If the recommended plugin is already installed (free or pro), try the next category.
+			if ( ( $recommend_file && isset( $installed[ $recommend_file ] ) ) || ( $recommend_pro_file && isset( $installed[ $recommend_pro_file ] ) ) ) {
+				continue;
+			}
+
+			return [
+				'name' => isset( $recommend['name'] ) ? $recommend['name'] : '',
+				'slug' => isset( $recommend['slug'] ) ? $recommend['slug'] : '',
+				'more' => isset( $recommend['more'] ) ? $recommend['more'] : '',
+				'pro'  => [
+					'file' => $recommend_pro_file,
+				],
+			];
 		}
 
-		// Return the first plugin in the array.
-		return $plugins ? reset( $plugins ) : [];
+		return [];
 	}
 
 	/**

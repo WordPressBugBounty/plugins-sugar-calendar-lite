@@ -28,20 +28,21 @@ function sugar_calendar_get_calendar_taxonomy_id() {
 }
 
 /**
- * Event calendar taxonomy
+ * Get the calendar taxonomy labels.
  *
- * @since 2.0.0
+ * @since 3.8.2
+ *
+ * @param string $key The key of the label to get (optional).
+ *
+ * @return mixed array|string
  */
-function sugar_calendar_register_calendar_taxonomy() {
+function sugar_calendar_get_calendar_taxonomy_labels( $key = null ) {
 
-	// Get the taxonomy ID
-	$tax = sugar_calendar_get_calendar_taxonomy_id();
-
-	// Labels
 	$labels = [
 		'name'                       => esc_html__( 'Calendars', 'sugar-calendar-lite' ),
 		'singular_name'              => esc_html__( 'Calendar', 'sugar-calendar-lite' ),
-		'search_items'               => esc_html__( 'Search', 'sugar-calendar-lite' ),
+		'search_items'               => esc_html__( 'Search Calendar...', 'sugar-calendar-lite' ),
+		'search_submit'              => esc_html__( 'Search', 'sugar-calendar-lite' ),
 		'popular_items'              => esc_html__( 'Popular Calendars', 'sugar-calendar-lite' ),
 		'all_items'                  => esc_html__( 'All Calendars', 'sugar-calendar-lite' ),
 		'parent_item'                => esc_html__( 'Parent Calendar', 'sugar-calendar-lite' ),
@@ -61,13 +62,39 @@ function sugar_calendar_register_calendar_taxonomy() {
 		'back_to_items'              => esc_html__( '&larr; Back to Calendars', 'sugar-calendar-lite' ),
 	];
 
-	// Rewrite rules
+	// Return empty if key is provided but not found.
+	if (
+		$key !== null
+		&&
+		! isset( $labels[ $key ] )
+	) {
+		return '';
+	}
+
+	return $key === null ? $labels : $labels[ $key ];
+}
+
+/**
+ * Event calendar taxonomy.
+ *
+ * @since 2.0.0
+ * @since 3.8.2 Use the new function to get the labels.
+ */
+function sugar_calendar_register_calendar_taxonomy() {
+
+	// Get the taxonomy ID.
+	$tax = sugar_calendar_get_calendar_taxonomy_id();
+
+	// Labels.
+	$labels = sugar_calendar_get_calendar_taxonomy_labels();
+
+	// Rewrite rules.
 	$rewrite = [
 		'slug'       => 'events/calendar',
 		'with_front' => false,
 	];
 
-	// Capabilities
+	// Capabilities.
 	$caps = [
 		'manage_terms' => 'manage_event_calendars',
 		'edit_terms'   => 'edit_event_calendars',
@@ -75,7 +102,7 @@ function sugar_calendar_register_calendar_taxonomy() {
 		'assign_terms' => 'assign_event_calendars',
 	];
 
-	// Arguments
+	// Arguments.
 	$args = [
 		'labels'                => $labels,
 		'rewrite'               => $rewrite,
@@ -94,25 +121,25 @@ function sugar_calendar_register_calendar_taxonomy() {
 		'meta_box_cb'           => 'Sugar_Calendar\\Admin\\Editor\\Meta\\calendars',
 	];
 
-	// Default Calendar
+	// Default Calendar.
 	$default = sugar_calendar_get_default_calendar();
 
-	// Default exists
+	// Default exists.
 	if ( ! empty( $default ) ) {
 
-		// Get term (does not use taxonomy, because it's not registered yet!)
+		// Get term (does not use taxonomy, because it's not registered yet!).
 		$term = get_term( $default );
 
-		// Term exists
+		// Term exists.
 		if ( ! empty( $term->name ) ) {
 			$args['default_term'] = [ 'name' => $term->name ];
 		}
 	}
 
-	// Get the editor type
+	// Get the editor type.
 	$editor = Editor\current();
 
-	// Register
+	// Register.
 	register_taxonomy(
 		$tax,
 		sugar_calendar_get_event_post_type_id(),

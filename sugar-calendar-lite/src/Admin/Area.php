@@ -705,7 +705,6 @@ class Area {
 			'calendars'        => Calendars::class,
 			'calendar_new'     => CalendarNew::class,
 			'calendar_edit'    => CalendarEdit::class,
-			'tags'             => Tags::class,
 			'settings'         => Settings::class,
 			'settings_general' => SettingsGeneralTab::class,
 			'settings_feeds'   => SettingsFeedsTab::class,
@@ -868,6 +867,11 @@ class Area {
 
 		// Only do this for single site installs.
 		if ( isset( $_GET['activate-multi'] ) || is_network_admin() ) { // WPCS: CSRF ok.
+			return;
+		}
+
+		// Skip if it's a local site.
+		if ( WP::is_local_environment() ) {
 			return;
 		}
 
@@ -1172,7 +1176,7 @@ class Area {
 			'sugar-calendar-vendor-choices',
 			SC_PLUGIN_ASSETS_URL . 'lib/choices.min.js',
 			[],
-			'9.0.1'
+			'11.1.0'
 		);
 
 		wp_register_style(

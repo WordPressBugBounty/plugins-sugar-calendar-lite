@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Features\Tags\Admin\Pages;
 
 use Sugar_Calendar\Features\Tags\Common\Helpers;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 
 /**
  * Abstract Event page.
@@ -33,6 +34,7 @@ abstract class EventAbstract {
 	 * Get Choices.js configuration for column values.
 	 *
 	 * @since 3.7.0
+	 * @since 3.8.2 Add search placeholder and search submit.
 	 *
 	 * @return array
 	 */
@@ -45,6 +47,7 @@ abstract class EventAbstract {
 			'noResultsText'     => esc_html__( 'No results found', 'sugar-calendar-lite' ),
 			'noChoicesText'     => esc_html__( 'No tags to choose from', 'sugar-calendar-lite' ),
 			'itemSelectText'    => '',
+			'placeholderValue'  => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
 			'searchEnabled'     => true,
 			'searchChoices'     => true,
 			'searchFloor'       => 1,

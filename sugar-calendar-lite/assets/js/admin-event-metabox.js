@@ -55,6 +55,9 @@
 
 			// Initialize date pickers.
 			this.initDatepickers();
+
+			// Block adjustments.
+			this.initBlockAdjustments();
 		},
 
 		bindEvents: function () {
@@ -262,9 +265,6 @@
 
 				this.$startTimeAmPm.val( this.$endTimeAmPm.val() );
 			} );
-
-			// Setup start and end date range.
-			this.$endDate.datepicker( 'option', 'minDate', this.getDate( this.$startDate.val() ) );
 
 			// Validate dates for block editor. Disable the submit button if the dates are invalid.
 			if ( typeof( wp.blockEditor ) === 'object' ) {
@@ -623,6 +623,50 @@
 
 			// Clear the input field.
 			choicesObj.clearInput();
+		},
+
+		/**
+		 * Initialize block adjustments.
+		 *
+		 * @since 3.8.2
+		 *
+		 * @return {void}
+		 */
+		initBlockAdjustments: function () {
+
+			// Only proceed for block editor.
+			const editorSettings = this.settings.editor || {};
+
+			if ( editorSettings.type !== 'block' ) {
+				return;
+			}
+
+			const postTypeSetting = this.settings.post_type || 'sc_event';
+			const taxonomiesToHide = Array.isArray( editorSettings.taxonomies_to_hide ) ? editorSettings.taxonomies_to_hide : [];
+
+			wp.domReady( function () {
+
+				const { select, dispatch, subscribe } = wp.data;
+
+				const removePanels = () => {
+
+					const postType = select( 'core/editor' ).getCurrentPostType();
+
+					if ( postType !== postTypeSetting ) {
+						return;
+					}
+
+					// Remove the sidebar taxonomy panel(s) for the current post type.
+					taxonomiesToHide.forEach( ( slug ) => {
+						const panelName = 'taxonomy-panel-' + slug;
+						dispatch( 'core/edit-post' ).removeEditorPanel( panelName );
+					} );
+				};
+
+				removePanels();
+
+				subscribe( removePanels );
+			} );
 		},
 	};
 

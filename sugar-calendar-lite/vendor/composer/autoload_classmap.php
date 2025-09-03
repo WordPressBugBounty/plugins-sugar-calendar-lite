@@ -472,6 +472,8 @@ return array(
     'Sugar_Calendar\\Block\\EventList\\EventListView\\PlainView' => $baseDir . '/src/Block/EventList/EventListView/PlainView.php',
     'Sugar_Calendar\\Block\\EventList\\Loader' => $baseDir . '/src/Block/EventList/Loader.php',
     'Sugar_Calendar\\Block\\Loader' => $baseDir . '/src/Block/Loader.php',
+    'Sugar_Calendar\\ConflictFixes\\GiveWP\\GiveWP' => $baseDir . '/src/ConflictFixes/GiveWP/GiveWP.php',
+    'Sugar_Calendar\\ConflictFixes\\Loader' => $baseDir . '/src/ConflictFixes/Loader.php',
     'Sugar_Calendar\\Connect' => $baseDir . '/src/Connect.php',
     'Sugar_Calendar\\Features\\Loader' => $baseDir . '/src/Features/Loader.php',
     'Sugar_Calendar\\Features\\Tags\\Admin\\Area' => $baseDir . '/src/Features/Tags/Admin/Area.php',

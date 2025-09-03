@@ -229,6 +229,9 @@ final class Plugin {
 		// Load the integrations.
 		$this->get_integrations();
 
+		// Load conflict fixes adjustments.
+		$this->get_conflict_fixes();
+
 		// Load the Setup Wizard.
 		$this->get_setup_wizard();
 
@@ -948,6 +951,28 @@ final class Plugin {
 		}
 
 		return $integrations;
+	}
+
+	/**
+	 * Get the conflict fixes adjustments.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return ConflictFixes\Loader
+	 */
+	public function get_conflict_fixes() {
+
+		static $conflict_fixes;
+
+		if ( ! isset( $conflict_fixes ) ) {
+			$conflict_fixes = new ConflictFixes\Loader();
+
+			if ( method_exists( $conflict_fixes, 'init' ) ) {
+				$conflict_fixes->init();
+			}
+		}
+
+		return $conflict_fixes;
 	}
 
 	/**

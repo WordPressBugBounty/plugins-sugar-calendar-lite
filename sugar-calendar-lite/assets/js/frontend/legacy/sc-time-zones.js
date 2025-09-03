@@ -59,6 +59,11 @@ var SCTimeZones = window.SCTimeZones || ( function( document, window, $ ) {
 					org  = time.html(),
 					html = convert( SCTimezoneConvert.time_format, dt, tz );
 
+				// If the conversion format data is available, use it to format the time.
+				if ( time.attr( 'data-conversion-format' ) ) {
+					html = convert( time.attr( 'data-conversion-format' ), dt, tz );
+				}
+
 				// Set original to data attribute, and update HTML
 				time
 					.attr( 'data-original', org )

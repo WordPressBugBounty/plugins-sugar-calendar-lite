@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\Pages;
 
 use Sugar_Calendar\Admin\Tools\Importers\TheEventCalendar;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helpers as BaseHelper;
 
 /**
  * Calendar Migrate Tools tab.
@@ -20,6 +21,26 @@ class ToolsMigrateTab extends Tools {
 	 * @var null|bool Whether migration is possible.
 	 */
 	private static $is_migration_possible = null;
+
+	/**
+	 * Filter the help URL in the Tools page -> Migrate tab.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param string $help_url The help URL.
+	 *
+	 * @return string
+	 */
+	public function help_url( $help_url ) {
+
+		return BaseHelper\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/importing-events-from-the-events-calendar/',
+			[
+				'content' => 'Help',
+				'medium'  => 'tools-migrate',
+			]
+		);
+	}
 
 	/**
 	 * Whether a migration is possible.

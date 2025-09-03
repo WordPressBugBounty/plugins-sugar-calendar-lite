@@ -73,6 +73,16 @@ function display( $post_id = 0, $event = null ) { // phpcs:ignore Generic.Metric
 	$limit_capacity = absint( get_event_meta( $event->id, 'ticket_limit_capacity', true ) );
 	$available      = Functions\get_available_tickets( $event->id );
 
+	/**
+	 * Filter to determine if the limit capacity should be shown.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param bool $show_limit Whether the limit capacity should be shown.
+	 * @param int  $event      The event object.
+	 */
+	$show_limit = apply_filters( 'sc_et_show_limit_capacity', boolval( $limit_capacity ), $event );
+
 	// Only limit if capacity limitation is enabled.
 	$remaining = $limit_capacity ? absint( $available ) : null;
 	$max       = $limit_capacity
@@ -146,7 +156,7 @@ function display( $post_id = 0, $event = null ) { // phpcs:ignore Generic.Metric
 							</div>
 							<div class="sc-event-ticketing-qty-available">
 								<?php
-								if ( $limit_capacity ) {
+								if ( $show_limit ) {
 									/* translators: %d: number of available tickets. */
 									printf( esc_html__( '%d available', 'sugar-calendar-lite' ), absint( $remaining ) );
 								}

@@ -167,4 +167,63 @@ class WP {
 		 */
 		return apply_filters( 'sugar_calendar_admin_url', admin_url( $path, $scheme ), $path, $scheme ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 	}
+
+	/**
+	 * Whether the site is a local installation.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return bool
+	 */
+	public static function is_local_environment() {
+
+		$is_local_environment = false;
+
+		// Check environment.
+		if ( function_exists( 'wp_get_environment_type' ) ) {
+
+			$is_local_environment = in_array(
+				wp_get_environment_type(),
+				[
+					'local',
+					'development',
+				],
+				true
+			);
+		}
+
+		// Check domain.
+		$home_url = home_url();
+
+		if ( strpos( $home_url, '.local' ) !== false ||
+		     strpos( $home_url, '.localhost' ) !== false ||
+		     strpos( $home_url, '.test' ) !== false
+		) {
+			$is_local_environment = true;
+		}
+
+		// Check server address.
+		$server_address = $_SERVER['SERVER_ADDR'] ?? '';
+
+		if ( ! empty( $server_address ) ) {
+			$is_local_environment |= in_array(
+				$server_address,
+				[
+					'127.0.0.1',
+					'::1',
+					'0.0.0.0',
+				],
+				true
+			);
+		}
+
+		/**
+		 * Whether the site is a local installation.
+		 *
+		 * @since 3.8.2
+		 *
+		 * @param bool $is_local_environment Whether the environment is local.
+		 */
+		return apply_filters( 'sugar_calendar_is_local_environment', $is_local_environment );
+	}
 }

@@ -22,6 +22,7 @@ if ( $context->should_group_events_by_week() ) {
 <div id="<?php echo esc_attr( $context->get_block_id() ); ?>"
 	class="<?php echo esc_attr( implode( ' ', $context->get_classes() ) ); ?>"
 	data-attributes="<?php echo esc_attr( wp_json_encode( $context->get_attributes() ) ); ?>"
+	data-paged="<?php echo esc_attr( $context->get_paged() ); ?>"
 	data-ogday="<?php echo esc_attr( $context->get_day_num_without_zero() ); ?>"
 	data-ogmonth="<?php echo esc_attr( $context->get_month_num_without_zero() ); ?>"
 	data-ogyear="<?php echo esc_attr( $context->get_year() ); ?>"

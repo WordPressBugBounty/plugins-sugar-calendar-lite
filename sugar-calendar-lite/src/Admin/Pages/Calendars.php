@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Pages;
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Helper;
 use WP_Term;
 use Sugar_Calendar\Helpers as BaseHelpers;
 
@@ -90,6 +91,7 @@ class Calendars extends PageAbstract {
 	 *
 	 * @since 3.0.0
 	 * @since 3.4.0 Add term_updated_messages filter.
+	 * @since 3.8.2 Add custom "Events" column and renderer; remove default count column.
 	 */
 	public function hooks() {
 
@@ -104,6 +106,12 @@ class Calendars extends PageAbstract {
 
 		// Change the count column label.
 		add_filter( 'manage_edit-sc_event_category_columns', [ $this, 'change_count_column_label' ] );
+
+		// Add custom "Events" column to the Calendars list table.
+		add_filter( 'manage_edit-sc_event_category_columns', [ $this, 'add_event_column' ] );
+
+		// Render content for custom taxonomy columns.
+		add_filter( 'manage_sc_event_category_custom_column', [ $this, 'render_event_column' ], 10, 3 );
 
 		// Set Calendar updated messages.
 		add_filter( 'term_updated_messages', [ $this, 'get_calendar_updated_messages' ] );
@@ -179,8 +187,36 @@ class Calendars extends PageAbstract {
 		 * @since 3.0.0
 		 */
 		do_action( 'sugar_calendar_admin_page_before' ); //phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-		?>
-		<?php
+
+		// Display search reset when searching calendars from taxonomy list screen.
+		if (
+			! empty( $_GET['s'] )
+			&&
+			isset( $_GET['taxonomy'] )
+			&&
+			sugar_calendar_get_calendar_taxonomy_id() === sanitize_key( wp_unslash( $_GET['taxonomy'] ) )
+		) {
+
+			$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ) );
+			$results     = get_terms(
+				[
+					'taxonomy'   => sugar_calendar_get_calendar_taxonomy_id(),
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'search'     => $search_term,
+				]
+			);
+
+			$total_count = is_wp_error( $results ) ? 0 : count( (array) $results );
+
+			Helper::display_search_reset(
+				$total_count,
+				'calendar',
+				'calendars',
+				__( 'Calendars', 'sugar-calendar-lite' ),
+				admin_url( 'edit-tags.php?taxonomy=' . sugar_calendar_get_calendar_taxonomy_id() )
+			);
+		}
 	}
 
 	/**
@@ -357,6 +393,7 @@ class Calendars extends PageAbstract {
 	 * Enqueue assets.
 	 *
 	 * @since 3.0.0
+	 * @since 3.8.2 Enqueue styles and scripts for search reset.
 	 *
 	 * @return void
 	 */
@@ -365,8 +402,24 @@ class Calendars extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-calendars',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendars' . WP::asset_min() . '.css',
-			[],
+			[ 'sugar-calendar-admin-fontawesome' ],
 			BaseHelpers::get_asset_version()
+		);
+
+		wp_enqueue_script(
+			'sugar-calendar-admin-calendars',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-calendars' . WP::asset_min() . '.js',
+			[ 'jquery' ],
+			BaseHelpers::get_asset_version()
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-calendars',
+			'sugarCalendarAdminCalendars',
+			[
+				'searchCalendarsPlaceholder' => sugar_calendar_get_calendar_taxonomy_labels( 'search_items' ),
+				'searchCalendarsSubmit'      => sugar_calendar_get_calendar_taxonomy_labels( 'search_submit' ),
+			]
 		);
 	}
 
@@ -374,6 +427,7 @@ class Calendars extends PageAbstract {
 	 * Change the count column label in the calendar list table.
 	 *
 	 * @since 3.0.0
+	 * @since 3.8.2 Remove default taxonomy count column; use custom Events column instead.
 	 *
 	 * @param array $columns Table columns.
 	 *
@@ -381,8 +435,79 @@ class Calendars extends PageAbstract {
 	 */
 	public function change_count_column_label( $columns ) {
 
-		$columns['posts'] = esc_html__( 'Events', 'sugar-calendar-lite' );
+		// Remove the default count column.
+		if ( isset( $columns['posts'] ) ) {
+			unset( $columns['posts'] );
+		}
 
 		return $columns;
+	}
+
+	/**
+	 * Add custom column "Event2" (slug: event) to Calendars list table.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param array $columns Table columns.
+	 *
+	 * @return array
+	 */
+	public function add_event_column( $columns ) {
+
+		$insertion = [ 'event' => esc_html__( 'Events', 'sugar-calendar-lite' ) ];
+
+		// Insert after the Slug column when possible.
+		if ( isset( $columns['slug'] ) ) {
+			$new = [];
+
+			foreach ( $columns as $key => $label ) {
+				$new[ $key ] = $label;
+
+				if ( $key === 'slug' ) {
+					$new = array_merge( $new, $insertion );
+				}
+			}
+
+			return $new;
+		}
+
+		// Fallback: append at the end.
+		return array_merge( $columns, $insertion );
+	}
+
+	/**
+	 * Render content for custom taxonomy columns.
+	 *
+	 * Currently renders a link with the term's Events count in the "Event2" column.
+	 * This duplicates the Count column temporarily until the Count column is removed.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param string $content The custom column output. Default empty.
+	 * @param string $column  Name of the column being displayed.
+	 * @param int    $term_id Term ID.
+	 *
+	 * @return string
+	 */
+	public function render_event_column( $content, $column, $term_id ) { // phpcs:ignore WPForms.NamingConventions.ValidFunctionName.MethodNameInvalid
+
+		if ( $column === 'event' ) {
+			$term  = get_term( $term_id );
+			$count = $term && ! is_wp_error( $term ) ? (int) $term->count : 0;
+
+			$url = sugar_calendar_get_admin_url(
+				[
+					sugar_calendar_get_calendar_taxonomy_id() => $term ? $term->slug : '',
+				]
+			);
+
+			$content = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $url ),
+				number_format_i18n( $count )
+			);
+		}
+
+		return $content;
 	}
 }

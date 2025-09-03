@@ -205,6 +205,7 @@ abstract class EventAbstract extends PageAbstract {
 
 		return [
 			'notice_title_required' => esc_html__( 'Event name is required', 'sugar-calendar-lite' ),
+			'supports_editor_pre_save' => version_compare( get_bloginfo( 'version' ), '6.7', '>=' ),
 		];
 	}
 
@@ -267,7 +268,7 @@ abstract class EventAbstract extends PageAbstract {
 				],
 				Helpers::get_asset_version()
 			);
-	
+
 			wp_enqueue_script(
 				'sugar-calendar-hand-holding',
 				SC_PLUGIN_ASSETS_URL . 'admin/js/hand-holding' . WP::asset_min() . '.js',

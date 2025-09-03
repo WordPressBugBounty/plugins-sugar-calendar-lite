@@ -408,8 +408,9 @@ class Helpers {
 	 * Get the multi-day date/time.
 	 *
 	 * @since 3.1.0
+	 * @since 3.8.2 Add start date timezone format removal for same timezone events.
 	 *
-	 * @param \Sugar_Calendar\Event $event The event object.
+	 * @param Event $event The event object.
 	 *
 	 * @return string|false
 	 */
@@ -439,7 +440,15 @@ class Helpers {
 			/* translators: 1: start date, 2: start time, 3: end date, 4: end time. */
 			'%1$s at %2$s - %3$s at %4$s',
 			'<span class="sc-frontend-single-event__details__val-date">' . self::get_event_time_output( $event, $date_format ) . '</span>',
-			'<span class="sc-frontend-single-event__details__val-time">' . self::get_event_time_output( $event, $time_format ) . '</span>',
+			'<span class="sc-frontend-single-event__details__val-time">' .
+				self::get_event_time_output(
+					$event,
+					self::maybe_remove_timezone_format( $time_format, 'time', $event ),
+					'start',
+					false,
+					( ! self::event_has_multiple_timezones( $event ) ) // Hide the conversion timezone if the event has same timezone.
+				) .
+			'</span>',
 			'<span class="sc-frontend-single-event__details__val-date">' . self::get_event_time_output( $event, $date_format, 'end' ) . '</span>',
 			'<span class="sc-frontend-single-event__details__val-time">' . self::get_event_time_output( $event, $time_format, 'end' ) . '</span>'
 		);
@@ -450,6 +459,7 @@ class Helpers {
 	 *
 	 * @since 3.1.0
 	 * @since 3.1.2 Refactor the method to output the datetime.
+	 * @since 3.8.2 Add start date timezone format removal for same timezone events.
 	 *
 	 * @param Event  $event        The event object.
 	 * @param string $date_or_time Accept either 'date' or 'time'.
@@ -467,7 +477,13 @@ class Helpers {
 		}
 
 		$format = Options::get( $format );
-		$output = self::get_event_time_output( $event, $format, 'start' );
+		$output = self::get_event_time_output(
+			$event,
+			self::maybe_remove_timezone_format( $format, $date_or_time, $event ),
+			'start',
+			false,
+			( ! self::event_has_multiple_timezones( $event ) ) // Hide the conversion timezone if the event has same timezone.
+		);
 
 		if ( ! empty( $event->end ) && $event->start !== $event->end ) {
 			if (
@@ -482,21 +498,142 @@ class Helpers {
 	}
 
 	/**
+	 * Remove the timezone format from the format.
+	 *
+	 * @param string $format       Date time format.
+	 * @param string $date_or_time Accept either 'date' or 'time'.
+	 * @param Event  $event        The event object.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return string
+	 */
+	public static function maybe_remove_timezone_format( $format, $date_or_time, $event ) {
+
+		// Works only for time.
+		if ( $date_or_time !== 'time' ) {
+			return $format;
+		}
+
+		// If start and end timezone are not the same, return the format.
+		if ( self::event_has_multiple_timezones( $event ) ) {
+			return $format;
+		}
+
+		/**
+		 * Filters the time format characters to remove and validate.
+		 *
+		 * @since 3.8.2
+		 *
+		 * @param array  $format_chars    Array containing timezone symbols, time identifiers, and separators.
+		 * @param string $format          The format saved in the options.
+		 * @param string $date_or_time    Accept either 'date' or 'time'.
+		 * @param Event  $event           The event object.
+		 *
+		 * @return array
+		 */
+		$format_chars = apply_filters(
+			'sugar_calendar_helpers_maybe_remove_timezone_format_characters',
+			[
+				'timezone_format_symbols' => [ 'e', 'O', 'T', 'Z', 'P' ],
+				'time_format_identifiers' => [ 'g', 'G', 'h', 'H', 'i', 's', 'u', 'A', 'a' ],
+				'format_separators'       => [ ':', '/', '-', ',', ';', ' ' ],
+			],
+			$format,
+			$date_or_time,
+			$event
+		);
+
+		// Return if no timezone symbols are found.
+		if ( empty( $format_chars['timezone_format_symbols'] ) ) {
+			return $format;
+		}
+
+		foreach ( $format_chars['timezone_format_symbols'] as $symbol ) {
+			$format = str_replace( $symbol, '', $format );
+		}
+
+		// Character-by-character time format validation and cleanup.
+		$chars       = str_split( $format );
+		$chars_count = count( $chars );
+
+		$last_valid_index = -1;
+
+		for ( $i = 1; $i < $chars_count - 1; $i++ ) {
+
+			$prev_char = $chars[ $i - 1 ];
+			$curr_char = $chars[ $i ];
+			$next_char = $chars[ $i + 1 ];
+
+			// Check if current character is a separator.
+			if ( in_array( $curr_char, $format_chars['format_separators'], true ) ) {
+
+				// Check if previous and next characters are time identifiers.
+				if ( in_array( $prev_char, $format_chars['time_format_identifiers'], true ) && in_array( $next_char, $format_chars['time_format_identifiers'], true ) ) {
+
+					$last_valid_index = $i + 1; // Include the next character.
+				}
+			}
+		}
+
+		// If we found a valid separator pattern, cut the string.
+		if ( $last_valid_index > 0 ) {
+			$format = implode( '', array_slice( $chars, 0, $last_valid_index + 1 ) );
+		}
+
+		// Normalize excess whitespace.
+		return preg_replace( '/\s+/', ' ', trim( $format ) );
+	}
+
+	/**
+	 * Check if an event has different start and end timezones.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param Event $event The event object.
+	 *
+	 * @return bool True if the event has different start and end timezones.
+	 */
+	public static function event_has_multiple_timezones( $event ) {
+
+		// All-day events don't have timezones.
+		if ( $event->is_all_day() ) {
+			return false;
+		}
+
+		// If both timezones are empty, they're the same.
+		if ( empty( $event->start_tz ) && empty( $event->end_tz ) ) {
+			return false;
+		}
+
+		// Compare the timezones.
+		return $event->start_tz !== $event->end_tz;
+	}
+
+	/**
 	 * Get the event time output.
 	 *
 	 * The output is the event time wrapped in `<time>` tag with the datetime attribute.
 	 *
 	 * @since 3.1.2
 	 * @since 3.2.0 Support 'recurrence_end' as the event time type.
+	 * @since 3.8.2 Add support for conversion format.
 	 *
-	 * @param Event  $event           The event object.
-	 * @param string $format          The format saved in the options.
-	 * @param string $event_time_type Accepts 'start', 'end', 'recurrence_start', 'recurrence_end'.
-	 * @param bool   $output_array    Whether to output an array or not.
+	 * @param Event  $event             The event object.
+	 * @param string $format            The format saved in the options.
+	 * @param string $event_time_type   Accepts 'start', 'end', 'recurrence_start', 'recurrence_end'.
+	 * @param bool   $output_array      Whether to output an array or not.
+	 * @param bool   $conversion_format Whether to use the conversion format.
 	 *
 	 * @return string|array
 	 */
-	public static function get_event_time_output( $event, $format, $event_time_type = 'start', $output_array = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	public static function get_event_time_output(
+		$event,
+		$format,
+		$event_time_type = 'start',
+		$output_array = false,
+		$conversion_format = false
+	) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		// Default format.
 		$time_attr_format = 'Y-m-d\TH:i:s';
@@ -544,16 +681,40 @@ class Helpers {
 		if ( $output_array ) {
 			return [
 				'datetime' => $time_attr_dt,
-				'value'    => sugar_calendar_format_date_i18n( $format, $event_time ),
+				'value'    => sugar_calendar_format_date_i18n( $format, $event_time, $time_attr_tz ),
 			];
 		}
 
+		$conversion_format_attr = '';
+
+		if ( $conversion_format ) {
+
+			/**
+			 * Filters the conversion time format.
+			 *
+			 * @since 3.8.2
+			 *
+			 * @param string $conversion_time_format The conversion time format.
+			 * @param Event  $event                  The event object.
+			 * @param string $event_time_type        Accepts 'start', 'end', 'recurrence_start', 'recurrence_end'.
+			 */
+			$conversion_time_format = apply_filters(
+				'sugar_calendar_helpers_get_event_time_output_conversion_time_format',
+				$format,
+				$event,
+				$event_time_type
+			);
+
+			$conversion_format_attr = wp_sprintf( ' data-conversion-format="%s"', $conversion_time_format );
+		}
+
 		return sprintf(
-			'<time datetime="%1$s" title="%2$s" data-timezone="%3$s">%4$s</time>',
+			'<time datetime="%1$s" title="%2$s" data-timezone="%3$s"%5$s>%4$s</time>',
 			esc_attr( $time_attr_dt ),
 			esc_attr( $time_attr_dt ),
 			esc_attr( $time_attr_tz ),
-			esc_html( sugar_calendar_format_date_i18n( $format, $event_time ) )
+			esc_html( sugar_calendar_format_date_i18n( $format, $event_time, $time_attr_tz ) ),
+			$conversion_format_attr
 		);
 	}
 

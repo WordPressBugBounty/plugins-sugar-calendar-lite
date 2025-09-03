@@ -6,6 +6,8 @@ use Sugar_Calendar\Admin\Events\MetaboxInterface;
 use Sugar_Calendar\Event as EventRow;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
+use Sugar_Calendar\Helpers\Helpers as ScHelpers;
+use Sugar_Calendar\Common\Editor;
 
 /**
  * Event metabox.
@@ -1363,6 +1365,11 @@ class Event implements MetaboxInterface {
 					'venue'          => 'Venue',
 					'url'            => 'Link',
 					'tickets'        => 'Tickets',
+				],
+				'post_type'     => sugar_calendar_get_event_post_type_id(),
+				'editor'        => [
+					'type'               => Editor\current(),
+					'taxonomies_to_hide' => [ ScHelpers::get_tags_slug() ],
 				],
 			]
 		);

@@ -54,6 +54,7 @@ class UI {
 	 *
 	 * @since 1.2.0
 	 * @since 3.8.0 Added class support.
+	 * @since 3.8.2 Added render support.
 	 *
 	 * @param array  $tabs     List of tabs.
 	 * @param string $selected Selected tab id.
@@ -116,13 +117,21 @@ class UI {
                 <li
 					<?php echo isset( $nav['wrapper_class'] ) ? 'class="' . esc_attr( $nav['wrapper_class'] ) . '"' : ''; ?>
 				>
-                    <a
-						href="<?php echo esc_url( $nav['url'] ); ?>"
-						<?php echo isset( $nav['id'] ) ? 'id="' . esc_attr( $nav['id'] ) . '"' : ''; ?>
-						class="<?php echo esc_attr( $link_classes ); ?>"
-					>
-						<?php echo esc_html( $nav['name'] ); ?>
-					</a>
+
+					<?php if ( isset( $nav['render'] ) && is_callable( $nav['render'] ) ) : ?>
+
+						<?php call_user_func( $nav['render'], $nav ); ?>
+
+					<?php elseif ( isset( $nav['url'] ) ) : ?>
+
+						<a
+							href="<?php echo esc_url( $nav['url'] ); ?>"
+							<?php echo isset( $nav['id'] ) ? 'id="' . esc_attr( $nav['id'] ) . '"' : ''; ?>
+							class="<?php echo esc_attr( $link_classes ); ?>"
+						>
+							<?php echo esc_html( $nav['name'] ); ?>
+						</a>
+					<?php endif; ?>
                 </li>
 
 			<?php endforeach; ?>

@@ -332,6 +332,93 @@ class Requirements {
 		add_action( 'admin_init', [ $this, 'deactivate' ] );
 		add_action( 'admin_notices', [ $this, 'show_notices' ] );
 		add_action( 'network_admin_notices', [ $this, 'show_notices' ] );
+
+		// Allow addons to standardize the unmet Sugar Calendar requirement notice format.
+		add_filter( 'sugar_calendar_requirements_notice', [ $this, 'filter_requirements_notice' ], 10, 4 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	/**
+	 * Filter the requirements notice to a standardized format for addons failing SC requirement.
+	 *
+	 * Outputs: "The {Addon Name} plugin is disabled because it requires Sugar Calendar version {X} or later to be active."
+	 *
+	 * @since 3.8.2
+	 *
+	 * @param string $notice       Existing notice.
+	 * @param array  $errors       Validation errors.
+	 * @param string $basename     Plugin basename.
+	 * @param array  $requirements Addon requirements.
+	 *
+	 * @return string
+	 */
+	public function filter_requirements_notice( string $notice, array $errors, string $basename, array $requirements ): string { // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+		// Only affect addons, not the core plugin itself.
+		if ( strpos( $basename, 'sugar-calendar.php' ) !== false ) {
+			return $notice;
+		}
+
+		// Only when Sugar Calendar requirement failed.
+		if ( ! in_array( self::SUGAR_CALENDAR, (array) $errors, true ) ) {
+			return $notice;
+		}
+
+		// Derive addon name from plugin headers.
+		$plugin_name = '';
+
+		if ( ! empty( $requirements['file'] ) ) {
+
+			$headers = $this->get_plugin_data( $requirements['file'] );
+
+			$plugin_name = isset( $headers['Name'] ) ? $headers['Name'] : '';
+		}
+
+		if ( $plugin_name === '' ) {
+			$plugin_name = 'Sugar Calendar add-on';
+		}
+
+		// Extract required SC version, prefer a ">=" compare.
+		$required_version = '';
+		$sc_req           = isset( $requirements[ self::SUGAR_CALENDAR ] ) ? (array) $requirements[ self::SUGAR_CALENDAR ] : [];
+
+		if ( ! empty( $sc_req ) && ! empty( $sc_req[ self::VERSION ] ) && ! empty( $sc_req[ self::COMPARE ] ) ) {
+
+			$compare_arr = $this->get_compare_array( $sc_req );
+
+			foreach ( $compare_arr as $version2 => $compare ) {
+
+				if ( $compare === '>=' ) {
+
+					$required_version = $version2;
+
+					break;
+				}
+			}
+
+			if ( $required_version === '' ) {
+
+				foreach ( $compare_arr as $version2 => $compare ) {
+
+					$required_version = $version2;
+
+					break;
+				}
+			}
+		}
+
+		if ( $required_version === '' ) {
+			return $notice;
+		}
+
+		// Bold the plugin name.
+		$plugin_name = '<strong>' . $plugin_name . '</strong>';
+
+		return sprintf(
+			/* translators: 1: Addon name, 2: Required Sugar Calendar version. */
+			__( 'The %1$s plugin is disabled because it requires Sugar Calendar version %2$s or later to be active.', 'sugar-calendar-lite' ),
+			$plugin_name,
+			$required_version
+		);
 	}
 
 	/**

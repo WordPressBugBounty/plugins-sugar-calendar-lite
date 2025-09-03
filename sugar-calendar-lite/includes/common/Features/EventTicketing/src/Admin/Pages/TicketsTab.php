@@ -4,12 +4,13 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers as BaseHelpers;
+use Sugar_Calendar\AddOn\Ticketing\Admin\Tickets\List_Table;
+use Sugar_Calendar\Helpers\UI;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\trash_ticket;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\restore_ticket;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\delete_ticket;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\send_ticket_email;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket;
 
 /**
  * Tickets page.
@@ -53,6 +54,15 @@ class TicketsTab extends Tickets {
 	 * @var mixed
 	 */
 	private $performed_action_result;
+
+	/**
+	 * The list table.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @var List_Table
+	 */
+	private $wp_list_table;
 
 	/**
 	 * Page tab slug.
@@ -445,27 +455,57 @@ class TicketsTab extends Tickets {
 	}
 
 	/**
+	 * Display before tab.
+	 *
+	 * @since 3.8.2
+	 */
+	protected function before_display_tab() {
+
+		$this->wp_list_table = new List_Table();
+
+		$this->wp_list_table->user_saved_pref = get_user_option( self::SCREEN_OPTIONS_ID . '_screen_options' );
+
+		$this->wp_list_table->prepare_items();
+	}
+
+	/**
+	 * Display column options.
+	 *
+	 * @since 3.8.2
+	 */
+	public function display_column_options() {
+
+		// Output the cogwheel (table column chooser) UI.
+		UI::table_screen_options(
+			[
+				'table_name'             => 'sugar_calendar_table_tickets',
+				'table_columns'          => $this->wp_list_table->get_columns(),
+				'table_required_columns' => [ 'attendee', 'order' ],
+			]
+		);
+	}
+
+	/**
 	 * Display a tab's content.
 	 *
 	 * @since 1.2.0
+	 * @since 3.8.2 Add column options tab.
 	 */
 	protected function display_tab() {
 
-		$wp_list_table                  = new \Sugar_Calendar\AddOn\Ticketing\Admin\Tickets\List_Table();
-		$wp_list_table->user_saved_pref = get_user_option( self::SCREEN_OPTIONS_ID . '_screen_options' );
+		$this->wp_list_table->display_search_reset();
 
 		// Query for orders/tickets.
-		$wp_list_table->prepare_items();
-		$wp_list_table->views();
+		$this->wp_list_table->views();
 		?>
 
         <form id="posts-filter" method="get">
 
-			<?php $wp_list_table->search_box( 'Search', 'sc_event_tickets_search' ); ?>
+			<?php $this->wp_list_table->search_box( 'Search', 'sc_event_tickets_search' ); ?>
 
             <input type="hidden" name="page" value="sc-event-ticketing"/>
 
-			<?php $wp_list_table->display(); ?>
+			<?php $this->wp_list_table->display(); ?>
 
         </form>
 
@@ -497,6 +537,9 @@ class TicketsTab extends Tickets {
 			true
 		);
 
+		// Enqueue column control (cogwheel) behavior.
+		wp_enqueue_script( 'sugar-calendar-admin-column-control' );
+
 		// Localize script.
 		wp_localize_script(
 			'sugar-calendar-ticketing-admin',
@@ -506,7 +549,8 @@ class TicketsTab extends Tickets {
 				'nonce'   => wp_create_nonce( 'sc-admin-ticketing-list' ),
 				'action'  => 'fetch_ticketing_events_choices',
 				'strings' => [
-					'select_event' => esc_html__( 'Event', 'sugar-calendar-lite' ),
+					'select_event'    => esc_html__( 'Event', 'sugar-calendar-lite' ),
+					'no_results_text' => esc_html__( 'No results found', 'sugar-calendar-lite' ),
 				],
 			]
 		);

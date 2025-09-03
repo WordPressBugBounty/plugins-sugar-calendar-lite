@@ -142,6 +142,7 @@ class Tickets extends PageAbstract {
 	 *
 	 * @since 1.0.0
 	 * @since 3.8.0 Add export tab button.
+	 * @since 3.8.2 Add column options tab.
 	 *
 	 * @return array
 	 */
@@ -149,21 +150,38 @@ class Tickets extends PageAbstract {
 
 		// Initial tab array.
 		$tabs = [
-			'tickets' => [
+			'tickets'        => [
 				'name' => esc_html__( 'Tickets', 'sugar-calendar-lite' ),
 				'url'  => admin_url( 'admin.php?page=sc-event-ticketing' ),
 			],
-			'orders'  => [
+			'orders'         => [
 				'name' => esc_html__( 'Orders', 'sugar-calendar-lite' ),
 				'url'  => admin_url( 'admin.php?page=sc-event-ticketing&tab=orders' ),
 			],
-			'export'  => $this->get_export_tab_args(),
+			'export'         => $this->get_export_tab_args(),
+			'column_options' => $this->get_column_options_tab_args(),
 		];
 
 		// Filter the tabs.
 		$tabs = apply_filters( 'sc_event_tickets_admin_nav', $tabs );
 
 		return $tabs;
+	}
+
+	/**
+	 * Get the column options tab arguments.
+	 *
+	 * @since 3.8.2
+	 *
+	 * @return array
+	 */
+	private function get_column_options_tab_args() {
+
+		return [
+			'name'          => esc_html__( 'Column Options', 'sugar-calendar-lite' ),
+			'render'        => [ $this, 'display_column_options' ],
+			'wrapper_class' => 'sc-et-column-options-wrapper',
+		];
 	}
 
 	/**
@@ -255,8 +273,11 @@ class Tickets extends PageAbstract {
 	 * Display page.
 	 *
 	 * @since 1.2.0
+	 * @since 3.8.2 Add before display tab hook.
 	 */
 	public function display() {
+
+		$this->before_display_tab();
 
 		?>
 
@@ -280,4 +301,11 @@ class Tickets extends PageAbstract {
 	 * @since 1.2.0
 	 */
 	protected function display_tab() {}
+
+	/**
+	 * Display before tab.
+	 *
+	 * @since 3.8.2
+	 */
+	protected function before_display_tab() {}
 }
