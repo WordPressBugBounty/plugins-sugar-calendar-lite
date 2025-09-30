@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Block\Calendar\CalendarView\Month;
 use DateTime;
 use Sugar_Calendar\Block\Common\InterfaceView;
 use Sugar_Calendar\Block\Common\Template;
+use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
@@ -56,19 +57,31 @@ class EventCell implements InterfaceView {
 	private $calendar_category_info;
 
 	/**
+	 * The block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var AbstractBlock|null
+	 */
+	private $block;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Make block instance available.
 	 *
-	 * @param Event  $event         The event.
-	 * @param string $cell_date     The date of the cell.
-	 * @param array  $calendar_info The calendar info.
+	 * @param Event              $event         The event.
+	 * @param string             $cell_date     The date of the cell.
+	 * @param array              $calendar_info The calendar info.
+	 * @param AbstractBlock|null $block         Block instance for timezone access.
 	 */
-	public function __construct( $event, $cell_date, $calendar_info = [] ) {
+	public function __construct( $event, $cell_date, $calendar_info = [], $block = null ) {
 
 		$this->event         = $event;
 		$this->cell_date     = $cell_date;
 		$this->calendar_info = $calendar_info;
+		$this->block         = $block;
 	}
 
 	/**
@@ -97,6 +110,7 @@ class EventCell implements InterfaceView {
 	 * Get the DOM classes of the event.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Adjustments for timezone conversion.
 	 *
 	 * @return string[]
 	 */
@@ -116,16 +130,36 @@ class EventCell implements InterfaceView {
 			$classes[] = 'sugar-calendar-block__calendar-month__body__day__events-container__event-recur';
 		}
 
-		if ( ! $this->get_event()->is_multi() ) {
+		// Check if event is multi-day using visitor timezone when available.
+		// All-day events should use original logic regardless of timezone conversion.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		$is_multi_day = ( $this->get_event()->is_all_day() || ! $visitor_timezone )
+			? $this->get_event()->is_multi()
+			: TimezoneConversionHelper::is_multi_day_in_timezone( $this->get_event(), $visitor_timezone );
+
+		if ( ! $is_multi_day ) {
 			return $classes;
 		}
 
-		if ( $this->get_event()->start_dto->format( 'Y-m-d' ) === $this->cell_date ) {
+		// Get event start date in visitor timezone when available.
+		// All-day events should use original dates regardless of timezone conversion.
+		$event_start_date = ( $this->get_event()->is_all_day() || ! $visitor_timezone )
+			? $this->get_event()->start_dto
+			: TimezoneConversionHelper::convert_event_start( $this->get_event(), $visitor_timezone );
+
+		if ( $event_start_date->format( 'Y-m-d' ) === $this->cell_date ) {
 			$classes[] = 'sugar-calendar-block__calendar-month__body__day__events-container__event-multi-day-start';
-			$classes   = array_merge( $classes, $this->get_multi_day_duration_classes( $this->get_event()->start_dto ) );
+			$classes   = array_merge( $classes, $this->get_multi_day_duration_classes( $event_start_date ) );
 		} elseif ( ! isset( $this->calendar_info['events_displayed_in_the_week'][ $this->get_event()->id ] ) ) {
+
 			$classes[] = 'sugar-calendar-block__calendar-month__body__day__events-container__event-multi-day-start-overflow';
-			$classes   = array_merge( $classes, $this->get_multi_day_duration_classes( DateTime::createFromFormat( 'Y-m-d|', $this->cell_date ) ) );
+
+			$cell_date_obj = ( $this->get_event()->is_all_day() || ! $visitor_timezone )
+				? DateTime::createFromFormat( 'Y-m-d|', $this->cell_date )
+				: TimezoneConversionHelper::create_date_in_timezone( $this->cell_date, $visitor_timezone );
+
+			$classes = array_merge( $classes, $this->get_multi_day_duration_classes( $cell_date_obj ) );
 		} else {
 			$classes[] = 'sugar-calendar-block__calendar-month__body__day__events-container__event-multi-day-overflow';
 		}
@@ -138,6 +172,7 @@ class EventCell implements InterfaceView {
 	 *
 	 * @since 3.0.0
 	 * @since 3.5.1 Fixed issue with multi-day events overflow.
+	 * @since 3.9.0 Adjustments for timezone conversion.
 	 *
 	 * @param DateTime $start_date The start date we will display the multi-day event.
 	 *
@@ -147,16 +182,28 @@ class EventCell implements InterfaceView {
 
 		$classes = [];
 
-		// Clone to avoid modifying the original object.
-		$event_end  = clone $this->get_event()->end_dto;
-		$start_date = clone $start_date;
+		// All-day events should not be affected by timezone conversion for duration calculation.
+		// They represent calendar days, not specific times.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		if ( $this->get_event()->is_all_day() || ! $visitor_timezone ) {
+			// Use original dates for all-day events or when no timezone conversion.
+			$event_end  = clone $this->get_event()->end_dto;
+			$start_date = clone $start_date;
+		} else {
+			// Use timezone-converted dates for timed events only.
+			$event_end  = TimezoneConversionHelper::convert_event_end( $this->get_event(), $visitor_timezone );
+			$start_date = clone $start_date;
+
+			$start_date->setTimezone( $visitor_timezone );
+		}
 
 		// Remove the time part.
 		$start_date->setTime( 0, 0, 0 );
 		$event_end->setTime( 0, 0, 0 );
 
 		// Calculate the full-day difference.
-		$date_diff = $this->get_event()->end_dto->diff( $start_date );
+		$date_diff = $event_end->diff( $start_date );
 
 		$duration = absint( $date_diff->format( '%a' ) );
 
@@ -195,6 +242,7 @@ class EventCell implements InterfaceView {
 	 * Get the event styles.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Adjustments for timezone conversion.
 	 *
 	 * @return string
 	 */
@@ -209,7 +257,15 @@ class EventCell implements InterfaceView {
 		$styles                 = [];
 		$styles['border-color'] = $primary_event_color;
 
-		if ( $this->get_event()->is_multi() ) {
+		// Check if event is multi-day using visitor timezone when available.
+		// All-day events should use original logic regardless of timezone conversion.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		$is_multi_day = ( $this->get_event()->is_all_day() || ! $visitor_timezone )
+			? $this->get_event()->is_multi()
+			: TimezoneConversionHelper::is_multi_day_in_timezone( $this->get_event(), $visitor_timezone );
+
+		if ( $is_multi_day ) {
 			$styles['background'] = $primary_event_color;
 		}
 
@@ -279,6 +335,7 @@ class EventCell implements InterfaceView {
 	 *
 	 * @since 3.0.0
 	 * @since 3.1.2 Return the wp_json_encoded string.
+	 * @since 3.9.0 Adjustments for timezone conversion.
 	 *
 	 * @return string
 	 */
@@ -286,11 +343,28 @@ class EventCell implements InterfaceView {
 
 		$date_format = Options::get( 'date_format' );
 
-		if ( ! $this->get_event()->is_multi() ) {
+		// Check if we should use timezone conversion for this event.
+		// All-day events should use original logic regardless of timezone conversion.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		$use_timezone_conversion = ( ! $this->get_event()->is_all_day() && $visitor_timezone );
+
+		// Determine if event is multi-day (timezone-aware for timed events).
+		$is_multi_day = ( $this->get_event()->is_all_day() || ! $visitor_timezone )
+			? $this->get_event()->is_multi()
+			: TimezoneConversionHelper::is_multi_day_in_timezone( $this->get_event(), $visitor_timezone );
+
+		if ( ! $is_multi_day ) {
+
+			// Single day event - get start date in appropriate timezone.
+			$event_for_output = $use_timezone_conversion
+				? TimezoneConversionHelper::create_timezone_converted_event_for_output( $this->get_event(), $visitor_timezone )
+				: $this->get_event();
+
 			return wp_json_encode(
 				[
 					'start_date' => Helpers::get_event_time_output(
-						$this->get_event(),
+						$event_for_output,
 						$date_format,
 						'start',
 						true
@@ -299,17 +373,21 @@ class EventCell implements InterfaceView {
 			);
 		}
 
-		// For multi-day event, we display the short day name.
+		// Multi-day event - get both start and end dates in appropriate timezone.
+		$event_for_output = $use_timezone_conversion
+			? TimezoneConversionHelper::create_timezone_converted_event_for_output( $this->get_event(), $visitor_timezone )
+			: $this->get_event();
+
 		return wp_json_encode(
 			[
 				'start_date' => Helpers::get_event_time_output(
-					$this->get_event(),
+					$event_for_output,
 					$date_format,
 					'start',
 					true
 				),
 				'end_date'   => Helpers::get_event_time_output(
-					$this->get_event(),
+					$event_for_output,
 					$date_format,
 					'end',
 					true

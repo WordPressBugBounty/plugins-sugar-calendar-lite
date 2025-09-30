@@ -89,9 +89,10 @@ class EventView {
 		}
 
 		printf(
-			'<a href="%1$s">%2$s</a>',
+			'<a href="%1$s"%3$s>%2$s</a>',
 			esc_url( Helper::get_event_frontend_url( $this->event ) ),
-			esc_html( $this->event->title )
+			esc_html( $this->event->title ),
+			Helper::get_event_frontend_url_open_in_new_tab( $this->event ) ? ' target="_blank"' : ''
 		);
 	}
 

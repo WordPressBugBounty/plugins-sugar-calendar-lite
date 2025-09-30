@@ -252,7 +252,7 @@ $event-margin: 18px;
 				}
 
 				.sugar-calendar-block__calendar-week__event-slot:last-child {
-					border-bottom: 0;
+					border-bottom: 1px solid $cell-border-color-dark;
 				}
 			}
 
@@ -1289,6 +1289,7 @@ $event-margin: 18px;
 		}
 
 		&__event-cell {
+			border: 1px solid;
 			border-left: 2px solid;
 			border-radius: 3px;
 			cursor: pointer;

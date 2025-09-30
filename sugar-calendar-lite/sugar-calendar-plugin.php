@@ -20,6 +20,7 @@ use Sugar_Calendar\UsageTracking\UsageTracking;
 use Sugar_Calendar\Features\Loader as FeaturesLoader;
 use Sugar_Calendar\Shortcodes\ModernShortcodes;
 use Sugar_Calendar\Admin\Tools\DashboardWidget;
+use Sugar_Calendar\Admin\Tools\ShortcodeHelper;
 
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
@@ -251,6 +252,9 @@ final class Plugin {
 
 		// Load the Dashboard Widget.
 		$this->get_dashboard_widget();
+
+		// Load the Shortcode Helper.
+		$this->get_shortcode_helper();
 	}
 
 	/**
@@ -929,6 +933,27 @@ final class Plugin {
 		}
 
 		return $dashboard_widget;
+	}
+
+	/**
+	 * Get the Shortcode Helper.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return ShortcodeHleper
+	 */
+	public function get_shortcode_helper() {
+
+		static $shortcode_helper;
+
+		if ( ! isset( $shortcode_helper ) ) {
+
+			$shortcode_helper = new ShortcodeHelper();
+
+			$shortcode_helper->init();
+		}
+
+		return $shortcode_helper;
 	}
 
 	/**

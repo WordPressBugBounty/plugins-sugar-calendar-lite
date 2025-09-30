@@ -21,6 +21,44 @@
 			font-weight: 700;
 			line-height: normal;
 			text-transform: uppercase;
+			position: relative;
+			cursor: pointer;
+
+			.sc-filter-applied-indicator {
+				top: -1px;
+				left: 4px;
+				border-radius: 50%;
+				height: 4px;
+				width: 4px;
+				position: relative;
+				display: inline-block;
+				background: var(--accent-color);
+				vertical-align: middle;
+				visibility: hidden;
+			}
+
+			.sc-accordion-indicator {
+				position: absolute;
+				right: 0px;
+			}
+		}
+
+		[data-sc-accordion-open="true"] {
+
+			.sugar-calendar-block__popover__calendar_selector__container__heading {
+				padding-bottom: 12px;
+			}
+
+			.sc-accordion-indicator {
+				transform: rotate(180deg);
+			}
+		}
+		[data-sc-accordion-open="false"] {
+			cursor: pointer;
+
+			.sc-accordion-indicator {
+				transform: rotate(0deg);
+			}
 		}
 
 		&__options {
@@ -28,7 +66,38 @@
 			align-self: stretch;
 			display: flex;
 			flex-direction: column;
-			padding: 6px 0;
+			// Remove the previous 6px top padding as the heading now provides spacing.
+			padding: 0;
+
+			// Footer and utility buttons styling for Apply/Clear and indicators.
+			.sc-filters-footer {
+				align-items: center;
+				border-top: 1px solid $cell-border-color;
+				display: flex;
+				gap: 10px;
+				justify-content: flex-end;
+				padding: 12px 15px 10px 15px;
+
+				.sc-filters-clear {
+					background: #fff;
+					border: 1px solid $border-color-secondary;
+					border-radius: 4px;
+					color: $text-color-primary;
+					cursor: pointer;
+					font-size: 13px;
+					padding: 6px 12px;
+				}
+
+				.sc-filters-apply {
+					background: var(--accent-color);
+					border: 1px solid var(--accent-color);
+					border-radius: 4px;
+					color: #fff;
+					cursor: pointer;
+					font-size: 13px;
+					padding: 6px 14px;
+				}
+			}
 
 			&__val {
 				align-items: center;
@@ -40,10 +109,16 @@
 				padding: 6px 0;
 
 				input {
+					position: relative;
 					accent-color: var(--accent-color);
 					margin: 0;
 					height: 16px;
 					width: 16px;
+					cursor: pointer;
+				}
+
+				input:focus {
+					outline: none;
 				}
 
 				label {
@@ -56,21 +131,77 @@
 					gap: 10px;
 					margin: 0;
 					padding: 0;
+					width: 100%;
 				}
+			}
+
+			&__val:last-child {
+				padding-bottom: 0;
 			}
 		}
 
-		&__calendars {
-			padding: 12px 15px 0 15px;
-		}
-
+		&__calendars,
 		&__days,
 		&__time,
 		&__venues,
 		&__speakers,
-		&__tags {
+		&__tags,
+		.sc-filters-footer {
 			border-top: 1px solid $cell-border-color;
-			padding: 12px 15px 0 15px;
+			padding: 12px 15px;
+		}
+
+		&__calendars {
+			border-top: none;
+		}
+
+		.sc-filters-footer {
+			display: flex;
+			padding: 12px 15px;
+			align-items: center;
+			gap: 8px;
+			align-self: stretch;
+
+			button {
+				display: flex;
+				height: 30px;
+				padding: 0 10px;
+				justify-content: center;
+				align-items: center;
+				gap: 5px;
+				flex: 1 0 0;
+				cursor: pointer;
+
+				color: var(--calendar-text-tertiary, rgba(0, 0, 0, 0.55));
+				text-align: center;
+				font-size: 12px;
+				font-style: normal;
+				font-weight: 500;
+				line-height: normal;
+
+				&.sc-filters-clear {
+					background: none;
+					border-radius: $radius-md;
+					border: 1px solid var(--calendar-divider, rgba(0, 0, 0, 0.10));
+
+					&:hover,
+					&:focus {
+						background: $border-hover-color;
+						color: $text-color-primary;
+					}
+				}
+
+				&.sc-filters-apply {
+					border-radius: $radius-md;
+					background-color: var(--accent-color);
+					border: none;
+					color: var(--popover-accent, #FFF);
+
+					&:hover {
+						background-color: color-mix(in srgb, var(--accent-color) 85%, black);
+					}
+				}
+			}
 		}
 	}
 }

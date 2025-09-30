@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Block\Calendar\CalendarView\Week;
 use DateTimeImmutable;
 use Sugar_Calendar\Block\Common\InterfaceView;
 use Sugar_Calendar\Block\Common\Template;
+use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
@@ -47,6 +48,24 @@ class EventCell implements InterfaceView {
 	private $args;
 
 	/**
+	 * Block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var AbstractBlock|null
+	 */
+	private $block;
+
+	/**
+	 * Whether the event is multiday.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var bool
+	 */
+	private $is_multi_day = false;
+
+	/**
 	 * Whether the event is an all-day or multi-day event.
 	 *
 	 * @since 3.0.0
@@ -77,16 +96,21 @@ class EventCell implements InterfaceView {
 	 * Constructor.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Make block instance available.
 	 *
-	 * @param Event             $event Event.
-	 * @param DateTimeImmutable $day   Day of the event cell.
-	 * @param array             $args  Event cell args.
+	 * @param Event              $event Event.
+	 * @param DateTimeImmutable  $day   Day of the event cell.
+	 * @param array              $args  Event cell args.
+	 * @param AbstractBlock|null $block Block instance.
 	 */
-	public function __construct( $event, $day, $args = [] ) {
+	public function __construct( $event, $day, $args = [], $block = null ) {
 
 		$this->event = $event;
 		$this->day   = $day;
 		$this->args  = $args;
+		$this->block = $block;
+
+		$this->is_multi_day = $this->get_event_multiday();
 
 		if ( isset( $this->args['is_all_day'] ) && $this->args['is_all_day'] ) {
 			$this->is_all_day = (bool) $this->args['is_all_day'];
@@ -104,23 +128,25 @@ class EventCell implements InterfaceView {
 	}
 
 	/**
-	 * Get the event styles.
+	 * Get the event month view styles.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Separate style handler for day view.
 	 *
 	 * @return string
 	 */
 	public function get_style() {
 
-		$styles = [
-			'border-color' => $this->get_color(),
-		];
+		$styles = $this->get_border_styles();
 
 		if ( ! $this->is_all_day ) {
 			$styles['height'] = $this->get_height() . 'px';
 
 			if ( $this->has_overlap() ) {
-				$dynamic_padding = $this->get_event()->overlap_count * 12;
+
+				$padding_modifier = $this->is_day_view() ? 36 : 12;
+
+				$dynamic_padding = $this->get_event()->overlap_count * $padding_modifier;
 
 				if ( $this->is_day_view() ) {
 					$left  = $dynamic_padding;
@@ -153,6 +179,34 @@ class EventCell implements InterfaceView {
 		}
 
 		return $style_string;
+	}
+
+	/**
+	 * Get the border styles.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return array
+	 */
+	private function get_border_styles() {
+
+		$dark    = '#7F7F7F';
+		$light   = '#FFFFFF';
+		$is_dark = $this->block->get_appearance_mode() === 'dark';
+
+		$secondary_border_color = $is_dark ? $dark : $light;
+
+		$default_border_styles = [
+			'border-color'        => $this->get_color(),
+		];
+
+		if ( ! $this->is_all_day ) {
+			$default_border_styles['border-top-color']    = $secondary_border_color;
+			$default_border_styles['border-right-color']  = $secondary_border_color;
+			$default_border_styles['border-bottom-color'] = $secondary_border_color;
+		}
+
+		return $default_border_styles;
 	}
 
 	/**
@@ -194,7 +248,7 @@ class EventCell implements InterfaceView {
 			$classes[] = 'sugar-calendar-block__calendar-week__event-cell';
 		}
 
-		if ( ! $this->is_day_view() && $this->get_event()->is_multi() ) {
+		if ( ! $this->is_day_view() && $this->get_event_multiday() ) {
 
 			if ( $this->day->format( 'Y-m-d' ) === $this->get_event()->start_dto->format( 'Y-m-d' ) ) {
 				$get_event_offset_width = Helper::get_event_offset_width(
@@ -255,6 +309,7 @@ class EventCell implements InterfaceView {
 	 * Returns the height of the event block in px.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Updated Day view multi-day height calculation to use timezone-aware event times.
 	 *
 	 * @return float
 	 */
@@ -270,7 +325,129 @@ class EventCell implements InterfaceView {
 			return $this->height;
 		}
 
-		$diff = $this->get_event()->end_dto->diff( $this->get_event()->start_dto );
+		$this->height = $this->is_day_view() && $this->get_event_multiday()
+			? $this->get_render_heights_day_view_multiday_events()
+			: $this->get_render_heights();
+
+		return $this->height;
+	}
+
+	/**
+	 * Get the height of normal event block.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return int
+	 */
+	public function get_render_heights() {
+
+		// Original logic for single-day events and Week view.
+		$duration = $this->calculate_durations( $this->get_event()->start_dto, $this->get_event()->end_dto );
+
+		return $this->calculate_height( $duration['hours'], $duration['minutes'] );
+	}
+
+	/**
+	 * Get the height of the event block for multiday events in the day view.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return int
+	 */
+	public function get_render_heights_day_view_multiday_events() {
+
+		// Renderers.
+		$render_hours   = 0;
+		$render_minutes = 0;
+
+		$current_day_date = $this->day->format( 'Y-m-d' );
+
+		// Use timezone-aware event dates and times when visitor timezone is available.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		if ( $visitor_timezone ) {
+			$event_start_dto = TimezoneConversionHelper::convert_event_start( $this->get_event(), $visitor_timezone );
+			$event_end_dto   = TimezoneConversionHelper::convert_event_end( $this->get_event(), $visitor_timezone );
+		} else {
+			$event_start_dto = $this->get_event()->start_dto;
+			$event_end_dto   = $this->get_event()->end_dto;
+		}
+
+		$event_start_date = $event_start_dto->format( 'Y-m-d' );
+		$event_end_date   = $event_end_dto->format( 'Y-m-d' );
+
+		// Handling for multiday events.
+		if ( $current_day_date === $event_start_date ) { // Start of multiday event.
+
+			// Start day: use original logic (same as single-day events).
+			$duration = $this->calculate_durations( $event_start_dto, $event_end_dto );
+
+			// Multiday event does not need minutes on start day.
+			$render_hours = $duration['hours'];
+
+		} elseif ( $current_day_date === $event_end_date ) { // End of multiday event.
+
+			// Setup a midnight marker.
+			$event_end_midnight = clone $event_end_dto;
+			$event_end_midnight = $event_end_midnight->setTime( 0, 0, 0 );
+
+			// Compare the midnight marker to the event end time.
+			$diff = $event_end_midnight->diff( $event_end_dto );
+
+			$render_hours   = $diff->h;
+			$render_minutes = $diff->i;
+
+		} else { // Middle of multiday event.
+
+			// Render full day (24 hours).
+			$render_hours = 24;
+		}
+
+		return $this->calculate_height( $render_hours, $render_minutes );
+	}
+
+	/**
+	 * Calculate duration hours and minutes from start/end DTOs.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @param DateTimeImmutable $start_dto Event start datetime.
+	 * @param DateTimeImmutable $end_dto   Event end datetime.
+	 *
+	 * @return array Array with 'hours' and 'minutes' keys.
+	 */
+	private function calculate_durations( $start_dto, $end_dto ) {
+
+		$diff = $end_dto->diff( $start_dto );
+
+		// Get start hour in 24-hour format.
+		$start_hour_pointer = intval( $start_dto->format( 'H' ) );
+		$event_duration     = $diff->h + $diff->d * 24;
+		$total_height       = $start_hour_pointer + $event_duration;
+
+		$is_over_bound = $total_height > 24;
+
+		$render_hours = $is_over_bound ? 24 - $start_hour_pointer : $event_duration;
+
+		return [
+			'hours'   => $render_hours,
+			'minutes' => $diff->i,
+		];
+	}
+
+	/**
+	 * Calculate the height of the event block.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @param int $render_hours   The number of hours to render.
+	 * @param int $render_minutes The number of minutes to render.
+	 *
+	 * @return int
+	 */
+	public function calculate_height( $render_hours, $render_minutes ) {
+
+		$pixel_cutoff = 3;
 
 		/*
 		 * Calculate the height of the event block.
@@ -278,11 +455,9 @@ class EventCell implements InterfaceView {
 		 * We substract 1 to avoid the event block to hit the bottom border
 		 * for events that ends in the top of the hour.
 		 */
-		$height = ( ( $diff->h * 51 ) + ( $diff->i * 0.9 ) ) - 1;
+		$height = ( ( $render_hours * 51 ) + ( $render_minutes * 0.9 ) ) - $pixel_cutoff;
 
-		$this->height = $height;
-
-		return $this->height;
+		return $height;
 	}
 
 	/**
@@ -307,6 +482,24 @@ class EventCell implements InterfaceView {
 	public function get_event_title() {
 
 		return $this->get_event()->title;
+	}
+
+	/**
+	 * Check if the event is multiday.
+	 *
+	 * @since 3.9.0
+	 * @since 3.9.0 Updated to use timezone-aware multi-day detection for proper timezone conversion support.
+	 *
+	 * @return bool
+	 */
+	public function get_event_multiday() {
+
+		// Use timezone-aware multi-day detection when visitor timezone is available.
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		return $visitor_timezone
+			? TimezoneConversionHelper::is_multi_day_in_timezone( $this->get_event(), $visitor_timezone )
+			: $this->get_event()->is_multi();
 	}
 
 	/**
@@ -398,6 +591,18 @@ class EventCell implements InterfaceView {
 	}
 
 	/**
+	 * Get the block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return AbstractBlock|null
+	 */
+	public function get_block() {
+
+		return $this->block;
+	}
+
+	/**
 	 * Get the event day duration.
 	 *
 	 * @since 3.0.0
@@ -409,7 +614,7 @@ class EventCell implements InterfaceView {
 
 		$date_format = Options::get( 'date_format' );
 
-		if ( ! $this->get_event()->is_multi() ) {
+		if ( ! $this->get_event_multiday() ) {
 			return wp_json_encode(
 				[
 					'start_date' => Helpers::get_event_time_output(

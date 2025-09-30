@@ -19,15 +19,15 @@ class ModernShortcodes {
 	public $shortcodes = [];
 
 	/**
-	 * Initialize the shortcodes loader.
+	 * Get the shortcodes configuration.
 	 *
-	 * @since 3.4.0
-	 * @since 3.7.0 Removed venues attribute.
+	 * @since 3.9.0
+	 *
+	 * @return array
 	 */
-	public function init() {
+	public function get_shortcodes_config() {
 
-		// Set up shortcodes.
-		$this->shortcodes = [
+		return [
 			'sc_events_calendar' => [
 				'name'       => 'sugarcalendar_events_calendar',
 				'callback'   => [ $this, 'shortcode_render_block' ],
@@ -219,6 +219,16 @@ class ModernShortcodes {
 				],
 			],
 		];
+	}
+
+	/**
+	 * Initialize the shortcodes loader.
+	 *
+	 * @since 3.4.0
+	 * @since 3.7.0 Removed venues attribute.
+	 * @since 3.9.0 Separate shortcodes configuration from the method.
+	 */
+	public function init() {
 
 		/**
 		 * Filters the modern shortcodes configuration.
@@ -228,7 +238,7 @@ class ModernShortcodes {
 		 * @param array             $shortcodes Array of shortcode configurations.
 		 * @param ModernShortcodes  $this       Instance of ModernShortcodes.
 		 */
-		$this->shortcodes = apply_filters( 'sugar_calendar_shortcodes_modern_shortcodes', $this->shortcodes, $this );
+		$this->shortcodes = apply_filters( 'sugar_calendar_shortcodes_modern_shortcodes', $this->get_shortcodes_config(), $this );
 
 		// Register hooks.
 		$this->hooks();

@@ -212,7 +212,17 @@ class Block extends AbstractBlock {
 	 */
 	public function get_appearance_mode() {
 
-		return $this->attributes['appearance'];
+		$attributes = $this->get_attributes();
+
+		if ( ! empty( $attributes['appearance'] ) ) {
+			return $attributes['appearance'];
+		}
+
+		if ( ! empty( $attributes['attributes']['appearance'] ) ) {
+			return $attributes['attributes']['appearance'];
+		}
+
+		return 'light';
 	}
 
 	/**

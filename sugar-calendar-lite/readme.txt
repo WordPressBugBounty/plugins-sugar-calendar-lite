@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.8
-Stable tag:        3.8.2
+Stable tag:        3.9.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,14 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.9.0 - 2025-09-30 =
+- Added: Shortcode generator for the classical editor.
+- Changed: Filter dropdown in Calendar and List blocks/shortcodes.
+- Fixed: Event option to open links in new tab.
+- Fixed: Import file button. It will now alert the user that file is required to start the import process.
+- Fixed: Display for Calendar Block Week and Day mode in 24 hour format.
+- Fixed: Timezone conversion and multiday event card presentation in Day view of Calendar block.
+
 = 3.8.2 - 2025-09-03 =
 - Fixed: Single event page Timezone display, when enabled.
 - Fixed: Tags filter in Events Calendar admin page.

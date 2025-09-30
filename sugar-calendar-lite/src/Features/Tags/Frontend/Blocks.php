@@ -55,6 +55,12 @@ class Blocks {
 		<div class="sugar-calendar-block__popover__calendar_selector__container__tags">
 			<div class="sugar-calendar-block__popover__calendar_selector__container__heading">
 				<?php esc_html_e( 'Tags', 'sugar-calendar-lite' ); ?>
+				<span class="sc-filter-applied-indicator" aria-hidden="true"></span>
+				<span class="sc-accordion-indicator" aria-hidden="true">
+					<svg width="13" height="8" viewBox="0 0 13 8" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12.0586 1.34375C12.1953 1.45312 12.1953 1.67188 12.0586 1.80859L6.34375 7.52344C6.20703 7.66016 6.01562 7.66016 5.87891 7.52344L0.164062 1.80859C0.0273438 1.67188 0.0273438 1.45312 0.164062 1.34375L0.683594 0.796875C0.820312 0.660156 1.03906 0.660156 1.14844 0.796875L6.125 5.74609L11.0742 0.796875C11.1836 0.660156 11.4023 0.660156 11.5391 0.796875L12.0586 1.34375Z" fill="currentColor"></path>
+					</svg>
+				</span>
 			</div>
 			<div class="sugar-calendar-block__popover__calendar_selector__container__options">
 				<?php foreach ( $tags as $tag ) : ?>

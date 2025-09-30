@@ -76,7 +76,7 @@ class SugarCalendar extends Importer {
 		<form id="sc-admin-tools-import-form" method="post" enctype="multipart/form-data">
 			<div class="sc-admin-tools-form-content">
 				<div id="sc-admin-tools-import-file-upload-wrap">
-					<input type="file" name="file" id="sc-admin-tools-form-import" class="inputfile" accept=".json" />
+					<input type="file" name="file" id="sc-admin-tools-form-import" class="inputfile" accept=".json" required />
 					<label for="sc-admin-tools-form-import">
 						<span id="sc-admin-tools-form-import-file-btn">
 							<?php esc_html_e( 'Choose File', 'sugar-calendar-lite' ); ?>

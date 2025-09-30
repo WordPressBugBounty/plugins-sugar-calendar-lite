@@ -420,47 +420,77 @@ final class Event extends Row {
 	 *
 	 * @since 2.1.2
 	 * @since 3.2.1 Used `getOffset()` instead of the timezone to compare timezones.
+	 * @since 3.9.0 Added optional event_timezone parameter for timezone conversion.
 	 *
-	 * @param DateTime $start Start boundary, with desired time zone
-	 * @param DateTime $end   End boundary, with desired time zone
+	 * @param DateTime     $start          Start boundary, with desired time zone.
+	 * @param DateTime     $end            End boundary, with desired time zone.
+	 * @param DateTimeZone $event_timezone Optional. If provided, converts event times to this timezone before intersection check.
 	 *
 	 * @return bool True if intersects, False if not
 	 */
-	public function intersects( $start = '', $end = '' ) {
+	public function intersects( $start = '', $end = '', $event_timezone = null ) {
 
-		// Default return value
+		// Default return value.
 		$retval = false;
 
-		// Bail if start or end are empty
+		// Bail if start or end are empty.
 		if ( empty( $start ) || empty( $end ) ) {
 			return $retval;
 		}
 
-		// Default to time zones for boundaries (to "float")
+		// Get event start and end times, optionally converted to specified timezone.
+		if ( $event_timezone !== null ) {
+			// Convert event times to the specified timezone for intersection check.
+			$event_start_dto = sugar_calendar_set_datetime_timezone( $this->start_dto, $event_timezone );
+			$event_end_dto   = sugar_calendar_set_datetime_timezone( $this->end_dto, $event_timezone );
+		} else {
+			// Use original event times (backward compatibility).
+			$event_start_dto = $this->start_dto;
+			$event_end_dto   = $this->end_dto;
+		}
+
+		// Default to time zones for boundaries (to "float").
 		$start_tz = $start->getTimezone();
 		$end_tz   = $end->getTimezone();
 
-		// Maybe adjust start time zone (loose comparison)
-		$start_dto = ( $start->getOffset() != $this->start_dto->getOffset() )
-			? sugar_calendar_set_datetime_timezone( $this->start_dto, $start_tz )
-			: $this->start_dto;
+		// Maybe adjust start time zone (loose comparison).
+		$start_dto = ( $start->getOffset() != $event_start_dto->getOffset() )
+			? sugar_calendar_set_datetime_timezone( $event_start_dto, $start_tz )
+			: $event_start_dto;
 
-		// Maybe adjust end time zone (loose comparison)
-		$end_dto   = ( $end->getOffset() != $this->end_dto->getOffset() )
-			? sugar_calendar_set_datetime_timezone( $this->end_dto, $end_tz )
-			: $this->end_dto;
+		// Maybe adjust end time zone (loose comparison).
+		$end_dto   = ( $end->getOffset() != $event_end_dto->getOffset() )
+			? sugar_calendar_set_datetime_timezone( $event_end_dto, $end_tz )
+			: $event_end_dto;
 
-		// Boundary fits inside current cell
+		// Boundary fits inside current cell.
 		if ( ( $end_dto <= $end ) && ( $start_dto >= $start ) ) {
 			$retval = true;
 
-		// Boundary fits outside current cell
+		// Boundary fits outside current cell.
 		} elseif ( ( $end_dto >= $start ) && ( $start_dto <= $end ) ) {
 			$retval = true;
 		}
 
-		// Filter and return
-		return (bool) apply_filters( 'sugar_calendar_event_intersects', $retval, $this, $start, $end );
+		/**
+		 * Filter the intersects result.
+		 *
+		 * @since 3.2.1
+		 *
+		 * @param bool         $retval         The intersects result.
+		 * @param Event        $this           The event object.
+		 * @param DateTime     $start          The start boundary.
+		 * @param DateTime     $end            The end boundary.
+		 * @param DateTimeZone $event_timezone The event timezone.
+		 */
+		return (bool) apply_filters(
+			'sugar_calendar_event_intersects',
+			$retval,
+			$this,
+			$start,
+			$end,
+			$event_timezone
+		);
 	}
 
 	/**

@@ -189,6 +189,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 * this method is also used via AJAX.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Make block instance available.
 	 *
 	 * @throws Exception When the date for the calendar was not created.
 	 */
@@ -203,7 +204,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 
 		foreach ( array_chunk( $this->get_calendar_data(), 7, true ) as $cal_data ) {
 
-			$calendar_week = new Week( $cal_data, $cal_info );
+			$calendar_week = new Week( $cal_data, $cal_info, $this->block );
 
 			$calendar_week->render();
 		}

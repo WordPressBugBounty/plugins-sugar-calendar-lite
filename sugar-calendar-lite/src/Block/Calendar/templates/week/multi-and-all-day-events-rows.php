@@ -81,7 +81,8 @@ foreach ( $multi_and_all_day_events as $key => $label ) {
 							'week_day_ctr'                 => $week_day_ctr,
 							'is_ajax'                      => $context->get_block()->is_ajax(),
 							'events_displayed_in_the_week' => $events_display,
-						]
+						],
+						$context->get_block()
 					);
 
 					$event_cell->render();

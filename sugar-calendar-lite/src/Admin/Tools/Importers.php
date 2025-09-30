@@ -123,13 +123,14 @@ class Importers {
 	 *
 	 * @since 3.3.0
 	 * @since 3.6.0 Add categories to the importer.
+	 * @since 3.9.0 Update method check name.
 	 *
 	 * @param string $hook Hook suffix for the current admin page.
 	 */
 	public function enqueue_admin_importers_script( $hook ) {
 
 		// For now, we only need the JS for migrations.
-		if ( $hook !== 'sugar-calendar_page_sc-tools' || ! $this->is_in_migration_page() ) {
+		if ( $hook !== 'events_page_sc-tools' || ! $this->is_in_tools_page() ) {
 			return;
 		}
 
@@ -160,6 +161,8 @@ class Importers {
 					'yes'                      => esc_html__( 'Yes', 'sugar-calendar-lite' ),
 					'cancel'                   => esc_html__( 'Cancel', 'sugar-calendar-lite' ),
 					'recurring_events_warning' => esc_html__( 'Are you sure you want to import the recurring events as normal non-recurring events?', 'sugar-calendar-lite' ),
+					'please_select_file'       => esc_html__( 'Please select a file to import.', 'sugar-calendar-lite' ),
+					'ok'                       => esc_html__( 'OK', 'sugar-calendar-lite' ),
 				],
 			]
 		);
@@ -169,14 +172,14 @@ class Importers {
 	 * Check if we are in a migration page.
 	 *
 	 * @since 3.3.0
+	 * @since 3.9.0 Simplify the check. Renamed the method.
 	 *
 	 * @return bool
 	 */
-	private function is_in_migration_page() {
+	private function is_in_tools_page() {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		return ! empty( $_GET['page'] ) && $_GET['page'] === 'sc-tools' &&
-			! empty( $_GET['section'] ) && $_GET['section'] === 'migrate';
+		return ! empty( $_GET['page'] ) && $_GET['page'] === 'sc-tools';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 

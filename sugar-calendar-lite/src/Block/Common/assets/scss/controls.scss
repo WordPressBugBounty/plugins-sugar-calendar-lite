@@ -135,6 +135,21 @@
 			cursor: pointer;
 			padding: 11.5px 14px;
 
+			&.sc-has-indicator {
+				position: relative;
+
+				.sc-filter-applied-indicator {
+					background: var(--accent-color);
+					border-radius: 50%;
+					display: none;
+					height: 8px;
+					position: absolute;
+					right: -4px;
+					top: -4px;
+					width: 8px;
+				}
+			}
+
 			&:hover {
 				background: $border-hover-color;
 				border-color: transparent;

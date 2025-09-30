@@ -49,7 +49,8 @@ use Sugar_Calendar\Block\Calendar\CalendarView\Month;
 			$event_cell = new Month\EventCell(
 				$event,
 				$context->get_date(),
-				$context->get_calendar_info()
+				$context->get_calendar_info(),
+				$context->get_block()
 			);
 
 			$event_cell->render();

@@ -8,6 +8,7 @@ use DateTimeInterface;
 use Sugar_Calendar\Block\Calendar\CalendarView\Block;
 use Sugar_Calendar\Block\Common\InterfaceBaseView;
 use Sugar_Calendar\Block\Common\Template;
+use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
 use Sugar_Calendar\Helper;
 
 /**
@@ -182,6 +183,7 @@ class Week implements InterfaceBaseView {
 	 * Setup the formatted events.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Updated to use timezone-aware multi-day detection for proper timezone conversion support.
 	 */
 	private function setup_formatted_events() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
@@ -209,10 +211,18 @@ class Week implements InterfaceBaseView {
 
 			$normal_events = [];
 
+			// Get visitor timezone for timezone-aware multi-day detection.
+			$visitor_timezone = $this->get_block()->get_visitor_timezone();
+
 			// Separate the events by type.
 			foreach ( $events as $event ) {
 
-				if ( $event->is_multi() ) {
+				// Use timezone-aware multi-day detection when visitor timezone is available.
+				$event_is_multi = $visitor_timezone
+					? TimezoneConversionHelper::is_multi_day_in_timezone( $event, $visitor_timezone )
+					: $event->is_multi();
+
+				if ( $event_is_multi ) {
 					$multi_day_events[ $date ][] = $event;
 
 					continue;

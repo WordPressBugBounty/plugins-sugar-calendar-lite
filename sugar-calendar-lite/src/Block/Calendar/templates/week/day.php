@@ -32,7 +32,8 @@ foreach ( Day\Day::get_division_by_hour() as $hour_int => $hour_name ) {
 						$event_cell = new Week\EventCell(
 							$time_slot_event,
 							$context->get_date(),
-							$event_cell_args
+							$event_cell_args,
+							$context->get_args()['block']
 						);
 
 						$event_cell->render();

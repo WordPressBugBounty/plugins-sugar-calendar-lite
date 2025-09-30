@@ -189,6 +189,8 @@ class Loader {
 			'clientId'               => '',
 			'display'                => 'month',
 			'accentColor'            => '#5685BD',
+			'appearance'             => 'light',
+
 			/*
 			 * If visitor timezone conversion is enabled, we don't load the events the first time
 			 * since we still need to get the visitor's timezone from the browser.
@@ -243,6 +245,7 @@ class Loader {
 	 *
 	 * @since 3.0.0
 	 * @since 3.5.0 Added `filter_event_more_string` filter.
+	 * @since 3.9.0 Prevented access to non-published events.
 	 */
 	public function ajax_event_popover() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
@@ -262,6 +265,20 @@ class Loader {
 			wp_send_json_error(
 				[
 					'message' => esc_attr__( 'Invalid request.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		$post_obj = get_post( $event_object_id );
+
+		if (
+			empty( $post_obj ) ||
+			empty( $post_obj->post_status ) ||
+			$post_obj->post_status !== 'publish'
+		) {
+			wp_send_json_error(
+				[
+					'message' => esc_attr__( 'Event does not exists.', 'sugar-calendar-lite' ),
 				]
 			);
 		}

@@ -21,7 +21,8 @@ namespace Sugar_Calendar\Block\Calendar\CalendarView;
 					'week_day_ctr'     => 0, // We don't need this since we are displaying the day view.
 					'is_all_day'       => true,
 					'is_ajax'          => $context->get_block()->is_ajax(),
-				]
+				],
+				$context->get_block()
 			);
 
 			$event_cell->render();

@@ -52,19 +52,31 @@ class Day implements InterfaceView {
 	private $calendar_info;
 
 	/**
+	 * The block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var AbstractBlock|null
+	 */
+	private $block;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Make block instance available.
 	 *
-	 * @param string                $date          The day date.
-	 * @param \Sugar_Calendar\Event $events        Events on the day.
-	 * @param array                 $calendar_info Calendar Info.
+	 * @param string             $date          The day date.
+	 * @param Event              $events        Events on the day.
+	 * @param array              $calendar_info Calendar Info.
+	 * @param AbstractBlock|null $block         Block instance for timezone access.
 	 */
-	public function __construct( $date, $events, $calendar_info ) {
+	public function __construct( $date, $events, $calendar_info, $block = null ) {
 
 		$this->date          = $date;
 		$this->events        = $events;
 		$this->calendar_info = $calendar_info;
+		$this->block         = $block;
 	}
 
 	/**
@@ -138,6 +150,18 @@ class Day implements InterfaceView {
 	public function get_calendar_info() {
 
 		return $this->calendar_info;
+	}
+
+	/**
+	 * Get the block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return AbstractBlock|null
+	 */
+	public function get_block() {
+
+		return $this->block;
 	}
 
 	/**

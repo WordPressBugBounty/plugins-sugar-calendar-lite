@@ -29,7 +29,8 @@ use Sugar_Calendar\Event;
 				'year'                         => $context->get_calendar_info()['year'],
 				'from_ajax'                    => ! empty( $context->get_calendar_info()['from_ajax'] ) && $context->get_calendar_info()['from_ajax'],
 				'accentColor'                  => ! empty( $context->get_calendar_info()['accentColor'] ) ? $context->get_calendar_info()['accentColor'] : '',
-			]
+			],
+			$context->get_block()
 		);
 
 		++$start_of_week_ctr;

@@ -251,6 +251,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 		 *
 		 * @since 3.3.0
 		 * @since 3.6.0 Modified where to get the assets URL.
+		 * @since 3.9.0 Add handler for file field validation.
 		 */
 		bindEvents() {
 
@@ -301,6 +302,34 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			// Listen to import button click.
 			$( '#sc-admin-tools-sc-import-btn' ).on( 'click', function( e ) {
 				const $this = $( this );
+
+				// Check if file field is empty.
+				if ( ! app.runtime_vars.doms.$import_file_field.val() ) {
+					e.preventDefault();
+
+					// Set the strings.
+					app.runtime_vars.strings = sc_admin_importers.strings;
+
+					// Set the assets URL.
+					app.runtime_vars.assets_url = sc_admin_importers.assets_url;
+
+					$.confirm( {
+						title: false,
+						content: app.runtime_vars.strings.please_select_file,
+						titleClass: 'sc-ics-importer-error-title',
+						icon: app.getIcon( 'exclamation-circle-solid-orange' ),
+						type: 'red',
+						buttons: {
+							confirm: {
+								text: app.runtime_vars.strings.ok,
+								btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg sugar-calendar-btn-primary',
+								keys: ['enter'],
+							},
+						}
+					} );
+
+					return;
+				}
 
 				// Hide the text.
 				$this.find( '.sc-admin-tools-sc-import-btn__text' ).addClass( 'sc-admin-tools__invisible' );

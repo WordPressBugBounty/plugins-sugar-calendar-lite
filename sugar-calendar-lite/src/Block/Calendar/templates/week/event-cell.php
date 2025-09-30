@@ -14,6 +14,7 @@ use Sugar_Calendar\Helper;
 	data-eventobjid="<?php echo esc_attr( $context->get_event()->object_id ); ?>"
 	data-calendarsinfo="<?php echo esc_attr( wp_json_encode( $context->get_calendars_info() ) ); ?>"
 	data-daydiv="<?php echo esc_attr( wp_json_encode( Helper::get_time_day_division_of_event( $context->get_event() ) ) ); ?>"
+	data-openinnewtab="<?php echo esc_attr( Helper::get_event_frontend_url_open_in_new_tab( $context->get_event() ) ? '1' : '0' ); ?>"
 	style="<?php echo esc_attr( $context->get_style() ); ?>"
 	class="<?php echo esc_attr( implode( ' ', $context->get_classes() ) ); ?>">
 

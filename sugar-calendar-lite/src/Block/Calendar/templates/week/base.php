@@ -60,6 +60,7 @@ use Sugar_Calendar\Block\Common\Template;
 						'block_attributes' => $context->get_block()->get_attributes(),
 						'week_day_ctr'     => $week_day_ctr,
 						'is_ajax'          => $context->get_block()->is_ajax(),
+						'block'            => $context->get_block(),
 					]
 				);
 

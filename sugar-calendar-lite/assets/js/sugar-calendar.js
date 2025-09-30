@@ -141,6 +141,13 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		eventLink.attr( 'href', $eventDataContainer.data( 'eventurl' ) );
 		eventLink.text( title );
 
+		// Set target attribute if event should open in new tab
+		if ( $eventDataContainer.data( 'openinnewtab' ) === 1 ) {
+			eventLink.attr( 'target', '_blank' );
+		} else {
+			eventLink.removeAttr( 'target' );
+		}
+
 		// Handle the date.
 		let visitorTZ = Intl.DateTimeFormat().resolvedOptions().timeZone,
 			eventDate = '',
@@ -214,11 +221,24 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Constructor: Settings popover events.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Add popover control.
 	 *
 	 * @param {jQuery} $mainContainer The main container of the calendar block.
 	 */
-	let SettingsPopoverEvents = function ( $mainContainer ) {
-		this.$mainContainer = $mainContainer;
+	let SettingsPopoverEvents = function ( calendarBlock ) {
+		this.calendarBlock = calendarBlock;
+		this.$mainContainer = calendarBlock.$mainContainer;
+
+		this.selector = {
+			popoverCalendarSelector: '.sugar-calendar-block__popover__calendar_selector',
+			popoverCalendarSelectorContainer: '.sugar-calendar-block__popover__calendar_selector__container',
+			buttonRightSettingsBtn: '.sugar-calendar-block__controls__right__settings__btn',
+			popoverCalendarSelectorHeading: '.sugar-calendar-block__popover__calendar_selector__container__heading',
+			popoverCalendarSelectorOptions: '.sugar-calendar-block__popover__calendar_selector__container__options',
+			popoverCalendarSelectorApply: '.sc-filters-apply',
+			popoverCalendarSelectorClear: '.sc-filters-clear',
+			popoverSelectedIndicator: '.sc-filter-applied-indicator',
+		};
 
 		let settingPopovers = [
 			{
@@ -228,8 +248,8 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			},
 			{
 				key: 'calendar_selector',
-				popover_selector: '.sugar-calendar-block__popover__calendar_selector',
-				button_selector: '.sugar-calendar-block__controls__right__settings__btn'
+				popover_selector: this.selector.popoverCalendarSelector,
+				button_selector: this.selector.buttonRightSettingsBtn
 			},
 			{
 				key: 'display_selector',
@@ -242,10 +262,17 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		settingPopovers.forEach( ( settingPopover ) => {
 
-			let $button = $mainContainer.find( settingPopover.button_selector );
+			let $button = that.$mainContainer.find( settingPopover.button_selector );
 
 			$button.on( 'click', that.toggle.bind( that, $button, settingPopover.key, settingPopovers ) );
 		});
+
+		// Initialize UI inside the filter popover.
+		this.initFilterUI();
+
+		// Bind Apply / Clear events.
+		this.$mainContainer.find( this.selector.popoverCalendarSelectorApply ).off( 'click.sc' ).on( 'click.sc', this.onApplyFilters.bind( this ) );
+		this.$mainContainer.find( this.selector.popoverCalendarSelectorClear ).off( 'click.sc' ).on( 'click.sc', this.onClearAllFilters.bind( this ) );
 	}
 
 	/**
@@ -324,6 +351,193 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		$button.addClass( 'sugar-calendar-block__controls__settings__btn_active' );
 		$popover.show();
 		$( 'body' ).addClass( 'sugar-calendar-block__popovers__active' );
+	}
+
+	/**
+	 * Initialize filter UI: accordions, indicators.
+	 *
+	 * Ensures only one section is open at a time, Calendars open by default,
+	 * adds per-section and global indicators.
+	 *
+	 * @since 3.9.0
+	 */
+	SettingsPopoverEvents.prototype.initFilterUI = function() {
+
+		const $popover   = this.$mainContainer.find( this.selector.popoverCalendarSelector );
+		const $container = $popover.find( this.selector.popoverCalendarSelectorContainer );
+		const that       = this;
+
+		if ( $container.length <= 0 ) {
+			return;
+		}
+
+		// Add indicators to the settings button.
+		const $settingsBtn = this.$mainContainer.find( this.selector.buttonRightSettingsBtn );
+
+		if ( $settingsBtn.length > 0 ) {
+
+			$settingsBtn.addClass( 'sc-has-indicator' );
+
+			if ( $settingsBtn.find( that.selector.popoverSelectedIndicator ).length === 0 ) {
+
+				const indicatorClass = that.selector.popoverSelectedIndicator.replace( '.', '' );
+
+				const $indicator = jQuery( `<span class="${indicatorClass}" aria-hidden="true"></span>` );
+
+				$indicator.hide();
+
+				$settingsBtn.append( $indicator );
+			}
+		}
+
+		// Identify sections by presence of heading within container.
+		const $sections = $container.children().filter( function() {
+			return jQuery( this ).find( that.selector.popoverCalendarSelectorHeading ).length > 0;
+		} );
+
+		// Setup accordion behavior; respect initial open state from markup.
+		$sections.each( function() {
+
+			const $section = jQuery( this );
+			const $options = $section.find( that.selector.popoverCalendarSelectorOptions ).first();
+
+			// Initialize open/close state from data attribute.
+			const isOpen = ($section.attr( 'data-sc-accordion-open' ) === 'true');
+
+			$options.toggle( isOpen );
+
+			// Toggle logic.
+			$section.on( 'click', function(e) {
+
+				const $clickedSection = jQuery( this );
+				const isCurrentlyOpen = ($clickedSection.attr( 'data-sc-accordion-open' ) === 'true');
+
+				if ( isCurrentlyOpen && ! $(e.target).hasClass( that.selector.popoverCalendarSelectorHeading.replace('.', '') ) ) {
+					return;
+				}
+
+				$sections.each( function() {
+
+					const $s  = jQuery( this );
+					const $op = $s.find( that.selector.popoverCalendarSelectorOptions ).first();
+
+					if ( $s.is( $clickedSection ) ) {
+
+						if ( isCurrentlyOpen ) {
+							// Close the currently open section
+							$op.stop( true, true ).slideUp( 150 );
+							$s.attr( 'data-sc-accordion-open', 'false' );
+						} else {
+							// Open the clicked section
+							$op.stop( true, true ).slideDown( 150 );
+							$s.attr( 'data-sc-accordion-open', 'true' );
+						}
+					} else {
+
+						// Close all other sections
+						$op.stop( true, true ).slideUp( 150 );
+						$s.attr( 'data-sc-accordion-open', 'false' );
+					}
+				} );
+			} );
+		} );
+
+		// Initialize checkboxes listeners.
+		$sections.find( 'input[type="checkbox"]' ).on( 'change', this.updateSectionIndicator.bind( this ) );
+
+		// Initialize indicator visibility.
+		this.updateIndicators();
+	}
+
+	/**
+	 * Apply filters: trigger a full block update.
+	 *
+	 * @since 3.9.0
+	 */
+	SettingsPopoverEvents.prototype.onApplyFilters = function() {
+
+		this.updateIndicators();
+
+		this.calendarBlock.update();
+	}
+
+	/**
+	 * Clear all filters: uncheck all and apply.
+	 *
+	 * @since 3.9.0
+	 */
+	SettingsPopoverEvents.prototype.onClearAllFilters = function() {
+
+		const $popover = this.$mainContainer.find( this.selector.popoverCalendarSelector );
+
+		$popover.find( 'input[type="checkbox"]' ).prop( 'checked', false );
+
+		this.updateIndicators();
+
+		this.updateSectionIndicator();
+
+		this.calendarBlock.update();
+	}
+
+	/**
+	 * Update the section indicator.
+	 *
+	 * @since 3.9.0
+	 */
+	SettingsPopoverEvents.prototype.updateSectionIndicator = function() {
+
+		const that = this;
+
+		// Loop each section.
+		this.$mainContainer
+			.find( this.selector.popoverCalendarSelectorHeading )
+			.each( function( i, el ) {
+				const $section = jQuery( el ).parent();
+
+				// Check if there's any checked checkbox in the section.
+				const $inputs = $section.find( 'input[type="checkbox"]' );
+				const hasAnyChecked = $inputs.filter( ':checked' ).length > 0;
+
+				// Update the indicator.
+				jQuery( el ).find( that.selector.popoverSelectedIndicator )
+					.css( 'visibility', hasAnyChecked ? 'visible' : 'hidden' );
+			} );
+	}
+
+	/**
+	 * Update per-section and global filter applied indicators.
+	 *
+	 * @since 3.9.0
+	 */
+	SettingsPopoverEvents.prototype.updateIndicators = function() {
+
+		const $popover   = this.$mainContainer.find( this.selector.popoverCalendarSelector );
+		const $container = $popover.find( this.selector.popoverCalendarSelectorContainer );
+
+		const that = this;
+
+		const $sections = $container.children().filter( function() {
+			return jQuery( this ).find( that.selector.popoverCalendarSelectorHeading ).length > 0;
+		} );
+
+		let anyChecked = false;
+
+		$sections.each( function() {
+
+			const $section = jQuery( this );
+			const $options = $section.find( that.selector.popoverCalendarSelectorOptions ).first();
+			const $inputs  = $options.find( 'input[type="checkbox"]' );
+			const hasAny   = $inputs.filter( ':checked' ).length > 0;
+
+			if ( hasAny ) {
+				anyChecked = true;
+			}
+		} );
+
+		// Global button indicator.
+		const $settingsBtn = this.$mainContainer.find( this.selector.buttonRightSettingsBtn );
+
+		$settingsBtn.find( this.selector.popoverSelectedIndicator ).css( 'display', anyChecked ? 'block' : 'none' );
 	}
 
 	/**
@@ -629,12 +843,13 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Initialize the popovers.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Add popover control.
 	 */
 	CalendarBlock.prototype.initPopovers = function() {
 
 		let $mainContainer = this.$mainContainer;
 
-		new SettingsPopoverEvents( $mainContainer );
+		new SettingsPopoverEvents( this );
 
 		// Setup the event popover.
 		let $calendarPopover = $mainContainer.find( '.sugar-calendar-block__popover__event' );
@@ -687,6 +902,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * @since 3.0.0
 	 * @since 3.5.0 Add venue filter trigger.
 	 * @since 3.7.0 Add tag filter trigger.
+	 * @since 3.9.0 Add popover control.
 	 */
 	CalendarBlock.prototype.initControls = function() {
 
@@ -718,29 +934,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		this.$mainContainer.find( '.sugar-calendar-block__controls__left__pagination__current' )
 			.on( 'click', this.controlEvents.onSelectCurrent.bind( this.controlEvents ) );
 
-		// Calendars selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__cal' )
-			.on( 'change', this.controlEvents.onSelectCalendar.bind( this.controlEvents ) );
-
-		// Venues selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__venue' )
-			.on( 'change', this.controlEvents.onSelectVenue.bind( this.controlEvents ) );
-
-		// Speaker selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__speaker' )
-			.on( 'click', this.controlEvents.onSelectSpeaker.bind( this.controlEvents ) );
-
-		// Tags selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__tag' )
-			.on( 'change', this.controlEvents.onSelectTag.bind( this.controlEvents ) );
-
-		// Day selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__day' )
-			.on( 'change', this.displayEvents.bind( this ) );
-
-		// Time selector.
-		this.$mainContainer.find( '.sugar-calendar-block__popover__calendar_selector__container__options__val__time' )
-			.on( 'change', this.displayEvents.bind( this ) );
+		// Note: Filter checkbox change listeners removed in favor of Apply/Clear in popover.
 
 		// View selector.
 		this.$mainContainer.find( '.sugar-calendar-block__popover__display_selector__container__body__option' )

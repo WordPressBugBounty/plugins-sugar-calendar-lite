@@ -236,17 +236,18 @@ function sc_get_event_sequences_for_calendar( $events = array(), $after = null, 
 }
 
 /**
- * Return if an event overlaps a day, month, and year combination
+ * Return if an event overlaps a day, month, and year combination.
  *
  * @since 2.0.0
  * @since 2.1.2 Prefers Event::intersects() over Event::overlaps()
  * @since 3.1.2 Added `$timezone` parameter.
+ * @since 3.9.0 Updated to use timezone-aware intersection check for proper timezone conversion support.
  *
- * @param \Sugar_Calendar\Event $event    The event object.
- * @param string                $day
- * @param string                $month
- * @param string                $year
- * @param false|\DateTimeZone   $timezone Timezone to convert the events' datetime.
+ * @param Event              $event    The event object.
+ * @param string             $day      Day of the month.
+ * @param string             $month    Month of the year.
+ * @param string             $year     Year.
+ * @param false|DateTimeZone $timezone Timezone to convert the events' datetime.
  *
  * @return bool
  */
@@ -261,16 +262,16 @@ function sc_is_event_for_day( $event, $day = '01', $month = '01', $year = '1970'
 		$timezone = sugar_calendar_get_timezone();
 	}
 
-	// Make time stamps
-	$start_ts = gmmktime( 00, 00, 00, (int) $month, (int) $day, (int) $year );
+	// Make timestamps.
+	$start_ts = gmmktime( 0, 0, 0, (int) $month, (int) $day, (int) $year );
 	$end_ts   = gmmktime( 23, 59, 59, (int) $month, (int) $day, (int) $year );
 
-	// Get start & end objects
+	// Get start and end objects.
 	$start = sugar_calendar_get_datetime_object( $start_ts, $timezone );
 	$end   = sugar_calendar_get_datetime_object( $end_ts, $timezone );
 
-	// Return
-	return $event->intersects( $start, $end );
+	// Return - pass timezone for timezone-aware intersection check.
+	return $event->intersects( $start, $end, $timezone );
 }
 
 /**

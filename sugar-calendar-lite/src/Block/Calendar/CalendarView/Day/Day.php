@@ -64,6 +64,7 @@ class Day implements InterfaceBaseView {
 	 * @since 3.6.0 Added filter hook `sugar_calendar_block_calendar_view_day_events`.
 	 * @since 3.7.0 Added support for filtering by tags.
 	 * @since 3.7.0 Filter the number of events to load.
+	 * @since 3.9.0 Added support for correct multiday positioning.
 	 *
 	 * @return \Sugar_Calendar\Event[]
 	 */
@@ -170,7 +171,11 @@ class Day implements InterfaceBaseView {
 			$normal_events[] = $event;
 		}
 
-		$this->formatted_events = Helper::get_formatted_events_with_overlap( $normal_events );
+		$this->formatted_events = Helper::get_formatted_events_with_overlap(
+			$normal_events,
+			$this->get_block()->get_datetime(),
+			$this->get_block()->get_visitor_timezone()
+		);
 
 		return $this->formatted_events;
 	}
@@ -252,33 +257,18 @@ class Day implements InterfaceBaseView {
 	 */
 	public static function get_division_by_hour() {
 
-		return [
-			0  => '12:01 AM',
-			1  => '1:00 AM',
-			2  => '2:00 AM',
-			3  => '3:00 AM',
-			4  => '4:00 AM',
-			5  => '5:00 AM',
-			6  => '6:00 AM',
-			7  => '7:00 AM',
-			8  => '8:00 AM',
-			9  => '9:00 AM',
-			10 => '10:00 AM',
-			11 => '11:00 AM',
-			12 => '12:00 PM',
-			13 => '1:00 PM',
-			14 => '2:00 PM',
-			15 => '3:00 PM',
-			16 => '4:00 PM',
-			17 => '5:00 PM',
-			18 => '6:00 PM',
-			19 => '7:00 PM',
-			20 => '8:00 PM',
-			21 => '9:00 PM',
-			22 => '10:00 PM',
-			23 => '11:00 PM',
-			24 => '12:00 AM',
-		];
+		// Respect the site's/user's 12/24-hour clock preference.
+		$is_twelve_hour = sugar_calendar_get_clock_type() === '12';
+		$format         = $is_twelve_hour ? 'g:i A' : 'H:i';
+
+		$labels = [];
+
+		// Generate 24 hourly labels (0..23). First label uses 1-minute offset.
+		for ( $h = 0; $h < 24; $h++ ) {
+			$labels[ $h ] = gmdate( $format, gmmktime( $h , 0, 0, 1, 1, 1970 ) );
+		}
+
+		return $labels;
 	}
 
 	/**

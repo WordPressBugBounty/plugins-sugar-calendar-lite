@@ -49,7 +49,8 @@ use Sugar_Calendar\Block\Common\Template;
 											'block_attributes' => $context->get_block()->get_attributes(),
 											'week_day_ctr' => 0, // We don't need this since we are displaying the day view.
 											'is_ajax'      => $context->get_block()->is_ajax(),
-										]
+										],
+										$context->get_block()
 									);
 
 									$event_cell->render();

@@ -14,7 +14,7 @@ use Sugar_Calendar\Block\Common\Template;
 	data-ogmonth="<?php echo esc_attr( $context->get_month_num_without_zero() ); ?>"
 	data-ogyear="<?php echo esc_attr( $context->get_year() ); ?>"
 	data-appearance="<?php echo esc_attr( $context->get_appearance_mode() ); ?>"
-	style="--accent-color: <?php echo esc_attr( $context->get_default_accent_color() ); ?>"
+	style="--accent-color: <?php echo esc_attr( $context->get_default_accent_color() ); ?>; --popover-accent: <?php echo esc_attr( sugar_calendar_get_contrast_color( $context->get_default_accent_color(), '#111111', '#ffffff' ) ); ?>"
 >
 	<?php
 		Template::load( 'form', $context, 'common' );

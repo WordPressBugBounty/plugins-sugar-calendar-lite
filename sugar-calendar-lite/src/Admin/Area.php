@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin;
 
 use Sugar_Calendar\Admin\Events\Events as AdminEvents;
 use Sugar_Calendar\Admin\Events\Metaboxes;
+use Sugar_Calendar\Admin\FlyoutMenu;
 use Sugar_Calendar\Admin\Pages\Addons;
 use Sugar_Calendar\Admin\Pages\CalendarEdit;
 use Sugar_Calendar\Admin\Pages\CalendarNew;
@@ -28,6 +29,7 @@ use Sugar_Calendar\Admin\Pages\Welcome;
 use Sugar_Calendar\Admin\Pages\Speakers;
 use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Helpers\Helpers;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;
@@ -78,6 +80,26 @@ class Area {
 	 * @var PageInterface Current page.
 	 */
 	protected $current_page;
+
+	/**
+	 * Registered Sugar Calendar admin page slugs.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var array
+	 */
+	private static $pages_registered = [
+		'sugar-calendar',
+		'sc-event-ticketing',
+		'sugar-calendar-venue',
+		'sugar-calendar-speaker',
+		'sc-rsvp',
+		'sugarcalendar-settings',
+		'sc-tools',
+		'sugar-calendar-addons',
+		'sugar-calendar-calendar-new',
+		'sugar-calendar-rsvp',
+	];
 
 	/**
 	 * AJAX Handler for updating hand holding status.
@@ -217,6 +239,9 @@ class Area {
 
 		( new Education() )->hooks();
 
+		// Flyout Menu.
+		( new FlyoutMenu() )->hooks();
+
 		// Metaboxes.
 		( new Metaboxes() )->hooks();
 
@@ -298,7 +323,7 @@ class Area {
 
 		add_menu_page(
 			esc_html__( 'Sugar Calendar', 'sugar-calendar-lite' ),
-			esc_html__( 'Sugar Calendar', 'sugar-calendar-lite' ),
+			esc_html__( 'Events', 'sugar-calendar-lite' ),
 			/**
 			 * Filters the capability required to view the Sugar Calendar menu.
 			 *
@@ -1308,6 +1333,17 @@ class Area {
 			]
 		);
 
+		// Flyout Menu assets - only on Sugar Calendar admin pages.
+		if ( $this->current_page !== null ) {
+			wp_enqueue_script(
+				'sugar-calendar-admin-flyout-menu',
+				SC_PLUGIN_ASSETS_URL . 'js/admin-flyout-menu' . WP::asset_min() . '.js',
+				[ 'jquery' ],
+				BaseHelpers::get_asset_version(),
+				true
+			);
+		}
+
 		// Bail if not in an admin page.
 		if ( $this->current_page === null ) {
 			return;
@@ -1528,5 +1564,81 @@ class Area {
 		}
 
 		return $tabs;
+	}
+
+	/**
+	 * Check whether we are on an admin page.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @param array|string $slug ID(s) of a plugin page. Possible values: 'general', 'logs', 'about' or array of them.
+	 *
+	 * @return bool
+	 */
+	public function is_admin_page( $slug = [] ) {
+
+		global $pagenow, $typenow;
+
+		// Don't show on AJAX requests.
+		if ( wp_doing_ajax() ) {
+			return false;
+		}
+
+		// Check for event pages.
+		if (
+			$pagenow === 'post-new.php'
+			&&
+			(
+				$typenow === sugar_calendar_get_event_post_type_id() ||
+				$typenow === 'sc_rsvp' ||
+				$typenow === 'sugar-calendar-speaker' ||
+				$typenow === SC_VENUE_POST_TYPE
+			)
+		) {
+			return true;
+		}
+
+		if (
+			$pagenow === 'post.php'
+			&& isset( $_GET['post'] )
+			&&
+			(
+				get_post_type( sanitize_key( $_GET['post'] ) ) === sugar_calendar_get_event_post_type_id() ||
+				get_post_type( sanitize_key( $_GET['post'] ) ) === 'sc_rsvp' ||
+				get_post_type( sanitize_key( $_GET['post'] ) ) === 'sc_speakers' ||
+				( defined( 'SC_VENUE_POST_TYPE' ) ? get_post_type( sanitize_key( $_GET['post'] ) ) === SC_VENUE_POST_TYPE : false )
+			)
+		) {
+			return true;
+		}
+
+		if (
+			$pagenow === 'edit.php'
+			&& isset( $_GET['post_type'] )
+			&& sanitize_key( $_GET['post_type'] ) === sugar_calendar_get_event_post_type_id()
+		) {
+			return true;
+		}
+
+		// Check for calendar taxonomy pages.
+		if (
+			$pagenow === 'edit-tags.php'
+			&& isset( $_GET['taxonomy'] )
+			&& (
+				sanitize_key( $_GET['taxonomy'] ) === sanitize_key(sugar_calendar_get_calendar_taxonomy_id()) ||
+				sanitize_key( $_GET['taxonomy'] ) === sanitize_key(TagsHelpers::get_tags_taxonomy_id())
+			)
+		) {
+			return true;
+		}
+
+		// Check for Sugar Calendar custom pages.
+		if ( isset( $_GET['page'] ) ) {
+			$page = sanitize_key( $_GET['page'] );
+
+			return in_array( $page, self::$pages_registered, true );
+		}
+
+		return false;
 	}
 }

@@ -17,7 +17,7 @@
 }
 
 @mixin popover-container-dark {
-	background: #000;
+	background: $calendar-background-menu-dark;
 	border: 1px solid $border-color-dark-secondary;
 }
 
@@ -277,8 +277,8 @@
 						input::before {
 							content: "";
 							position: absolute;
-							width: 16px;
-							height: 16px;
+							width: 100%;
+							height: 100%;
 							background-color: #666;
 							opacity: 0.5;
 						}
@@ -286,15 +286,28 @@
 						input:checked::before {
 							display: none;
 						}
-
-						input:hover {
-							accent-color: #6f6d6d;
-						}
 					}
 				}
 
-				&__days, &__time {
+				&__days,
+				&__time,
+				&__venues,
+				&__speakers,
+				&__tags,
+				.sc-filters-footer {
 					border-color: $cell-border-color-dark;
+
+					button {
+
+						&.sc-filters-clear {
+							border-color: $cell-border-color-dark;
+							color: $text-color-dark-tertiary;
+
+							&:hover {
+								border-color: $cell-border-color-dark-hover;
+							}
+						}
+					}
 				}
 			}
 		}

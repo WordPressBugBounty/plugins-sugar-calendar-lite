@@ -67,12 +67,12 @@ function register() {
 	wp_register_script(
 		'sc-event-ticketing-stripe',
 		Assets\get_url( 'js' ) . "/frontend/stripe{$min}.js",
-		[ 'jquery', 'sandhills-stripe-js-v3' ],
+		[ 'jquery', 'sugarcalendar-stripe-js-v3' ],
 		Helpers::get_asset_version()
 	);
 
 	wp_register_script(
-		'sandhills-stripe-js-v3',
+		'sugarcalendar-stripe-js-v3',
 		'https://js.stripe.com/v3/',
 		[],
 		SC_PLUGIN_VERSION,
@@ -151,7 +151,7 @@ function enqueue() {
 	$stripe_script_handle = apply_filters( 'sc_et_frontend_stripe_script_handle', 'sc-event-ticketing-stripe', $event );
 
 	wp_enqueue_script( $stripe_script_handle );
-	wp_enqueue_script( 'sandhills-stripe-js-v3' );
+	wp_enqueue_script( 'sugarcalendar-stripe-js-v3' );
 
 	wp_localize_script(
 		$stripe_script_handle,

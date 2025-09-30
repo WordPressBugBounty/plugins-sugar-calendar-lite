@@ -10,6 +10,7 @@ use Sugar_Calendar\Block\Common\AbstractBlock;
 use Sugar_Calendar\Block\Common\Template;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
+use function sugar_calendar_get_contrast_color;
 
 class Block extends AbstractBlock {
 
@@ -277,8 +278,9 @@ class Block extends AbstractBlock {
 	public function get_styles() {
 
 		$styles = [
-			'--accent-color' => $this->get_default_accent_color(),
-			'--links-color'  => $this->attributes['linksColor'],
+			'--accent-color'   => $this->get_default_accent_color(),
+			'--links-color'    => $this->attributes['linksColor'],
+			'--popover-accent' => sugar_calendar_get_contrast_color( $this->get_default_accent_color(), '#111111', '#ffffff' ),
 		];
 
 		$output = '';

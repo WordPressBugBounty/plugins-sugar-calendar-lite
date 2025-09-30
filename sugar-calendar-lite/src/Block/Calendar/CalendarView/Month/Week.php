@@ -72,17 +72,29 @@ class Week implements InterfaceView {
 	private $calendar_info = [];
 
 	/**
+	 * The block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @var AbstractBlock|null
+	 */
+	private $block;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
+	 * @since 3.9.0 Make block instance available.
 	 *
-	 * @param array $data          Array containing the events for a week.
-	 * @param array $calendar_info Calendar Info.
+	 * @param array              $data          Array containing the events for a week.
+	 * @param array              $calendar_info Calendar Info.
+	 * @param AbstractBlock|null $block         Block instance for timezone access.
 	 */
-	public function __construct( $data, $calendar_info ) {
+	public function __construct( $data, $calendar_info, $block = null ) {
 
 		$this->data          = $data;
 		$this->calendar_info = $calendar_info;
+		$this->block         = $block;
 	}
 
 	/**
@@ -105,6 +117,18 @@ class Week implements InterfaceView {
 	public function get_calendar_info() {
 
 		return $this->calendar_info;
+	}
+
+	/**
+	 * Get the block instance.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @return AbstractBlock|null
+	 */
+	public function get_block() {
+
+		return $this->block;
 	}
 
 	/**
