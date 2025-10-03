@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'awesomemotive/sugarcalendar',
-        'pretty_version' => 'dev-3.9.0-release',
-        'version' => 'dev-3.9.0-release',
-        'reference' => '9faeef642636c378ba7b71abc8e4155f02f46714',
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => '5a1556207003c647e0221c55a64094bdab8f7ba7',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'awesomemotive/sugarcalendar' => array(
-            'pretty_version' => 'dev-3.9.0-release',
-            'version' => 'dev-3.9.0-release',
-            'reference' => '9faeef642636c378ba7b71abc8e4155f02f46714',
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '5a1556207003c647e0221c55a64094bdab8f7ba7',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

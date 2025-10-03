@@ -1592,7 +1592,7 @@ class Area {
 				$typenow === sugar_calendar_get_event_post_type_id() ||
 				$typenow === 'sc_rsvp' ||
 				$typenow === 'sugar-calendar-speaker' ||
-				$typenow === SC_VENUE_POST_TYPE
+				( defined( 'SC_VENUE_POST_TYPE' ) ? $typenow === SC_VENUE_POST_TYPE : false )
 			)
 		) {
 			return true;

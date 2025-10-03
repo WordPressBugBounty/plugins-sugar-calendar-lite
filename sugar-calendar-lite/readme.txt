@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 5.9
 Tested up to:      6.8
-Stable tag:        3.9.0
+Stable tag:        3.9.1
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,10 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+## [3.9.1] - 2025-10-03
+## Fixed:
+- Fatal error on new post or CPT creation.
+
 = 3.9.0 - 2025-09-30 =
 - Added: Shortcode generator for the classical editor.
 - Changed: Filter dropdown in Calendar and List blocks/shortcodes.

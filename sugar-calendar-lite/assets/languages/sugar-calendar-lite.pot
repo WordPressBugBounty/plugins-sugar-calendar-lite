@@ -1,20 +1,19 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.9.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.9.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-30T12:41:41+00:00\n"
+"POT-Creation-Date: 2025-10-03T06:17:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
+"X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: sugar-calendar-lite\n"
 
 #. Plugin Name of the plugin
 #. Author of the plugin
-#: sugar-calendar.php
 #: src/Admin/Area.php:325
 #: src/Admin/Tools/DashboardWidget.php:120
 #: src/Block/Calendar/Loader.php:448
@@ -23,12 +22,10 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
-#: sugar-calendar.php
 msgid "https://sugarcalendar.com"
 msgstr ""
 
 #. Description of the plugin
-#: sugar-calendar.php
 msgid "A calendar with a sweet disposition."
 msgstr ""
 
@@ -765,7 +762,6 @@ msgid "Clear"
 msgstr ""
 
 #: includes/admin/nav.php:139
-#, php-format
 msgid "Add %s"
 msgstr ""
 
@@ -785,7 +781,6 @@ msgid "Event updated."
 msgstr ""
 
 #: includes/admin/posts.php:66
-#, php-format
 msgid "Event restored to revision from %s."
 msgstr ""
 
@@ -802,7 +797,6 @@ msgid "Event submitted."
 msgstr ""
 
 #: includes/admin/posts.php:71
-#, php-format
 msgid "Event scheduled for: %s."
 msgstr ""
 
@@ -886,17 +880,14 @@ msgid "The upgrade process has begun. Please be patient. You will be redirected 
 msgstr ""
 
 #: includes/admin/upgrades.php:47
-#, php-format
 msgid "Step %d of %d..."
 msgstr ""
 
 #: includes/admin/upgrades.php:129
-#, php-format
 msgid "Sugar Calendar needs to upgrade the events database. Click <a href=\"%s\">here</a> to start."
 msgstr ""
 
 #: includes/admin/upgrades.php:136
-#, php-format
 msgid "Sugar Calendar needs to perform an upgrade. Click <a href=\"%s\">here</a> to start."
 msgstr ""
 
@@ -1010,7 +1001,6 @@ msgstr ""
 
 #. translators: %s - URL to payment settings page.
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:321
-#, php-format
 msgid "Ticket Sales cannot be used until <a href=\"%s\">Stripe is connected</a>."
 msgstr ""
 
@@ -1373,7 +1363,6 @@ msgid "about connecting with Stripe"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:428
-#, php-format
 msgid "Your Stripe account is connected in %s mode."
 msgstr ""
 
@@ -2063,7 +2052,6 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:104
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:212
 #: includes/common/Features/EventTicketing/includes/front-end/print.php:79
-#, php-format
 msgid "%s at %s"
 msgstr ""
 
@@ -2073,17 +2061,14 @@ msgid "View event details"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:137
-#, php-format
 msgid "Ticket ID: %d"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:138
-#, php-format
 msgid "Ticket Code: %s"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:142
-#, php-format
 msgid "For: %s"
 msgstr ""
 
@@ -2131,7 +2116,6 @@ msgstr ""
 
 #. translators: %s: Optional text.
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:135
-#, php-format
 msgid "Enter the name and email of all attendees%s."
 msgstr ""
 
@@ -2185,7 +2169,6 @@ msgstr ""
 
 #. translators: %s: Event name.
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:274
-#, php-format
 msgid "<span>Event:</span> %s"
 msgstr ""
 
@@ -2195,13 +2178,11 @@ msgstr ""
 
 #. translators: %s: Tickets quantity.
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:307
-#, php-format
 msgid "<span>Tickets:</span> %s"
 msgstr ""
 
 #. translators: %s: Ticket Price.
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:324
-#, php-format
 msgid "<span>Ticket Price:</span> <strong>%s</strong>"
 msgstr ""
 
@@ -2250,7 +2231,6 @@ msgstr ""
 
 #. translators: %s: price.
 #: includes/common/Features/EventTicketing/includes/front-end/singular.php:140
-#, php-format
 msgid "%s per ticket"
 msgstr ""
 
@@ -2260,7 +2240,6 @@ msgstr ""
 
 #. translators: %d: number of available tickets.
 #: includes/common/Features/EventTicketing/includes/front-end/singular.php:161
-#, php-format
 msgid "%d available"
 msgstr ""
 
@@ -2282,7 +2261,6 @@ msgstr ""
 
 #. translators: %d: number of available tickets.
 #: includes/common/Features/EventTicketing/includes/gateways/checkout.php:217
-#, php-format
 msgid "Only %d tickets are available. Please reduce your purchase quantity."
 msgstr ""
 
@@ -2322,7 +2300,6 @@ msgstr ""
 
 #. translators: %s: Error code.
 #: includes/common/Features/EventTicketing/includes/gateways/stripe.php:269
-#, php-format
 msgid "Error: %s"
 msgstr ""
 
@@ -2332,7 +2309,6 @@ msgstr ""
 
 #. translators: %1$s: Event title, %2$s: Event date.
 #: includes/common/Features/EventTicketing/includes/gateways/stripe.php:314
-#, php-format
 msgid "Event ticket for %1$s on %2$s"
 msgstr ""
 
@@ -2385,7 +2361,6 @@ msgstr ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:298
-#, php-format
 msgid "%1$d order moved to Trash successfully, %2$d failed."
 msgid_plural "%1$d orders moved to Trash successfully, %2$d failed."
 msgstr[0] ""
@@ -2393,7 +2368,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of orders moved to trash.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:311
-#, php-format
 msgid "%d order was successfully moved to Trash."
 msgid_plural "%d orders were successfully moved to Trash."
 msgstr[0] ""
@@ -2401,7 +2375,6 @@ msgstr[1] ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:327
-#, php-format
 msgid "%1$d order restored successfully, %2$d failed."
 msgid_plural "%1$d orders restored successfully, %2$d failed."
 msgstr[0] ""
@@ -2409,7 +2382,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of orders restored.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:340
-#, php-format
 msgid "%d order was successfully restored."
 msgid_plural "%d orders were successfully restored."
 msgstr[0] ""
@@ -2417,7 +2389,6 @@ msgstr[1] ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:356
-#, php-format
 msgid "%1$d order permanently deleted successfully, %2$d failed."
 msgid_plural "%1$d orders permanently deleted successfully, %2$d failed."
 msgstr[0] ""
@@ -2425,7 +2396,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of orders permanently deleted.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrdersTab.php:369
-#, php-format
 msgid "%d order was successfully permanently deleted."
 msgid_plural "%d orders were successfully permanently deleted."
 msgstr[0] ""
@@ -2448,7 +2418,6 @@ msgstr ""
 
 #. translators: %1$d: Number of successful emails, %2$d: Number of failed emails.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:311
-#, php-format
 msgid "%1$d ticket email sent successfully, %2$d failed."
 msgid_plural "%1$d ticket emails sent successfully, %2$d failed."
 msgstr[0] ""
@@ -2456,7 +2425,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of ticket emails sent.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:324
-#, php-format
 msgid "%d ticket email sent successfully."
 msgid_plural "%d ticket emails sent successfully."
 msgstr[0] ""
@@ -2464,7 +2432,6 @@ msgstr[1] ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:340
-#, php-format
 msgid "%1$d ticket moved to Trash successfully, %2$d failed."
 msgid_plural "%1$d tickets moved to Trash successfully, %2$d failed."
 msgstr[0] ""
@@ -2472,7 +2439,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of tickets moved to trash.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:353
-#, php-format
 msgid "%d ticket was successfully moved to Trash."
 msgid_plural "%d tickets were successfully moved to Trash."
 msgstr[0] ""
@@ -2480,7 +2446,6 @@ msgstr[1] ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:369
-#, php-format
 msgid "%1$d ticket restored successfully, %2$d failed."
 msgid_plural "%1$d tickets restored successfully, %2$d failed."
 msgstr[0] ""
@@ -2488,7 +2453,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of tickets restored.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:382
-#, php-format
 msgid "%d ticket was successfully restored."
 msgid_plural "%d tickets were successfully restored."
 msgstr[0] ""
@@ -2496,7 +2460,6 @@ msgstr[1] ""
 
 #. translators: %1$d: Number of successful, %2$d: Number of failed.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:398
-#, php-format
 msgid "%1$d ticket permanently deleted successfully, %2$d failed."
 msgid_plural "%1$d tickets permanently deleted successfully, %2$d failed."
 msgstr[0] ""
@@ -2504,7 +2467,6 @@ msgstr[1] ""
 
 #. translators: %d: Number of tickets permanently deleted.
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:411
-#, php-format
 msgid "%d ticket was successfully permanently deleted."
 msgid_plural "%d tickets were successfully permanently deleted."
 msgstr[0] ""
@@ -2512,7 +2474,6 @@ msgstr[1] ""
 
 #. translators: %1$s is the price of the ticket.
 #: includes/common/Features/EventTicketing/src/Frontend/Loader.php:100
-#, php-format
 msgid "Buy Tickets - %1$s"
 msgstr ""
 
@@ -2592,7 +2553,6 @@ msgstr ""
 
 #. translators: %s: error message.
 #: includes/common/Features/GoogleMaps/Feature.php:449
-#, php-format
 msgid "Request Denied. %s"
 msgstr ""
 
@@ -2609,7 +2569,6 @@ msgstr ""
 #: includes/common/time-zones.php:207
 #: includes/common/time.php:218
 #: includes/common/time.php:252
-#, php-format
 msgid "%s hour"
 msgid_plural "%s hours"
 msgstr[0] ""
@@ -2629,7 +2588,6 @@ msgid "UTC Manual Offsets"
 msgstr ""
 
 #: includes/common/time.php:206
-#, php-format
 msgid "%s year"
 msgid_plural "%s years"
 msgstr[0] ""
@@ -2637,7 +2595,6 @@ msgstr[1] ""
 
 #: includes/common/time.php:209
 #: includes/common/time.php:243
-#, php-format
 msgid "%s month"
 msgid_plural "%s months"
 msgstr[0] ""
@@ -2645,7 +2602,6 @@ msgstr[1] ""
 
 #: includes/common/time.php:212
 #: includes/common/time.php:246
-#, php-format
 msgid "%s week"
 msgid_plural "%s weeks"
 msgstr[0] ""
@@ -2653,7 +2609,6 @@ msgstr[1] ""
 
 #: includes/common/time.php:215
 #: includes/common/time.php:249
-#, php-format
 msgid "%s day"
 msgid_plural "%s days"
 msgstr[0] ""
@@ -2661,7 +2616,6 @@ msgstr[1] ""
 
 #: includes/common/time.php:221
 #: includes/common/time.php:255
-#, php-format
 msgid "%s minute"
 msgid_plural "%s minutes"
 msgstr[0] ""
@@ -2669,7 +2623,6 @@ msgstr[1] ""
 
 #: includes/common/time.php:224
 #: includes/common/time.php:258
-#, php-format
 msgid "%s second"
 msgid_plural "%s seconds"
 msgstr[0] ""
@@ -2973,32 +2926,26 @@ msgid "Read More"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1715
-#, php-format
 msgid "Starts %s then every %s until %s"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1729
-#, php-format
 msgid "Starts %s then every month on the %s until %s"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1743
-#, php-format
 msgid "Starts %s then every year on the %s of %s until %s"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1763
-#, php-format
 msgid "Starts %s then every %s"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1776
-#, php-format
 msgid "Starts %s then every month on the %s"
 msgstr ""
 
 #: includes/themes/legacy/functions.php:1789
-#, php-format
 msgid "Starts %s then every year on the %s of %s"
 msgstr ""
 
@@ -3147,12 +3094,10 @@ msgid "This plugin is not fully active."
 msgstr ""
 
 #: requirements-check.php:241
-#, php-format
 msgid "Requires %s (%s), but (%s) is installed."
 msgstr ""
 
 #: requirements-check.php:251
-#, php-format
 msgid "Requires %s (%s), but it appears to be missing."
 msgstr ""
 
@@ -3166,13 +3111,11 @@ msgstr ""
 
 #. translators: %s - addon name.
 #: src/Admin/Addons/Addons.php:440
-#, php-format
 msgid "%s addon"
 msgstr ""
 
 #. translators: 1: Addon name, 2: Required Sugar Calendar version.
 #: src/Admin/Addons/Requirements.php:418
-#, php-format
 msgid "The %1$s plugin is disabled because it requires Sugar Calendar version %2$s or later to be active."
 msgstr ""
 
@@ -3207,7 +3150,6 @@ msgstr ""
 
 #. translators: %s - SugarCalendar.com Upgrade page URL.
 #: src/Admin/Education.php:167
-#, php-format
 msgid "<strong>You’re using Sugar Calendar Lite</strong>. To unlock more features consider <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">upgrading to Pro</a> for 50%% off."
 msgstr ""
 
@@ -3296,7 +3238,6 @@ msgstr ""
 
 #. translators: %s - SugarCalendar.com Upgrade page URL.
 #: src/Admin/Education.php:260
-#, php-format
 msgid "Elevate your event management with Sugar Calendar Pro. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Upgrade today</a> and start leveraging advanced features to streamline and enhance your event management."
 msgstr ""
 
@@ -3333,7 +3274,6 @@ msgstr ""
 #. translators: %s - SugarCalendar.com documentation page URL.
 #: src/Admin/Education.php:360
 #: src/Admin/Education.php:413
-#, php-format
 msgid "Need more help? <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Read our Documentation</a>"
 msgstr ""
 
@@ -3451,7 +3391,6 @@ msgid "Show Map"
 msgstr ""
 
 #: src/Admin/Events/Metaboxes.php:654
-#, php-format
 msgid "You need to configure Google API in %s to enable this feature."
 msgstr ""
 
@@ -3561,7 +3500,6 @@ msgstr ""
 
 #. translators: %s - Item count.
 #: src/Admin/Events/Tables/Base.php:1531
-#, php-format
 msgctxt "List table: all statuses (excluding trash)"
 msgid "All <span class=\"count\">(%s)</span>"
 msgid_plural "All <span class=\"count\">(%s)</span>"
@@ -3599,7 +3537,6 @@ msgstr ""
 #. translators: %1$s - Datetime; %2$s - Timezone.
 #: src/Admin/Events/Tables/Base.php:2673
 #: src/Admin/Events/Tables/Base.php:2693
-#, php-format
 msgctxt "Time Time Zone"
 msgid "%1$s %2$s"
 msgstr ""
@@ -3628,7 +3565,6 @@ msgstr ""
 
 #. translators: %s taxonomy label.
 #: src/Admin/Events/Tables/Base.php:3885
-#, php-format
 msgid "Filter by %s"
 msgstr ""
 
@@ -3684,7 +3620,6 @@ msgstr ""
 
 #. translators: %s: Number of events trashed.
 #: src/Admin/Events/Tables/Basic.php:142
-#, php-format
 msgid "%s event moved to the Trash."
 msgid_plural "%s events moved to the Trash."
 msgstr[0] ""
@@ -3692,7 +3627,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of events deleted.
 #: src/Admin/Events/Tables/Basic.php:156
-#, php-format
 msgid "%s event permanently deleted."
 msgid_plural "%s events permanently deleted."
 msgstr[0] ""
@@ -3700,7 +3634,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of events restored.
 #: src/Admin/Events/Tables/Basic.php:172
-#, php-format
 msgid "%s event restored."
 msgid_plural "%s events restored."
 msgstr[0] ""
@@ -3762,7 +3695,6 @@ msgstr ""
 #. translators: %s - week number.
 #: src/Admin/Events/Tables/Day.php:83
 #: src/Admin/Events/Tables/Week.php:81
-#, php-format
 msgctxt "Week number"
 msgid "Week %s"
 msgstr ""
@@ -3842,7 +3774,6 @@ msgstr ""
 
 #. translators: %s - addon title.
 #: src/Admin/Pages/Addons.php:128
-#, php-format
 msgid "%s logo"
 msgstr ""
 
@@ -4063,7 +3994,6 @@ msgstr ""
 #: src/Admin/Pages/Rsvp.php:73
 #: src/Admin/Pages/SettingsRsvpTab.php:71
 #: src/Pro/Admin/Loader.php:191
-#, php-format
 msgid "RSVP feature is available as an add-on. Please <a target=\"_blank\" href=\"%1$s\">upgrade your plan</a> to Plus, Pro or Elite, in order to get access to the RSVP add-on and others."
 msgstr ""
 
@@ -4138,7 +4068,6 @@ msgstr ""
 
 #. translators: 1. WP Mail SMTP URL.
 #: src/Admin/Pages/Settings.php:158
-#, php-format
 msgid "Solve common email deliverability issues for good. <a target=\"_blank\" href=\"%1$s\">Get WP Mail SMTP!</a>"
 msgstr ""
 
@@ -4386,13 +4315,11 @@ msgstr ""
 
 #. translators: %s - WPMailSMTP.com upgrade URL.
 #: src/Admin/Pages/SettingsGeneralTab.php:368
-#, php-format
 msgid "To unlock more features, consider <strong><a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"sugar-calendar-upgrade-modal\">upgrading to PRO</a></strong>."
 msgstr ""
 
 #. Translators: %s - discount value 50%
 #: src/Admin/Pages/SettingsGeneralTab.php:395
-#, php-format
 msgid "As a valued Sugar Calendar Lite user you receive <strong>%s off</strong>, automatically applied at checkout!"
 msgstr ""
 
@@ -4406,7 +4333,6 @@ msgstr ""
 
 #. translators: %1$s - Sugar Calendar account dashboard url; %2$s - pricing page url.
 #: src/Admin/Pages/SettingsGeneralTab.php:424
-#, php-format
 msgid "Your license key can be found in your <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sugar Calendar Account Dashboard</a>. Don't have a license?  <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sign up today!</a>"
 msgstr ""
 
@@ -4425,7 +4351,6 @@ msgstr ""
 
 #. translators: %1$s - Google Maps API Key link url; %1$s - Documentation link url.
 #: src/Admin/Pages/SettingsMapsTab.php:148
-#, php-format
 msgid "In order to display maps with pins and dynamic views, you'll need to obtain and enter your own <a href=\"%1$s\" target=\"_blank\">Google Maps API Key</a>.<br>If you need help, please refer to <a href=\"%2$s\" target=\"_blank\">our documentation</a>."
 msgstr ""
 
@@ -4603,7 +4528,6 @@ msgstr ""
 
 #. translators: %s: import source.
 #: src/Admin/Pages/ToolsImportTab.php:97
-#, php-format
 msgid "Importer not found for: %s"
 msgstr ""
 
@@ -4792,7 +4716,6 @@ msgstr ""
 
 #. translators: %1$s is the URL for the upgrade link, %2$s is the link text.
 #: src/Admin/Tools/DashboardWidget.php:570
-#, php-format
 msgid "Upgrade to <strong>Sugar Calendar Pro</strong> and get access to powerful features like Venues, Speakers, Recurring Events, and much more! <a href=\"%1$s\">%2$s</a>"
 msgstr ""
 
@@ -4925,13 +4848,11 @@ msgstr ""
 
 #. translators: %1$s: number of imported items, %2$s: item type.
 #: src/Admin/Tools/Importers/SugarCalendar.php:145
-#, php-format
 msgid "%1$s imported: %2$s"
 msgstr ""
 
 #. translators: %s: Sugar Calendar Pro pricing page URL.
 #: src/Admin/Tools/Importers/SugarCalendar.php:178
-#, php-format
 msgid "If you are importing recurring events, please <a target=\"_blank\" href=\"%1$s\">upgrade to Sugar Calendar Pro</a>. If you import recurring events on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?"
 msgstr ""
 
@@ -4949,7 +4870,6 @@ msgstr ""
 
 #. translators: %s: Sugar Calendar Pro pricing page URL.
 #: src/Admin/Tools/Importers/SugarCalendarIcs.php:85
-#, php-format
 msgid "Import events from your Apple, Google, Microsoft, or other calendars, by pasting your ICS URL below. <a target=\"_blank\" href=\"%1$s\">Upgrade to Sugar Calendar Pro</a>."
 msgstr ""
 
@@ -4963,13 +4883,11 @@ msgstr ""
 
 #. translators: %s: Sugar Calendar to TEC migration admin page.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:261
-#, php-format
 msgid "The Events Calendar to Sugar Calendar migration was not completed. Please complete the migration <a href=\"%s\">here</a>."
 msgstr ""
 
 #. translators: %s: Sugar Calendar to TEC migration admin page.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:277
-#, php-format
 msgid "Sugar Calendar has detected The Events Calendar events on this site. Migrate them to Sugar Calendar with our <a href=\"%s\">1-click migration tool</a>."
 msgstr ""
 
@@ -4991,19 +4909,16 @@ msgstr ""
 
 #. translators: %s: A sentence describing the number of items per context to be imported.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:352
-#, php-format
 msgid "There are %s defined in The Events Calendar. You can import them to Sugar Calendar with just one click!"
 msgstr ""
 
 #. translators: %s: Sugar Calendar Pro pricing page URL.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:372
-#, php-format
 msgid "The Events Calendar migration contains recurring events. Please <a target=\"_blank\" href=\"%1$s\">upgrade to Sugar Calendar Pro</a>, to successfully import recurring events. If you want to proceed with this migration on Sugar Calendar Lite, then the recurring events will be converted to normal non-recurring events. Are you sure you want to continue?"
 msgstr ""
 
 #. translators: %d - number of events to migrate.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:464
-#, php-format
 msgid "%d event"
 msgid_plural "%d events"
 msgstr[0] ""
@@ -5011,7 +4926,6 @@ msgstr[1] ""
 
 #. translators: %d - number of venues to migrate.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:472
-#, php-format
 msgid ", %d venue"
 msgid_plural ", %d venues"
 msgstr[0] ""
@@ -5019,7 +4933,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of TEC categories to import.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:484
-#, php-format
 msgid "%s category"
 msgid_plural "%s categories"
 msgstr[0] ""
@@ -5027,7 +4940,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of TEC tags to import.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:500
-#, php-format
 msgid "%s tag"
 msgid_plural "%s tags"
 msgstr[0] ""
@@ -5035,7 +4947,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of TEC orders to import.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:516
-#, php-format
 msgid "%s order"
 msgid_plural "%s orders"
 msgstr[0] ""
@@ -5043,7 +4954,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of TEC tickets to import.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:532
-#, php-format
 msgid "%s ticket"
 msgid_plural "%s tickets"
 msgstr[0] ""
@@ -5051,7 +4961,6 @@ msgstr[1] ""
 
 #. translators: %s: Number of TEC attendees to import.
 #: src/Admin/Tools/Importers/TheEventCalendar.php:544
-#, php-format
 msgid "%s attendee"
 msgid_plural "%s attendees"
 msgstr[0] ""
@@ -5202,7 +5111,6 @@ msgstr ""
 
 #. translators: %s: Month name and the date. E.g January 1.
 #: src/Block/Calendar/Loader.php:115
-#, php-format
 msgid "Events on %s"
 msgstr ""
 
@@ -5345,7 +5253,6 @@ msgstr ""
 
 #. translators: %d - number of events selected for Bulk Edit.
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:123
-#, php-format
 msgid "<strong>%d events</strong> selected for Bulk Edit."
 msgstr ""
 
@@ -5479,13 +5386,11 @@ msgstr ""
 
 #. translators: %s: All items label.
 #: src/Helper.php:601
-#, php-format
 msgid "Clear search and return to All %s"
 msgstr ""
 
 #. translators: 1: start date, 2: end date.
 #: src/Helpers.php:431
-#, php-format
 msgid "%1$s - %2$s"
 msgstr ""
 
@@ -5563,7 +5468,6 @@ msgstr ""
 
 #. translators: %1$s - the DB option name, %2$s - Sugar Calendar, %3$s - error message.
 #: src/Migrations/MigrationAbstract.php:156
-#, php-format
 msgid "There was an error while upgrading the %1$s database. Please contact %2$s support with this information: %3$s."
 msgstr ""
 
