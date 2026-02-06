@@ -37,7 +37,7 @@ class SettingsFeedsTab extends Settings {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/using-calendar-feeds/',
+			'https://sugarcalendar.com/docs/events/using-calendar-feeds/',
 			[
 				'content' => 'Help',
 				'medium'  => 'plugin-settings-feeds',

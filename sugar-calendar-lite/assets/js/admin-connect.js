@@ -57,8 +57,8 @@
 				$.alert( {
 					title: false,
 					content: message,
-					icon: this.getIcon( 'exclamation-circle-solid-orange.svg' ),
-					type: 'orange',
+					icon: this.getIcon( 'exclamation-circle-solid-yellow.svg' ),
+					type: 'yellow',
 					buttons: {
 						confirm: {
 							text: this.settings.text.ok,
@@ -79,7 +79,7 @@
 			return {
 				title: this.settings.text.almost_done,
 				content: response.data.message,
-				icon: this.getIcon( 'check-circle-solid-green.svg' ),
+				icon: this.getIcon( 'check-circle.svg' ),
 				type: 'green',
 				buttons: {
 					confirm: {
@@ -99,7 +99,7 @@
 			$.alert( {
 				title: this.settings.text.oops,
 				content: this.settings.text.server_error + '<br>' + xhr.status + ' ' + xhr.statusText + ' ' + xhr.responseText,
-				icon: this.getIcon( 'exclamation-circle-regular-red.svg' ),
+				icon: this.getIcon( 'exclamation-circle.svg' ),
 				type: 'red',
 				buttons: {
 					confirm: {

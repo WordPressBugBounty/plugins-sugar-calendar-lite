@@ -33,6 +33,10 @@ class TimezoneConversionHelper {
 			return false;
 		}
 
+		if ( $event->is_all_day() ) {
+			return $event->is_multi();
+		}
+
 		// Convert event start and end to the given timezone.
 		$event_start = clone $event->start_dto;
 		$event_end   = clone $event->end_dto;

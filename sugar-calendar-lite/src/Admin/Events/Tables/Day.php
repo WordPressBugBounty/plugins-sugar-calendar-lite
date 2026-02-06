@@ -53,6 +53,7 @@ class Day extends Grid {
 	 * Overrides base class to add the "week" column.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Added today indicator.
 	 *
 	 * @return array An associative array containing column information
 	 */
@@ -60,6 +61,16 @@ class Day extends Grid {
 
 		// Set initial time.
 		$time = $this->grid_start;
+
+		$today_date = gmdate( 'Y-m-d', $this->today_first_second );
+
+		$today_class_indicator = '';
+		$today_class           = '';
+
+		if ( $today_date === gmdate( 'Y-m-d', $time ) ) {
+			$today_class_indicator = '<div class="sce__admin__events-table__week__today-indicator"></div>';
+			$today_class           = 'today';
+		}
 
 		// Lowercase day, for column key.
 		$day = strtolower( gmdate( 'l', $time ) );
@@ -87,7 +98,12 @@ class Day extends Grid {
 		// Return Week & Day.
 		return [
 			'hour' => '<a href="' . esc_url( $link_to_week ) . '" class="week-number">' . esc_html( $text ) . '</a>',
-			$day   => esc_html( $day_text ),
+			$day   => sprintf(
+				'%1$s <span class="%2$s">%3$s</span>',
+				$today_class_indicator,
+				esc_attr( $today_class ),
+				esc_html( $day_text )
+			),
 		];
 	}
 
@@ -187,6 +203,7 @@ class Day extends Grid {
 	 * Start the week with a table row, and a th to show the time.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Added add new for all day cell.
 	 *
 	 * @param string $type Event spans type (either 'all_day' or 'multi_day').
 	 */
@@ -205,9 +222,9 @@ class Day extends Grid {
 		// Start an output buffer.
 		ob_start(); ?>
 
-        <div class="event-spans-group event-spans-group--<?php echo sanitize_html_class( $type ); ?>">
-            <div class="row event-spans">
-                <div class="column column-hour<?php echo $this->get_hour_class(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+		<div class="event-spans-group event-spans-group--<?php echo sanitize_html_class( $type ); ?>">
+			<div class="row event-spans">
+				<div class="column column-hour<?php echo $this->get_hour_class(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 
 					<?php if ( $type === 'all_day' ) : ?>
 
@@ -218,8 +235,7 @@ class Day extends Grid {
 						<?php esc_html_e( 'Multiple Days', 'sugar-calendar-lite' ); ?>
 
 					<?php endif; ?>
-
-                </div>
+				</div>
 
 				<?php
 				// Set the boundaries.
@@ -238,9 +254,13 @@ class Day extends Grid {
 				$this->set_current_cell( $args );
 				?>
 
-                <div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+				<div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 
 					<?php
+					if ( $type === 'all_day' ) {
+						echo $this->get_add_new_button( false, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+
 					$events = $this->get_current_cell( 'items', [] );
 
 					foreach ( $events as $event ) :
@@ -273,11 +293,8 @@ class Day extends Grid {
 
 		// Start an output buffer.
 		ob_start();
-		?>
 
-		<?php echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-
-		<?php
+		echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		// Return the output buffer.
 		return ob_get_clean();
@@ -353,6 +370,7 @@ class Day extends Grid {
 	 * Start the week with a table row.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Added add new button.
 	 */
 	protected function get_row_cell() {
 
@@ -360,9 +378,12 @@ class Day extends Grid {
 		ob_start();
 		?>
 
-        <div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
-			<?php echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        </div>
+		<div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+			<?php
+			echo $this->get_add_new_button( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+		</div>
 
 		<?php
 

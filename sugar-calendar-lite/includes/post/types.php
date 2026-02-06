@@ -47,12 +47,13 @@ function sugar_calendar_allowed_post_types() {
 }
 
 /**
- * Register the Event post types
+ * Register the Event post types.
  *
  * If you want to manipulate these arguments, use the `register_post_type_args`
  * filter that's built into WordPress since version 4.4.
  *
  * @since 2.0.0
+ * @since 3.10.0 Added `excerpt` support.
  */
 function sugar_calendar_register_post_types() {
 
@@ -96,6 +97,7 @@ function sugar_calendar_register_post_types() {
 	// Supports
 	$supports = array(
 		'title',
+		'excerpt',
 		'thumbnail',
 		'revisions',
 		'events',

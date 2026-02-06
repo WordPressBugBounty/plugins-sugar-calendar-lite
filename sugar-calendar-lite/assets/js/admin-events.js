@@ -206,6 +206,7 @@
 					trigger: 'click',
 					allowHTML: true,
 					interactive: true,
+					appendTo: document.body,
 					triggerTarget: $( this ).parent( 'a' ).get( 0 ),
 					offset: [0, 12],
 

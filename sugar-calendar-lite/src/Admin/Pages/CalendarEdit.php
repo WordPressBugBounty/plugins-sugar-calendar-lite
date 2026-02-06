@@ -37,7 +37,7 @@ class CalendarEdit extends CalendarAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/organizing-events-with-calendars/',
+			'https://sugarcalendar.com/docs/events/organizing-events-with-calendars/',
 			[
 				'content' => 'Help',
 				'medium'  => 'edit-calendar',

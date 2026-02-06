@@ -274,7 +274,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 						escapeKey: true,
 						animationBounce: 1,
 						type: 'orange',
-						icon: app.getIcon( 'exclamation-circle-solid-orange' ),
+						icon: app.getIcon( 'info-circle' ),
 						title: sc_admin_importers.strings.heads_up,
 						content: sc_admin_importers.strings.recurring_events_warning,
 						buttons: {
@@ -317,7 +317,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 						title: false,
 						content: app.runtime_vars.strings.please_select_file,
 						titleClass: 'sc-ics-importer-error-title',
-						icon: app.getIcon( 'exclamation-circle-solid-orange' ),
+						icon: app.getIcon( 'info-circle' ),
 						type: 'red',
 						buttons: {
 							confirm: {
@@ -593,7 +593,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 								title: false,
 								content: responseMessage,
 								titleClass: 'sc-ics-importer-error-title',
-								icon: app.getIcon( 'exclamation-circle-solid-orange' ),
+								icon: app.getIcon( 'info-circle' ),
 								type: 'red',
 								boxWidth: '400px',
 								buttons: {

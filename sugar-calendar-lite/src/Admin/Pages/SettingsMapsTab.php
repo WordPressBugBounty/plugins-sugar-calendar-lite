@@ -82,7 +82,7 @@ class SettingsMapsTab extends Settings {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/using-google-maps-to-display-event-location/',
+			'https://sugarcalendar.com/docs/events/using-google-maps-to-display-event-location/',
 			[
 				'content' => 'Help',
 				'medium'  => 'plugin-settings-maps',
@@ -94,6 +94,7 @@ class SettingsMapsTab extends Settings {
 	 * Enqueue assets.
 	 *
 	 * @since 3.5.0
+	 * @since 3.10.0 Removed the enqueued `admin-settings-maps.js`.
 	 *
 	 * @return void
 	 */
@@ -101,14 +102,6 @@ class SettingsMapsTab extends Settings {
 
 		wp_enqueue_style( 'sugar-calendar-admin-settings' );
 		wp_enqueue_script( 'sugar-calendar-admin-settings' );
-
-		wp_enqueue_script(
-			'sugar-calendar-admin-settings-maps',
-			SC_PLUGIN_ASSETS_URL . 'js/admin-settings-maps' . WP::asset_min() . '.js',
-			[ 'jquery' ],
-			Sugar_Calendar_Helpers::get_asset_version(),
-			true
-		);
 
 		wp_localize_script(
 			'sugar-calendar-admin-settings',
@@ -134,7 +127,7 @@ class SettingsMapsTab extends Settings {
 
 		$api_key_link_url       = 'https://developers.google.com/maps/documentation/javascript/get-api-key';
 		$documentation_link_url = Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/using-google-maps-to-display-event-location',
+			'https://sugarcalendar.com/docs/events/using-google-maps-to-display-event-location/',
 			[
 				'content' => 'our documentation',
 				'medium'  => 'settings-maps',
@@ -163,81 +156,6 @@ class SettingsMapsTab extends Settings {
 				'required' => true,
 			]
 		);
-	}
-
-	/**
-	 * Handle verify maps API key.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @return void
-	 */
-	public function handle_verify_maps_api_key() {
-
-		// Bail if maps_google_api_key is not set.
-		if ( ! isset( $_POST['api_key'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			wp_send_json_error();
-		}
-
-		$maps_api_key = sanitize_text_field( wp_unslash( $_POST['api_key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
-		$response = [
-			'success' => false,
-			'message' => '',
-		];
-
-		// Test the API key.
-		$maps_api_key_check = Sugar_Calendar_Helpers::verify_google_maps_api_key( $maps_api_key );
-
-		// If the API key is string it is not valid.
-		if ( $maps_api_key_check['success'] ) {
-
-			$response['success'] = true;
-			$response['message'] = esc_html__( 'Settings saved.', 'sugar-calendar-lite' );
-
-		} else {
-
-			$message = sprintf(
-				'<p>%1$s: %2$s</p>',
-				__( 'An error occurred while connecting to Google Maps Services', 'sugar-calendar-lite' ),
-				$maps_api_key_check['message']
-			);
-
-			// If code is REQUEST_DENIED, we need to show the required APIs.
-			if (
-				$maps_api_key_check['code'] === 'REQUEST_DENIED'
-				&&
-				$maps_api_key_check['message'] === 'This API project is not authorized to use this API.'
-			) {
-
-				$message .= sprintf(
-					'<p>The provided Google Maps API key does not support the <a href="%1$s" target="_blank">Google Geocoding API service</a> or the <a href="%2$s" target="_blank">Google Maps JavaScript API</a>. Please enable them in your Google Console.</p>',
-					esc_url( 'https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com' ),
-					esc_url( 'https://console.cloud.google.com/apis/library/maps-backend.googleapis.com' )
-				);
-			}
-
-			$message .= sprintf(
-				'<p>%2$s <a href="%1$s" target="_blank">%3$s</a> %4$s.</p>',
-				esc_url(
-					Helpers::get_utm_url(
-						'https://sugarcalendar.com/docs/using-google-maps-to-display-event-location',
-						[
-							'content' => 'our documentation',
-							'medium'  => 'settings-maps',
-						]
-					)
-				),
-				__( 'Please read', 'sugar-calendar-lite' ),
-				__( 'our documentation', 'sugar-calendar-lite' ),
-				__( 'on how to set up Google Maps in Sugar Calendar', 'sugar-calendar-lite' ),
-			);
-
-			$response['message'] = $message;
-		}
-
-		// Return response.
-		wp_send_json_success( $response );
 	}
 
 	/**

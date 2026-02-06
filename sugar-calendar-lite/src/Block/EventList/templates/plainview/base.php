@@ -58,7 +58,7 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 				if ( $event_view->should_display_description() ) {
 					?>
 					<div class="sugar-calendar-event-list-block__plainview__event__desc">
-						<?php echo esc_html( $event_view->get_description_excerpt() ); ?>
+						<?php echo wp_kses_post( $event_view->get_description_excerpt() ); ?>
 					</div>
 					<?php
 				}

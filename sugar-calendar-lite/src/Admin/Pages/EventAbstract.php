@@ -289,7 +289,7 @@ abstract class EventAbstract extends PageAbstract {
 				__( 'To sell tickets, enable ticketing here, but ensure your Stripe account is connected first.', 'sugar-calendar-lite' ),
 				esc_url(
 					ExtHelpers::get_utm_url(
-						'https://sugarcalendar.com/docs/setting-up-event-ticketing-with-sugar-calendar-lite/',
+						'https://sugarcalendar.com/docs/events/setting-up-event-ticketing-with-sugar-calendar-lite/',
 						[
 							'medium'  => 'hand-holding-ticket-step',
 							'content' => 'Learn More',
@@ -334,7 +334,7 @@ abstract class EventAbstract extends PageAbstract {
 							'admin_calendar' => esc_url( admin_url( 'admin.php?page=sugar-calendar' ) ),
 							'sc_ext_docs'    => esc_url(
 									ExtHelpers::get_utm_url(
-									'https://sugarcalendar.com/docs/displaying-the-calendar/',
+									'https://sugarcalendar.com/docs/events/displaying-the-calendar/',
 									[
 										'medium'  => 'hand-holding-docs',
 										'content' => 'Check Documentation',

@@ -8,8 +8,8 @@ License:           GNU General Public License v2 or later
 Tags:              events, calendar, event calendar, event management, event tickets
 Requires PHP:      7.4
 Requires at least: 5.9
-Tested up to:      6.8
-Stable tag:        3.9.1
+Tested up to:      6.9
+Stable tag:        3.10.1
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,9 +256,21 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
-## [3.9.1] - 2025-10-03
-## Fixed:
-- Fatal error on new post or CPT creation.
+= 3.10.1 - 2025-12-18 =
+- Fixed: Update URLs.
+
+= 3.10.0 - 2025-12-17 =
+- Added: Massive improvements to our Elementor integration. This includes many new Sugar Calendar Widgets for Elementor, Theme Builder support, and Loop Grid support.
+- Added: Support to Excerpt in Events.
+- Added: Support defining the license key using a PHP constant.
+- Added: View number of ticket purchased directly in the Event List table.
+- Changed: Events and Calendars archive page is now showing a page with Event List block for better user experience. This can still be overriden via theme files.
+- Changed: Admin Events Calendar View QoL and UX improvements.
+- Fixed: Event description with HTML like links `<a>` is not displaying properly in Event List and Event Calendar blocks.
+- Fixed: Security improvement.
+
+= 3.9.1 - 2025-10-03 =
+- Fixed: Fatal error on new post or CPT creation.
 
 = 3.9.0 - 2025-09-30 =
 - Added: Shortcode generator for the classical editor.

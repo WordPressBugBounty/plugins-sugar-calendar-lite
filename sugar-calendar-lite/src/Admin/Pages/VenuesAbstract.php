@@ -77,7 +77,7 @@ abstract class VenuesAbstract extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-venues',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-venues' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-admin-settings', 'sugar-calendar-admin-education', 'sugar-calendar-admin-fontawesome' ],
+			[ 'sugar-calendar-admin-settings' ],
 			BaseHelpers::get_asset_version()
 		);
 	}

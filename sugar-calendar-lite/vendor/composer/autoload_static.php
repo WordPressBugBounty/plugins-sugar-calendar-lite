@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
 {
     public static $prefixLengthsPsr4 = array (
-        'S' => 
+        'S' =>
         array (
             'Sugar_Calendar\\AddOn\\Ticketing\\' => 31,
             'Sugar_Calendar\\' => 15,
@@ -16,24 +16,24 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
     );
 
     public static $prefixDirsPsr4 = array (
-        'Sugar_Calendar\\AddOn\\Ticketing\\' => 
+        'Sugar_Calendar\\AddOn\\Ticketing\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src',
         ),
-        'Sugar_Calendar\\' => 
+        'Sugar_Calendar\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'Stripe\\' => 
+        'Stripe\\' =>
         array (
             0 => __DIR__ . '/..' . '/stripe/stripe-php/lib',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'I' => 
+        'I' =>
         array (
-            'ICal' => 
+            'ICal' =>
             array (
                 0 => __DIR__ . '/..' . '/johngrogg/ics-parser/src',
             ),
@@ -424,6 +424,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\AddOn\\Ticketing\\Frontend\\Loader' => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src/Frontend/Loader.php',
         'Sugar_Calendar\\AddOn\\Ticketing\\Helpers\\Helpers' => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src/Helpers/Helpers.php',
         'Sugar_Calendar\\AddOn\\Ticketing\\Helpers\\UI' => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src/Helpers/UI.php',
+        'Sugar_Calendar\\AddOn\\Ticketing\\Renderer' => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src/Renderer.php',
         'Sugar_Calendar\\Admin\\Addons\\Addons' => __DIR__ . '/../..' . '/src/Admin/Addons/Addons.php',
         'Sugar_Calendar\\Admin\\Addons\\Cache' => __DIR__ . '/../..' . '/src/Admin/Addons/Cache.php',
         'Sugar_Calendar\\Admin\\Addons\\Requirements' => __DIR__ . '/../..' . '/src/Admin/Addons/Requirements.php',
@@ -534,8 +535,24 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Helpers\\UI' => __DIR__ . '/../..' . '/src/Helpers/UI.php',
         'Sugar_Calendar\\Helpers\\WP' => __DIR__ . '/../..' . '/src/Helpers/WP.php',
         'Sugar_Calendar\\Integrations\\Elementor\\CalendarWidget' => __DIR__ . '/../..' . '/src/Integrations/Elementor/CalendarWidget.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Controls\\FixedText' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Controls/FixedText.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Controls\\FixedTextHeading' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Controls/FixedTextHeading.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Documents\\Event' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Documents/Event.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Documents\\Event_Post' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Documents/Event_Post.php',
         'Sugar_Calendar\\Integrations\\Elementor\\Elementor' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Elementor.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Helpers' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Helpers.php',
         'Sugar_Calendar\\Integrations\\Elementor\\ListWidget' => __DIR__ . '/../..' . '/src/Integrations/Elementor/ListWidget.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\AbstractEventWidget' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/AbstractEventWidget.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\BaseEventText' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/BaseEventText.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventBuyTicketBox' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventBuyTicketBox.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventBuyTicketButton' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventBuyTicketButton.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventDate' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventDate.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventDetails' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventDetails.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventImage' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventImage.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventLocation' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventLocation.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventLocationMap' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventLocationMap.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTime' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventTime.php',
+        'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTitle' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventTitle.php',
         'Sugar_Calendar\\Integrations\\Loader' => __DIR__ . '/../..' . '/src/Integrations/Loader.php',
         'Sugar_Calendar\\Migrations\\Migration' => __DIR__ . '/../..' . '/src/Migrations/Migration.php',
         'Sugar_Calendar\\Migrations\\MigrationAbstract' => __DIR__ . '/../..' . '/src/Migrations/MigrationAbstract.php',
@@ -545,6 +562,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Pro\\Admin\\Loader' => __DIR__ . '/../..' . '/src/Pro/Admin/Loader.php',
         'Sugar_Calendar\\Pro\\Admin\\MSClarity' => __DIR__ . '/../..' . '/src/Pro/Admin/MSClarity.php',
         'Sugar_Calendar\\Pro\\Admin\\Pages\\Addons' => __DIR__ . '/../..' . '/src/Pro/Admin/Pages/Addons.php',
+        'Sugar_Calendar\\Pro\\Admin\\Pages\\EventListTable' => __DIR__ . '/../..' . '/src/Pro/Admin/Pages/EventListTable.php',
         'Sugar_Calendar\\Pro\\Admin\\Tools\\DashboardWidget' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/DashboardWidget.php',
         'Sugar_Calendar\\Pro\\Admin\\Tools\\Exporter' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Exporter.php',
         'Sugar_Calendar\\Pro\\Admin\\Tools\\Importers\\SugarCalendar' => __DIR__ . '/../..' . '/src/Pro/Admin/Tools/Importers/SugarCalendar.php',
@@ -563,6 +581,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\RecurringBuilder' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/RecurringBuilder.php',
         'Sugar_Calendar\\Pro\\Features\\AdvancedRecurring\\RegenerateOccurrences' => __DIR__ . '/../..' . '/src/Pro/Features/AdvancedRecurring/RegenerateOccurrences.php',
         'Sugar_Calendar\\Pro\\Features\\CalendarFeeds\\Admin\\Pages\\SettingsFeedsTab' => __DIR__ . '/../..' . '/src/Pro/Features/CalendarFeeds/Admin/Pages/SettingsFeedsTab.php',
+        'Sugar_Calendar\\Pro\\Features\\CalendarFeeds\\Helpers' => __DIR__ . '/../..' . '/src/Pro/Features/CalendarFeeds/Helpers.php',
         'Sugar_Calendar\\Pro\\Features\\CalendarFeeds\\Migration' => __DIR__ . '/../..' . '/src/Pro/Features/CalendarFeeds/Migration.php',
         'Sugar_Calendar\\Pro\\Features\\Speakers\\Admin\\Area' => __DIR__ . '/../..' . '/src/Pro/Features/Speakers/Admin/Area.php',
         'Sugar_Calendar\\Pro\\Features\\Speakers\\Admin\\Metabox\\Event' => __DIR__ . '/../..' . '/src/Pro/Features/Speakers/Admin/Metabox/Event.php',
@@ -586,6 +605,15 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Pro\\Features\\Speakers\\Loader' => __DIR__ . '/../..' . '/src/Pro/Features/Speakers/Loader.php',
         'Sugar_Calendar\\Pro\\Frontend\\Loader' => __DIR__ . '/../..' . '/src/Pro/Frontend/Loader.php',
         'Sugar_Calendar\\Pro\\Helpers' => __DIR__ . '/../..' . '/src/Pro/Helpers.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Elementor' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Elementor.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventCalendarFeeds' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventCalendarFeeds.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventLink' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventLink.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventOccurrencesList' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventOccurrencesList.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventSpeakers' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventSpeakers.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventVenueAddress' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventVenueAddress.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventVenueMap' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventVenueMap.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Elementor\\Widgets\\EventVenueName' => __DIR__ . '/../..' . '/src/Pro/Integrations/Elementor/Widgets/EventVenueName.php',
+        'Sugar_Calendar\\Pro\\Integrations\\Loader' => __DIR__ . '/../..' . '/src/Pro/Integrations/Loader.php',
         'Sugar_Calendar\\Pro\\License\\License' => __DIR__ . '/../..' . '/src/Pro/License/License.php',
         'Sugar_Calendar\\Pro\\License\\Updater' => __DIR__ . '/../..' . '/src/Pro/License/Updater.php',
         'Sugar_Calendar\\Pro\\Migrations\\LicenseKeyMigration' => __DIR__ . '/../..' . '/src/Pro/Migrations/LicenseKeyMigration.php',

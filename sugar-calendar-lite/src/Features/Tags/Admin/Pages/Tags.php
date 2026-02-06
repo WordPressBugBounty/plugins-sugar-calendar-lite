@@ -113,7 +113,7 @@ class Tags extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-calendars',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendars' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-admin-fontawesome' ],
+			[],
 			BaseHelpers::get_asset_version()
 		);
 

@@ -23,7 +23,7 @@ class Notifications {
 	 *
 	 * @var string
 	 */
-	const SOURCE_URL = 'https://plugin.sugarcalendar.com/wp-content/notifications.json';
+	const SOURCE_URL = 'https://events.sugarcalendarapi.com/feeds/v1/notifications';
 
 	/**
 	 * The WP option key for storing the notification options.

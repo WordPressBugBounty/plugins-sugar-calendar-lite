@@ -129,7 +129,7 @@ class Calendars extends PageAbstract {
 	public function help_url( $help_url ) {
 
 		return BaseHelpers\Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/organizing-events-with-calendars/',
+			'https://sugarcalendar.com/docs/events/organizing-events-with-calendars/',
 			[
 				'content' => 'Help',
 				'medium'  => 'calendars-list',
@@ -402,7 +402,7 @@ class Calendars extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-calendars',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-calendars' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-admin-fontawesome' ],
+			[],
 			BaseHelpers::get_asset_version()
 		);
 

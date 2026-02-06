@@ -34,7 +34,7 @@ class ToolsMigrateTab extends Tools {
 	public function help_url( $help_url ) {
 
 		return BaseHelper\Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/importing-events-from-the-events-calendar/',
+			'https://sugarcalendar.com/docs/events/importing-events-from-the-events-calendar/',
 			[
 				'content' => 'Help',
 				'medium'  => 'tools-migrate',

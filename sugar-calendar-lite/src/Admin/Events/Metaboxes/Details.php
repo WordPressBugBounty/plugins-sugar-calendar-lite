@@ -75,11 +75,25 @@ class Details implements MetaboxInterface {
 	 * Display the metabox.
 	 *
 	 * @since 3.0.0
+	 * @since 3.10.0 Updated to use the event content instead of the post content.
 	 *
 	 * @param WP_Post $post Current post.
 	 */
 	public function display( $post = null ) {
 
-		wp_editor( $post->post_content, 'post_content' );
+		$content = '';
+
+		if ( ! empty( $post ) && ! empty( $post->ID ) ) {
+			$event = sugar_calendar_get_event_by_object( $post->ID );
+
+			if ( ! empty( $event ) && ! empty( $event->id ) && ! empty( $event->content ) ) {
+				$content = $event->content;
+			} else if ( ! empty( $post->post_content ) ) {
+				// This is to display the content of the occurrences.
+				$content = $post->post_content;
+			}
+		}
+
+		wp_editor( $content, 'post_content' );
 	}
 }

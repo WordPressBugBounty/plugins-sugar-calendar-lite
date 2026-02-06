@@ -61,7 +61,7 @@ class Metaboxes {
 		}
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/creating-events/',
+			'https://sugarcalendar.com/docs/events/creating-events/',
 			[
 				'content' => 'Help',
 				'medium'  => $medium,

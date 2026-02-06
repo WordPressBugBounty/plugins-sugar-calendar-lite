@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar;
 
+use Sugar_Calendar\Helpers as BaseHelpers;
+
 /**
  * Class Settings handles setting storage and retrieval.
  *
@@ -138,6 +140,7 @@ class Options {
 	 * Get a setting.
 	 *
 	 * @since 3.0.0
+	 * @since 3.10.0 Handle license key defined as PHP constant.
 	 *
 	 * @param string $key     The setting's key.
 	 * @param mixed  $default The setting's value, if it's not found.
@@ -152,6 +155,17 @@ class Options {
 
 		// If a setting value is stored, return it.
 		if ( array_key_exists( $key, static::$settings ) ) {
+
+			// Handle license defined as PHP constant.
+			if (
+				$key === 'license' &&
+				! empty( BaseHelpers::get_license_key_from_constant() ) &&
+				is_array( static::$settings[ $key ] ) &&
+				empty( static::$settings[ $key ]['key'] )
+			) {
+				static::$settings[ $key ]['key'] = BaseHelpers::get_license_key_from_constant();
+			}
+
 			return static::$settings[ $key ];
 		}
 

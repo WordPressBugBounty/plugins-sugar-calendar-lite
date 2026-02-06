@@ -6,7 +6,6 @@ use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
-use Sugar_Calendar\Helpers as BaseHelpers;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -1309,23 +1308,6 @@ class Helpers {
 	}
 
 	/**
-	 * Verify the Google Maps API key.
-	 *
-	 * @since 3.5.0
-	 *
-	 * @param string $api_key The API key to verify.
-	 *
-	 * @return array
-	 */
-	public static function verify_google_maps_api_key( $api_key ) {
-
-		$features            = Plugin::instance()->get_common_features();
-		$feature_google_maps = $features->get_feature( 'GoogleMaps' );
-
-		return $feature_google_maps->verify_api_key( $api_key );
-	}
-
-	/**
 	 * Return the Google Maps API Key from options.
 	 *
 	 * @since 3.5.0
@@ -1367,7 +1349,7 @@ class Helpers {
 			'sugar-calendar-admin-compatibility-acf',
 			SC_PLUGIN_ASSETS_URL . 'js/compatibility/sc-compatibility-acf' . WP::asset_min() . '.js',
 			[ 'jquery' ],
-			BaseHelpers::get_asset_version(),
+			self::get_asset_version(),
 			true
 		);
 
@@ -1478,4 +1460,42 @@ class Helpers {
 		return (bool) $exists;
 	}
 
+	/**
+	 * Get the event excerpt.
+	 *
+	 * This returns the user-defined excerpt, if it exists.
+	 * If not, the WP generated one from the content.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param int $event_object_id The Event Object ID / Post ID.
+	 *
+	 * @return string
+	 */
+	public static function get_event_excerpt( $event_object_id ) {
+
+		$excerpt = get_post_field( 'post_excerpt', $event_object_id );
+
+		if ( empty( $excerpt ) ) {
+			$excerpt = wp_trim_excerpt( '', $event_object_id );
+		}
+
+		return $excerpt;
+	}
+
+	/**
+	 * Get the license key from the PHP constant.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @return string|false
+	 */
+	public static function get_license_key_from_constant() {
+
+		if ( defined( 'SC_LICENSE_KEY' ) && ! empty( SC_LICENSE_KEY ) ) {
+			return SC_LICENSE_KEY;
+		}
+
+		return false;
+	}
 }

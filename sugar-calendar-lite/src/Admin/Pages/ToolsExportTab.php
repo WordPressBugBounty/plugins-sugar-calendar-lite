@@ -63,7 +63,7 @@ class ToolsExportTab extends Tools {
 	public function help_url( $help_url ) {
 
 		return Helpers\Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/importing-and-exporting-events/#Exporting_Events',
+			'https://sugarcalendar.com/docs/events/importing-and-exporting-events/#Exporting_Events',
 			[
 				'content' => 'Help',
 				'medium'  => 'tools-export',

@@ -65,7 +65,7 @@ class Addons extends PageAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/categories/docs/addons/',
+			'https://sugarcalendar.com/docs/events/addons/',
 			[
 				'content' => 'Help',
 				'medium'  => 'addons',

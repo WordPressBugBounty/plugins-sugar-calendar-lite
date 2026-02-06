@@ -46,7 +46,7 @@ class Rsvp extends PageAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/rsvp-addon/',
+			'https://sugarcalendar.com/docs/events/rsvp-addon/',
 			[
 				'content' => 'Help',
 				'medium'  => 'rsvp-education',
@@ -261,7 +261,7 @@ class Rsvp extends PageAbstract {
 					if ( sugar_calendar()->is_pro() ) {
 						$btn_text = __( 'Install RSVP add-on', 'sugar-calendar-lite' );
 						$btn_link = Helpers::get_utm_url(
-							'https://sugarcalendar.com/account/downloads/',
+							'https://sugarcalendar.com/account/licenses/',
 							[
 								'medium'  => 'rsvp',
 								'content' => 'Install RSVP add-on',

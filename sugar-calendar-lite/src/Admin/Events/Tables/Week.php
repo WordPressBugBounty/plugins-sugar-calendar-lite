@@ -66,6 +66,7 @@ class Week extends Grid {
 	 * Overrides base class to add the "week" column.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Added today indicator.
 	 *
 	 * @return array An associative array containing column information
 	 */
@@ -95,7 +96,8 @@ class Week extends Grid {
 			$days = $this->get_week_days();
 
 			// Set initial time.
-			$time = $this->grid_start;
+			$time       = $this->grid_start;
+			$today_date = gmdate( 'Y-m-d', $this->today_first_second );
 
 			// Loop through days and add them to the return value.
 			foreach ( $days as $day ) {
@@ -108,6 +110,14 @@ class Week extends Grid {
 					'cd'   => gmdate( 'd', $time ),
 				];
 
+				$today_class_indicator = '';
+				$today_class           = '';
+
+				if ( $today_date === gmdate( 'Y-m-d', $time ) ) {
+					$today_class_indicator = '<div class="sce__admin__events-table__week__today-indicator"></div>';
+					$today_class           = 'today';
+				}
+
 				// Link text.
 				$text = gmdate( 'M j, D', $time );
 
@@ -118,7 +128,13 @@ class Week extends Grid {
 				$link_to_day = add_query_arg( $args, $this->get_persistent_url() );
 
 				// Column.
-				$retval[ $day ] = '<a href="' . esc_url( $link_to_day ) . '" class="day-number">' . esc_html( $text ) . '</a>';
+				$retval[ $day ] = sprintf(
+					'%1$s<a href="%2$s" class="day-number %3$s">%4$s</a>',
+					$today_class_indicator,
+					esc_url( $link_to_day ),
+					esc_attr( $today_class ),
+					esc_html( $text )
+				);
 			}
 		}
 
@@ -286,9 +302,9 @@ class Week extends Grid {
 		ob_start();
 		?>
 
-        <div class="event-spans-group event-spans-group--<?php echo sanitize_html_class( $type ); ?>">
-            <div class="row">
-                <div class="column column-hour<?php echo $this->get_hour_class(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+		<div class="event-spans-group event-spans-group--<?php echo sanitize_html_class( $type ); ?>">
+			<div class="row">
+				<div class="column column-hour<?php echo $this->get_hour_class(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 
 					<?php if ( $type === 'all_day' ) : ?>
 
@@ -299,19 +315,24 @@ class Week extends Grid {
 						<?php esc_html_e( 'Multiple Days', 'sugar-calendar-lite' ); ?>
 
 					<?php endif; ?>
-
-                </div>
+				</div>
 
 				<?php foreach ( $cells as $cell ) : ?>
 
 					<?php $this->set_current_cell( $cell ); ?>
 
-                    <div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"></div>
+					<div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+						<?php
+						if ( $type === 'all_day' ) {
+							echo $this->get_add_new_button( false, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						}
+						?>
+					</div>
 
 				<?php endforeach; ?>
-            </div>
+			</div>
 
-            <div class="row event-spans">
+			<div class="row event-spans">
 
 				<?php foreach ( $items as $item ) : ?>
 
@@ -420,6 +441,7 @@ class Week extends Grid {
 	 * Start the week with a table row.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Added add new button.
 	 */
 	protected function get_row_cell() {
 
@@ -427,9 +449,12 @@ class Week extends Grid {
 		ob_start();
 		?>
 
-        <div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
-			<?php echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        </div>
+		<div class="<?php echo $this->get_cell_classes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+			<?php
+			echo $this->get_add_new_button( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $this->get_events_for_cell(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+		</div>
 
 		<?php
 

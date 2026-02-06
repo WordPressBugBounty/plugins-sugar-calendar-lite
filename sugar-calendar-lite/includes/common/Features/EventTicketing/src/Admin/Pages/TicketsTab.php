@@ -446,7 +446,7 @@ class TicketsTab extends Tickets {
 	public function help_url( $help_url ) {
 
 		return BaseHelpers\Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/event-ticketing-addon/#managing-ticket-orders',
+			'https://sugarcalendar.com/docs/events/event-ticketing-addon/#managing-ticket-orders',
 			[
 				'content' => 'Help',
 				'medium'  => 'tickets-list',
@@ -524,7 +524,7 @@ class TicketsTab extends Tickets {
 		wp_enqueue_style(
 			'sugar-calendar-ticketing-admin-tickets',
 			get_url( 'css' ) . '/admin-tickets' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-admin-fontawesome' ],
+			[],
 			BaseHelpers::get_asset_version()
 		);
 

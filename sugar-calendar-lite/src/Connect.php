@@ -100,7 +100,7 @@ class Connect {
 				'redirect' => rawurldecode( base64_encode( $redirect ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				'v'        => 2,
 			],
-			'https://upgrade.sugarcalendar.com'
+			'https://events.sugarcalendarapi.com/lite-plugin-upgrade'
 		);
 	}
 

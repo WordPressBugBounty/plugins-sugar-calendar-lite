@@ -7,9 +7,9 @@ use Sugar_Calendar\Event;
 use Sugar_Calendar\Event_Query;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelper;
-use Sugar_Calendar\Pro\Features\AdvancedRecurring\Occurrence;
 use WP_List_Table;
 use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
+use Sugar_Calendar\AddOn\Ticketing\Renderer as TicketingRenderer;
 
 // Include the main list table class if it's not included.
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -169,6 +169,15 @@ class Base extends WP_List_Table {
 	 * @var int
 	 */
 	protected $today = 0;
+
+	/**
+	 * The timestamp of the first second today.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @var int
+	 */
+	protected $today_first_second;
 
 	/**
 	 * The time zone for the current view.
@@ -407,6 +416,11 @@ class Base extends WP_List_Table {
 
 		// Set now once, so everything uses the same timestamp.
 		$this->now = $this->get_current_time();
+
+		$now_date = new \DateTime( '@' . $this->now );
+		$now_date->setTime( 0, 0, 0 );
+
+		$this->today_first_second = $now_date->getTimestamp();
 
 		// Set formatting options.
 		$this->start_of_week = $this->get_start_of_week();
@@ -1891,7 +1905,7 @@ class Base extends WP_List_Table {
 		$this->setup_pointer( $event, $cell );
 
 		// Prepare the link HTML.
-		$html = '<a %s><span>%s</span></a>';
+		$html = '<a %s><div class="sce__admin__events-table__event-entry__cal-indicator"></div><span>%s</span></a>';
 		$link = sprintf( $html, $attr, esc_html( $event_title ) );
 
 		// Return the event link.
@@ -2571,9 +2585,11 @@ class Base extends WP_List_Table {
 		// Get all pointer info.
 		$pointer = [
 			$this->get_pointer_dates( $event ),
-			$this->get_pointer_meta( $event ),
 			$this->get_pointer_details( $event ),
 		];
+
+		$pointer[] = $this->get_pointer_for_tickets( $event );
+		$pointer[] = $this->get_pointer_meta( $event );
 
 		// Filter out empties and merge.
 		$pointer_text = array_merge( array_filter( $pointer ) );
@@ -2595,6 +2611,54 @@ class Base extends WP_List_Table {
 
 		// Combine with line breaks.
 		return implode( '', $retval );
+	}
+
+	/**
+	 * Get the pointer for tickets.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param object $event Event object.
+	 *
+	 * @return string
+	 */
+	public function get_pointer_for_tickets( $event ) {
+
+		/**
+		 * Filter the pointer for tickets.
+		 *
+		 * @since 3.10.0
+		 *
+		 * @param bool                  $output Output.
+		 * @param \Sugar_Calendar\Event $event  Event object.
+		 */
+		$output = apply_filters(
+			'sugar_calendar_admin_events_tables_base_get_pointer_for_tickets',
+			false,
+			$event
+		);
+
+		if ( ! empty( $output ) ) {
+			return $output;
+		}
+
+		$renderer   = new TicketingRenderer( $event );
+		$extra_data = $renderer->get_extra_data();
+
+		if ( empty( $extra_data ) ) {
+			return false;
+		}
+
+		$attendees = isset( $extra_data['tickets_purchased'] ) ? absint( $extra_data['tickets_purchased'] ) : 0;
+
+		return sprintf(
+			'<strong>%1$s</strong><span>%2$s%3$s - <a target="_blank" href="%4$s">%5$s</a></span>',
+			esc_html__( 'Attendees', 'sugar-calendar-lite' ),
+			esc_html( $attendees ),
+			$extra_data['ticket_total'] > 0 ? esc_html( ' / ' . $extra_data['ticket_total'] ) : '',
+			esc_url( $extra_data['ticket_url'] ),
+			esc_html__( 'View Tickets', 'sugar-calendar-lite' )
+		);
 	}
 
 	/**
@@ -2895,6 +2959,7 @@ class Base extends WP_List_Table {
 				'class'              => [],
 				'data-action'        => [],
 				'data-occurrence-id' => [],
+				'target'             => [],
 			],
 			'strong' => [],
 			'span'   => [ 'class' => [] ],
@@ -3350,12 +3415,14 @@ class Base extends WP_List_Table {
 		$events_max_num = sugar_calendar_get_user_preference( 'events_max_num', $preferences['events_max_num'] );
 
 		?>
-        <div class="sugar-calendar-screen-options">
-            <button id="sugar-calendar-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 19">
-                    <path d="M18,11l-2.18,0c-0.17,0.7 -0.44,1.35 -0.81,1.93l1.54,1.54l-2.1,2.1l-1.54,-1.54c-0.58,0.36 -1.23,0.63 -1.91,0.79l0,2.18l-3,0l0,-2.18c-0.68,-0.16 -1.33,-0.43 -1.91,-0.79l-1.54,1.54l-2.12,-2.12l1.54,-1.54c-0.36,-0.58 -0.63,-1.23 -0.79,-1.91l-2.18,0l0,-2.97l2.17,0c0.16,-0.7 0.44,-1.35 0.8,-1.94l-1.54,-1.54l2.1,-2.1l1.54,1.54c0.58,-0.37 1.24,-0.64 1.93,-0.81l0,-2.18l3,0l0,2.18c0.68,0.16 1.33,0.43 1.91,0.79l1.54,-1.54l2.12,2.12l-1.54,1.54c0.36,0.59 0.64,1.24 0.8,1.94l2.17,0l0,2.97Zm-8.5,1.5c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3Z"></path>
-                </svg>
-            </button>
+		<div class="sugar-calendar-screen-options">
+			<button id="sugar-calendar-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button">
+				<svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M4 0.5H28C29.933 0.5 31.5 2.067 31.5 4V26C31.5 27.933 29.933 29.5 28 29.5H4C2.067 29.5 0.5 27.933 0.5 26V4C0.5 2.067 2.067 0.5 4 0.5Z" fill="#F7F7F7"/>
+					<path d="M4 0.5H28C29.933 0.5 31.5 2.067 31.5 4V26C31.5 27.933 29.933 29.5 28 29.5H4C2.067 29.5 0.5 27.933 0.5 26V4C0.5 2.067 2.067 0.5 4 0.5Z" stroke="#F7F7F7"/>
+					<path d="M24.4961 16.5039H22.3086C22.1263 17.207 21.8529 17.8581 21.4883 18.457L23.0508 19.9805L20.9414 22.0898L19.3789 20.5273C18.806 20.8919 18.181 21.1654 17.5039 21.3477V23.4961H14.4961V21.3477C13.819 21.1654 13.181 20.8919 12.582 20.5273L11.0195 22.0898L8.91016 19.9805L10.4727 18.418C10.1081 17.819 9.83464 17.181 9.65234 16.5039H7.50391V13.5352H9.65234C9.80859 12.8581 10.082 12.2201 10.4727 11.6211L8.91016 10.0586L11.0195 7.94922L12.543 9.51172C13.1159 9.14714 13.7669 8.8737 14.4961 8.69141V6.50391H17.5039V8.69141C18.181 8.84766 18.806 9.10807 19.3789 9.47266L20.9414 7.94922L23.0508 10.0586L21.5273 11.6211C21.8919 12.2201 22.1523 12.8581 22.3086 13.5352H24.4961V16.5039ZM15.9805 18.0273C16.8138 18.0273 17.5169 17.7409 18.0898 17.168C18.6888 16.569 18.9883 15.8529 18.9883 15.0195C18.9883 14.1862 18.6888 13.4831 18.0898 12.9102C17.5169 12.3112 16.8138 12.0117 15.9805 12.0117C15.1471 12.0117 14.431 12.3112 13.832 12.9102C13.2591 13.4831 12.9727 14.1862 12.9727 15.0195C12.9727 15.8529 13.2591 16.569 13.832 17.168C14.431 17.7409 15.1471 18.0273 15.9805 18.0273Z" fill="#50575E"/>
+				</svg>
+			</button>
 
             <div class="sugar-calendar-screen-options-menu" style="display: none;">
                 <form action="" method="post">
@@ -3448,23 +3515,23 @@ class Base extends WP_List_Table {
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
 
-        <table class="wp-list-table <?php echo implode( ' ', $this->get_table_classes() ); ?>">
-            <thead>
-            <tr>
-				<?php $this->print_column_headers(); ?>
-            </tr>
-            </thead>
+		<table class="wp-list-table <?php echo implode( ' ', $this->get_table_classes() ); ?>">
+			<thead>
+				<tr>
+					<?php $this->print_column_headers(); ?>
+				</tr>
+			</thead>
 
-            <tbody id="the-list" data-wp-lists='list:<?php echo $this->_args['singular']; ?>'>
-			<?php $this->display_mode(); ?>
-            </tbody>
+			<tbody id="the-list" data-wp-lists='list:<?php echo $this->_args['singular']; ?>'>
+				<?php $this->display_mode(); ?>
+			</tbody>
 
-            <tfoot>
-            <tr>
-				<?php $this->print_column_headers( false ); ?>
-            </tr>
-            </tfoot>
-        </table>
+			<tfoot>
+				<tr>
+					<?php $this->print_column_headers( false ); ?>
+				</tr>
+			</tfoot>
+		</table>
 
 		<?php
 		// Bottom.
@@ -3768,6 +3835,7 @@ class Base extends WP_List_Table {
 		$dow_last           = '';
 		$dow_ordinal        = '';
 		$is_different_month = '';
+		$is_past            = ( $this->get_current_cell( 'start' ) < $this->today_first_second ) ? 'past' : '';
 
 		// Day.
 		if ( ! empty( $day ) ) {
@@ -3806,6 +3874,7 @@ class Base extends WP_List_Table {
 			[
 				'column',
 				$is_today,
+				$is_past,
 				$hidden,
 				$dow_ordinal,
 				$dow_last,
@@ -4300,8 +4369,8 @@ class Base extends WP_List_Table {
 		ob_start();
 		?>
 
-        <div class="sugar-calendar-view-modes">
-            <input type="hidden" name="mode" value="<?php echo esc_attr( $this->get_mode() ); ?>"/>
+		<div class="sugar-calendar-view-modes">
+			<input type="hidden" name="mode" value="<?php echo esc_attr( $this->get_mode() ); ?>"/>
 
 			<?php
 
@@ -4330,7 +4399,7 @@ class Base extends WP_List_Table {
                 <a href="<?php echo esc_url( $url ); ?>"
                    class="<?php echo esc_attr( $classes ); ?>"
                    title="<?php echo esc_attr( $title ); ?>">
-                    <span class='screen-reader-text'><?php echo esc_html( $title ); ?></span>
+                    <span><?php echo esc_html( $title ); ?></span>
                 </a>
 
 			<?php endforeach; ?>
@@ -4454,5 +4523,40 @@ class Base extends WP_List_Table {
 	public function get_filtered_items() {
 
 		return $this->filtered_items;
+	}
+
+	/**
+	 * Get the add new button icon DOM.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param bool $include_hour Whether or not to include hour in the button link.
+	 * @param bool $is_all_day   Whether or not the button is for an all-day event.
+	 *
+	 * @return string
+	 */
+	protected function get_add_new_button( $include_hour = false, $is_all_day = false ) {
+
+		$start = $this->get_current_cell( 'start_dto' );
+		$args  = [
+			'post_type'      => sugar_calendar_get_event_post_type_id(),
+			'sce_start_date' => $start->format( 'Y-m-d' ),
+		];
+
+		if ( $include_hour ) {
+			$args['sce_start_hour'] = $start->format( 'G' );
+		} elseif ( $is_all_day ) {
+			$args['sce_all_day'] = 1;
+		}
+
+		return sprintf(
+			'<div class="sce__add-new-btn"><a href="%1$s" target="_blank"></a></div>',
+			esc_url(
+				add_query_arg(
+					$args,
+					get_admin_url( null, 'post-new.php' )
+				)
+			)
+		);
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Integrations;
 
+use Sugar_Calendar\Integrations\Elementor\Elementor;
+
 /**
  * Integrations Loader.
  *
@@ -13,11 +15,12 @@ class Loader {
 	 * Integrations classes.
 	 *
 	 * @since 3.2.0
+	 * @since 3.10.0 Used FCQN.
 	 *
 	 * @var array
 	 */
 	private $integrations_classes = [
-		'Elementor\Elementor',
+		Elementor::class,
 	];
 
 	/**
@@ -48,13 +51,11 @@ class Loader {
 
 		foreach ( $class_names as $class_name ) {
 
-			$fqcn = __NAMESPACE__ . '\\' . $class_name;
-
-			if ( ! class_exists( $fqcn ) ) {
+			if ( ! class_exists( $class_name ) ) {
 				continue;
 			}
 
-			$class = new $fqcn();
+			$class = new $class_name();
 
 			if ( method_exists( $class, 'init' ) ) {
 				$class->init();

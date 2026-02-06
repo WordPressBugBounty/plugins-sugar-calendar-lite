@@ -114,19 +114,8 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 							$popoverImageContainer.show();
 						}
 
-						let textContent = [];
-
-						if ( response.data.description ) {
-							// We parse the HTML to get the decoded text instead of HTML entities for commas, etc.
-							let parsed = $.parseHTML( response.data.description.trim() );
-
-							$.each( parsed, function( i, el ) {
-								textContent.push( el.textContent );
-							} );
-						}
-
 						$popoverDescContainer.html( '' );
-						$popoverDescContainer.text( textContent.join( '' ) );
+						$popoverDescContainer.html( response.data.description.trim() );
 					}
 				}
 			);

@@ -57,7 +57,7 @@
 					$.alert( {
 						title: false,
 						content: response.data.message,
-						icon: getIcon( 'exclamation-circle-solid-red.svg' ),
+						icon: getIcon( 'exclamation-circle.svg' ),
 						type: 'red',
 						buttons: {
 							confirm: {

@@ -133,8 +133,9 @@ class Feature extends FeatureAbstract {
 	 * Automatically include front-end specific files.
 	 *
 	 * @since 3.1.0
+	 * @since 3.10.0 Changed the visibility to public.
 	 */
-	private function include_frontend() {
+	public function include_frontend() {
 
 		$this->slurp( 'front-end' );
 	}

@@ -22,6 +22,15 @@ use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
 class Events extends PageAbstract {
 
 	/**
+	 * The view mode.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @var string
+	 */
+	private $view_mode = null;
+
+	/**
 	 * Page slug.
 	 *
 	 * @since 3.0.0
@@ -85,12 +94,48 @@ class Events extends PageAbstract {
 
 		$page_hook = get_plugin_page_hook( self::get_slug(), Area::SLUG );
 
+		add_action( 'admin_init', [ $this, 'maybe_save_view_mode' ] );
+
 		add_action( "load-{$page_hook}", [ $this, 'get_list_table' ] );
 		add_filter( 'screen_options_show_screen', '__return_false' );
 		add_action( 'sugar_calendar_ajax_update_hidden_columns', [ $this, 'ajax_update_hidden_columns' ] );
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
 		add_action( 'admin_head', [ $this, 'output_grid_layout' ] );
 		add_action( 'admin_footer', [ $this, 'output_tooltips' ] );
+	}
+
+	/**
+	 * Maybe save the view mode.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @return void
+	 */
+	public function maybe_save_view_mode() {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended 
+		if (
+			empty( $_GET['mode'] ) ||
+			empty( $_GET['page'] ) ||
+			$_GET['page'] !== 'sugar-calendar'
+		) {
+			return;
+		}
+
+		$mode = sanitize_text_field( wp_unslash( $_GET['mode'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if (
+			! in_array( $mode, [ 'month', 'week', 'day', 'list' ], true ) ||
+			$this->get_view_mode() === $mode // We don't have to do anything if the current mode is the one saved.
+		) {
+			return;
+		}
+
+		// If we are here then we need to save the new mode.
+		$this->view_mode = $mode;
+
+		sugar_calendar_set_user_preference( 'events_view_mode', $mode );
 	}
 
 	/**
@@ -109,8 +154,8 @@ class Events extends PageAbstract {
 		$table->prepare_items();
 		?>
 
-        <div class="sugar-calendar-admin-subheader">
-            <h4><?php esc_html_e( 'Events', 'sugar-calendar-lite' ); ?></h4>
+		<div class="sugar-calendar-admin-subheader sugar-calendar-admin-subheader-events-list">
+			<h4><?php esc_html_e( 'Events', 'sugar-calendar-lite' ); ?></h4>
 
 			<?php
 			UI::button(
@@ -123,15 +168,14 @@ class Events extends PageAbstract {
 			);
 			?>
 
-            <div class="sugar-calendar-admin-subheader-tools">
+			<div class="sugar-calendar-admin-subheader-tools">
 
 				<?php
 				$table->event_filters();
 				$table->options_menu();
 				?>
-
-            </div>
-        </div>
+			</div>
+		</div>
 
         <div id="sugar-calendar-events" class="wrap sugar-calendar-admin-wrap">
 
@@ -183,29 +227,63 @@ class Events extends PageAbstract {
 
 		static $table;
 
-		if ( $table === null ) {
+		if ( ! is_null( $table ) ) {
+			return $table;
+		}
 
-			switch ( sugar_calendar_get_admin_view_mode() ) {
-				case 'day':
-					$table = new Day();
-					break;
+		switch ( $this->get_view_mode() ) {
+			case 'day':
+				$table = new Day();
+				break;
 
-				case 'week':
-					$table = new Week();
-					break;
+			case 'week':
+				$table = new Week();
+				break;
 
-				case 'month':
-					$table = new Month();
-					break;
+			case 'month':
+				$table = new Month();
+				break;
 
-				case 'list':
-				default:
+			case 'list':
+			default:
+				/**
+				 * Filter the class for the events list page.
+				 *
+				 * @since 3.10.0
+				 *
+				 * @param bool $table The table for the events page.
+				 */
+				$table = apply_filters(
+					'sugar_calendar_admin_pages_events_get_list_table_class',
+					false
+				);
+
+				if ( ! $table instanceof \Sugar_Calendar\Admin\Events\Tables\Base ) {
 					$table = new Basic();
-					break;
-			}
+				}
+				break;
 		}
 
 		return $table;
+	}
+
+	/**
+	 * Get the view mode.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @return string
+	 */
+	private function get_view_mode() {
+
+		if ( ! is_null( $this->view_mode ) ) {
+			return $this->view_mode;
+		}
+
+		$view_mode       = sugar_calendar_get_user_preference( 'events_view_mode' );
+		$this->view_mode = empty( $view_mode ) ? 'month' : $view_mode;
+
+		return $this->view_mode;
 	}
 
 	/**
@@ -337,7 +415,7 @@ class Events extends PageAbstract {
 		wp_enqueue_style(
 			'sugar-calendar-admin-events',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-events' . WP::asset_min() . '.css',
-			[ 'sugar-calendar-vendor-tippy', 'sugar-calendar-admin-fontawesome' ],
+			[ 'sugar-calendar-vendor-tippy' ],
 			Helpers::get_asset_version()
 		);
 

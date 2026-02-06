@@ -208,105 +208,152 @@ class Education {
 		$assets_url  = SC_PLUGIN_ASSETS_URL . 'images/';
 		$screenshots = [
 			[
-				'url'           => $assets_url . 'settings/event-recurrence.png',
-				'url_thumbnail' => $assets_url . 'settings/event-recurrence-thumbnail.png',
+				'url'           => $assets_url . 'settings/recurring.png',
+				'url_thumbnail' => $assets_url . 'settings/recurring-thumbnail.png',
 				'title'         => esc_html__( 'Recurring Events', 'sugar-calendar-lite' ),
-				'features'      => [
-					esc_html__( 'Create recurring events', 'sugar-calendar-lite' ),
-					esc_html__( 'Daily, weekly, monthly, and yearly frequency', 'sugar-calendar-lite' ),
-					esc_html__( 'Dynamic intervals', 'sugar-calendar-lite' ),
-					esc_html__( 'Ending on a date or number of occurrences', 'sugar-calendar-lite' ),
-				],
 			],
 			[
-				'url'           => $assets_url . 'payments/payments-popup.png',
-				'url_thumbnail' => $assets_url . 'payments/payments-popup-thumbnail.png',
-				'title'         => esc_html__( 'Event Ticketing', 'sugar-calendar-lite' ),
-				'features'      => [
-					esc_html__( 'Sell tickets for your events', 'sugar-calendar-lite' ),
-					esc_html__( 'One page checkout for quick purchases', 'sugar-calendar-lite' ),
-					esc_html__( 'Stripe integration', 'sugar-calendar-lite' ),
-					esc_html__( 'WooCommerce integration', 'sugar-calendar-lite' ),
-					esc_html__( 'Simple order management', 'sugar-calendar-lite' ),
-				],
+				'url'           => $assets_url . 'settings/rsvp-list.png',
+				'url_thumbnail' => $assets_url . 'settings/rsvp-list-thumbnail.png',
+				'title'         => esc_html__( 'RSVP List', 'sugar-calendar-lite' ),
 			],
 			[
-				'url'           => $assets_url . 'zapier/zapier-zaps.png',
-				'url_thumbnail' => $assets_url . 'zapier/zapier-zaps-thumbnail.png',
-				'title'         => esc_html__( 'And more...', 'sugar-calendar-lite' ),
-				'features'      => [
-					esc_html__( 'Frontend event submissions', 'sugar-calendar-lite' ),
-					esc_html__( 'Zapier integration', 'sugar-calendar-lite' ),
-					esc_html__( 'Calendar feeds (Google, Outlook, Apple, ...)', 'sugar-calendar-lite' ),
-					esc_html__( 'Event duplication', 'sugar-calendar-lite' ),
-					esc_html__( 'Premium support', 'sugar-calendar-lite' ),
-				],
+				'url'           => $assets_url . 'settings/speaker.png',
+				'url_thumbnail' => $assets_url . 'settings/speaker-thumbnail.png',
+				'title'         => esc_html__( 'Speaker Page', 'sugar-calendar-lite' ),
 			],
 		];
 		?>
+		<div class="sugar-calendar__product-education sugar-calendar__product-education__general sugar-calendar-education-notice sugar-calendar-settings-education"
+			data-notice="<?php echo esc_attr( static::NOTICE_SETTINGS_GENERAL_PAGE ); ?>">
 
-        <div class="sugar-calendar-education-notice sugar-calendar-settings-education"
-             data-notice="<?php echo esc_attr( static::NOTICE_SETTINGS_GENERAL_PAGE ); ?>">
-            <button type="button"
-                    class="sugar-calendar-dismiss-notice"
-                    title="<?php esc_html_e( 'Dismiss this message.', 'sugar-calendar-lite' ); ?>"
-                    data-notice="<?php echo esc_attr( static::NOTICE_SETTINGS_GENERAL_PAGE ); ?>"></button>
-            <div class="sugar-calendar-education-header">
-                <h4><?php esc_html_e( 'Take Your Events to the Next Level', 'sugar-calendar-lite' ); ?></h4>
-                <p>
+			<button type="button"
+				class="sugar-calendar-dismiss-notice"
+				title="<?php esc_html_e( 'Dismiss this message.', 'sugar-calendar-lite' ); ?>"
+				data-notice="<?php echo esc_attr( static::NOTICE_SETTINGS_GENERAL_PAGE ); ?>"></button>
+			
+			<div class="sugar-calendar-education-header">
+				<h4><?php esc_html_e( 'Let Your Calendar Do the Heavy Lifting — Unlock Pro Features', 'sugar-calendar-lite' ); ?></h4>
+				<p>
 					<?php
-					echo wp_kses(
-						sprintf( /* translators: %s - SugarCalendar.com Upgrade page URL. */
-							__( 'Elevate your event management with Sugar Calendar Pro. <a href="%s" target="_blank" rel="noopener noreferrer">Upgrade today</a> and start leveraging advanced features to streamline and enhance your event management.', 'sugar-calendar-lite' ),
-							Helpers::get_upgrade_link( [ 'medium' => 'settings-general', 'content' => 'Upgrade today' ] )
-						),
-						[
-							'a' => [
-								'href'   => [],
-								'rel'    => [],
-								'target' => [],
-							],
-						]
-					);
+					esc_html_e( 'Step up from basic scheduling to a full event system, all inside WordPress.', 'sugar-calendar-lite' );
 					?>
-                </p>
-            </div>
-            <div class="sugar-calendar-education-preview">
+				</p>
+			</div>
 
-				<?php foreach ( $screenshots as $screenshot ) : ?>
+			<div class="sugar-calendar-education-header sugar-calendar__product-education__features">
+				<h4><?php esc_html_e( "Key Features You'll Unlock:", 'sugar-calendar-lite' ); ?></h4>
+				<div class="sugar-calendar__product-education__features__list">
+					<?php
+					$features = [
+						[
+							'title' => __( 'Save Time With Automated Scheduling', 'sugar-calendar-lite' ),
+							'desc'  => __( 'Recurring events with flexible patterns — daily, weekly, monthly, or fully custom', 'sugar-calendar-lite' ),
+						],
+						[
+							'title' => __( 'Showcase the People and Places Behind Your Events', 'sugar-calendar-lite' ),
+							'desc'  => __( 'Add speaker bios and venue details with maps, photos, and social links.', 'sugar-calendar-lite' ),
+						],
+						[
+							'title' => __( 'Stay Organized With Attendee Tracking', 'sugar-calendar-lite' ),
+							'desc'  => __( 'RSVP tools and attendee reports keep signups clear and capacity under control', 'sugar-calendar-lite' ),
+						],
+						[
+							'title' => __( 'Make Events Easy to Remember', 'sugar-calendar-lite' ),
+							'desc'  => __( 'One-click add-to-calendar support for Google, Outlook, Apple, and more', 'sugar-calendar-lite' ),
+						],
+						[
+							'title' => __( 'And much more...', 'sugar-calendar-lite' ),
+							'icon'  => false,
+						],
+					];
 
-                    <figure>
-                        <a href="<?php echo esc_url( $screenshot['url'] ); ?>" data-lity data-lity-desc="<?php echo esc_attr( $screenshot['title'] ); ?>">
-                            <img src="<?php echo esc_url( $screenshot['url_thumbnail'] ); ?>" alt="">
-                        </a>
-                        <figcaption>
-                            <dl>
-                                <dt><?php echo esc_html( $screenshot['title'] ); ?></dt>
-
-								<?php foreach ( $screenshot['features'] as $feature ) : ?>
-
-                                    <dd><?php echo esc_html( $feature ); ?></dd>
-								<?php endforeach; ?>
-
-                            </dl>
-                        </figcaption>
-                    </figure>
-
-				<?php endforeach; ?>
-
-            </div>
-
-			<?php
-			UI::button(
-				[
-					'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-					'size'   => 'lg',
-					'link'   => esc_url( Helpers::get_upgrade_link( [ 'medium' => 'settings-general', 'content' => 'Upgrade to Sugar Calendar Pro' ] ) ),
-					'target' => '_blank',
-				]
-			);
-			?>
-        </div>
+					foreach ( $features as $feature ) {
+						?>
+						<div class="sugar-calendar__product-education__features__list__item">
+							<div class="sugar-calendar__product-education__features__list__item__icon">
+								<?php
+								if (
+									! isset( $feature['icon'] ) || $feature['icon']
+								) {
+									?>
+									<svg width="9" height="7" viewBox="0 0 9 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M8.63281 0.253906C8.88672 0.488281 8.88672 0.898438 8.63281 1.13281L3.63281 6.13281C3.39844 6.38672 2.98828 6.38672 2.75391 6.13281L0.253906 3.63281C0 3.39844 0 2.98828 0.253906 2.75391C0.488281 2.5 0.898438 2.5 1.13281 2.75391L3.20312 4.80469L7.75391 0.253906C7.98828 0 8.39844 0 8.63281 0.253906Z" fill="#008A20"/>
+									</svg>
+									<?php
+								}
+								?>
+							</div>
+							<div class="sugar-calendar__product-education__features__list__item__content">
+								<p><strong><?php echo esc_html( $feature['title'] ); ?></strong></p>
+								<?php
+								if ( ! empty( $feature['desc'] ) ) {
+									?>
+									<p><?php echo esc_html( $feature['desc'] ); ?></p>
+									<?php
+								}
+								?>
+							</div>
+						</div>
+						<?php
+					}
+					?>
+				</div>
+			</div>
+			<div class="sugar-calendar__product-education__button-section">
+				<?php
+				UI::button(
+					[
+						'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+						'size'   => 'lg',
+						'link'   => esc_url( Helpers::get_upgrade_link( [ 'medium' => 'settings-general', 'content' => 'Upgrade to Sugar Calendar Pro' ] ) ),
+						'target' => '_blank',
+					]
+				);
+				?>
+				<div class="sugar-calendar__product-education__button-section__discount">
+					<div class="sugar-calendar__product-education__button-section__discount__icon">
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8 0C9.125 0 10.125 0.65625 10.625 1.625C11.6562 1.28125 12.8125 1.53125 13.6562 2.34375C14.4688 3.15625 14.6875 4.34375 14.375 5.375C15.3438 5.875 16 6.875 16 8C16 9.15625 15.3438 10.1562 14.375 10.6562C14.7188 11.6875 14.4688 12.8438 13.6562 13.6562C12.8125 14.4688 11.6562 14.7188 10.625 14.4062C10.125 15.375 9.125 16 8 16C6.84375 16 5.84375 15.375 5.34375 14.4062C4.3125 14.7188 3.15625 14.4688 2.3125 13.6562C1.5 12.8438 1.28125 11.6875 1.59375 10.6562C0.625 10.1562 0 9.15625 0 8C0 6.875 0.625 5.875 1.59375 5.375C1.25 4.34375 1.5 3.15625 2.3125 2.34375C3.15625 1.53125 4.3125 1.28125 5.34375 1.625C5.84375 0.65625 6.84375 0 8 0ZM6 7C6.53125 7 7 6.5625 7 6C7 5.46875 6.53125 5 6 5C5.4375 5 5 5.46875 5 6C5 6.5625 5.4375 7 6 7ZM10 9C9.4375 9 9 9.46875 9 10C9 10.5625 9.4375 11 10 11C10.5312 11 11 10.5625 11 10C11 9.46875 10.5312 9 10 9ZM10.5 6.53125C10.8125 6.25 10.8125 5.78125 10.5 5.46875C10.2188 5.1875 9.75 5.1875 9.46875 5.46875L5.46875 9.46875C5.15625 9.78125 5.15625 10.25 5.46875 10.5312C5.75 10.8438 6.21875 10.8438 6.5 10.5312L10.5 6.53125Z" fill="#008A20"/>
+						</svg>
+					</div>
+					<div class="sugar-calendar__product-education__button-section__discount__text">
+						<p>
+							<?php
+							echo wp_kses(
+								sprintf(
+									/* translators: %1$s - Discount off in percentage (eg. 50% OFF). */
+									__( '%1$s for Sugar Calendar users, applied at checkout.', 'sugar-calendar-lite' ),
+									'<strong>50% OFF</strong>'
+								),
+								[
+									'strong' => [],
+								]
+							);
+							?>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="sugar-calendar-education-preview">
+				<?php
+				foreach ( $screenshots as $screenshot ) {
+					?>
+					<figure>
+						<a href="<?php echo esc_url( $screenshot['url'] ); ?>" data-lity data-lity-desc="<?php echo esc_attr( $screenshot['title'] ); ?>">
+							<img src="<?php echo esc_url( $screenshot['url_thumbnail'] ); ?>" alt="">
+						</a>
+						<figcaption>
+							<dl>
+								<dt><?php echo esc_html( $screenshot['title'] ); ?></dt>
+							</dl>
+						</figcaption>
+					</figure>
+					<?php
+				}
+				?>
+			</div>
+		</div>
 		<?php
 	}
 

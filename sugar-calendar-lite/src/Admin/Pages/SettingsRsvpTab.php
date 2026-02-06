@@ -179,7 +179,7 @@ class SettingsRsvpTab extends Settings {
 				if ( sugar_calendar()->is_pro() ) {
 					$cta_text = __( 'Install RSVP add-on', 'sugar-calendar-lite' );
 					$cta_link = Helpers::get_utm_url(
-						'https://sugarcalendar.com/account/downloads/',
+						'https://sugarcalendar.com/account/licenses/',
 						[
 							'medium'  => 'rsvp-settings',
 							'content' => 'Install RSVP add-on',

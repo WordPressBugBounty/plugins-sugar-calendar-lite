@@ -47,7 +47,7 @@ class CalendarNew extends CalendarAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/organizing-events-with-calendars/#Creating_a_Calendar',
+			'https://sugarcalendar.com/docs/events/organizing-events-with-calendars/#Creating_a_Calendar',
 			[
 				'content' => 'Help',
 				'medium'  => 'add-new-calendar',

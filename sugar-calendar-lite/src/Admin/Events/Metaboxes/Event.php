@@ -563,12 +563,7 @@ class Event implements MetaboxInterface {
 		$show_single_tz = false;
 
 		// All Day.
-
 		$all_day = ! empty( $event->all_day ) && (bool) $event->all_day;
-
-		$hidden = ( $all_day === true )
-			? ' style="display: none;"'
-			: '';
 
 		// Ends.
 
@@ -612,7 +607,19 @@ class Event implements MetaboxInterface {
 		// Starts.
 
 		// Get date_time.
-		if ( ! empty( $_GET['start_day'] ) ) {
+		if ( ! empty( $_GET['sce_start_date'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$start_date_raw = sanitize_text_field( wp_unslash( $_GET['sce_start_date'] ) );
+			$start_hour     = 0;
+
+			if ( ! empty( $_GET['sce_all_day'] ) ) {
+				$all_day = true;
+			} else {
+				$start_hour = isset( $_GET['sce_start_hour'] ) ? absint( wp_unslash( $_GET['sce_start_hour'] ) ) : 0;
+			}
+
+			$date_time = $this->validate_start_date_param( $start_date_raw, $start_hour );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		} elseif ( ! empty( $_GET['start_day'] ) ) {
 			$date_time = (int) $_GET['start_day'];
 		} else {
 			$date_time = ! $event->is_empty_date( $event->start )
@@ -694,6 +701,10 @@ class Event implements MetaboxInterface {
 		} elseif ( ( $tztype === 'single' ) || ! empty( $start_tz ) ) {
 			$show_single_tz = true;
 		}
+
+		$hidden = ( $all_day === true )
+			? ' style="display: none;"'
+			: '';
 
 		// Start an output buffer.
 		ob_start();
@@ -1396,5 +1407,39 @@ class Event implements MetaboxInterface {
 			'sugar-calendar',
 			SC_PLUGIN_DIR . 'languages'
 		);
+	}
+
+	/**
+	 * Validate a date string and return it's timestamp.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param string $date_string The date string to validate (expected format: Y-m-d).
+	 * @param int    $start_hour  The start hour to set.
+	 *
+	 * @return int|null Unix timestamp if valid, null otherwise.
+	 */
+	private function validate_start_date_param( $date_string, $start_hour = 0 ) {
+
+		// Bail early if empty.
+		if ( empty( $date_string ) ) {
+			return false;
+		}
+
+		try {
+			$new_date = new \DateTime( $date_string );
+		} catch ( \Exception $e ) {
+			return false;
+		}
+
+		if ( empty( $new_date ) ) {
+			return false;
+		}
+
+		$start_hour = empty( $start_hour ) ? 7 : absint( $start_hour );
+
+		$new_date->setTime( $start_hour, 0, 0 );
+
+		return $new_date->getTimestamp();
 	}
 }

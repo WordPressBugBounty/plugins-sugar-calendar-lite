@@ -224,6 +224,10 @@ final class Plugin {
 		// Load the common src Features.
 		$this->get_src_features();
 
+		if ( $this->is_pro() ) {
+			$this->get_pro();
+		}
+
 		// Load the Block.
 		$this->get_blocks();
 
@@ -239,10 +243,6 @@ final class Plugin {
 		if ( is_admin() ) {
 			$this->get_admin();
 			$this->get_importers();
-		}
-
-		if ( $this->is_pro() ) {
-			$this->get_pro();
 		}
 
 		$this->get_frontend();
@@ -368,6 +368,7 @@ final class Plugin {
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/functions.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/scripts.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/shortcodes.php';
+		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/events-list.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/widgets.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/hooks.php';
 
@@ -447,7 +448,6 @@ final class Plugin {
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/ajax.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/calendar.php';
 		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/event-display.php';
-		require_once SC_PLUGIN_DIR . 'includes/themes/legacy/events-list.php';
 	}
 
 	/**
@@ -1023,10 +1023,15 @@ final class Plugin {
 	 * Get the current license key.
 	 *
 	 * @since 3.0.0
+	 * @since 3.10.0 Always return the license key defined via PHP constant if it exists.
 	 *
 	 * @return string
 	 */
 	public function get_license_key() {
+
+		if ( ! empty( Helpers::get_license_key_from_constant() ) ) {
+			return Helpers::get_license_key_from_constant();
+		}
 
 		$license = Options::get( 'license' );
 		$key     = $license['key'] ?? '';
@@ -1064,7 +1069,7 @@ final class Plugin {
 	 */
 	public function maybe_flush_rewrite_rules() {
 
-		if ( version_compare( SC_PLUGIN_VERSION, '3.7.0', '<=' ) ) {
+		if ( version_compare( SC_PLUGIN_VERSION, '3.9.2', '<=' ) ) {
 			// Flush rewrite rules.
 			flush_rewrite_rules();
 
@@ -1106,8 +1111,8 @@ final class Plugin {
 
 		static $is_rsvp_addon_active;
 
-		if ( ! isset( $is_rsvp_addon_active ) ) {
-			$is_rsvp_addon_active = is_plugin_active( 'sc-rsvp/sc-rsvp.php' );
+		if ( ! isset( $is_rsvp_addon_active ) && function_exists( 'is_plugin_active' ) ) {
+			$is_rsvp_addon_active = \is_plugin_active( 'sc-rsvp/sc-rsvp.php' );
 		}
 
 		return $is_rsvp_addon_active;

@@ -903,24 +903,36 @@ class List_Table extends \WP_List_Table {
 			]
 		);
 	}
+
+	/**
+	 * Generates the tbody element for the list table.
+	 *
+	 * @since 3.8.0
+	 */
+	public function display_rows_or_placeholder() {
+
+		if ( $this->has_items() ) {
+			$this->display_rows();
+		} else {
+			$this->no_items();
+		}
+	}
+
 	/**
 	 * Message to be displayed when there are no items.
 	 *
 	 * @since 3.8.0
 	 */
 	public function no_items() {
-		?>
-		<tr class="no-orders">
-			<td class="colspanchange" colspan="<?php echo esc_attr( $this->get_column_count() ); ?>">
-				<div class="no-orders__content">
-					<div class="no-orders__content__icon">
-						<i class="fa-solid fa-ticket"></i>
-					</div>
-					<span><?php esc_html_e( 'No Orders detected!', 'sugar-calendar-lite' ); ?></span>
-				</div>
-			</td>
-		</tr>
-		<?php
+
+		Helper::display_placeholder_row(
+			$this->get_column_count(),
+			'sc-icon-ticket',
+			esc_html__( 'No Orders detected!', 'sugar-calendar-lite' ),
+			'',
+			'',
+			'orders'
+		);
 	}
 }
 

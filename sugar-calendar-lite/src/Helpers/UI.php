@@ -1049,12 +1049,13 @@ class UI {
 	 * Print badge HTML.
 	 *
 	 * @since 3.7.0
+	 * @since 3.10.0 Removed the fontawesome support.
 	 *
 	 * @param string $text     Badge text.
 	 * @param string $size     Badge size.
 	 * @param string $position Badge position.
 	 * @param string $color    Badge color.
-	 * @param string $icon     Badge icon name in Font Awesome "format", e.g. `fa-check`, defaults to empty string.
+	 * @param string $icon     Badge icon name.
 	 */
 	public static function print_badge(
 		string $text,

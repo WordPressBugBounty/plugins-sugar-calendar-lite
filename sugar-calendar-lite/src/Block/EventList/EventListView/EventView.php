@@ -171,9 +171,10 @@ class EventView {
 		);
 
 		$output = sprintf(
-			/* translators: 1: start date, 2: start time, 3: end date, 4: end time. */
-			'%1$s at %2$s - %3$s at %4$s',
+			/* translators: 1: start date, 2: "at" text, 3: start time, 4: end date, 5: "at" text, 6: end time. */
+			'%1$s %2$s %3$s - %4$s %5$s %6$s',
 			$start_date,
+			esc_html__( 'at', 'sugar-calendar-lite' ),
 			'<span class="sc-frontend-single-event__details__val-time">' .
 				Helpers::get_event_time_output(
 					$this->event,
@@ -184,6 +185,7 @@ class EventView {
 				) .
 			'</span>',
 			$end_date,
+			esc_html__( 'at', 'sugar-calendar-lite' ),
 			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format, 'end' ) . '</span>'
 		);
 
@@ -393,11 +395,76 @@ class EventView {
 	 * Get the description excerpt.
 	 *
 	 * @since 3.1.0
+	 * @since 3.10.0 Use the user-defined excerpt if it exists.
 	 *
 	 * @return string
 	 */
-	public function get_description_excerpt() {
+	public function get_description_excerpt() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
-		return wp_trim_excerpt( '', $this->event->object_id );
+		add_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
+		add_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
+
+		$excerpt = Helpers::get_event_excerpt( $this->event->object_id );
+
+		remove_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
+		remove_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
+
+		return $excerpt;
+	}
+
+	/**
+	 * Filter the number of words in the event description (Event List block).
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param int $number Number of words passed to the filter.
+	 *
+	 * @return int
+	 */
+	public function filter_event_description( $number ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+
+		/**
+		 * Filters the number of words in the event description for the Event List block.
+		 *
+		 * @since 3.10.0
+		 *
+		 * @param int   $length Desired excerpt length.
+		 * @param Event $event  Event object.
+		 * @param Block $block  Block instance.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_excerpt_length',
+			55,
+			$this->event,
+			$this->block
+		);
+	}
+
+	/**
+	 * Filters the string after the event description excerpt (Event List block).
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param string $excerpt_more The string after the event description excerpt.
+	 *
+	 * @return string
+	 */
+	public function filter_event_more_string( $excerpt_more ) {
+
+		/**
+		 * Filters the string after the event description excerpt in the Event List block.
+		 *
+		 * @since 3.10.0
+		 *
+		 * @param string $excerpt_more  The string after the excerpt.
+		 * @param Event  $event         Event object.
+		 * @param Block  $block         Block instance.
+		 */
+		return apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_excerpt_more_string',
+			$excerpt_more,
+			$this->event,
+			$this->block
+		);
 	}
 }

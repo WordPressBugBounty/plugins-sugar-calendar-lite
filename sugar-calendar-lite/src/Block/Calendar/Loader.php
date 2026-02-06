@@ -2,7 +2,6 @@
 
 namespace Sugar_Calendar\Block\Calendar;
 
-use Elementor\Plugin;
 use Sugar_Calendar\Block\Calendar\CalendarView\Block;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Options;
@@ -246,6 +245,7 @@ class Loader {
 	 * @since 3.0.0
 	 * @since 3.5.0 Added `filter_event_more_string` filter.
 	 * @since 3.9.0 Prevented access to non-published events.
+	 * @since 3.10.0 Escaped the event description using wp_kses_post().
 	 */
 	public function ajax_event_popover() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
@@ -298,14 +298,14 @@ class Loader {
 		add_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
 		add_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
 
-		$event_description = wp_trim_excerpt( '', $event_object_id );
+		$event_description = Helpers::get_event_excerpt( $event_object_id );
 
 		remove_filter( 'excerpt_length', [ $this, 'filter_event_description' ], PHP_INT_MAX );
 		remove_filter( 'excerpt_more', [ $this, 'filter_event_more_string' ], PHP_INT_MAX );
 
 		wp_send_json_success(
 			[
-				'description' => esc_html( $event_description ),
+				'description' => wp_kses_post( $event_description ),
 				'image'       => empty( $event_image ) ? false : esc_url( $event_image ),
 			]
 		);

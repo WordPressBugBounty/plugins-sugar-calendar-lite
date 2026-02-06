@@ -161,6 +161,16 @@ class Helper {
 			}
 		}
 
+		if ( ! empty( $multi_day ) ) {
+			// Sort multi-day events by start date so events that started earlier appear first.
+			usort(
+				$multi_day,
+				function ( $a, $b ) {
+					return $a->start_dto <=> $b->start_dto;
+				}
+			);
+		}
+
 		if ( ! empty( $simple ) ) {
 			// Sort the simple events by start date.
 			usort(
@@ -595,7 +605,7 @@ class Helper {
 			);
 
 			printf(
-				'<a href="%1$s"><i id="sugar-calendar-list__admin__reset-filter__icon" class="fa-solid fa-circle-xmark" title="%2$s"></i></a>',
+				'<a href="%1$s"><i id="sugar-calendar-list__admin__reset-filter__icon" title="%2$s"></i></a>',
 				esc_url( $return_url ),
 				/* translators: %s: All items label. */
 				esc_attr( sprintf( __( 'Clear search and return to All %s', 'sugar-calendar-lite' ), $all ) )
@@ -611,7 +621,7 @@ class Helper {
 	 * @since 3.8.0
 	 *
 	 * @param int    $column_count Number of columns to span.
-	 * @param string $icon_class   FontAwesome icon class (e.g., 'fa-user').
+	 * @param string $icon_class   Sugar Calendar icon class (e.g., 'sc-icon-user').
 	 * @param string $message      Message to display.
 	 * @param string $link_url     URL for the action link.
 	 * @param string $link_text    Text for the action link.
@@ -625,7 +635,14 @@ class Helper {
 			$row_classes .= ' sugar-calendar-table-no-items--' . sanitize_html_class( $table_type );
 		}
 
-		$icon_html = sprintf( '<i class="fa-solid %s"></i>', esc_attr( $icon_class ) );
+		$icon_html = sprintf( '<i class="%s"></i>', esc_attr( $icon_class ) );
+
+		// Build the action link HTML only if link text is provided.
+		$action_link_html = '';
+
+		if ( ! empty( $link_text ) ) {
+			$action_link_html = sprintf( '<a href="%s">%s</a>', esc_url( $link_url ), esc_html( $link_text ) );
+		}
 
 		printf(
 			'<tr class="%1$s">'
@@ -633,7 +650,7 @@ class Helper {
 					. '<div class="sugar-calendar-table-no-items__content">'
 						. '<div class="sugar-calendar-table-no-items__content__icon">%3$s</div>'
 						. '<span>%4$s</span>'
-						. '<a href="%5$s">%6$s</a>'
+						. '%5$s'
 					. '</div>'
 				. '</td>'
 			. '</tr>',
@@ -641,8 +658,7 @@ class Helper {
 			esc_attr( $column_count ),
 			$icon_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			esc_html( $message ),
-			esc_url( $link_url ),
-			esc_html( $link_text )
+			$action_link_html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
 	}
 }

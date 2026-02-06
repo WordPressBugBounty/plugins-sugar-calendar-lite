@@ -37,7 +37,7 @@ class Venues extends VenuesAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/creating-and-managing-event-venues/',
+			'https://sugarcalendar.com/docs/events/creating-and-managing-event-venues/',
 			[
 				'content' => 'Help',
 				'medium'  => 'venues-education',

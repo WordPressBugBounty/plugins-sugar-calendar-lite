@@ -227,13 +227,29 @@ class Month extends Grid {
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
 
-        <div class="<?php echo $this->get_cell_classes(); ?>">
-            <h4>
-                <a href="<?php echo esc_url( $link_to_day ); ?>" class="day-number"><?php echo $start->format( $day_format ); ?></a>
-            </h4>
+		<div class="<?php echo $this->get_cell_classes(); ?>">
+			<?php
+			if ( $this->get_current_cell( 'start' ) >= $this->today_first_second ) {
+				printf(
+					'<div class="sce__add-new-btn"><a href="%1$s" target="_blank"></a></div>',
+					esc_url(
+						add_query_arg(
+							[
+								'post_type'      => sugar_calendar_get_event_post_type_id(),
+								'sce_start_date' => $start->format( 'Y-m-d' ),
+							],
+							get_admin_url( null, 'post-new.php' )
+						)
+					)
+				);
+			}
+			?>
+			<h4>
+				<a href="<?php echo esc_url( $link_to_day ); ?>" class="day-number"><?php echo $start->format( $day_format ); ?></a>
+			</h4>
 
 			<?php echo $this->get_events_for_cell(); ?>
-        </div>
+		</div>
 
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped

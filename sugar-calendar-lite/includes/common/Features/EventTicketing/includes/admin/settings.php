@@ -248,7 +248,7 @@ function payments_section() {
 				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar-lite' ),
 				esc_url(
 					Helpers::get_utm_url(
-						'https://sugarcalendar.com/docs/event-ticketing-addon/#connecting-stripe',
+						'https://sugarcalendar.com/docs/events/event-ticketing-addon/#connecting-stripe',
 						[
 							'content' => 'Stripe documentation',
 							'medium'  => 'settings-payments',
@@ -405,7 +405,7 @@ function display_stripe_connect_field( $is_sandbox ) {
 					esc_html__( 'Securely connect to Stripe with just a few clicks to begin accepting payments!', 'sugar-calendar-lite' ),
 					esc_url(
 						Helpers::get_utm_url(
-							'https://sugarcalendar.com/docs/setting-up-event-ticketing-with-sugar-calendar-lite/',
+							'https://sugarcalendar.com/docs/events/setting-up-event-ticketing-with-sugar-calendar-lite/',
 							[
 								'medium'  => 'lite-event-tickets',
 								'content' => 'Learn more about connecting with Stripe',
@@ -827,7 +827,7 @@ function help_url( $help_url ) {
 	}
 
 	return Helpers::get_utm_url(
-		'https://sugarcalendar.com/docs/setting-up-event-ticketing-with-sugar-calendar-lite/#connecting-stripe',
+		'https://sugarcalendar.com/docs/events/setting-up-event-ticketing-with-sugar-calendar-lite/#connecting-stripe',
 		[
 			'content' => 'Help',
 			'medium'  => 'plugin-settings-payments',

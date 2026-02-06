@@ -37,7 +37,7 @@ class Speakers extends SpeakersAbstract {
 	public function help_url( $help_url ) {
 
 		return Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/creating-and-managing-event-speakers/',
+			'https://sugarcalendar.com/docs/events/creating-and-managing-event-speakers/',
 			[
 				'content' => 'Help',
 				'medium'  => 'speakers-education',

@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Events\Tables;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\AddOn\Ticketing\Renderer as TicketingRenderer;
 
 /**
  * Event table.
@@ -75,11 +76,29 @@ class Basic extends Base {
 	 */
 	public function hooks() {
 
+		add_filter( 'default_hidden_columns', [ $this, 'set_default_hidden_columns' ], 10 );
+
 		// Add admin notice.
 		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
 
 		// Prevent checkbox to be hidden.
 		add_filter( 'hidden_columns', [ $this, 'manage_hidden_columns' ], 10, 2 );
+	}
+
+	/**
+	 * Set default hidden columns.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param array $hidden Hidden columns.
+	 *
+	 * @return array
+	 */
+	public function set_default_hidden_columns( $hidden ) {
+
+		array_push( $hidden, 'tags', 'duration' );
+
+		return $hidden;
 	}
 
 	/**
@@ -352,6 +371,7 @@ class Basic extends Base {
 	 * Mock function for custom list table columns.
 	 *
 	 * @since 2.0.0
+	 * @since 3.10.0 Made the output columns array filterable.
 	 *
 	 * @return array
 	 */
@@ -372,7 +392,8 @@ class Basic extends Base {
 			$columns['repeat'] = esc_html_x( 'Repeats', 'Noun', 'sugar-calendar-lite' );
 		}
 
-		// Return columns.
+		$columns['attendees'] = esc_html_x( 'Attendees', 'Noun', 'sugar-calendar-lite' );
+
 		return $columns;
 	}
 
@@ -503,8 +524,9 @@ class Basic extends Base {
 	 * Handle bulk action requests.
 	 *
 	 * @since 3.3.0
+	 * @since 3.10.0 Check the current user's capability to perform action.
 	 */
-	public function process_bulk_action() {
+	public function process_bulk_action() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		// Validate nonce, by default it's already sanitized.
 		$nonce       = $this->get_request_var( 'bulk_actions_wpnonce' );
@@ -539,25 +561,70 @@ class Basic extends Base {
 		// Get the items for the action.
 		$items = $this->get_request_var( 'post', [ $this, 'sanitize_array_key_values' ] );
 
-		// Bail if no items.
 		if ( empty( $items ) ) {
 			return;
 		}
 
-		// Get redirect URL.
-		$redirect = remove_query_arg( [ 'action', 'action2', 'bulk_actions_wpnonce' ] );
+		$redirect     = remove_query_arg( [ 'action', 'action2', 'bulk_actions_wpnonce' ] );
+		$result_count = 0;
 
 		// Process the items.
 		foreach ( $items as $post_id ) {
-			call_user_func( $actions_map[ $bulk_action ]['callback'], (int) $post_id ?? false );
+
+			if ( $this->can_perform_action( $post_id, $bulk_action ) ) {
+				$result = call_user_func( $actions_map[ $bulk_action ]['callback'], (int) $post_id ?? false );
+
+				if ( ! empty( $result ) ) {
+					++$result_count;
+				}
+			}
 		}
 
 		// Add success message to the redirect URL.
-		$redirect = add_query_arg( $actions_map[ $bulk_action ]['event'], count( $items ), $redirect );
+		$redirect = add_query_arg( $actions_map[ $bulk_action ]['event'],  $result_count, $redirect );
 
 		// Redirect to remove query string.
 		wp_safe_redirect( $redirect );
 		exit;
+	}
+
+	/**
+	 * Check whether current user can perform an action to an event (based on Post ID).
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param string|int $post_id Post ID.
+	 * @param string     $action  Action to perform.
+	 *
+	 * @return bool
+	 */
+	private function can_perform_action( $post_id, $action ) {
+
+		$post_id = absint( $post_id );
+
+		if ( empty( $post_id ) ) {
+			return false;
+		}
+
+		$can_perform_action = current_user_can( 'manage_options' );
+
+		/**
+		 * Filter the ability to perform an action.
+		 *
+		 * @since 3.10.0
+		 *
+		 * @param bool   $can_perform_action Whether the user can perform the action.
+		 * @param int    $post_id            The post ID.
+		 * @param string $action             The action to perform.
+		 */
+		$can_perform_action = apply_filters(
+			'sugar_calendar_admin_events_tables_basic_can_perform_action',
+			$can_perform_action,
+			$post_id,
+			$action
+		);
+
+		return $can_perform_action;
 	}
 
 
@@ -868,6 +935,35 @@ class Basic extends Base {
 
 		// Return the repeat.
 		return $retval;
+	}
+
+	/**
+	 * Return the contents for the "Attendees" column.
+	 *
+	 * @since 3.10.0
+	 *
+	 * @param \Sugar_Calendar\Event $item The Event object.
+	 *
+	 * @return string
+	 */
+	public function column_attendees( $item = null ) {
+
+		$renderer   = new TicketingRenderer( $item );
+		$extra_data = $renderer->get_extra_data();
+
+		if ( empty( $extra_data ) ) {
+			return '&mdash;';
+		}
+
+		return sprintf(
+			'<a title="%1$s" href="%2$s"><span class="sugar-calendar-admin__event-list__col-attendees">%3$s%4$s%5$s</span><br /><span class="sugar-calendar-admin__event-list__col-attendees-view-link">%6$s</span></a>',
+			esc_html__( 'Event Attendees', 'sugar-calendar-lite' ),
+			esc_url( $extra_data['ticket_url'] ),
+			'<svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M0 1.75C0 0.792969 0.792969 0 1.75 0H14C14.957 0 15.75 0.792969 15.75 1.75V3.5C15.75 3.74609 15.5586 3.9375 15.3125 4.01953C14.8203 4.18359 14.4375 4.67578 14.4375 5.25C14.4375 5.82422 14.8203 6.31641 15.3125 6.48047C15.5586 6.5625 15.75 6.75391 15.75 7V8.75C15.75 9.70703 14.957 10.5 14 10.5H1.75C0.792969 10.5 0 9.70703 0 8.75V7C0 6.75391 0.191406 6.5625 0.4375 6.48047C0.957031 6.31641 1.3125 5.82422 1.3125 5.25C1.3125 4.67578 0.957031 4.18359 0.4375 4.01953C0.191406 3.9375 0 3.74609 0 3.5V1.75Z" fill="currentColor"/></svg>',
+			esc_html( $extra_data['tickets_purchased'] ),
+			$extra_data['ticket_total'] > 0 ? esc_html( ' / ' . $extra_data['ticket_total'] ) : '',
+			esc_html__( 'View Tickets', 'sugar-calendar-lite' )
+		);
 	}
 
 	/**
