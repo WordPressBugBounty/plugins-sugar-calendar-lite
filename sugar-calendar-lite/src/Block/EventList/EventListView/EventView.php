@@ -147,12 +147,12 @@ class EventView {
 			Options::get( 'date_format', 'F j, Y' )
 		);
 
-		$start_date = sugar_calendar_format_date_i18n( $date_format, $this->event->start );
-		$end_date   = sugar_calendar_format_date_i18n( $date_format, $this->event->end );
+		$start_date = Helpers::get_event_time_output( $this->event, $date_format, 'start' );
+		$end_date   = Helpers::get_event_time_output( $this->event, $date_format, 'end' );
 
 		if ( $this->event->is_all_day() ) {
 			return sprintf(
-				'%1$s - %2$s',
+				'<span class="sc-frontend-single-event__details__val-date">%1$s</span> - <span class="sc-frontend-single-event__details__val-date">%2$s</span>',
 				$start_date,
 				$end_date
 			);
@@ -173,7 +173,7 @@ class EventView {
 		$output = sprintf(
 			/* translators: 1: start date, 2: "at" text, 3: start time, 4: end date, 5: "at" text, 6: end time. */
 			'%1$s %2$s %3$s - %4$s %5$s %6$s',
-			$start_date,
+			'<span class="sc-frontend-single-event__details__val-date">' . $start_date . '</span>',
 			esc_html__( 'at', 'sugar-calendar-lite' ),
 			'<span class="sc-frontend-single-event__details__val-time">' .
 				Helpers::get_event_time_output(
@@ -184,7 +184,7 @@ class EventView {
 					( ! Helpers::event_has_multiple_timezones( $this->event ) ) // Hide the conversion timezone if the event has same timezone.
 				) .
 			'</span>',
-			$end_date,
+			'<span class="sc-frontend-single-event__details__val-date">' . $end_date . '</span>',
 			esc_html__( 'at', 'sugar-calendar-lite' ),
 			'<span class="sc-frontend-single-event__details__val-time">' . Helpers::get_event_time_output( $this->event, $time_format, 'end' ) . '</span>'
 		);

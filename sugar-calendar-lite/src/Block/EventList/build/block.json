@@ -93,7 +93,5 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "script": [
-    "sc-frontend-blocks-event-list-js"
-  ]
+  "script": "sc-frontend-blocks-event-list-js"
 }

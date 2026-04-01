@@ -55,6 +55,51 @@ class Renderer {
 	private $extra_data = null;
 
 	/**
+	 * Holds the `wp_timezone()`.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var mixed
+	 */
+	private $tz = null;
+
+	/**
+	 * Event start datetime.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var \DateTime
+	 */
+	private $event_start = null;
+
+	/**
+	 * Datetime NOW.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var \DateTime
+	 */
+	private $now = null;
+
+	/**
+	 * Ticket limit capacity.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var int
+	 */
+	private $limit_capacity = null;
+
+	/**
+	 * Available tickets.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var int
+	 */
+	private $available_tickets = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.10.0
@@ -81,10 +126,15 @@ class Renderer {
 	 * Maybe render the buy now button.
 	 *
 	 * @since 3.10.0
+	 * @since 3.11.0 Added check whether tickets are still available.
 	 */
 	public function maybe_render_buy_now_button() {
 
 		if ( ! $this->should_render_widget() ) {
+			return;
+		}
+
+		if ( ! $this->is_tickets_available() ) {
 			return;
 		}
 
@@ -120,7 +170,7 @@ class Renderer {
 			if ( ! empty( $woocommerce_link ) ) {
 				echo wp_kses(
 					sprintf(
-						'<a href="%1$s" class="sugar_calendar_event_ticketing_frontend_single_event__buy_now--woocommerce">%2$s %3$s</a>',
+						'<a href="%1$s" class="sugar_calendar_event_ticketing_frontend_single_event__buy_now--woocommerce sce-et-wc-btn">%2$s %3$s</a>',
 						$woocommerce_link,
 						$svg,
 						$buy_now_label
@@ -313,14 +363,13 @@ class Renderer {
 			return;
 		}
 
-		$tz    = wp_timezone();
-		$start = new DateTime( $this->event->start, $tz );
-		$today = new DateTime( 'now', $tz );
+		$start = $this->get_event_start();
+		$today = $this->get_now();
 		$price = get_event_meta( $this->event->id, 'ticket_price', true );
 
 		// Check if capacity limitation is enabled.
-		$limit_capacity = absint( get_event_meta( $this->event->id, 'ticket_limit_capacity', true ) );
-		$available      = Functions\get_available_tickets( $this->event->id );
+		$limit_capacity = $this->get_limit_capacity();
+		$available      = $this->get_available_tickets();
 
 		$this->render_ticket_box(
 			$start,
@@ -339,12 +388,12 @@ class Renderer {
 	public function render_ticket_box_placeholder() {
 
 		// Set placeholder data.
-		$tz                        = wp_timezone();
+		$tz                        = $this->get_timezone();
 		$price                     = 10.00;
 		$start                     = new DateTime( '+7 days', $tz );
 		$limit_capacity            = 1;
 		$available                 = 50;
-		$today                     = new DateTime( 'now', $tz );
+		$today                     = $this->get_now();
 		$this->should_enable_modal = false;
 
 		$this->render_ticket_box(
@@ -519,5 +568,117 @@ class Renderer {
 		$this->extra_data = $event_data;
 
 		return $this->extra_data;
+	}
+
+	/**
+	 * Get the WP timezone.
+	 *
+	 * @since 3.11.0
+	 * 
+	 * @return \DateTimeZone
+	 */
+	public function get_timezone() {
+
+		if ( ! is_null( $this->tz ) ) {
+			return $this->tz;
+		}
+
+		$this->tz = wp_timezone();
+
+		return $this->tz;
+	}
+
+	/**
+	 * Get the event start datetime.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return DateTime 
+	 */
+	public function get_event_start() {
+
+		if ( ! is_null( $this->event_start ) ) {
+			return $this->event_start;
+		}
+
+		$this->event_start = new DateTime( $this->event->start, $this->get_timezone() );
+
+		return $this->event_start;
+	}
+
+	/**
+	 * Get the datetime NOW.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return DateTime
+	 */
+	public function get_now() {
+
+		if ( ! is_null( $this->now ) ) {
+			return $this->now;
+		}
+
+		$this->now = new DateTime( 'now', $this->get_timezone() );
+
+		return $this->now;
+	}
+
+	/**
+	 * Get the ticket limit capacity.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return int
+	 */
+	public function get_limit_capacity() {
+
+		if ( ! is_null( $this->limit_capacity ) ) {
+			return $this->limit_capacity;
+		}
+
+		$this->limit_capacity = absint( get_event_meta( $this->event->id, 'ticket_limit_capacity', true ) );
+
+		return $this->limit_capacity;
+	}
+
+	/**
+	 * Get the available tickets.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return int 
+	 */
+	public function get_available_tickets() {
+
+		if ( ! is_null( $this->available_tickets ) ) {
+			return $this->available_tickets;
+		}
+
+		$this->available_tickets = Functions\get_available_tickets( $this->event->id );
+
+		return $this->available_tickets;
+	}
+
+	/**
+	 * Check if tickets are available.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return bool
+	 */
+	public function is_tickets_available() {
+
+		// If the event already started. It's no longer available for sale.
+		if ( $this->get_now() > $this->get_event_start() ) {
+			return false;
+		}
+
+		// If the event has a limit capacity and no tickets are available.
+		if ( $this->get_limit_capacity() && $this->get_available_tickets() <= 0 ) {
+			return false;
+		}
+
+		return true;
 	}
 }

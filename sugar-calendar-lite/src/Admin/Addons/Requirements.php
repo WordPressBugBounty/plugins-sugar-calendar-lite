@@ -538,7 +538,7 @@ class Requirements {
 		// Addon may get deactivated after this statement.
 		$this->deactivate();
 
-		return ! is_plugin_active( $plugin );
+		return ! \is_plugin_active( $plugin );
 	}
 
 	/**

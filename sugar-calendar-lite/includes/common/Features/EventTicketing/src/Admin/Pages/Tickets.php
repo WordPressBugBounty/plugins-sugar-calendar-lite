@@ -281,17 +281,26 @@ class Tickets extends PageAbstract {
 
 		?>
 
-        <div id="sugar-calendar-tickets" class="wrap sugar-calendar-admin-wrap">
+		<div id="sugar-calendar-tickets" class="wrap sugar-calendar-admin-wrap">
 
 			<?php UI::tabs( $this->get_tabs(), static::get_tab_slug() ); ?>
 
-            <div class="sugar-calendar-admin-content">
+			<div class="sugar-calendar-admin-content">
 
-                <h1 class="screen-reader-text"><?php echo esc_html( static::get_title() ); ?></h1>
+				<h1 class="screen-reader-text"><?php echo esc_html( static::get_title() ); ?></h1>
 
 				<?php $this->display_tab(); ?>
-            </div>
-        </div>
+			</div>
+
+			<?php
+			/**
+			 * Runs after the page content is displayed.
+			 *
+			 * @since 3.11.0
+			 */
+			do_action( 'sugar_calendar_admin_page_after' ); //phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			?>
+		</div>
 		<?php
 	}
 

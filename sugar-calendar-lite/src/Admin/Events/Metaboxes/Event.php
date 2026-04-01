@@ -947,7 +947,7 @@ class Event implements MetaboxInterface {
 					<?php
 					echo wp_kses(
 						sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
-							'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s.',
+							'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 							esc_url(
 								Helpers\Helpers::get_upgrade_link(
 									[
@@ -957,7 +957,7 @@ class Event implements MetaboxInterface {
 								)
 							),
 							esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-							esc_html__( 'to manage venues for your events', 'sugar-calendar-lite' )
+							esc_html__( 'to manage venues for your events plus a lot more features!', 'sugar-calendar-lite' )
 						),
 						[
 							'a' => [

@@ -1,0 +1,31 @@
+@use "../../../../../../scss/admin/variables";
+
+.item {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.button {
+	display: block;
+	width: 100%;
+	padding: 10px variables.$spacing-md;
+	border: none;
+	background: none;
+	text-align: left;
+	font-size: variables.$text-font-size-s;
+	color: variables.$text-text-primary;
+	cursor: pointer;
+	transition: background-color variables.$transitions-transition-normal ease;
+
+	&:hover {
+		background-color: variables.$surface-surface-background-light;
+		color: variables.$text-text-heading;
+	}
+
+	&:focus {
+		outline: none;
+		background-color: variables.$color-brand-blue-0;
+		color: variables.$color-brand-blue-50;
+	}
+}

@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\AddOn\Ticketing\Helpers;
 
+use Sugar_Calendar\Helpers as BaseHelpers;
+
 /**
  * Admin interface helpers.
  *
@@ -37,14 +39,20 @@ class UI {
 	 * @return void
 	 */
 	public static function header() {
-
+		$url = BaseHelpers\Helpers::get_utm_url(
+			'https://sugarcalendar.com/docs/',
+			[
+				'medium'  => 'event-ticketing-header',
+				'content' => 'logo image',
+			]
+		);
 		?>
         <div id="sugar-calendar-header"
              class="sugar-calendar-header">
             <img class="sugar-calendar-header-logo"
                  src="<?php echo esc_url( SC_PLUGIN_URL . 'assets/images/logo.svg' ); ?>"
                  alt="Sugar Calendar Logo"/>
-            <a href="https://sugarcalendar.com/docs/" target="_blank" id="sugar-calendar-header-help"><?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?></a>
+            <a href="<?php echo esc_url( $url ); ?>" target="_blank" id="sugar-calendar-header-help"><?php esc_html_e( 'Help', 'sugar-calendar-lite' ); ?></a>
         </div>
 		<?php
 	}

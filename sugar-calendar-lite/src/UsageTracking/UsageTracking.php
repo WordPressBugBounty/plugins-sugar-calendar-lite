@@ -216,7 +216,7 @@ class UsageTracking {
 		}
 
 		foreach ( get_plugins() as $path => $plugin ) {
-			if ( is_plugin_active( $path ) ) {
+			if ( \is_plugin_active( $path ) ) {
 				$active_plugins[ $path ] = isset( $plugin['Version'] ) ? $plugin['Version'] : 'Not Set';
 			}
 		}

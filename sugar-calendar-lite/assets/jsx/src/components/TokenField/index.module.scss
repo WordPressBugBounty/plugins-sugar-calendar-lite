@@ -1,0 +1,225 @@
+/**
+ * TokenField Component Styles
+ *
+ * @since 3.11.0
+ */
+
+.field {
+	margin-bottom: 1rem;
+}
+
+.fieldLabel {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #1e1e1e;
+	margin-bottom: 0.5rem;
+	line-height: 1.25;
+}
+
+.fieldLabelRequired {
+	position: relative;
+}
+
+.required {
+	color: #d63638;
+	margin-left: 0.25rem;
+	font-weight: 600;
+}
+
+.fieldInput {
+	position: relative;
+}
+
+.tokenField {
+	width: 100%;
+	min-height: 40px;
+	border: 1px solid #949494;
+	border-radius: 4px;
+	background-color: #fff;
+	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+	&:focus-within {
+		border-color: #007cba;
+		box-shadow: 0 0 0 1px #007cba;
+		outline: none;
+	}
+
+	// WordPress FormTokenField override styles
+	:global {
+		.components-form-token-field {
+			&__input-container {
+				border: none;
+				padding: 6px 8px;
+				min-height: 38px;
+			}
+
+			&__input {
+				font-size: 0.875rem;
+				line-height: 1.5;
+				color: #1e1e1e;
+
+				&::placeholder {
+					color: #757575;
+				}
+			}
+
+			&__token {
+				background-color: #f0f6fc;
+				border: 1px solid #c3dbf0;
+				color: #0a4b78;
+				border-radius: 12px;
+				padding: 2px 8px;
+				margin: 2px 4px 2px 0;
+				font-size: 0.75rem;
+				line-height: 1.5;
+				max-width: 100%;
+				display: inline-flex;
+				align-items: center;
+
+				&:hover {
+					background-color: #e7f3ff;
+					border-color: #a7c8e0;
+				}
+
+				&__remove-button {
+					background: none;
+					border: none;
+					color: #0a4b78;
+					cursor: pointer;
+					padding: 0;
+					margin-left: 4px;
+					display: inline-flex;
+					align-items: center;
+					line-height: 1;
+
+					&:hover {
+						color: #d63638;
+					}
+				}
+
+				&__text {
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					max-width: 200px;
+				}
+			}
+
+			&__suggestions-list {
+				background-color: #fff;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+				max-height: 200px;
+				overflow-y: auto;
+				position: absolute;
+				top: 100%;
+				left: 0;
+				right: 0;
+				z-index: 1000;
+				margin-top: 4px;
+			}
+
+			&__suggestion {
+				padding: 8px 12px;
+				cursor: pointer;
+				border-bottom: 1px solid #f0f0f0;
+				font-size: 0.875rem;
+				line-height: 1.5;
+
+				&:last-child {
+					border-bottom: none;
+				}
+
+				&:hover,
+				&.is-selected {
+					background-color: #f0f6fc;
+					color: #0a4b78;
+				}
+			}
+		}
+	}
+}
+
+.fieldError {
+	color: #d63638;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	margin-top: 0.25rem;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+
+	&::before {
+		content: "⚠";
+		font-size: 0.875rem;
+		line-height: 1;
+	}
+}
+
+// Disabled state
+.field:has(.tokenField[disabled]) {
+	.fieldLabel {
+		color: #757575;
+	}
+
+	.tokenField {
+		background-color: #f6f7f7;
+		border-color: #dcdcde;
+		cursor: not-allowed;
+
+		:global(.components-form-token-field__input) {
+			color: #757575;
+			cursor: not-allowed;
+		}
+
+		:global(.components-form-token-field__token) {
+			background-color: #f6f7f7;
+			border-color: #dcdcde;
+			color: #757575;
+		}
+	}
+}
+
+// Focus styles
+.tokenField:focus-within {
+	.fieldLabel {
+		color: #007cba;
+	}
+}
+
+// Error state
+.field:has(.fieldError) {
+	.tokenField {
+		border-color: #d63638;
+
+		&:focus-within {
+			border-color: #d63638;
+			box-shadow: 0 0 0 1px #d63638;
+		}
+	}
+}
+
+// High contrast accessibility
+@media (prefers-contrast: high) {
+	.tokenField {
+		border-width: 2px;
+	}
+
+	.fieldError {
+		font-weight: 600;
+	}
+
+	:global(.components-form-token-field__token) {
+		border-width: 2px;
+		font-weight: 500;
+	}
+}
+
+// Reduced motion preference
+@media (prefers-reduced-motion: reduce) {
+	.tokenField {
+		transition: none;
+	}
+}

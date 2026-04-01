@@ -318,3 +318,39 @@ function sugar_calendar_join_by_taxonomy_term( $clauses = [], $query = false ) {
 	// Return new clauses.
 	return $clauses;
 }
+
+/**
+ * Join events query with the posts table to exclude ghost events.
+ *
+ * Ghost events are sc_events records whose associated WordPress post
+ * has been deleted.
+ *
+ * @since 3.11.0
+ *
+ * @param array $clauses Query clauses.
+ * @param Query $query   Current Query instance.
+ *
+ * @return array Modified clauses with INNER JOIN on wp_posts.
+ */
+function sugar_calendar_exclude_ghost_events( $clauses = [], $query = false ) {
+
+	/**
+	 * Filter whether to exclude ghost events from queries.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @param bool  $exclude Whether to exclude ghost events. Default true.
+	 * @param Query $query   Current Query instance.
+	 */
+	$exclude = apply_filters( 'sugar_calendar_exclude_ghost_events', true, $query );
+
+	if ( empty( $exclude ) ) {
+		return $clauses;
+	}
+
+	global $wpdb;
+
+	$clauses['join'] .= " INNER JOIN {$wpdb->posts} ON sc_e.object_id = {$wpdb->posts}.ID";
+
+	return $clauses;
+}

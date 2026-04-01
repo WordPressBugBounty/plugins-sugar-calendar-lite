@@ -575,6 +575,10 @@ class RestApi {
 			],
 		];
 
+		if ( ! sugar_calendar()->is_pro() ) {
+			unset( $options['core']['allow_usage_tracking'] );
+		}
+
 		return $options;
 	}
 

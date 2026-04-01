@@ -156,6 +156,7 @@ function add_subsection( $subsections = [] ) {
  *
  * @since 1.0.0
  * @since 3.7.0 Moved "Tickets" related settings here.
+ * @since 3.11.0 Moved the Stripe section at the top.
  */
 function payments_section() {
 
@@ -163,6 +164,70 @@ function payments_section() {
 	$pages        = get_pages();
 	$is_sandbox   = Functions\is_sandbox();
 	$is_constant  = defined( 'SC_GATEWAY_SANDBOX_MODE' ) && SC_GATEWAY_SANDBOX_MODE;
+
+	UI::heading(
+		[
+			'title'       => esc_html__( 'Stripe', 'sugar-calendar-lite' ),
+			'id'          => 'stripe-connection',
+			'description' => sprintf( /* translators: %1$s - Stripe connect description; %2$s - Stripe documentation URL; %3$s - Stripe documentation link. */
+				'%1$s <a href="%2$s" target="_blank">%3$s</a>.',
+				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar-lite' ),
+				esc_url(
+					Helpers::get_utm_url(
+						'https://sugarcalendar.com/docs/events/event-ticketing-addon/#connecting-stripe',
+						[
+							'content' => 'Stripe documentation',
+							'medium'  => 'settings-payments',
+						]
+					)
+				),
+				esc_html__( 'Stripe documentation', 'sugar-calendar-lite' )
+			),
+		]
+	);
+
+	/**
+	 * Fires a hook before the Stripe integration section.
+	 *
+	 * @since 3.11.0
+	 */
+	do_action( 'sce_et_settings_payments_section_top_before_stripe_integration' );
+
+	// Stripe integration.
+	UI::field_wrapper(
+		[
+			'label' => esc_html__( 'Connection Status', 'sugar-calendar-lite' ),
+			'id'    => 'stripe-connect',
+		],
+		display_stripe_connect_field( $is_sandbox )
+	);
+
+	// Test mode
+	$test_mode_description = sprintf( /* translators: %1$s - test mode help; %2$s - link to Stripe dashboard; %3$s - link text. */
+		'%1$s <a href="%2$s" target="_blank"> %3$s</a>.',
+		esc_html__( 'While in test mode no live payments are processed. Be sure to enable Test Mode in your', 'sugar-calendar-lite' ),
+		esc_url( 'https://dashboard.stripe.com/' ),
+		esc_html__( 'Stripe Dashboard', 'sugar-calendar-lite' )
+	);
+
+	if ( $is_constant ) {
+		$test_mode_description .= sprintf( /* translators: %1$s - test mode constant note; %2$s - constant. */
+			'<br/>%1$s <code>SC_GATEWAY_SANDBOX_MODE</code> %2$s.',
+			esc_html__( 'Note: Test Mode is currently enabled via the', 'sugar-calendar-lite' ),
+			esc_html__( 'constant', 'sugar-calendar-lite' ),
+		);
+	}
+
+	UI::toggle_control(
+		[
+			'id'          => 'sandbox',
+			'name'        => 'sandbox',
+			'value'       => $is_sandbox,
+			'disabled'    => $is_constant,
+			'label'       => esc_html__( 'Test Mode', 'sugar-calendar-lite' ),
+			'description' => $test_mode_description,
+		]
+	);
 
 	UI::heading(
 		[
@@ -237,63 +302,6 @@ function payments_section() {
 			'label'       => esc_html__( 'Decimal Separator', 'sugar-calendar-lite' ),
 			'description' => $decimal_description,
 		]
-	);
-
-	UI::heading(
-		[
-			'title'       => esc_html__( 'Stripe', 'sugar-calendar-lite' ),
-			'id'          => 'stripe-connection',
-			'description' => sprintf( /* translators: %1$s - Stripe connect description; %2$s - Stripe documentation URL; %3$s - Stripe documentation link. */
-				'%1$s <a href="%2$s" target="_blank">%3$s</a>.',
-				esc_html__( 'Easily collect credit card payments with Stripe. For getting started and more information, see our', 'sugar-calendar-lite' ),
-				esc_url(
-					Helpers::get_utm_url(
-						'https://sugarcalendar.com/docs/events/event-ticketing-addon/#connecting-stripe',
-						[
-							'content' => 'Stripe documentation',
-							'medium'  => 'settings-payments',
-						]
-					)
-				),
-				esc_html__( 'Stripe documentation', 'sugar-calendar-lite' )
-			),
-		]
-	);
-
-	// Test mode
-	$test_mode_description = sprintf( /* translators: %1$s - test mode help; %2$s - link to Stripe dashboard; %3$s - link text. */
-		'%1$s <a href="%2$s" target="_blank"> %3$s</a>.',
-		esc_html__( 'While in test mode no live payments are processed. Be sure to enable Test Mode in your', 'sugar-calendar-lite' ),
-		esc_url( 'https://dashboard.stripe.com/' ),
-		esc_html__( 'Stripe Dashboard', 'sugar-calendar-lite' )
-	);
-
-	if ( $is_constant ) {
-		$test_mode_description .= sprintf( /* translators: %1$s - test mode constant note; %2$s - constant. */
-			'<br/>%1$s <code>SC_GATEWAY_SANDBOX_MODE</code> %2$s.',
-			esc_html__( 'Note: Test Mode is currently enabled via the', 'sugar-calendar-lite' ),
-			esc_html__( 'constant', 'sugar-calendar-lite' ),
-		);
-	}
-
-	UI::toggle_control(
-		[
-			'id'          => 'sandbox',
-			'name'        => 'sandbox',
-			'value'       => $is_sandbox,
-			'disabled'    => $is_constant,
-			'label'       => esc_html__( 'Test Mode', 'sugar-calendar-lite' ),
-			'description' => $test_mode_description,
-		]
-	);
-
-	// Stripe integration.
-	UI::field_wrapper(
-		[
-			'label' => esc_html__( 'Connection Status', 'sugar-calendar-lite' ),
-			'id'    => 'stripe-connect',
-		],
-		display_stripe_connect_field( $is_sandbox )
 	);
 
 	$receipt_page_description = sprintf( /* translators: %1$s - field description; %2$s - configuration hints; %3$s - shortcode. */
@@ -833,4 +841,57 @@ function help_url( $help_url ) {
 			'medium'  => 'plugin-settings-payments',
 		]
 	);
+}
+
+/**
+ * Add lite education to the Payments section.
+ *
+ * @since 3.11.0
+ */
+function add_lite_education() {
+
+	if ( sugar_calendar()->is_pro() ) {
+		return;
+	}
+	?>
+	<div id="sugar-calendar__product-education__notice-stripe" class="sugar-calendar__product-education__notice sugar-calendar__product-education__notice-info">
+		<div class="sugar-calendar__product-education__notice__content">
+			<div class="sugar-calendar__product-education__notice__content__icon">
+				<i class="fa-solid fa-circle-info"></i>
+			</div>
+			<div class="sugar-calendar__product-education__notice__content__text">
+				<div class="sugar-calendar__product-education__notice__content__text__title">
+					<strong><?php esc_html_e( 'Pay-as-you-go Pricing', 'sugar-calendar-lite' ); ?></strong>
+				</div>
+				<div class="sugar-calendar__product-education__notice__content__text__description">
+					<?php
+					$description = sprintf(
+						/* translators: %1$s - fee percentage, %2$s - SugarCalendar.com Upgrade page URL. */
+						__( '%1$s fee per-transaction + Stripe fees. <a href="%2$s">Upgrade to Pro</a> to remove additional fees and unlock powerful features.', 'sugar-calendar-lite' ),
+						'3%',
+						Helpers::get_utm_url(
+							'https://sugarcalendar.com/lite-upgrade/',
+							[
+								'content' => 'Upgrade to Pro',
+								'medium'  => 'plugin-settings-payments-stripe',
+							]
+						)
+					);
+
+					echo wp_kses(
+						$description,
+						[
+							'a' => [
+								'href'   => [],
+								'target' => [],
+								'rel'    => [],
+							]
+						]
+					)
+					?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
 }

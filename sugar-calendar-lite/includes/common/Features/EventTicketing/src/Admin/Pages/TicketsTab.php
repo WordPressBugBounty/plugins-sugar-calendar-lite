@@ -272,6 +272,24 @@ class TicketsTab extends Tickets {
 				break;
 		}
 
+		// If a return URL is provided, store notice in transient and redirect back.
+		if ( ! empty( $_REQUEST['return_url'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$return_url = esc_url_raw( wp_unslash( $_REQUEST['return_url'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			set_transient(
+				'sc_ticket_action_notice_' . get_current_user_id(),
+				[
+					'action'         => $action,
+					'affected_count' => $affected_ticket_counter,
+					'failed_count'   => $failed_ticket_counter,
+				],
+				60
+			);
+
+			wp_safe_redirect( $return_url );
+			exit;
+		}
+
 		// Redirect with action results to display notice.
 		wp_safe_redirect(
 			add_query_arg(

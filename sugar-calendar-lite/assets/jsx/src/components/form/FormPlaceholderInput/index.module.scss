@@ -1,0 +1,82 @@
+@use "../../../../../scss/admin/variables";
+
+.inputWrapper {
+	position: relative;
+
+	&.hasSmartTags {
+		position: relative;
+
+		.placeHolderInput {
+			float: left;
+			width: 100%;
+		}
+	}
+
+	.smartTagsButton {
+		position: absolute;
+		right: 0
+	}
+}
+
+.placeHolderInput {
+	min-height: 36px;
+	background-color: variables.$surface-surface-background-white;
+	border: 1px solid variables.$fields-field-border;
+	border-radius: variables.$radius-radius-field;
+
+	&:focus-within {
+		border-color: variables.$fields-field-border--focus;
+		box-shadow: 0 0 0 1px variables.$fields-field-border--focus;
+	}
+
+	:global(.tiptap) {
+		padding: 0 10px;
+		width: 100%;
+
+		:global(p) {
+			color: var(--text-text-primary, variables.$text-text-primary);
+			margin: 0;
+			line-height: 34px;
+			font-size: 14px;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+		:global(.mention) {
+			display: inline-block;
+			padding: 0 7px;
+			line-height: 24px;
+			font-size: 12px;
+			color: variables.$text-text-white;
+			background: variables.$color-brand-blue-50;
+			border-radius: 2px;
+
+			&::after {
+				content: '\200B';
+			}
+		}
+	}
+}
+
+.smartTagsButton {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	background: variables.$surface-surface-background-light;
+	border: 1px solid variables.$fields-field-border;
+	border-radius: variables.$radius-radius-field;
+	cursor: pointer;
+
+	&:hover {
+		border-color: variables.$fields-field-border--focus;
+	}
+
+	img {
+		width: 16px;
+		height: 16px;
+	}
+}

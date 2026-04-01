@@ -1,0 +1,9 @@
+@use "../../../../../scss/admin/variables";
+
+.errorMessage {
+	display: block;
+	margin-top: variables.$spacing-sm;
+	color: variables.$text-text-error;
+	font-size: 12px;
+	font-weight: 400;
+}

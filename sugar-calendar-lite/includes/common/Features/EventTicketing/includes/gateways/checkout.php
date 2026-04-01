@@ -184,20 +184,9 @@ class Checkout {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Add required condition for attendee fields.
+	 * @since 3.11.0 Fixed the condition for limit capacity.
 	 */
 	public function validate_data() {
-
-		$qty = ! empty( $_POST['sc_et_quantity'] )
-			? absint( $_POST['sc_et_quantity'] )
-			: 0;
-
-		$event_id = ! empty( $_POST['sc_et_event_id'] )
-			? absint( $_POST['sc_et_event_id'] )
-			: 0;
-
-		// Check if capacity limitation is enabled.
-		$limit_capacity = absint( get_event_meta( $event_id, 'ticket_limit_capacity', true ) );
-		$available      = get_event_meta( $event_id, 'ticket_quantity', true );
 
 		if ( empty( $_POST['first_name'] ) ) {
 			$this->add_error( 'missing_first_name', esc_html__( 'Please enter your first name.', 'sugar-calendar-lite' ), '#sc-event-ticketing-first-name' );
@@ -210,6 +199,18 @@ class Checkout {
 		if ( empty( $_POST['email'] ) || ! is_email( $_POST['email'] ) ) {
 			$this->add_error( 'missing_email', esc_html__( 'Please enter a valid email address.', 'sugar-calendar-lite' ), '#sc-event-ticketing-email' );
 		}
+
+		$qty = ! empty( $_POST['sc_et_quantity'] )
+			? absint( $_POST['sc_et_quantity'] )
+			: 0;
+
+		$event_id = ! empty( $_POST['sc_et_event_id'] )
+			? absint( $_POST['sc_et_event_id'] )
+			: 0;
+
+		// Check if capacity limitation is enabled.
+		$limit_capacity = absint( get_event_meta( $event_id, 'ticket_limit_capacity', true ) );
+		$available      = Functions\get_available_tickets( $event_id );
 
 		// Only validate quantity if capacity limitation is enabled.
 		if ( $limit_capacity && $qty > $available ) {
@@ -359,7 +360,7 @@ class Checkout {
 		$anonymous_attendees = [];
 
 		$attendees = ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] )
-			? $_POST['attendees']
+			? wp_unslash( $_POST['attendees'] )
 			: [];
 
 		$event_id = ! empty( $_POST['sc_et_event_id'] )

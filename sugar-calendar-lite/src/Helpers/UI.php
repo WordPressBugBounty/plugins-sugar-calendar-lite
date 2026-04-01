@@ -1107,14 +1107,14 @@ class UI {
 		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $table_columns );
 
 		?>
-		<div class="sugar-calendar-table-screen-options">
+		<div class="sugar-calendar-screen-options sugar-calendar-table-screen-options">
 			<button id="sugar-calendar-table-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button" title="<?php esc_attr_e( 'Change columns to display', 'sugar-calendar-lite' ); ?>">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 19">
-					<path d="M18,11l-2.18,0c-0.17,0.7 -0.44,1.35 -0.81,1.93l1.54,1.54l-2.1,2.1l-1.54,-1.54c-0.58,0.36 -1.23,0.63 -1.91,0.79l0,2.18l-3,0l0,-2.18c-0.68,-0.16 -1.33,-0.43 -1.91,-0.79l-1.54,1.54l-2.12,-2.12l1.54,-1.54c-0.36,-0.58 -0.63,-1.23 -0.79,-1.91l-2.18,0l0,-2.97l2.17,0c0.16,-0.7 0.44,-1.35 0.8,-1.94l-1.54,-1.54l2.1,-2.1l1.54,1.54c0.58,-0.37 1.24,-0.64 1.93,-0.81l0,-2.18l3,0l0,2.18c0.68,0.16 1.33,0.43 1.91,0.79l1.54,-1.54l2.12,2.12l-1.54,1.54c0.36,0.59 0.64,1.24 0.8,1.94l2.17,0l0,2.97Zm-8.5,1.5c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3Z"></path>
+				<svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+					<path d="M16.9922 10H14.8047C14.6224 10.7031 14.349 11.3542 13.9844 11.9531L15.5469 13.4766L13.4375 15.5859L11.875 14.0234C11.3021 14.388 10.6771 14.6615 10 14.8438V16.9922H6.99219V14.8438C6.3151 14.6615 5.67708 14.388 5.07812 14.0234L3.51562 15.5859L1.40625 13.4766L2.96875 11.9141C2.60417 11.3151 2.33073 10.6771 2.14844 10H0V7.03125H2.14844C2.30469 6.35417 2.57812 5.71615 2.96875 5.11719L1.40625 3.55469L3.51562 1.44531L5.03906 3.00781C5.61198 2.64323 6.26302 2.36979 6.99219 2.1875V0H10V2.1875C10.6771 2.34375 11.3021 2.60417 11.875 2.96875L13.4375 1.44531L15.5469 3.55469L14.0234 5.11719C14.388 5.71615 14.6484 6.35417 14.8047 7.03125H16.9922V10ZM8.47656 11.5234C9.3099 11.5234 10.013 11.237 10.5859 10.6641C11.1849 10.0651 11.4844 9.34896 11.4844 8.51562C11.4844 7.68229 11.1849 6.97917 10.5859 6.40625C10.013 5.80729 9.3099 5.50781 8.47656 5.50781C7.64323 5.50781 6.92708 5.80729 6.32812 6.40625C5.75521 6.97917 5.46875 7.68229 5.46875 8.51562C5.46875 9.34896 5.75521 10.0651 6.32812 10.6641C6.92708 11.237 7.64323 11.5234 8.47656 11.5234Z" fill="currentColor"/>
 				</svg>
 			</button>
 
-			<div class="sugar-calendar-table-screen-options-menu" style="display: none;">
+			<div class="sugar-calendar-screen-options-menu sugar-calendar-table-screen-options-menu" style="display: none;">
 				<form action="" method="post">
 
 					<?php wp_nonce_field( 'sugar-calendar-table-active-columns', 'sugar-calendar-table-active-columns-nonce' ); ?>

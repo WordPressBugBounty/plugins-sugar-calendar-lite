@@ -21,6 +21,9 @@ class List_Table extends \WP_List_Table {
 	public $per_page    = 30;
 	public $total_count = 0;
 	public $query;
+	public $should_show_trashed_tickets = true;
+	public $should_show_cb = true;
+	public $should_enable_sorting = true;
 
 	/**
 	 * User saved preferences.
@@ -420,7 +423,7 @@ class List_Table extends \WP_List_Table {
 
 		$attendee_name = $attendee->first_name . ' ' . $attendee->last_name;
 
-		$retval  = '<strong>' . esc_html( $attendee_name ) . '</strong><br>';
+		$retval  = '<span>' . esc_html( $attendee_name ) . '</span><br>';
 		$retval .= '<a href="mailto:' . esc_attr( $attendee->email ) . '">' . esc_html( $attendee->email ) . '</a>';
 
 		// Check if event exists.
@@ -469,66 +472,68 @@ class List_Table extends \WP_List_Table {
 			esc_html__( 'View Order Details', 'sugar-calendar-lite' )
 		);
 
-		// Different actions based on trash status.
-		if ( $is_trashed ) {
-			// Restore.
-			$actions['restore'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url(
-					wp_nonce_url(
-						add_query_arg(
-							[
-								'page'   => 'sc-event-ticketing',
-								'action' => 'restore',
-								'ticket' => [ $item->id ],
-							],
-							admin_url( 'admin.php' )
-						),
-						'bulk-' . $this->_args['plural']
-					)
-				),
-				esc_html__( 'Restore', 'sugar-calendar-lite' )
-			);
+		if ( $this->should_show_trashed_tickets ) {
+			// Different actions based on trash status.
+			if ( $is_trashed ) {
+				// Restore.
+				$actions['restore'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url(
+						wp_nonce_url(
+							add_query_arg(
+								[
+									'page'   => 'sc-event-ticketing',
+									'action' => 'restore',
+									'ticket' => [ $item->id ],
+								],
+								admin_url( 'admin.php' )
+							),
+							'bulk-' . $this->_args['plural']
+						)
+					),
+					esc_html__( 'Restore', 'sugar-calendar-lite' )
+				);
 
-			// Delete Permanently.
-			$actions['delete'] = sprintf(
-				'<a href="%s" class="submitdelete" onclick="return confirm(\'%s\');">%s</a>',
-				esc_url(
-					wp_nonce_url(
-						add_query_arg(
-							[
-								'page'   => 'sc-event-ticketing',
-								'action' => 'delete',
-								'ticket' => [ $item->id ],
-							],
-							admin_url( 'admin.php' )
-						),
-						'bulk-' . $this->_args['plural']
-					)
-				),
-				esc_attr__( 'Are you sure you want to permanently delete this ticket? This action cannot be undone.', 'sugar-calendar-lite' ),
-				esc_html__( 'Delete Permanently', 'sugar-calendar-lite' )
-			);
-		} else {
-			// Trash.
-			$actions['trash'] = sprintf(
-				'<a href="%s" class="submitdelete" title="%s">%s</a>',
-				esc_url(
-					wp_nonce_url(
-						add_query_arg(
-							[
-								'page'   => 'sc-event-ticketing',
-								'action' => 'trash',
-								'ticket' => [ $item->id ],
-							],
-							admin_url( 'admin.php' )
-						),
-						'bulk-' . $this->_args['plural']
-					)
-				),
-				esc_attr__( 'Move this ticket to the Trash', 'sugar-calendar-lite' ),
-				esc_html__( 'Trash', 'sugar-calendar-lite' )
-			);
+				// Delete Permanently.
+				$actions['delete'] = sprintf(
+					'<a href="%s" class="submitdelete" onclick="return confirm(\'%s\');">%s</a>',
+					esc_url(
+						wp_nonce_url(
+							add_query_arg(
+								[
+									'page'   => 'sc-event-ticketing',
+									'action' => 'delete',
+									'ticket' => [ $item->id ],
+								],
+								admin_url( 'admin.php' )
+							),
+							'bulk-' . $this->_args['plural']
+						)
+					),
+					esc_attr__( 'Are you sure you want to permanently delete this ticket? This action cannot be undone.', 'sugar-calendar-lite' ),
+					esc_html__( 'Delete Permanently', 'sugar-calendar-lite' )
+				);
+			} else {
+				// Trash.
+				$actions['trash'] = sprintf(
+					'<a href="%s" class="submitdelete" title="%s">%s</a>',
+					esc_url(
+						wp_nonce_url(
+							add_query_arg(
+								[
+									'page'   => 'sc-event-ticketing',
+									'action' => 'trash',
+									'ticket' => [ $item->id ],
+								],
+								admin_url( 'admin.php' )
+							),
+							'bulk-' . $this->_args['plural']
+						)
+					),
+					esc_attr__( 'Move this ticket to the Trash', 'sugar-calendar-lite' ),
+					esc_html__( 'Trash', 'sugar-calendar-lite' )
+				);
+			}
 		}
 
 		$retval .= '<div class="row-actions">' . $this->row_actions( $actions ) . '</div>';
@@ -555,6 +560,10 @@ class List_Table extends \WP_List_Table {
 			'event'    => esc_html__( 'Event',      'sugar-calendar-lite' ),
 			'order'    => esc_html__( 'Order Date', 'sugar-calendar-lite' ),
 		];
+
+		if ( ! $this->should_show_cb ) {
+			unset( $columns['cb'] );
+		}
 
 		// Filter & return.
 		return apply_filters( 'sc_event_tickets_list_table_columns', $columns );
@@ -585,6 +594,10 @@ class List_Table extends \WP_List_Table {
 	 * @return array
 	 */
 	public function get_sortable_columns() {
+
+		if ( ! $this->should_enable_sorting ) {
+			return [];
+		}
 
 		// Columns
 		$columns = array(

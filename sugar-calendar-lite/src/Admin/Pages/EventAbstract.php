@@ -552,5 +552,34 @@ abstract class EventAbstract extends PageAbstract {
 				)
 			);
 		}
+
+		if ( ! sugar_calendar()->is_pro() ) {
+
+			wp_enqueue_style(
+				'sugar-calendar-admin-education',
+				SC_PLUGIN_ASSETS_URL . 'css/admin-education' . WP::asset_min() . '.css',
+				[ 'sugar-calendar-vendor-lity', 'sugar-calendar-vendor-jquery-confirm' ],
+				Helpers::get_asset_version()
+			);
+
+			wp_enqueue_script(
+				'sugar-calendar-admin-event-lite',
+				SC_PLUGIN_ASSETS_URL . 'js/admin-event-lite' . WP::asset_min() . '.js',
+				[ 'jquery', 'sugar-calendar-admin-education', 'sugar-calendar-vendor-jquery-confirm' ],
+				Helpers::get_asset_version(),
+				true
+			);
+
+			wp_localize_script(
+				'sugar-calendar-admin-education',
+				'sugar_calendar_admin_education',
+				[
+					'sce_admin_upgrade_modal_title_default' => esc_html__( 'Uprade to Pro', 'sugar-calendar-lite' ),
+					'sce_admin_upgrade_modal_content'       => Helpers::get_education_upgrade_modal_content(),
+					'sce_admin_upgrade_thank_you_modal'     => Helpers::get_education_upgrade_thank_you_modal_content(),
+					'sce_admin_upgrade_modal_feature_name'  => esc_html__( 'feature', 'sugar-calendar-lite' ),
+				]
+			);
+		}
 	}
 }

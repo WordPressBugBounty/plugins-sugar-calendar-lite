@@ -10,8 +10,8 @@
  * Text Domain:       sugar-calendar-lite
  * Domain Path:       /assets/languages
  * Requires PHP:      7.4
- * Requires at least: 5.9
- * Version:           3.10.1
+ * Requires at least: 6.2
+ * Version:           3.11.0
  */
 
 // Exit if accessed directly.
@@ -25,7 +25,7 @@ if ( ! defined( 'SC_PLUGIN_VERSION' ) ) {
 	 *
 	 * @since 3.0.0
 	 */
-	define( 'SC_PLUGIN_VERSION', '3.10.1' );
+	define( 'SC_PLUGIN_VERSION', '3.11.0' );
 }
 
 if ( ! defined( 'SC_PLUGIN_FILE' ) ) {

@@ -333,6 +333,8 @@ class Emails {
 		 */
 		do_action( 'sc_email_send_before', $this );
 
+		$subject = wp_unslash( $subject );
+		$message = wp_unslash( $message );
 		$message = $this->build_email( $message );
 		$message = $this->parse_tags( $message );
 		$message = $this->text_to_html( $message );

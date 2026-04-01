@@ -6,6 +6,7 @@ use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\Helpers\Helpers as CommonHelpers;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -72,7 +73,7 @@ class Helpers {
 
 		if (
 			! class_exists( 'Sugar_Calendar\AddOn\Ticketing\Plugin' ) ||
-			! is_plugin_active( 'sc-event-ticketing/sc-event-ticketing.php' )
+			! \is_plugin_active( 'sc-event-ticketing/sc-event-ticketing.php' )
 		) {
 			return true;
 		}
@@ -841,6 +842,7 @@ class Helpers {
 	 * @since 3.7.0 Fixed issue with not displaying on-going events.
 	 * @since 3.7.0 Added support for the 'tags' parameter.
 	 * @since 3.7.2 Fixed issue with non-array calendar args.
+	 * @since 3.11.0 Added support to `show_past_only` args.
 	 *
 	 * @param array $args       The arguments to get the events.
 	 * @param array $attributes The block attributes.
@@ -850,10 +852,12 @@ class Helpers {
 	public static function get_upcoming_events_list_with_recurring( $args, $attributes ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$default_args = [
-			'number'       => 5,
-			'calendar_ids' => [],
-			'search'       => '',
-			'offset'       => 0,
+			'number'         => 5,
+			'calendar_ids'   => [],
+			'search'         => '',
+			'offset'         => 0,
+			'show_past_only' => false,
+			'event_order'    => 'asc',
 		];
 
 		$args = wp_parse_args(
@@ -874,6 +878,11 @@ class Helpers {
 
 		if ( empty( $args['offset'] ) ) {
 			$args['offset'] = $default_args['offset'];
+		}
+
+		// Validate event_order to prevent unexpected values.
+		if ( ! in_array( $args['event_order'], [ 'asc', 'desc' ], true ) ) {
+			$args['event_order'] = 'asc';
 		}
 
 		/**
@@ -910,6 +919,16 @@ class Helpers {
 
 			$term_taxonomy_ids = array_filter( array_map( 'absint', $args['calendar_ids'] ) );
 
+			// Convert term IDs to term taxonomy IDs for the SQL query.
+			$term_taxonomy_ids = get_terms(
+				[
+					'taxonomy'   => 'sc_event_category',
+					'include'    => $term_taxonomy_ids,
+					'fields'     => 'tt_ids',
+					'hide_empty' => false,
+				]
+			);
+
 			if ( ! empty( $term_taxonomy_ids ) ) {
 				$calendars_left_join = 'LEFT JOIN ' . $wpdb->term_relationships . ' AS cal_terms ON ' . $wpdb->prefix . 'sc_events.object_id = cal_terms.object_id';
 				$where_calendars     = $wpdb->prepare(
@@ -921,6 +940,11 @@ class Helpers {
 
 		$select_query = 'SELECT ' . $wpdb->prefix . 'sc_events.id FROM ' . $wpdb->prefix . 'sc_events';
 
+		// Exclude ghost events (sc_events records whose WP post was deleted).
+		if ( apply_filters( 'sugar_calendar_exclude_ghost_events', true ) ) {
+			$select_query .= ' INNER JOIN ' . $wpdb->posts . ' ON ' . $wpdb->prefix . 'sc_events.object_id = ' . $wpdb->posts . '.ID';
+		}
+
 		if ( ! empty( $calendars_left_join ) ) {
 			$select_query .= ' ' . $calendars_left_join;
 		}
@@ -928,9 +952,12 @@ class Helpers {
 		$tz  = sugar_calendar_get_timezone_type() === 'off' ? 'UTC' : sugar_calendar_get_timezone();
 		$now = sugar_calendar_get_request_time( 'mysql', $tz );
 
+		// Date filter: past events use `end < NOW()`, upcoming uses `end >= NOW()`.
+		$date_operator = ! empty( $args['show_past_only'] ) ? '<' : '>=';
+
 		$where_query = $wpdb->prepare(
 			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND '
-			. $wpdb->prefix . 'sc_events.`end` >= %s',
+			. $wpdb->prefix . 'sc_events.`end` ' . $date_operator . ' %s',
 			$now
 		);
 
@@ -980,8 +1007,14 @@ class Helpers {
 			}
 		}
 
+		if ( ! empty( $args['show_past_only'] ) ) {
+			$order_column    = $wpdb->prefix . 'sc_events.`end`';
+		} else {
+			$order_column    = $wpdb->prefix . 'sc_events.start';
+		}
+
 		$order_by = $wpdb->prepare(
-			'ORDER BY ' . $wpdb->prefix . 'sc_events.start ASC LIMIT %d OFFSET %d',
+			'ORDER BY ' . $order_column . ' ' . $args['event_order'] . ' LIMIT %d OFFSET %d',
 			$args['number'],
 			$args['offset']
 		);
@@ -998,8 +1031,8 @@ class Helpers {
 
 		$sugar_calendar_events_args = [
 			'id__in'  => wp_list_pluck( $event_ids, 'id' ),
-			'orderby' => 'start',
-			'order'   => 'ASC',
+			'orderby' => ! empty( $args['show_past_only'] ) ? 'end' : 'start',
+			'order'   => $args['event_order'],
 		];
 
 		return sugar_calendar_get_events( $sugar_calendar_events_args );
@@ -1467,6 +1500,7 @@ class Helpers {
 	 * If not, the WP generated one from the content.
 	 *
 	 * @since 3.10.0
+	 * @since 3.11.0 Added the filter `sugar_calendar_helpers_get_event_excerpt`.
 	 *
 	 * @param int $event_object_id The Event Object ID / Post ID.
 	 *
@@ -1479,6 +1513,20 @@ class Helpers {
 		if ( empty( $excerpt ) ) {
 			$excerpt = wp_trim_excerpt( '', $event_object_id );
 		}
+
+		/**
+		 * Filters the event excerpt.
+		 *
+		 * @since 3.11.0
+		 *
+		 * @param string $excerpt         The event excerpt.
+		 * @param int    $event_object_id The Event Object ID / Post ID.
+		 */
+		$excerpt = apply_filters(
+			'sugar_calendar_helpers_get_event_excerpt',
+			$excerpt,
+			$event_object_id
+		);
 
 		return $excerpt;
 	}
@@ -1497,5 +1545,98 @@ class Helpers {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the upgrade bonus content.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return string
+	 */
+	public static function get_education_upgrade_modal_content() {
+
+		return [
+			'upgrade_bonus'   => wp_kses(
+				sprintf(
+					/* translators: %1$s - Bonus label, %2$s - discount percentage. */
+					__( '%1$s Sugar Calendar Lite users get <span>%2$s off</span> regular price, automatically applied at checkout.', 'sugar-calendar-lite' ),
+					__( '<strong>Bonus:</strong>', 'sugar-calendar-lite' ),
+					'50%'
+				),
+				[
+					'strong' => [],
+					'span'   => [],
+				]
+			),
+			'upgrade_title'   => esc_html__( 'is a Pro Feature', 'sugar-calendar-lite' ),
+			'upgrade_content' => esc_html__( "We're sorry, the [feat-name] is not available on your plan. Please upgrade to the Pro plan to unlock all these awesome features.", 'sugar-calendar-lite' ),
+			'utm_locale'      => esc_attr( strtolower( get_user_locale() ) ),
+		];
+	}
+
+	/**
+	 * Get the upgrade thank you modal content.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return []
+	 */
+	public static function get_education_upgrade_thank_you_modal_content() {
+
+		$contact_url = CommonHelpers::get_utm_url(
+			'https://sugarcalendar.com/contact/',
+			[
+				'content' => 'let us know',
+				'medium'  => 'upgrade-thank-you-modal',
+			]
+		);
+
+		$content = '<p>' . sprintf(
+			__( 'If you have any questions or issues just <a class="sce-upgrade-thank-you-modal-contact-link" href="%1$s" target="_blank" rel="noopener noreferrer">let us know</a>.', 'sugar-calendar-lite' ),
+			esc_url( $contact_url )
+		) . '</p>';
+
+		$content .= '<p>' . __( "After purchasing a license, just <strong>enter your license key on the Sugar Calendar Settings page</strong>. This will let your site automatically upgrade to Sugar Calendar Pro! (Don't worry, all your forms and settings will be preserved.)", 'sugar-calendar-lite' ) . '</p>';
+
+		$docs_url = CommonHelpers::get_utm_url(
+			'https://sugarcalendar.com/docs/events/upgrading-from-sugar-calendar-lite-to-a-paid-license/',
+			[
+				'content' => 'our documentation',
+				'medium'  => 'upgrade-thank-you-modal',
+			]
+		);
+
+		$documentation = sprintf(
+			__( 'Check out <a class="sce-upgrade-thank-you-modal-documentation-link" href="%1$s" target="_blank" rel="noopener noreferrer">our documentation</a> for step-by-step instructions.', 'sugar-calendar-lite' ),
+			esc_url( $docs_url )
+		);
+
+		$content .= '<p>' . $documentation . '</p>';
+
+		$content = wp_kses(
+			$content,
+			[
+				'p' => [],
+				'a' => [
+					'href'   => [],
+					'target' => [],
+					'rel'    => [],
+					'class'  => [],
+				],
+				'strong' => [],
+			]
+		);
+
+		return [
+			'title'   => wp_kses(
+				__( 'Thank you for your interest in <br/>Sugar Calendar Pro!', 'sugar-calendar-lite' ),
+				[
+					'br' => [],
+				]
+			),
+			'content' => $content,
+			'ok'      => esc_html__( 'Ok', 'sugar-calendar-lite' ),
+		];
 	}
 }

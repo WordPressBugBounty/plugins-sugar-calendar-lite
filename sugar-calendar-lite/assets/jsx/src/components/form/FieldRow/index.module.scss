@@ -1,0 +1,30 @@
+@use "../../../../../scss/admin/variables";
+@use "../../../../../scss/vendor/include-media";
+
+.fieldRow {
+
+	& + & {
+		margin-top: variables.$spacing-md;
+	}
+}
+
+.fieldRowColumns2 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: variables.$spacing-md;
+
+
+	@include include-media.media("<tablet") {
+		grid-template-columns: 1fr;
+	}
+}
+
+.fieldRowColumns3 {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: variables.$spacing-md;
+
+	@include include-media.media("<tablet") {
+		grid-template-columns: 1fr;
+	}
+}

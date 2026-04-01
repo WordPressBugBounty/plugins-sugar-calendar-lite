@@ -116,7 +116,7 @@ class Settings extends PageTabAbstract {
 		$active_smtp_plugins = [];
 
 		foreach ( $smtp_plugins as $plugin ) {
-			if ( is_plugin_active( $plugin ) ) {
+			if ( \is_plugin_active( $plugin ) ) {
 				$active_smtp_plugins[] = $plugin;
 			}
 		}
@@ -156,7 +156,14 @@ class Settings extends PageTabAbstract {
 							 * translators: 1. WP Mail SMTP URL.
 							 */
 							__( 'Solve common email deliverability issues for good. <a target="_blank" href="%1$s">Get WP Mail SMTP!</a>', 'sugar-calendar-lite' ),
-							esc_url( 'https://wordpress.org/plugins/wp-mail-smtp/' )
+							esc_url(
+								add_query_arg(
+									[
+										'page' => 'sugar-calendar-smtp',
+									],
+									admin_url( 'admin.php' )
+								)
+							)
 						),
 						[
 							'a' => [

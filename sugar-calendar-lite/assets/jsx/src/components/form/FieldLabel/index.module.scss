@@ -1,0 +1,8 @@
+@use "../../../../../scss/admin/variables";
+
+.label {
+	display: flex;
+	color: variables.$text-text-primary;
+	font-size: 14px;
+	font-weight: 400;
+}

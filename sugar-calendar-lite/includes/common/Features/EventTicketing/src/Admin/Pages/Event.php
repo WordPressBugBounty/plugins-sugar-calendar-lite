@@ -58,8 +58,22 @@ class Event {
 	 * Enqueue scripts.
 	 *
 	 * @since 3.8.0
+	 * @since 3.11.0 Scoped to event editor pages only.
+	 *
+	 * @param string $hook The current admin page hook suffix.
 	 */
-	public function admin_enqueue_scripts() {
+	public function admin_enqueue_scripts( $hook ) {
+
+		// Only load on event editor pages (post.php / post-new.php).
+		if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ], true ) ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		if ( ! $screen || $screen->post_type !== sugar_calendar_get_event_post_type_id() ) {
+			return;
+		}
 
 		wp_register_script(
 			'sugar-calendar-event-ticketing-admin',
@@ -225,7 +239,7 @@ class Event {
 						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 						$upgrade_url,
 						esc_html__( 'Upgrade to Sugar Calendar Plus, Pro or Elite', 'sugar-calendar-lite' ),
-						esc_html__( 'to get access to Event Ticketing add-on + more!', 'sugar-calendar-lite' )
+						esc_html__( 'to sell tickets through WooCommerce or Stripe with NO extra fees!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [

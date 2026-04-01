@@ -55,24 +55,42 @@ class SettingsZapierTab extends Settings {
 	 * @since 3.0.0
 	 */
 	public function display() {
-
 		?>
-        <div id="sugar-calendar-settings" class="wrap sugar-calendar-admin-wrap">
-
+		<div id="sugar-calendar-settings" class="wrap sugar-calendar-admin-wrap sugar-calendar-admin__settings__tab-wrap">
 			<?php UI::tabs( $this->get_tabs(), static::get_tab_slug() ); ?>
-
-            <div class="sugar-calendar-admin-content">
-
-                <h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
+			<div class="sugar-calendar-admin-content">
+				<h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
 				<?php
-
 				UI::heading(
 					[
-						'title'       => esc_html__( 'Zapier', 'sugar-calendar-lite' ),
-						'description' => esc_html__( 'Zapier lets you connect Sugar Calendar with thousands of the most popular apps, so you can automate your work and have more time for what matters most.', 'sugar-calendar-lite' ),
-						'class'       => 'sugar-calendar--pro-only',
+						'class' => 'sugar-calendar--pro-only',
+						'title' => esc_html__( 'Zapier', 'sugar-calendar-lite' ),
 					]
 				);
+
+				printf(
+					'<p class="desc">%1$s</p>',
+					esc_html__( 'Zapier lets you connect Sugar Calendar with thousands of the most popular apps, so you can automate your work and have more time for what matters most.', 'sugar-calendar-lite' )
+				);
+
+				if ( ! sugar_calendar()->is_pro() ) {
+					UI::button(
+						[
+							'class'  => 'sugar-calendar-settings__tab__header__buy-pro-btn',
+							'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+							'size'   => 'lg',
+							'link'   => esc_url(
+								Helpers::get_upgrade_link(
+									[
+										'medium'  => 'zapier-settings',
+										'content' => 'Upgrade to Sugar Calendar Pro Top',
+									]
+								)
+							),
+							'target' => '_blank',
+						]
+					);
+				}
 
 				$assets_url  = SC_PLUGIN_ASSETS_URL . 'images/zapier/';
 				$screenshots = [

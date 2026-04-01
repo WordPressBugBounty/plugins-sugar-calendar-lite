@@ -1,0 +1,111 @@
+@use "../../../../../scss/admin/variables";
+@use "../../../../../scss/vendor/include-media";
+@use "../../../../../scss/admin/forms";
+
+.select {
+
+	:global(.select__control) {
+		background-color: variables.$surface-surface-background-white;
+		border: 1px solid variables.$fields-field-border;
+		border-radius: variables.$radius-radius-field;
+		box-shadow: none;
+		color: variables.$text-text-primary;
+		min-height: 36px;
+		min-width: 72px;
+		font-size: 14px;
+	}
+
+	:global(.select__control--is-focused) {
+		border-color: variables.$fields-field-border--focus !important;
+		box-shadow: 0 0 0 1px variables.$fields-field-border--focus !important;
+		outline: none !important;
+	}
+
+	:global(.select__control--is-disabled) {
+		:global(.select__indicators) {
+			visibility: hidden !important;
+		}
+
+		:global(.select__multi-value__remove svg) {
+			display: none !important;
+		}
+	}
+
+	:global(.select__input) {
+		min-height: auto;
+		box-shadow: none !important;
+	}
+
+	:global(.select__placeholder) {
+		color: variables.$text-text-icon;
+	}
+
+	:global(.select__value-container) {
+		padding-right: 0;
+	}
+
+	:global(.select__single-value) {
+		color: variables.$text-text-primary;
+	}
+
+	:global(.select__indicator) {
+		padding: 0 10px;
+
+		svg {
+			fill: var(--text-text-secondary, variables.$text-text-secondary);
+		}
+	}
+
+	:global(.select__menu) {
+		border-radius: variables.$radius-lg;
+		box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.15);
+		z-index: 5;
+	}
+
+	:global(.select__option) {
+		cursor: pointer;
+		padding: variables.$spacing-sm 20px;
+		color: variables.$text-text-secondary;
+	}
+
+	:global(.select__option--is-selected) {
+		background-color: variables.$surface-surface-background-light;
+	}
+
+	:global(.select__option--is-focused) {
+		background-color: variables.$surface-surface-background-light;
+	}
+
+	:global(.select__multi-value) {
+		border-radius: 2px;
+		background: variables.$color-brand-blue-50;
+	}
+
+	:global(.select__multi-value__label) {
+		padding-left: 7px;
+		font-size: 12px;
+		color: variables.$text-text-white;
+	}
+
+	:global(.select__multi-value__remove) {
+		cursor: pointer;
+		padding-right: 7px;
+		padding-left: 2px;
+
+		&:hover {
+			background: none;
+
+			svg > path {
+				opacity: 0.6;
+			}
+		}
+	}
+}
+
+.error {
+
+	:global(.select__control) {
+
+		@include forms.form-field-error;
+	}
+}

@@ -30,6 +30,8 @@ class Loader {
 	 */
 	public function hooks() {
 
+		add_filter( 'sugar_calendar_event_list_block_upcoming_events_args', [ $this, 'archive_backward_compatibility' ], 20, 2 );
+
 		add_filter( 'the_posts', [ $this, 'inject_archive_event_template_content' ], 10, 2 );
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_scripts' ] );
@@ -47,6 +49,53 @@ class Loader {
 		add_filter( 'body_class', [ $this, 'sc_modify_single_event_body_classes' ] );
 
 		add_filter( 'pre_get_shortlink', [ $this, 'filter_pre_get_shortlink' ], 10, 4 );
+	}
+
+	/**
+	 * This filter allows user to use the query params 'event-display' and 'event-order' in event
+	 * archive pages to manipulate how the events are queried.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @param array $args       The query arguments.
+	 * @param array $attributes The block attributes.
+	 *
+	 * @return array
+	 */
+	public function archive_backward_compatibility( $args, $attributes ) {
+
+		if ( is_admin() && ! wp_doing_ajax() ) {
+			return $args;
+		}
+
+		$event_display = '';
+		$event_order   = '';
+
+		// Let's handle non-AJAX (Visitor conversion Disabled)
+		if ( get_query_var( 'is_sce_archive_page' ) ) {
+			$event_display = empty( $_GET['event-display'] ) ? '' : strtolower( sanitize_title( wp_unslash( $_GET['event-display'] ) ) );
+			$event_order   = empty( $_GET['event-order'] ) ? '' : strtolower( sanitize_title( wp_unslash( $_GET['event-order'] ) ) );
+		} elseif ( wp_doing_ajax() && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+			$query_string   = wp_parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_QUERY );
+			$referer_params = [];
+
+			if ( $query_string ) {
+				parse_str( $query_string, $referer_params );
+			}
+
+			$event_display = empty( $referer_params['event-display'] ) ? '' : strtolower( sanitize_title( wp_unslash( $referer_params['event-display'] ) ) );
+			$event_order   = empty( $referer_params['event-order'] ) ? '' : strtolower( sanitize_title( wp_unslash( $referer_params['event-order'] ) ) );
+		}
+
+		if ( $event_display === 'past' ) {
+			$args['show_past_only'] = true;
+		}
+
+		if ( ! empty( $event_order ) ) {
+			$args['event_order'] = $event_order;
+		}
+
+		return $args;
 	}
 
 	/**
@@ -75,6 +124,7 @@ class Loader {
 	 * file in themes.
 	 *
 	 * @since 3.10.0
+	 * @since 3.11.0 Fixed issue where `/ics` request is not loading the correct output.
 	 *
 	 * @param \WP_Post[] $posts Array of post objects.
 	 * @param \WP_Query  $query The main WP Query instance.
@@ -83,7 +133,7 @@ class Loader {
 	 */
 	public function inject_archive_event_template_content( $posts, $query ) {
 
-		if ( is_admin() || ! $query->is_main_query() ) {
+		if ( is_admin() || ! $query->is_main_query() || isset( $query->query_vars['ics'] ) ) {
 			return $posts;
 		}
 
@@ -162,6 +212,8 @@ class Loader {
 		$query->max_num_pages        = 1;
 		$query->queried_object       = $wp_post;
 		$query->queried_object_id    = $wp_post->ID;
+
+		$query->set( 'is_sce_archive_page', true );
 
 		$query->setup_postdata( $wp_post );
 

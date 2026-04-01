@@ -438,13 +438,13 @@ class Stripe extends Checkout {
 
 		// Customer data
 		$order_data['email']      = ! empty( $_POST['email'] )
-			? sanitize_text_field( $_POST['email'] )
+			? sanitize_text_field( wp_unslash( $_POST['email'] ) )
 			: '';
 		$order_data['first_name'] = ! empty( $_POST['first_name'] )
-			? sanitize_text_field( $_POST['first_name'] )
+			? sanitize_text_field( wp_unslash( $_POST['first_name'] ) )
 			: '';
 		$order_data['last_name']  = ! empty( $_POST['last_name'] )
-			? sanitize_text_field( $_POST['last_name'] )
+			? sanitize_text_field( wp_unslash( $_POST['last_name'] ) )
 			: '';
 
 		$validate_transaction = $this->validate_transaction( $event, $order_data );

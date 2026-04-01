@@ -70,6 +70,15 @@ class Block extends AbstractBlock {
 	private $has_previous_events;
 
 	/**
+	 * Whether the block is showing past events only.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @var bool
+	 */
+	private $show_past_only = false;
+
+	/**
 	 * The start date of the upcoming period.
 	 *
 	 * @since 3.4.0
@@ -86,6 +95,43 @@ class Block extends AbstractBlock {
 	 * @var string
 	 */
 	public $upcoming_end_period;
+
+	/**
+	 * Returns whether the block is showing past events only.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return bool Whether the block is showing past events only.
+	 */
+	public function is_showing_past_events() {
+
+		return $this->show_past_only;
+	}
+
+	/**
+	 * Resolve the show_past_only flag by applying the filter.
+	 *
+	 * Called early in get_events() so the flag is available for pagination labels
+	 * even when events are loaded via AJAX (timezone conversion enabled).
+	 *
+	 * @since 3.11.0
+	 *
+	 * @access private
+	 */
+	private function resolve_show_past_only() {
+
+		/** This filter is documented in Sugar_Calendar\Block\EventList\EventListView\Block::get_upcoming_events() */
+		$args = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_args',
+			[
+				'show_past_only' => false,
+				'event_order'    => 'oldest_first',
+			],
+			$this->get_attributes()
+		);
+
+		$this->show_past_only = ! empty( $args['show_past_only'] );
+	}
 
 	/**
 	 * Returns whether the block has upcoming events or not.
@@ -183,6 +229,11 @@ class Block extends AbstractBlock {
 	 * @throws Exception When the date for the calendar was not created.
 	 */
 	public function get_events() {
+
+		// Resolve show_past_only early so pagination labels are correct in all code paths.
+		if ( ! $this->should_group_events_by_week() ) {
+			$this->resolve_show_past_only();
+		}
 
 		if ( $this->should_not_load_events() ) {
 			$this->events = [];
@@ -384,15 +435,26 @@ class Block extends AbstractBlock {
 	 *
 	 * @since 3.1.0
 	 * @since 3.4.0 Added the no events message for the upcoming event mode.
+	 * @since 3.11.0 Past events label.
 	 *
 	 * @return string
 	 */
 	public function get_no_events_msg() {
 
+		$has_active_filter = ! empty( $this->get_search_term() ) || ! empty( $this->get_calendars() );
+
+		// Past events mode messages.
+		if ( $this->show_past_only ) {
+
+			if ( $has_active_filter ) {
+				return __( 'There are no past events that match your criteria.', 'sugar-calendar-lite' );
+			}
+
+			return __( 'There are no past events.', 'sugar-calendar-lite' );
+		}
+
 		if (
-			! empty( $this->get_search_term() )
-			||
-			! empty( $this->get_calendars() )
+			$has_active_filter
 			||
 			! $this->should_group_events_by_week()
 		) {
@@ -420,6 +482,7 @@ class Block extends AbstractBlock {
 	 * @since 3.4.0
 	 * @since 3.6.0 Optimize the method to get the upcoming events.
 	 * @since 3.8.0 Respect the maximum events to show set by the user.
+	 * @since 3.11.0 Added support `show_past_only` args.
 	 *
 	 * @return Event[]
 	 */
@@ -472,11 +535,34 @@ class Block extends AbstractBlock {
 		$events_to_fetch         = min( $events_per_page, $remaining_events );
 
 		$args = [
-			'number'       => $events_to_fetch,
-			'calendar_ids' => $this->get_calendars(),
-			'search'       => $search_term,
-			'offset'       => ( $page - 1 ) * $events_per_page,
+			'number'         => $events_to_fetch,
+			'calendar_ids'   => $this->get_calendars(),
+			'search'         => $search_term,
+			'offset'         => ( $page - 1 ) * $events_per_page,
+			'show_past_only' => false,
+			'event_order'    => 'oldest_first',
 		];
+
+		/**
+		 * Filters the query args for the upcoming events list block.
+		 *
+		 * Allows developers to modify the query arguments before events are fetched.
+		 * Use `show_past_only` to display past events instead of upcoming ones.
+		 * Use `event_order` to control sort order.
+		 *
+		 * @since 3.11.0
+		 *
+		 * @param array $args       The query arguments.
+		 * @param array $attributes The block attributes.
+		 */
+		$args = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_list_block_upcoming_events_args',
+			$args,
+			$this->get_attributes()
+		);
+
+		// Store the resolved show_past_only flag for no-events message.
+		$this->show_past_only = ! empty( $args['show_past_only'] );
 
 		$upcoming_events = Helpers::get_upcoming_events_list_with_recurring(
 			$args,

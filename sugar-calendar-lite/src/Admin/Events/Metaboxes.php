@@ -486,7 +486,7 @@ class Metaboxes {
 						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 						Helpers::get_upgrade_link( [ 'medium' => 'lite-event-recurrence', 'content' => 'Upgrade to Sugar Calendar Pro' ] ),
 						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+						esc_html__( 'to unlock daily, weekly, monthly, and custom schedule Recurring Events!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -575,7 +575,7 @@ class Metaboxes {
 						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
 						Helpers::get_upgrade_link( [ 'medium' => 'lite-event-link', 'content' => 'Upgrade to Sugar Calendar Pro' ] ),
 						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+						esc_html__( 'to set a custom URL and optionally link out to external platforms!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -620,7 +620,7 @@ class Metaboxes {
 					</span>
 				</div>
 			</div>
-			<span id="venue-add-new"><?php esc_html_e( 'Add New Venue', 'sugar-calendar-lite' ); ?></span>
+			<span id="venue-add-new" class="sce-lite-education-modal-link" data-feat-id="<?php echo esc_attr( 'event-venues' ); ?>" data-feat-name="<?php esc_attr_e( 'Event Venues', 'sugar-calendar-lite' ); ?>"><?php esc_html_e( 'Add New Venue', 'sugar-calendar-lite' ); ?></span>
 			<div class="sugar-calendar-event-venue-summary">
 				<div class="sugar-calendar-event-venue-info-card active">
 					<div class="venue-info-card-display">
@@ -652,7 +652,7 @@ class Metaboxes {
 							<?php
 								echo wp_sprintf(
 									esc_html__( 'You need to configure Google API in %s to enable this feature.', 'sugar-calendar-lite' ),
-									'<a href="#" target="_blank">' . esc_html__( 'settings', 'sugar-calendar-lite' ) . '</a>'
+									'<span class="sce-link">' . esc_html__( 'settings', 'sugar-calendar-lite' ) . '</span>'
 								);
 							?>
 						</p>
@@ -676,7 +676,7 @@ class Metaboxes {
 							)
 						),
 						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+						esc_html__( 'for reusable venue profiles with interactive Google maps!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -765,7 +765,7 @@ class Metaboxes {
 							)
 						),
 						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+						esc_html__( 'to access a complete guest list management!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [
@@ -816,7 +816,7 @@ class Metaboxes {
 					</span>
 				</div>
 			</div>
-			<span id="speaker-add-new"><?php esc_html_e( 'Add New Speaker', 'sugar-calendar-lite' ); ?></span>
+			<span id="speaker-add-new" class="sce-lite-education-modal-link" data-feat-id="<?php echo esc_attr( 'event-speakers' ); ?>" data-feat-name="<?php esc_attr_e( 'Event Speakers', 'sugar-calendar-lite' ); ?>"><?php esc_html_e( 'Add New Speaker', 'sugar-calendar-lite' ); ?></span>
 		</div>
 
 		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
@@ -834,7 +834,7 @@ class Metaboxes {
 							)
 						),
 						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'to access this feature and a lot more!', 'sugar-calendar-lite' )
+						esc_html__( 'to create reusable speaker & performer profiles with full details!', 'sugar-calendar-lite' )
 					),
 					[
 						'a' => [

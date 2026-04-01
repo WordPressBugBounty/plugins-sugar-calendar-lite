@@ -374,6 +374,8 @@ var SCHandHolding = window.SCHandHolding || ( function( document, window, $ ) {
 		 */
 		performStep: function() {
 
+			$el.$tooltip.css( 'visibility', 'hidden' );
+
 			// Current step.
 			const step = sugar_calendar_hand_holding.steps[app.stepCounter];
 
@@ -441,15 +443,8 @@ var SCHandHolding = window.SCHandHolding || ( function( document, window, $ ) {
 				}
 			}
 
-			// We want to highlight the elements
-			step.highlights.forEach( highlight => {
-				$( highlight ).addClass( 'sc-hand-holding__highlighted-element' );
-			} );
-
 			// We also want to highlight the container.
 			const stepContainer = $( step.container );
-
-			stepContainer.addClass( 'sc-hand-holding__highlighted-element' );
 
 			let allowedPlacement = 'right';
 
@@ -457,49 +452,65 @@ var SCHandHolding = window.SCHandHolding || ( function( document, window, $ ) {
 				allowedPlacement = 'left';
 			}
 
-			// Adjust the position of the tooltip.
-			FloatingUIDOM.computePosition(
-				stepContainer[0],
-				$el.$tooltip[0],
-				{
-					placement: step.tooltip.placement,
-					middleware: [
-						FloatingUIDOM.offset( 5 ),
-						FloatingUIDOM.autoPlacement({
-							allowedPlacements: [ allowedPlacement ]
-						}),
-						FloatingUIDOM.arrow({
-							element: $el.$tooltipArrow[0],
-						})
-					]
-				}
-			).
-			then( ( { x, y, placement, middlewareData } ) => {
+			$( 'html, body' ).animate({
+				scrollTop: stepContainer.offset().top - 100
+			}, 250 )
+			.promise()
+			.done(function() {
 
-				Object.assign(
-					$el.$tooltip[0].style,
-					{
-						left: `${x}px`,
-						top: `${y}px`,
-					}
-				);
-
-				const {x: arrowX, y: arrowY} = middlewareData.arrow;
-
-				const staticSide = {
-					top: 'bottom',
-					right: 'left',
-					bottom: 'top',
-					left: 'right',
-				}[placement.split('-')[0]];
-
-				Object.assign( $el.$tooltipArrow[0].style, {
-					left: arrowX != null ? `${arrowX}px` : '',
-					top: arrowY != null ? `${arrowY}px` : '',
-					right: '',
-					bottom: '',
-					[staticSide]: '-4px',
+				// We want to highlight the elements
+				step.highlights.forEach( highlight => {
+					$( highlight ).addClass( 'sc-hand-holding__highlighted-element' );
 				} );
+				
+				stepContainer.addClass( 'sc-hand-holding__highlighted-element' );
+
+				// Adjust the position of the tooltip.
+				FloatingUIDOM.computePosition(
+					stepContainer[0],
+					$el.$tooltip[0],
+					{
+						placement: step.tooltip.placement,
+						middleware: [
+							FloatingUIDOM.offset( 5 ),
+							FloatingUIDOM.autoPlacement({
+								allowedPlacements: [ allowedPlacement ]
+							}),
+							FloatingUIDOM.arrow({
+								element: $el.$tooltipArrow[0],
+							})
+						]
+					}
+				).
+				then( ( { x, y, placement, middlewareData } ) => {
+
+					Object.assign(
+						$el.$tooltip[0].style,
+						{
+							left: `${x}px`,
+							top: `${y}px`,
+						}
+					);
+
+					const {x: arrowX, y: arrowY} = middlewareData.arrow;
+
+					const staticSide = {
+						top: 'bottom',
+						right: 'left',
+						bottom: 'top',
+						left: 'right',
+					}[placement.split('-')[0]];
+
+					Object.assign( $el.$tooltipArrow[0].style, {
+						left: arrowX != null ? `${arrowX}px` : '',
+						top: arrowY != null ? `${arrowY}px` : '',
+						right: '',
+						bottom: '',
+						[staticSide]: '-4px',
+					} );
+
+					$el.$tooltip.css( 'visibility', 'visible' );
+				});
 			});
 		},
 

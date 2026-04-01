@@ -71,10 +71,42 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 					<div class="sugar-calendar-event-list-block__listview__event__day">
 						<div class="sugar-calendar-event-list-block__listview__event__day__block">
 							<div class="sugar-calendar-event-list-block__listview__event__day__block-name">
-								<?php echo esc_html( \Sugar_Calendar\Helpers::get_weekday_abbrev( $day ) ); ?>
+								<?php
+								if ( $event->is_all_day() ) {
+									echo esc_html( \Sugar_Calendar\Helpers::get_weekday_abbrev( $day ) );
+								} else {
+									echo wp_kses(
+										\Sugar_Calendar\Helpers::get_event_time_output( $event, 'D', 'start', false, true ),
+										[
+											'time' => [
+												'datetime'               => true,
+												'title'                  => true,
+												'data-timezone'          => true,
+												'data-conversion-format' => true,
+											],
+										]
+									);
+								}
+								?>
 							</div>
 							<div class="sugar-calendar-event-list-block__listview__event__day__block-num">
-								<?php echo esc_html( $day->format( 'd' ) ); ?>
+								<?php
+								if ( $event->is_all_day() ) {
+									echo esc_html( $day->format( 'd' ) );
+								} else {
+									echo wp_kses(
+										\Sugar_Calendar\Helpers::get_event_time_output( $event, 'd', 'start', false, true ),
+										[
+											'time' => [
+												'datetime'               => true,
+												'title'                  => true,
+												'data-timezone'          => true,
+												'data-conversion-format' => true,
+											],
+										]
+									);
+								}
+								?>
 							</div>
 						</div>
 					</div>

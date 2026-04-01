@@ -6,18 +6,6 @@ use Sugar_Calendar\Block\EventList\EventListView;
  * @var EventListView\Block $context
  */
 
-// Label for groupped events.
-if ( $context->should_group_events_by_week() ) {
-
-	$previous_button_label = __( 'Previous Week', 'sugar-calendar-lite' );
-	$next_button_label     = __( 'Next Week', 'sugar-calendar-lite' );
-
-} else {
-
-	$previous_button_label = __( 'Previous', 'sugar-calendar-lite' );
-	$next_button_label     = __( 'Next', 'sugar-calendar-lite' );
-}
-
 ?>
 <div id="<?php echo esc_attr( $context->get_block_id() ); ?>"
 	class="<?php echo esc_attr( implode( ' ', $context->get_classes() ) ); ?>"
@@ -41,6 +29,20 @@ if ( $context->should_group_events_by_week() ) {
 	<div class="sugar-calendar-event-list-block__base-container sugar-calendar-block__base-container">
 		<?php $context->get_view()->render_base(); ?>
 	</div>
+
+	<?php
+	// Label for pagination buttons (set after render_base so show_past_only is resolved).
+	if ( $context->should_group_events_by_week() ) {
+
+		$previous_button_label = __( 'Previous Week', 'sugar-calendar-lite' );
+		$next_button_label     = __( 'Next Week', 'sugar-calendar-lite' );
+
+	} else {
+
+		$previous_button_label = __( 'Previous', 'sugar-calendar-lite' );
+		$next_button_label     = __( 'Next', 'sugar-calendar-lite' );
+	}
+	?>
 
 	<?php if ( $context->should_render_block_footer() ) : ?>
 		<div class="sugar-calendar-event-list-block__footer">

@@ -109,6 +109,26 @@ class Rsvp extends PageAbstract {
 			[ 'sugar-calendar-admin-settings', 'sugar-calendar-admin-education' ],
 			BaseHelpers::get_asset_version()
 		);
+
+		// Enqueue addon install script for Pro users with non-basic licenses.
+		if ( sugar_calendar()->is_pro() && sugar_calendar()->get_license_type() !== 'basic' ) {
+			wp_enqueue_script(
+				'sugar-calendar-admin-education-addon-install',
+				SC_PLUGIN_ASSETS_URL . 'js/admin-education-addon-install' . WP::asset_min() . '.js',
+				[ 'jquery' ],
+				BaseHelpers::get_asset_version(),
+				true
+			);
+
+			wp_localize_script(
+				'sugar-calendar-admin-education-addon-install',
+				'sugar_calendar_admin_education_addon_install',
+				[
+					'ajax_url'      => sugar_calendar()->get_admin()->ajax_url(),
+					'error_message' => esc_html__( 'Could not install the add-on. Please try again or install it from the Addons page.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
 	}
 
 	/**
@@ -250,44 +270,87 @@ class Rsvp extends PageAbstract {
 					</div>
 
 					<?php
-					$btn_text = __( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' );
-					$btn_link = Helpers::get_upgrade_link(
-						[
-							'medium'  => 'rsvp',
-							'content' => 'Upgrade to Sugar Calendar Pro Bottom',
-						]
-					);
+					if ( sugar_calendar()->is_pro() && sugar_calendar()->get_license_type() !== 'basic' ) {
+						$addon = sugar_calendar()->get_addons()->get_addon( 'sc-rsvp' );
+						$status = ! empty( $addon['status'] ) ? $addon['status'] : 'missing';
 
-					if ( sugar_calendar()->is_pro() ) {
-						$btn_text = __( 'Install RSVP add-on', 'sugar-calendar-lite' );
-						$btn_link = Helpers::get_utm_url(
-							'https://sugarcalendar.com/account/licenses/',
-							[
-								'medium'  => 'rsvp',
-								'content' => 'Install RSVP add-on',
-							]
-						);
+						if ( $status === 'missing' && ! empty( $addon['url'] ) ) {
+							$btn_text   = __( 'Install RSVP add-on', 'sugar-calendar-lite' );
+							$btn_action = 'install';
+							$btn_plugin = $addon['url'];
+						} elseif ( $status === 'installed' ) {
+							// Installed but not active.
+							$btn_text   = __( 'Activate RSVP add-on', 'sugar-calendar-lite' );
+							$btn_action = 'activate';
+							$btn_plugin = 'sc-rsvp/sc-rsvp.php';
+						}
 
-						if ( sugar_calendar()->get_license_type() === 'basic' ) {
-							$btn_text = __( 'Upgrade Now', 'sugar-calendar-lite' );
-							$btn_link = Helpers::get_utm_url(
-								'https://sugarcalendar.com/account/licenses/',
+						if ( ! empty( $btn_action ) ) {
+							UI::button(
 								[
-									'medium'  => 'rsvp',
-									'content' => 'Upgrade Now',
+									'class'  => 'sugar-calendar-education-addon-install',
+									'text'   => esc_html( $btn_text ),
+									'size'   => 'lg',
+									'submit' => false,
+									'data'   => [
+										'action' => $btn_action,
+										'plugin' => $btn_plugin,
+									],
+								]
+							);
+						} else {
+							// No valid license key — fall back to external link.
+							UI::button(
+								[
+									'text'   => esc_html__( 'Install RSVP add-on', 'sugar-calendar-lite' ),
+									'size'   => 'lg',
+									'link'   => esc_url(
+										Helpers::get_utm_url(
+											'https://sugarcalendar.com/account/licenses/',
+											[
+												'medium'  => 'rsvp',
+												'content' => 'Install RSVP add-on',
+											]
+										)
+									),
+									'target' => '_blank',
 								]
 							);
 						}
+					} elseif ( sugar_calendar()->is_pro() && sugar_calendar()->get_license_type() === 'basic' ) {
+						UI::button(
+							[
+								'text'   => esc_html__( 'Upgrade Now', 'sugar-calendar-lite' ),
+								'size'   => 'lg',
+								'link'   => esc_url(
+									Helpers::get_utm_url(
+										'https://sugarcalendar.com/account/licenses/',
+										[
+											'medium'  => 'rsvp',
+											'content' => 'Upgrade Now',
+										]
+									)
+								),
+								'target' => '_blank',
+							]
+						);
+					} else {
+						UI::button(
+							[
+								'text'   => esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
+								'size'   => 'lg',
+								'link'   => esc_url(
+									Helpers::get_upgrade_link(
+										[
+											'medium'  => 'rsvp',
+											'content' => 'Upgrade to Sugar Calendar Pro Bottom',
+										]
+									)
+								),
+								'target' => '_blank',
+							]
+						);
 					}
-
-					UI::button(
-						[
-							'text'   => esc_html( $btn_text ),
-							'size'   => 'lg',
-							'link'   => esc_url( $btn_link ),
-							'target' => '_blank',
-						]
-					);
 					?>
 				</div>
 			</div>

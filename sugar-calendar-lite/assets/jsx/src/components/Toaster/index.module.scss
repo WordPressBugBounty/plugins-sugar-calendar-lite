@@ -1,0 +1,11 @@
+@use "../../../../scss/admin/variables";
+
+.toaster {
+	border-radius: variables.$radius-radius-table !important;
+	box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.15) !important;
+	padding: variables.$spacing-sm !important;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: variables.$text-text-heading !important;
+}

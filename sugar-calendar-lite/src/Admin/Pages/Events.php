@@ -172,6 +172,7 @@ class Events extends PageAbstract {
 
 				<?php
 				$table->event_filters();
+				$table->event_notifications();
 				$table->options_menu();
 				?>
 			</div>

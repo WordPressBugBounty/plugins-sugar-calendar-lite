@@ -81,17 +81,8 @@ function register() {
  */
 function enqueue() {
 
-	// Menu styling
-	wp_enqueue_style( 'sugar_calendar_admin_menu' );
-
-	// Nav styling
-	wp_enqueue_style( 'sugar_calendar_admin_nav' );
-
 	// Events Pages
 	if ( sugar_calendar_admin_is_events_page() ) {
-
-		// General
-		wp_enqueue_script( 'sugar_calendar_admin_general' );
 
 		// Pointer
 		wp_enqueue_script( 'wp-pointer' );

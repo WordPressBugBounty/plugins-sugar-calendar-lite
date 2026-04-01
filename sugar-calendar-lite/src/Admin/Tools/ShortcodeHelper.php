@@ -39,9 +39,6 @@ class ShortcodeHelper {
 	 */
 	public function hooks() {
 
-		// Set shortcode config.
-		add_action( 'admin_init', [ $this, 'set_shortcode_config' ] );
-
 		// Add a button to the Classic Editor toolbar next to "Add Media".
 		add_action( 'media_buttons', [ $this, 'render_classic_editor_button' ], 20 );
 
@@ -53,11 +50,23 @@ class ShortcodeHelper {
 	}
 
 	/**
-	 * Get shortcode config.
+	 * Get shortcode config, populating it lazily on first access.
+	 *
+	 * This avoids running get_shortcodes_config() and get_terms() DB queries
+	 * on every admin page. The config is only built when actually needed
+	 * (on post editing screens, guarded by enqueue_scripts/render_modal_container).
 	 *
 	 * @since 3.9.0
+	 * @since 3.10.0 Refactored to lazy-load instead of running on admin_init.
+	 *
+	 * @return array
 	 */
-	public function set_shortcode_config() {
+	public function get_config() {
+
+		// Return cached config if already populated.
+		if ( ! empty( $this->config ) ) {
+			return $this->config;
+		}
 
 		$modern_shortcodes = new ModernShortcodes();
 
@@ -170,6 +179,8 @@ class ShortcodeHelper {
 		];
 
 		$this->config = array_replace_recursive( $shortcode_config_helper, $config );
+
+		return $this->config;
 	}
 
 	/**
@@ -223,8 +234,15 @@ class ShortcodeHelper {
 	 * Registers assets.
 	 *
 	 * @since 3.9.0
+	 *
+	 * @param string $hook The current admin page hook suffix.
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts( $hook ) {
+
+		// Only load on post editing screens (Classic Editor shortcode helper).
+		if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ], true ) ) {
+			return;
+		}
 
 		wp_enqueue_script(
 			'sugar-calendar-admin-shortcode-helper',
@@ -251,7 +269,7 @@ class ShortcodeHelper {
 				'height'     => $this->get_modal_config()['height'],
 				'inlineId'   => $this->get_modal_config()['inline_id'],
 				'identifier' => $this->get_modal_config()['identifier'],
-				'config'     => $this->config,
+				'config'     => $this->get_config(),
 			]
 		);
 	}
@@ -267,6 +285,13 @@ class ShortcodeHelper {
 	 */
 	public function render_modal_container() {
 
+		// Only render on post editing screens (Classic Editor shortcode helper).
+		$screen = get_current_screen();
+
+		if ( ! $screen || ! in_array( $screen->base, [ 'post' ], true ) ) {
+			return;
+		}
+
 		// Only print once.
 		static $printed = false;
 
@@ -275,6 +300,8 @@ class ShortcodeHelper {
 		}
 
 		$printed = true;
+
+		$config = $this->get_config();
 
 		?>
 		<div id="<?php echo esc_attr( $this->get_modal_config()['inline_id'] ); ?>" style="display:none;">
@@ -301,12 +328,12 @@ class ShortcodeHelper {
 								'default'  => true,
 							]
 						);
-						$this->render_field( 'array_int', $this->config['sc_events_calendar']['attributes']['calendars'] );
+						$this->render_field( 'array_int', $config['sc_events_calendar']['attributes']['calendars'] );
 
 						// Group events by week.
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['group_events_by_week'] );
-						$this->render_field( 'int', $this->config['sc_events_list']['attributes']['events_per_page'] );
-						$this->render_field( 'int', $this->config['sc_events_list']['attributes']['maximum_events_to_show'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['group_events_by_week'] );
+						$this->render_field( 'int', $config['sc_events_list']['attributes']['events_per_page'] );
+						$this->render_field( 'int', $config['sc_events_list']['attributes']['maximum_events_to_show'] );
 						?>
 					</div>
 					<hr class="sc-sh-separator" />
@@ -314,26 +341,26 @@ class ShortcodeHelper {
 					<div class="sc-sh-section sc-sh-display-options" data-shortcode="sc_events_calendar">
 
 						<?php
-						$this->render_field( 'options', $this->config['sc_events_calendar']['attributes']['display'] );
-						$this->render_field( 'boolean', $this->config['sc_events_calendar']['attributes']['show_block_header'] );
-						$this->render_field( 'boolean', $this->config['sc_events_calendar']['attributes']['allow_user_change_display'] );
-						$this->render_field( 'boolean', $this->config['sc_events_calendar']['attributes']['show_filters'] );
-						$this->render_field( 'boolean', $this->config['sc_events_calendar']['attributes']['show_search'] );
+						$this->render_field( 'options', $config['sc_events_calendar']['attributes']['display'] );
+						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['show_block_header'] );
+						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['allow_user_change_display'] );
+						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['show_filters'] );
+						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['show_search'] );
 						?>
 					</div>
 
 					<div class="sc-sh-section sc-sh-display-options" data-shortcode="sc_events_list">
 
 						<?php
-						$this->render_field( 'options', $this->config['sc_events_list']['attributes']['display'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_block_header'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['allow_user_change_display'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_filters'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_search'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_date_cards'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_descriptions'] );
-						$this->render_field( 'boolean', $this->config['sc_events_list']['attributes']['show_featured_images'] );
-						$this->render_field( 'options', $this->config['sc_events_list']['attributes']['image_position'] );
+						$this->render_field( 'options', $config['sc_events_list']['attributes']['display'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_block_header'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['allow_user_change_display'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_filters'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_search'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_date_cards'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_descriptions'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_featured_images'] );
+						$this->render_field( 'options', $config['sc_events_list']['attributes']['image_position'] );
 						?>
 					</div>
 				</div>

@@ -21,6 +21,7 @@ use Sugar_Calendar\Features\Loader as FeaturesLoader;
 use Sugar_Calendar\Shortcodes\ModernShortcodes;
 use Sugar_Calendar\Admin\Tools\DashboardWidget;
 use Sugar_Calendar\Admin\Tools\ShortcodeHelper;
+use Sugar_Calendar\Admin\EmailNotifications;
 
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
@@ -239,6 +240,15 @@ final class Plugin {
 
 		// Load the Setup Wizard.
 		$this->get_setup_wizard();
+
+		// Register the Action Scheduler callback for email notification batches.
+		// This must run outside is_admin() so WP Cron can find the callback.
+		add_action(
+			EmailNotifications::AS_HOOK_SEND_BATCH,
+			[ new EmailNotifications(), 'process_email_batch' ],
+			10,
+			2
+		);
 
 		if ( is_admin() ) {
 			$this->get_admin();

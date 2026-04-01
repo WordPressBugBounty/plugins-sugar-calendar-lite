@@ -2491,6 +2491,12 @@ class Base extends WP_List_Table {
 		// Default return value.
 		$retval = $this->get_event_edit_url( $event );
 
+		// Fallback for post types where get_edit_post_link() returns null
+		// (e.g. sc_recurring_event which has show_ui = false).
+		if ( empty( $retval ) && $event->object_type === 'post' ) {
+			$retval = admin_url( 'post.php?post=' . $event->object_id . '&action=edit' );
+		}
+
 		// Arguments.
 		$action      = 'sc_copy';
 		$request_uri = $_SERVER['REQUEST_URI'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -2955,11 +2961,13 @@ class Base extends WP_List_Table {
 
 		return [
 			'a'      => [
-				'href'               => [],
-				'class'              => [],
-				'data-action'        => [],
-				'data-occurrence-id' => [],
-				'target'             => [],
+				'href'                           => [],
+				'class'                          => [],
+				'data-action'                    => [],
+				'data-occurrence-id'             => [],
+				'data-sc-notify-event-attendees' => [],
+				'data-type'                      => [],
+				'target'                         => [],
 			],
 			'strong' => [],
 			'span'   => [ 'class' => [] ],
@@ -3311,6 +3319,15 @@ class Base extends WP_List_Table {
 	}
 
 	/**
+	 * Display attendees notification button.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return void
+	 */
+	public function event_notifications() {}
+
+	/**
 	 * Output the event search form.
 	 *
 	 * @since 3.0.0
@@ -3417,11 +3434,9 @@ class Base extends WP_List_Table {
 		?>
 		<div class="sugar-calendar-screen-options">
 			<button id="sugar-calendar-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button">
-				<svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M4 0.5H28C29.933 0.5 31.5 2.067 31.5 4V26C31.5 27.933 29.933 29.5 28 29.5H4C2.067 29.5 0.5 27.933 0.5 26V4C0.5 2.067 2.067 0.5 4 0.5Z" fill="#F7F7F7"/>
-					<path d="M4 0.5H28C29.933 0.5 31.5 2.067 31.5 4V26C31.5 27.933 29.933 29.5 28 29.5H4C2.067 29.5 0.5 27.933 0.5 26V4C0.5 2.067 2.067 0.5 4 0.5Z" stroke="#F7F7F7"/>
-					<path d="M24.4961 16.5039H22.3086C22.1263 17.207 21.8529 17.8581 21.4883 18.457L23.0508 19.9805L20.9414 22.0898L19.3789 20.5273C18.806 20.8919 18.181 21.1654 17.5039 21.3477V23.4961H14.4961V21.3477C13.819 21.1654 13.181 20.8919 12.582 20.5273L11.0195 22.0898L8.91016 19.9805L10.4727 18.418C10.1081 17.819 9.83464 17.181 9.65234 16.5039H7.50391V13.5352H9.65234C9.80859 12.8581 10.082 12.2201 10.4727 11.6211L8.91016 10.0586L11.0195 7.94922L12.543 9.51172C13.1159 9.14714 13.7669 8.8737 14.4961 8.69141V6.50391H17.5039V8.69141C18.181 8.84766 18.806 9.10807 19.3789 9.47266L20.9414 7.94922L23.0508 10.0586L21.5273 11.6211C21.8919 12.2201 22.1523 12.8581 22.3086 13.5352H24.4961V16.5039ZM15.9805 18.0273C16.8138 18.0273 17.5169 17.7409 18.0898 17.168C18.6888 16.569 18.9883 15.8529 18.9883 15.0195C18.9883 14.1862 18.6888 13.4831 18.0898 12.9102C17.5169 12.3112 16.8138 12.0117 15.9805 12.0117C15.1471 12.0117 14.431 12.3112 13.832 12.9102C13.2591 13.4831 12.9727 14.1862 12.9727 15.0195C12.9727 15.8529 13.2591 16.569 13.832 17.168C14.431 17.7409 15.1471 18.0273 15.9805 18.0273Z" fill="#50575E"/>
-				</svg>
+			<svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+				<path d="M16.9922 10H14.8047C14.6224 10.7031 14.349 11.3542 13.9844 11.9531L15.5469 13.4766L13.4375 15.5859L11.875 14.0234C11.3021 14.388 10.6771 14.6615 10 14.8438V16.9922H6.99219V14.8438C6.3151 14.6615 5.67708 14.388 5.07812 14.0234L3.51562 15.5859L1.40625 13.4766L2.96875 11.9141C2.60417 11.3151 2.33073 10.6771 2.14844 10H0V7.03125H2.14844C2.30469 6.35417 2.57812 5.71615 2.96875 5.11719L1.40625 3.55469L3.51562 1.44531L5.03906 3.00781C5.61198 2.64323 6.26302 2.36979 6.99219 2.1875V0H10V2.1875C10.6771 2.34375 11.3021 2.60417 11.875 2.96875L13.4375 1.44531L15.5469 3.55469L14.0234 5.11719C14.388 5.71615 14.6484 6.35417 14.8047 7.03125H16.9922V10ZM8.47656 11.5234C9.3099 11.5234 10.013 11.237 10.5859 10.6641C11.1849 10.0651 11.4844 9.34896 11.4844 8.51562C11.4844 7.68229 11.1849 6.97917 10.5859 6.40625C10.013 5.80729 9.3099 5.50781 8.47656 5.50781C7.64323 5.50781 6.92708 5.80729 6.32812 6.40625C5.75521 6.97917 5.46875 7.68229 5.46875 8.51562C5.46875 9.34896 5.75521 10.0651 6.32812 10.6641C6.92708 11.237 7.64323 11.5234 8.47656 11.5234Z" fill="currentColor"/>
+			</svg>
 			</button>
 
             <div class="sugar-calendar-screen-options-menu" style="display: none;">
@@ -4058,15 +4073,13 @@ class Base extends WP_List_Table {
 			// Show start & end years for list mode.
 			if ( $this->get_mode() === 'list' ) :
 				?>
-
-                <label for="cystart" class="screen-reader-text"><?php esc_html_e( 'Set the first year', 'sugar-calendar-lite' ); ?></label>
-                <input type="number" name="cystart" id="cystart" value="<?php echo (int) $this->get_start_year(); ?>">
-
-                <span><?php esc_html_e( 'to', 'sugar-calendar-lite' ); ?></span>
-
-                <label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the last year', 'sugar-calendar-lite' ); ?></label>
-                <input type="number" name="cy" id="cy" value="<?php echo (int) $this->get_year(); ?>">
-
+				<div class="sce-admin__table-top-nav__cy">
+					<label for="cystart" class="screen-reader-text"><?php esc_html_e( 'Set the first year', 'sugar-calendar-lite' ); ?></label>
+					<input type="number" name="cystart" id="cystart" value="<?php echo (int) $this->get_start_year(); ?>">
+					<span><?php esc_html_e( 'to', 'sugar-calendar-lite' ); ?></span>
+					<label for="cy" class="screen-reader-text"><?php esc_html_e( 'Set the last year', 'sugar-calendar-lite' ); ?></label>
+					<input type="number" name="cy" id="cy" value="<?php echo (int) $this->get_year(); ?>">
+				</div>
 			<?php
 
 			// Show single year for non-list modes.

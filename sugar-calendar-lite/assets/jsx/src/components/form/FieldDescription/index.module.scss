@@ -1,0 +1,7 @@
+@use "../../../../../scss/admin/variables";
+
+.description {
+	color: variables.$text-text-tertiary;
+	font-size: 14px;
+	line-height: 1.4;
+}

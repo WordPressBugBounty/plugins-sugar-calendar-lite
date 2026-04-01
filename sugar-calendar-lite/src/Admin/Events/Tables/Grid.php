@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Admin\Events\Tables;
 
+use Sugar_Calendar\Helpers\UI;
+
 /**
  * Grid event view.
  *
@@ -160,5 +162,25 @@ class Grid extends Base {
 		$classes = "{$classes} sugar-calendar-event-entry";
 
 		return $classes;
+	}
+
+	/**
+	 * Display attendees notification button.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return void
+	 */
+	public function event_notifications() {
+
+		UI::button(
+			[
+				'text' => esc_html__( 'Notify Attendees', 'sugar-calendar-lite' ),
+				'type' => 'tertiary',
+				'size' => 'sm',
+				'id'   => 'sugar-calendar-btn-notify-attendees',
+				'link' => '#',
+			]
+		);
 	}
 }

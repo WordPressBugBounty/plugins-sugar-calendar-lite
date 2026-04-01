@@ -1,0 +1,127 @@
+@use "../../../../../../scss/admin/variables";
+
+.dropdown {
+	position: absolute;
+	top: variables.$spacing-md;
+	right: variables.$spacing-xs;
+	z-index: 1000;
+	height: 266px;
+	width: 100%;
+	max-width: 370px;
+	margin-top: variables.$spacing-xs;
+	background: variables.$surface-surface-background-white;
+	border: 1px solid variables.$surface-surface-border;
+	border-radius: variables.$radius-lg;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transition: opacity variables.$transitions-transition-normal ease;
+
+	&.openDown {
+		margin-top: 13px;
+	}
+}
+
+.title {
+	padding: variables.$spacing-sm variables.$spacing-md;
+	font-size: variables.$text-font-size-s;
+	font-weight: 600;
+	color: variables.$text-text-heading;
+	border-bottom: 1px solid variables.$surface-surface-divider;
+	background: variables.$surface-surface-background-light;
+	border-radius: variables.$radius-lg variables.$radius-lg 0 0;
+}
+
+.searchContainer {
+	position: relative;
+	padding: variables.$spacing-sm;
+	border-bottom: 1px solid variables.$surface-surface-divider;
+}
+
+.searchInput {
+	width: 100%;
+	padding: 8px variables.$spacing-sm;
+	padding-right: 30px;
+	border: 1px solid variables.$fields-field-border;
+	border-radius: variables.$radius-radius-field;
+	font-size: variables.$text-font-size-s;
+	line-height: 1.4;
+	background: variables.$surface-surface-background-white;
+	color: variables.$text-text-primary;
+	transition: border-color variables.$transitions-transition-normal ease;
+
+	&::placeholder {
+		color: variables.$text-text-tertiary;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: variables.$fields-field-border--focus;
+		box-shadow: 0 0 0 1px variables.$fields-field-border--focus;
+	}
+}
+
+.searchClose {
+	position: absolute;
+	top: 50%;
+	right: variables.$spacing-md;
+	transform: translateY(-50%);
+	color: variables.$text-text-tertiary;
+	cursor: pointer;
+	font-size: variables.$text-font-size-s;
+	transition: color variables.$transitions-transition-normal ease;
+
+	&:hover {
+		color: variables.$text-text-secondary;
+	}
+}
+
+.list {
+	max-height: 170px;
+	overflow-y: auto;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	scrollbar-width: thin;
+	scrollbar-color: variables.$color-neutral-20 transparent;
+
+	li {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: variables.$color-neutral-20;
+		border-radius: 3px;
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background-color: variables.$color-neutral-30;
+	}
+}
+
+.heading {
+	display: block;
+	padding: 8px variables.$spacing-md;
+	color: variables.$text-text-tertiary;
+	font-size: variables.$text-font-size-xs;
+	font-weight: 600;
+	text-transform: uppercase;
+	background-color: variables.$surface-surface-background-light;
+	cursor: default;
+}
+
+.noResults {
+	padding: variables.$spacing-md;
+	text-align: center;
+	color: variables.$text-text-tertiary;
+	font-size: variables.$text-font-size-s;
+	font-style: italic;
+}

@@ -27,6 +27,7 @@ use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
 use Sugar_Calendar\Admin\Pages\Venues;
 use Sugar_Calendar\Admin\Pages\Welcome;
 use Sugar_Calendar\Admin\Pages\Speakers;
+use Sugar_Calendar\Admin\Pages\SMTP;
 use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
@@ -210,6 +211,9 @@ class Area {
 		// Handle different menu highlighting scenarios.
 		add_filter( 'submenu_file', [ $this, 'force_sub_menu' ] );
 
+		// Show one-time notice after RSVP add-on install/activate.
+		add_action( 'admin_init', [ $this, 'maybe_show_rsvp_activated_notice' ] );
+
 		// Initialize current page. We run this at high priority
 		// so that page classes can still hook onto `admin_init`.
 		add_action( 'admin_init', [ $this, 'init' ], 0 );
@@ -244,6 +248,10 @@ class Area {
 
 		// Metaboxes.
 		( new Metaboxes() )->hooks();
+
+		// Email Notifications
+		// TODO: only load when RSVP or ticketing are active.
+		( new EmailNotifications() )->hooks();
 
 		// Product education.
 		if ( ! Plugin::instance()->is_pro() ) {
@@ -458,6 +466,16 @@ class Area {
 			Welcome::get_priority()
 		);
 
+		// Hidden SMTP page.
+		add_submenu_page(
+			null,
+			__( 'SMTP', 'sugar-calendar-lite' ),
+			__( 'SMTP', 'sugar-calendar-lite' ),
+			'manage_options',
+			SMTP::get_slug(),
+			[ $this, 'display' ]
+		);
+
 		if ( ! Plugin::instance()->is_pro() ) {
 			add_submenu_page(
 				self::SLUG,
@@ -625,6 +643,10 @@ class Area {
 					case Addons::get_slug():
 						$page_id = 'addons';
 						break;
+
+					case SMTP::get_slug():
+						$page_id = 'smtp';
+						break;
 				}
 			}
 
@@ -743,6 +765,7 @@ class Area {
 			'speakers'         => Speakers::class,
 			'rsvp'             => Rsvp::class,
 			'addons'           => Addons::class,
+			'smtp'             => SMTP::class,
 		];
 
 		/**
@@ -954,7 +977,7 @@ class Area {
 		// Handle legacy settings.
 		$this->handle_legacy_settings_post();
 
-		$post_data = $_POST[ self::SLUG ] ?? []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$post_data = isset( $_POST[ self::SLUG ] ) ? wp_unslash( $_POST[ self::SLUG ] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Let the current page handle the request.
 		$this->current_page->handle_post( $post_data );
@@ -1032,6 +1055,25 @@ class Area {
 
 			return;
 		}
+	}
+
+	/**
+	 * Show a one-time success notice after RSVP add-on install/activate.
+	 *
+	 * @since 3.11.0
+	 */
+	public function maybe_show_rsvp_activated_notice() {
+
+		if ( empty( $_GET['sc-rsvp-activated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		WP::add_admin_notice(
+			esc_html__( 'RSVP add-on installed and activated successfully.', 'sugar-calendar-lite' ),
+			WP::ADMIN_NOTICE_SUCCESS
+		);
+
+		add_action( 'admin_notices', [ $this, 'display_admin_notices' ], 5 );
 	}
 
 	/**
@@ -1144,11 +1186,26 @@ class Area {
 	 * Display the admin header.
 	 *
 	 * @since 3.0.0
+	 * @since 3.11.0 Added filter to not display the admin header.
 	 */
 	public function display_admin_header() {
 
 		// Bail if not in an admin page.
 		if ( $this->current_page === null ) {
+			return;
+		}
+
+		/**
+		 * Filters whether to display the admin header.
+		 *
+		 * @since 3.11.0
+		 *
+		 * @param bool          $display_admin_header Whether to display the admin header.
+		 * @param PageInterface $page                 Current page.
+		 */
+		$display_admin_header = apply_filters( 'sugar_calendar_admin_area_display_admin_header', true, $this->current_page );
+
+		if ( ! boolval( $display_admin_header ) ) {
 			return;
 		}
 
@@ -1168,6 +1225,8 @@ class Area {
 	 */
 	public function enqueue_assets( $hook ) {
 
+		// Admin menu CSS is intentionally global — it styles the SC sidebar menu
+		// (upgrade link highlight, pseudo-element cleanup) which is visible on every admin page.
 		wp_enqueue_style(
 			'sugar-calendar-admin-menu',
 			SC_PLUGIN_ASSETS_URL . 'css/admin-menu' . WP::asset_min() . '.css',
@@ -1304,27 +1363,38 @@ class Area {
 
 		$wp_screen = get_current_screen();
 
-		// Only enqueue if Screen Options is displayed.
-		if ( $wp_screen instanceof WP_Screen && $wp_screen->show_screen_options() ) {
+		// Only enqueue on SC admin pages that display Screen Options.
+		// The script moves #screen-meta into #sugar-calendar-admin-header-temp,
+		// which is only rendered when current_page is set.
+		if ( $this->current_page !== null && $wp_screen instanceof WP_Screen && $wp_screen->show_screen_options() ) {
 			wp_enqueue_script( 'sugar-calendar-admin-screen-options' );
 		}
 
-		wp_enqueue_script(
-			'sugar-calendar-admin-common',
-			SC_PLUGIN_ASSETS_URL . 'admin/js/common' . WP::asset_min() . '.js',
-			[ 'jquery' ],
-			BaseHelpers::get_asset_version(),
-			true
-		);
+		// Only enqueue common JS on SC admin pages, the WordPress Dashboard, and post editor screens.
+		// common.js handles: migration notice dismiss (SC pages), dashboard widget AJAX (Dashboard),
+		// and provides `tags_slug` for Gutenberg block editor sidebar controls (post editors).
+		if (
+			$this->current_page !== null
+			|| ( $wp_screen instanceof WP_Screen && $wp_screen->id === 'dashboard' )
+			|| in_array( $hook, [ 'post.php', 'post-new.php' ], true )
+		) {
+			wp_enqueue_script(
+				'sugar-calendar-admin-common',
+				SC_PLUGIN_ASSETS_URL . 'admin/js/common' . WP::asset_min() . '.js',
+				[ 'jquery' ],
+				BaseHelpers::get_asset_version(),
+				true
+			);
 
-		wp_localize_script(
-			'sugar-calendar-admin-common',
-			'sugar_calendar_admin_common',
-			[
-				'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-				'tags_slug' => Helpers::get_tags_slug(),
-			]
-		);
+			wp_localize_script(
+				'sugar-calendar-admin-common',
+				'sugar_calendar_admin_common',
+				[
+					'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+					'tags_slug' => Helpers::get_tags_slug(),
+				]
+			);
+		}
 
 		// Flyout Menu assets - only on Sugar Calendar admin pages.
 		if ( $this->current_page !== null ) {
@@ -1340,6 +1410,18 @@ class Area {
 		// Bail if not in an admin page.
 		if ( $this->current_page === null ) {
 			return;
+		}
+
+		// WP 7.0+ admin compatibility overrides.
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '7.0-alpha1', '>=' ) ) {
+			wp_enqueue_style(
+				'sugar-calendar-admin-wp7-compat',
+				SC_PLUGIN_ASSETS_URL . 'css/admin-wp7-compat' . WP::asset_min() . '.css',
+				[],
+				BaseHelpers::get_asset_version()
+			);
 		}
 
 		/**
@@ -1446,7 +1528,8 @@ class Area {
 		}
 
 		if (
-			! is_plugin_active( 'sc-zapier/sc-zapier.php' )
+			function_exists( 'is_plugin_active' )
+			&& ! \is_plugin_active( 'sc-zapier/sc-zapier.php' )
 			&& ( $_GET['section'] === 'zapier' )
 		) {
 
@@ -1468,7 +1551,7 @@ class Area {
 	 */
 	public function product_education_settings_page_tabs( $tabs ) {
 
-		if ( ! is_plugin_active( 'sc-zapier/sc-zapier.php' ) ) {
+		if ( function_exists( 'is_plugin_active' ) && ! \is_plugin_active( 'sc-zapier/sc-zapier.php' ) ) {
 			$tabs[] = 'settings_zapier';
 		}
 

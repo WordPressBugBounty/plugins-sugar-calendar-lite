@@ -1,0 +1,34 @@
+@use "../../../../scss/admin/variables";
+
+#sugar-calendar-btn-notify-attendees {
+	&:before {
+		content: "";
+		display: inline-block;
+		vertical-align: middle;
+		mask-image: url("../../../../images/icons/envelope.svg");
+		mask-position: center center;
+		mask-repeat: no-repeat;
+		background-color: variables.$buttons-button-tertiary-text;
+		width: 16px;
+		height: 16px;
+		margin: -2px 4px 0 0;
+	}
+
+	&:hover {
+		&:before {
+			background-color: variables.$buttons-button-tertiary-text--hover;
+		}
+	}
+}
+
+.sugar-calendar-admin-tabs {
+	li.sc-et-notify-attendees-wrapper {
+		display: flex;
+		align-items: center;
+		margin-left: auto;
+
+		& + .sc-et-export-tickets-wrapper {
+			margin-left: -25px;
+		}
+	}
+}

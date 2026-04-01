@@ -163,9 +163,10 @@ class Education {
 				</div>
 			</div>',
 			wp_kses(
-				sprintf( /* translators: %s - SugarCalendar.com Upgrade page URL. */
-					__( '<strong>You’re using Sugar Calendar Lite</strong>. To unlock more features consider <a href="%s" target="_blank" rel="noopener noreferrer">upgrading to Pro</a> for 50%% off.', 'sugar-calendar-lite' ),
-					Helpers::get_upgrade_link( [ 'medium' => 'lite-top-admin-bar', 'content' => 'upgrading to Pro' ] )
+				sprintf( /* translators: %1$s - SugarCalendar.com Upgrade page URL, %2$s - discount percentage. */
+					__( '<strong>You\'re using Sugar Calendar Lite</strong>. To unlock more features consider <a href="%1$s" target="_blank" rel="noopener noreferrer">upgrading to Pro</a> for %2$s off.', 'sugar-calendar-lite' ),
+					Helpers::get_upgrade_link( [ 'medium' => 'lite-top-admin-bar', 'content' => 'upgrading to Pro' ] ),
+					'50%'
 				),
 				[
 					'strong' => [],
@@ -231,7 +232,7 @@ class Education {
 				class="sugar-calendar-dismiss-notice"
 				title="<?php esc_html_e( 'Dismiss this message.', 'sugar-calendar-lite' ); ?>"
 				data-notice="<?php echo esc_attr( static::NOTICE_SETTINGS_GENERAL_PAGE ); ?>"></button>
-			
+
 			<div class="sugar-calendar-education-header">
 				<h4><?php esc_html_e( 'Let Your Calendar Do the Heavy Lifting — Unlock Pro Features', 'sugar-calendar-lite' ); ?></h4>
 				<p>

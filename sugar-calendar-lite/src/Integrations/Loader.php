@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Integrations;
 
 use Sugar_Calendar\Integrations\Elementor\Elementor;
+use Sugar_Calendar\Integrations\WPBakery\WPBakery;
 
 /**
  * Integrations Loader.
@@ -21,6 +22,7 @@ class Loader {
 	 */
 	private $integrations_classes = [
 		Elementor::class,
+		WPBakery::class,
 	];
 
 	/**

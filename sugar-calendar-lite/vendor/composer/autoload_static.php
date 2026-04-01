@@ -4,9 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
+class ComposerStaticInit9f288c98e125c117c69dff760362d379
 {
     public static $prefixLengthsPsr4 = array (
+        'W' =>
+        array (
+            'Wikimedia\\Composer\\Merge\\V2\\' => 28,
+        ),
         'S' =>
         array (
             'Sugar_Calendar\\AddOn\\Ticketing\\' => 31,
@@ -16,6 +20,10 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
     );
 
     public static $prefixDirsPsr4 = array (
+        'Wikimedia\\Composer\\Merge\\V2\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src',
+        ),
         'Sugar_Calendar\\AddOn\\Ticketing\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes/common/Features/EventTicketing/src',
@@ -430,6 +438,8 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Admin\\Addons\\Requirements' => __DIR__ . '/../..' . '/src/Admin/Addons/Requirements.php',
         'Sugar_Calendar\\Admin\\Area' => __DIR__ . '/../..' . '/src/Admin/Area.php',
         'Sugar_Calendar\\Admin\\Education' => __DIR__ . '/../..' . '/src/Admin/Education.php',
+        'Sugar_Calendar\\Admin\\EmailNotifications' => __DIR__ . '/../..' . '/src/Admin/EmailNotifications.php',
+        'Sugar_Calendar\\Admin\\EmailNotifications\\EventRecentTicketsTable' => __DIR__ . '/../..' . '/src/Admin/EmailNotifications/EventRecentTicketsTable.php',
         'Sugar_Calendar\\Admin\\Events\\Events' => __DIR__ . '/../..' . '/src/Admin/Events/Events.php',
         'Sugar_Calendar\\Admin\\Events\\MetaboxInterface' => __DIR__ . '/../..' . '/src/Admin/Events/MetaboxInterface.php',
         'Sugar_Calendar\\Admin\\Events\\Metaboxes' => __DIR__ . '/../..' . '/src/Admin/Events/Metaboxes.php',
@@ -459,6 +469,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Admin\\Pages\\EventNew' => __DIR__ . '/../..' . '/src/Admin/Pages/EventNew.php',
         'Sugar_Calendar\\Admin\\Pages\\Events' => __DIR__ . '/../..' . '/src/Admin/Pages/Events.php',
         'Sugar_Calendar\\Admin\\Pages\\Rsvp' => __DIR__ . '/../..' . '/src/Admin/Pages/Rsvp.php',
+        'Sugar_Calendar\\Admin\\Pages\\SMTP' => __DIR__ . '/../..' . '/src/Admin/Pages/SMTP.php',
         'Sugar_Calendar\\Admin\\Pages\\Settings' => __DIR__ . '/../..' . '/src/Admin/Pages/Settings.php',
         'Sugar_Calendar\\Admin\\Pages\\SettingsFeedsTab' => __DIR__ . '/../..' . '/src/Admin/Pages/SettingsFeedsTab.php',
         'Sugar_Calendar\\Admin\\Pages\\SettingsGeneralTab' => __DIR__ . '/../..' . '/src/Admin/Pages/SettingsGeneralTab.php',
@@ -554,6 +565,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTime' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventTime.php',
         'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTitle' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventTitle.php',
         'Sugar_Calendar\\Integrations\\Loader' => __DIR__ . '/../..' . '/src/Integrations/Loader.php',
+        'Sugar_Calendar\\Integrations\\WPBakery\\WPBakery' => __DIR__ . '/../..' . '/src/Integrations/WPBakery/WPBakery.php',
         'Sugar_Calendar\\Migrations\\Migration' => __DIR__ . '/../..' . '/src/Migrations/Migration.php',
         'Sugar_Calendar\\Migrations\\MigrationAbstract' => __DIR__ . '/../..' . '/src/Migrations/MigrationAbstract.php',
         'Sugar_Calendar\\Migrations\\Migrations' => __DIR__ . '/../..' . '/src/Migrations/Migrations.php',
@@ -624,6 +636,7 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Pro\\Tasks\\LicenseCheckTask' => __DIR__ . '/../..' . '/src/Pro/Tasks/LicenseCheckTask.php',
         'Sugar_Calendar\\Pro\\Translations\\Translations' => __DIR__ . '/../..' . '/src/Pro/Translations/Translations.php',
         'Sugar_Calendar\\Pro\\Translations\\WPOrg' => __DIR__ . '/../..' . '/src/Pro/Translations/WPOrg.php',
+        'Sugar_Calendar\\Pro\\UsageTracking\\ProductEvents' => __DIR__ . '/../..' . '/src/Pro/UsageTracking/ProductEvents.php',
         'Sugar_Calendar\\SetupWizard\\Auth' => __DIR__ . '/../..' . '/src/SetupWizard/Auth.php',
         'Sugar_Calendar\\SetupWizard\\RestApi' => __DIR__ . '/../..' . '/src/SetupWizard/RestApi.php',
         'Sugar_Calendar\\SetupWizard\\SetupWizard' => __DIR__ . '/../..' . '/src/SetupWizard/SetupWizard.php',
@@ -633,15 +646,23 @@ class ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9
         'Sugar_Calendar\\Tasks\\Tasks' => __DIR__ . '/../..' . '/src/Tasks/Tasks.php',
         'Sugar_Calendar\\UsageTracking\\SendUsageTask' => __DIR__ . '/../..' . '/src/UsageTracking/SendUsageTask.php',
         'Sugar_Calendar\\UsageTracking\\UsageTracking' => __DIR__ . '/../..' . '/src/UsageTracking/UsageTracking.php',
+        'Wikimedia\\Composer\\Merge\\V2\\ExtraPackage' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/ExtraPackage.php',
+        'Wikimedia\\Composer\\Merge\\V2\\Logger' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/Logger.php',
+        'Wikimedia\\Composer\\Merge\\V2\\MergePlugin' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/MergePlugin.php',
+        'Wikimedia\\Composer\\Merge\\V2\\MissingFileException' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/MissingFileException.php',
+        'Wikimedia\\Composer\\Merge\\V2\\MultiConstraint' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/MultiConstraint.php',
+        'Wikimedia\\Composer\\Merge\\V2\\NestedArray' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/NestedArray.php',
+        'Wikimedia\\Composer\\Merge\\V2\\PluginState' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/PluginState.php',
+        'Wikimedia\\Composer\\Merge\\V2\\StabilityFlags' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/StabilityFlags.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc1aba8a910da7e63abaf80dd69b0acb9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit9f288c98e125c117c69dff760362d379::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit9f288c98e125c117c69dff760362d379::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit9f288c98e125c117c69dff760362d379::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit9f288c98e125c117c69dff760362d379::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -7,9 +7,9 @@ License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 License:           GNU General Public License v2 or later
 Tags:              events, calendar, event calendar, event management, event tickets
 Requires PHP:      7.4
-Requires at least: 5.9
+Requires at least: 6.2
 Tested up to:      6.9
-Stable tag:        3.10.1
+Stable tag:        3.11.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 

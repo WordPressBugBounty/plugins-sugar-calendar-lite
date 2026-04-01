@@ -1,0 +1,35 @@
+@use "../../../../scss/admin/variables";
+
+.loader {
+	display: inline-block;
+	width: 48px;
+	height: 48px;
+	border: 4px solid rgba(0, 0, 0, 0.1);
+	border-top: 4px solid variables.$color-accent-orange-50;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto;
+}
+
+@keyframes spin {
+
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.visuallyHidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

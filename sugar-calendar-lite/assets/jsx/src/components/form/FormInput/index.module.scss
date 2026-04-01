@@ -1,0 +1,15 @@
+
+@use "../../../../../scss/admin/variables";
+@use "../../../../../scss/vendor/include-media";
+@use "../../../../../scss/admin/forms";
+
+:global(body) .input {
+
+	@include forms.form-field;
+	width: 100%;
+}
+
+:global(body) .error {
+
+	@include forms.form-field-error;
+}

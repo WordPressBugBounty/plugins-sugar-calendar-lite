@@ -44,10 +44,13 @@ function register() {
  */
 function enqueue() {
 
-	wp_enqueue_style( 'sc-event-ticketing' );
-
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( ! empty( $_GET['page'] ) && ( $_GET['page'] === 'sc-event-ticketing' ) ) {
+
+		// ET general styles: list table columns, order details, modal, color schemes.
+		// Also includes #adminmenu separator rules which only render on ET pages;
+		// the separator won't display on non-ET pages, which is acceptable.
+		wp_enqueue_style( 'sc-event-ticketing' );
 
 		wp_enqueue_script( 'sc-et-general' );
 	}

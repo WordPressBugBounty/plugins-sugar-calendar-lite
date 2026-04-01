@@ -1,0 +1,43 @@
+@use "../../../../../scss/admin/variables";
+
+.wrapper {
+	position: relative;
+
+	:global(.mce-tinymce) {
+		border: 1px solid variables.$surface-surface-border;
+		border-radius: variables.$radius-radius-field;
+		overflow: hidden;
+	}
+
+	:global(.mce-btn.mce-active button),
+	:global(.mce-btn.mce-active:hover button),
+	:global(.mce-btn.mce-active i),
+	:global(.mce-btn.mce-active:hover i) {
+		color: variables.$text-text-secondary;
+	}
+
+	:global(.mce-toolbar .mce-ico) {
+		width: 19px;
+		height: 19px;
+	}
+
+	:global(.add_media) {
+		margin-bottom: 4px;
+	}
+
+	:global(.add_media span.wp-media-buttons-icon) {
+		background: none;
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		line-height: 1;
+		vertical-align: middle;
+		margin: 0 2px;
+	}
+
+	:global(.add_media span.wp-media-buttons-icon:before) {
+		font: normal 18px / 1 dashicons;
+		content: "\f104";
+	}
+}
+

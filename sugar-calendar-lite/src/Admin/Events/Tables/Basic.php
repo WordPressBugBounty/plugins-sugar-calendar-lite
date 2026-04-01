@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Events\Tables;
 
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use Sugar_Calendar\AddOn\Ticketing\Renderer as TicketingRenderer;
@@ -471,6 +472,9 @@ class Basic extends Base {
 
 			// Edit tags action. Handled via JS.
 			$actions['edit_tags'] = esc_html__( 'Edit Tags', 'sugar-calendar-lite' );
+
+			// Notify attendees action. Handled via JS.
+			$actions['notify_attendees'] = esc_html__( 'Notify Attendees', 'sugar-calendar-lite' );
 		}
 
 		return $actions;
@@ -518,6 +522,26 @@ class Basic extends Base {
         </div>
 
 		<?php
+	}
+
+	/**
+	 * Display attendees notification button.
+	 *
+	 * @since 3.11.0
+	 *
+	 * @return void
+	 */
+	public function event_notifications() {
+
+		UI::button(
+			[
+				'text' => esc_html__( 'Notify Attendees', 'sugar-calendar-lite' ),
+				'type' => 'tertiary',
+				'size' => 'sm',
+				'id'   => 'sugar-calendar-btn-notify-attendees',
+				'link' => '#',
+			]
+		);
 	}
 
 	/**
@@ -1103,9 +1127,9 @@ class Basic extends Base {
 		$this->item_ends = false;
 		?>
 
-        <tr id="event-<?php echo esc_attr( $item->id ); ?>">
+		<tr id="event-<?php echo esc_attr( $item->id ); ?>" data-event-id="<?php echo esc_attr( $item->id ); ?>">
 			<?php $this->single_row_columns( $item ); ?>
-        </tr>
+		</tr>
 
 		<?php
 	}

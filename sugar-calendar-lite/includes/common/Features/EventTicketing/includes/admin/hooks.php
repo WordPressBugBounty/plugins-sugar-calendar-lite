@@ -33,6 +33,7 @@ add_filter( 'sugar_calendar_settings_subsections', __NAMESPACE__ . '\\Settings\\
 add_filter( 'sugar_calendar_settings_sections', __NAMESPACE__ . '\\Settings\\add_section' );
 add_filter( 'sugar_calendar_admin_area_handle_post', __NAMESPACE__ . '\\Settings\\handle_post' );
 add_filter( 'display_post_states', __NAMESPACE__ . '\\Settings\\add_page_states', 10, 2 );
+add_action( 'sce_et_settings_payments_section_top_before_stripe_integration', __NAMESPACE__ . '\\Settings\\add_lite_education' );
 
 // Admin meta box
 add_action( 'sugar_calendar_admin_meta_box_setup_sections', __NAMESPACE__ . '\\Metabox\\metabox' );

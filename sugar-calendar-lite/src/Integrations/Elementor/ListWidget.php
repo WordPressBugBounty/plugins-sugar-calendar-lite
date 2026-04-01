@@ -110,6 +110,7 @@ class ListWidget extends Widget_Base {
 	 * Register widget controls.
 	 *
 	 * @since 3.2.0
+	 * @since 3.11.0 Removed the `max` attributes in "Events per page" and "Max events to show" fields.
 	 */
 	protected function register_controls() {
 
@@ -193,7 +194,6 @@ class ListWidget extends Widget_Base {
 				'show_label' => true,
 				'type'       => Controls_Manager::NUMBER,
 				'min'        => 1,
-				'max'        => 30,
 				'step'       => 1,
 				'condition'  => [
 					'group_events_by_week!' => 'yes',
@@ -209,7 +209,6 @@ class ListWidget extends Widget_Base {
 				'show_label' => true,
 				'type'       => Controls_Manager::NUMBER,
 				'min'        => 1,
-				'max'        => 30,
 				'step'       => 1,
 				'condition'  => [
 					'group_events_by_week!' => 'yes',

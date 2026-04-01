@@ -534,7 +534,7 @@ $event-margin: 18px;
 
 		// Event Cell
 		.sugar-calendar-block__event-cell {
-
+			border: 0;
 			border-left: 2px solid;
 			cursor: pointer;
 			margin: 12px 0 0 12px;
@@ -952,6 +952,7 @@ $event-margin: 18px;
 				padding: 0;
 
 				.sugar-calendar-block__event-cell {
+					border: 0;
 					border-left: 2px solid;
 
 					.sugar-calendar-block__calendar-week__event-cell__container {
@@ -1469,6 +1470,7 @@ $event-margin: 18px;
 				width: 100%;
 
 				.sugar-calendar-block__calendar-week__event-cell--all-day {
+					border: 0;
 					border-left: 2px solid;
 					border-radius: 3px;
 					display: flex;

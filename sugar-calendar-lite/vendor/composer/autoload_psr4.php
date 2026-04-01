@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Wikimedia\\Composer\\Merge\\V2\\' => array($vendorDir . '/wikimedia/composer-merge-plugin/src'),
     'Sugar_Calendar\\AddOn\\Ticketing\\' => array($baseDir . '/includes/common/Features/EventTicketing/src'),
     'Sugar_Calendar\\' => array($baseDir . '/src'),
     'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
