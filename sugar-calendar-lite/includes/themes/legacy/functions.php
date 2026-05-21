@@ -17,16 +17,21 @@ defined( 'ABSPATH' ) || exit;
  * Get events within a custom date range with flexible arguments.
  *
  * @since 3.7.0
+ * @since 3.11.1 Added optional `has_password` arg.
  *
  * @param array $args Arguments.
- *        DateTimeInterface $start_range Start date range.
- *        DateTimeInterface $end_range   End date range.
- *        array|string      $category    Category IDs or term slugs.
- *        string            $search      Search term.
- *        int|null          $number      Number of events to retrieve.
- *        array             $venues      Venue IDs.
- *        array             $tags        Tag IDs.
- *        array             $speakers    Speaker IDs.
+ *        DateTimeInterface $start_range  Start date range.
+ *        DateTimeInterface $end_range    End date range.
+ *        array|string      $category     Category IDs or term slugs.
+ *        string            $search       Search term.
+ *        int|null          $number       Number of events to retrieve.
+ *        array             $venues       Venue IDs.
+ *        array             $tags         Tag IDs.
+ *        array             $speakers     Speaker IDs.
+ *        bool|null         $has_password Pass `false` to exclude password-protected
+ *                                         sc_event posts when the current user
+ *                                         lacks edit_posts. Omit (default) to
+ *                                         preserve behavior for non-block callers.
  *
  * @return array Array of event objects.
  */
@@ -92,6 +97,28 @@ function sugar_calendar_get_events_within_range( $args = [] ) {
 	// Maybe add speakers if non-empty.
 	if ( ! empty( $args['speakers'] ) ) {
 		$query_args['speaker_ids'] = $args['speakers'];
+	}
+
+	// When the caller opted in (`has_password => false`) and the current
+	// user lacks edit_posts, exclude password-protected sc_event posts via
+	// object_id__not_in. The list is small in practice (most sites have
+	// zero protected events) and is cached per-request.
+	if (
+		isset( $args['has_password'] ) &&
+		$args['has_password'] === false &&
+		\Sugar_Calendar\Helpers::should_filter_password_protected_events()
+	) {
+		$protected_ids = \Sugar_Calendar\Helpers::get_password_protected_event_ids();
+
+		if ( ! empty( $protected_ids ) ) {
+			$existing = isset( $query_args['object_id__not_in'] ) && is_array( $query_args['object_id__not_in'] )
+				? $query_args['object_id__not_in']
+				: [];
+
+			$query_args['object_id__not_in'] = array_values(
+				array_unique( array_merge( $existing, $protected_ids ) )
+			);
+		}
 	}
 
 	// Query for events.

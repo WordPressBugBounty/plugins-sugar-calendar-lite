@@ -154,6 +154,9 @@ const SCVenuesFrontendGeneral = window.SCVenuesFrontendGeneral || ( function( do
 		 */
 		loadMap( $mapCanvas, lat, lng ) {
 
+			lat = parseFloat( lat );
+			lng = parseFloat( lng );
+
 			const map = new google.maps.Map( $mapCanvas[0], {
 				zoom: 15,
 				center: { lat: lat, lng: lng },

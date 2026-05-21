@@ -46,7 +46,8 @@ final class Attendee_Schema extends Schema {
 			'type'       => 'varchar',
 			'length'     => '100',
 			'searchable' => true,
-			'sortable'   => true
+			'sortable'   => true,
+			'validate'   => 'sanitize_email',
 		),
 
 		// first_name
@@ -55,7 +56,8 @@ final class Attendee_Schema extends Schema {
 			'type'       => 'varchar',
 			'length'     => '100',
 			'searchable' => true,
-			'sortable'   => true
+			'sortable'   => true,
+			'validate'   => 'sanitize_text_field',
 		),
 
 		// last_name
@@ -64,7 +66,8 @@ final class Attendee_Schema extends Schema {
 			'type'       => 'varchar',
 			'length'     => '100',
 			'searchable' => true,
-			'sortable'   => true
+			'sortable'   => true,
+			'validate'   => 'sanitize_text_field',
 		),
 
 		// date_created

@@ -122,8 +122,21 @@ class RestApi {
 		$token = $request->get_header( 'X-TOKEN' );
 		$auth  = sugar_calendar()->get_setup_wizard()->get_auth();
 
-		if ( ! $auth->verify_token( $token ) ) {
+		$user_id = $auth->verify_token( $token );
+
+		if ( ! $user_id ) {
 			return $this->error( __( 'Session expired.', 'sugar-calendar-lite' ), 401 );
+		}
+
+		// Hydrate the request as the bound user so capability checks
+		// work even though the cross-origin wizard request carries no
+		// auth cookies.
+		wp_set_current_user( $user_id );
+
+		// Re-check the capability — this catches users whose role changed
+		// after the token was issued (demoted, deleted, role revoked).
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return $this->error( __( 'Insufficient permissions.', 'sugar-calendar-lite' ), 403 );
 		}
 
 		$auth->refresh_token();

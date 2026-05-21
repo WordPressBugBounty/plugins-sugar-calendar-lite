@@ -30,8 +30,9 @@ final class Orders_Table extends Table {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Updated to `202501150001`.
+	 * @since 3.11.1 Updated to `202605070001`.
 	 */
-	protected $version = 202501150001;
+	protected $version = 202605070001;
 
 	/**
 	 * @var string Table schema
@@ -45,6 +46,7 @@ final class Orders_Table extends Table {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Added `202010270003` upgrade.
+	 * @since 3.11.1 Added `202605070001` upgrade.
 	 */
 	protected $upgrades = [
 		'202010270001' => 202010270001,
@@ -52,6 +54,7 @@ final class Orders_Table extends Table {
 		'202010270003' => 202010270003,
 		'202010270004' => 202010270004,
 		'202501150001' => 202501150001,
+		'202605070001' => 202605070001,
 	];
 
 	/**
@@ -63,7 +66,7 @@ final class Orders_Table extends Table {
 	protected function set_schema() {
 
 		$this->schema = "id bigint(20) unsigned NOT NULL auto_increment,
-			transaction_id varchar(100) NOT NULL default '',
+			transaction_id varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL default '',
 			status varchar(20) NOT NULL default '',
 			currency varchar(20) NOT NULL default '',
 			discount_id bigint(20) unsigned NOT NULL default '0',
@@ -192,6 +195,44 @@ final class Orders_Table extends Table {
 		if ( $result === false ) {
 			$result = $this->get_db()->query( "ALTER TABLE {$this->table_name} ADD COLUMN `occurrence_id` bigint(20) unsigned NOT NULL default 0 AFTER `event_id`;" );
 		}
+
+		return $this->is_success( $result );
+	}
+
+	/**
+	 * Upgrade to version 202605070001.
+	 *
+	 * Force `transaction_id` to utf8mb4 / utf8mb4_unicode_ci so replay-prevention
+	 * lookups are case-insensitive on every install regardless of DB defaults.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @return bool
+	 */
+	protected function __202605070001() { // phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.MethodDoubleUnderscore
+
+		$db = $this->get_db();
+
+		$current = $db->get_var( $db->prepare(
+			"SELECT COLLATION_NAME
+			   FROM INFORMATION_SCHEMA.COLUMNS
+			  WHERE TABLE_SCHEMA = %s
+			    AND TABLE_NAME   = %s
+			    AND COLUMN_NAME  = 'transaction_id'",
+			DB_NAME,
+			$this->table_name
+		) );
+
+		if ( $current === 'utf8mb4_unicode_ci' ) {
+			return $this->is_success( true );
+		}
+
+		$result = $db->query(
+			"ALTER TABLE {$this->table_name}
+			 MODIFY COLUMN `transaction_id`
+			 varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+			 NOT NULL DEFAULT ''"
+		);
 
 		return $this->is_success( $result );
 	}

@@ -22,10 +22,8 @@ class Migrations {
 		// Initialize migrations during request in the admin panel only.
 		add_action( 'admin_init', [ $this, 'init_migrations_on_request' ] );
 
-		// Initialize migrations after plugin update.
-		add_action( 'upgrader_process_complete', [ $this, 'init_migrations_after_upgrade' ], PHP_INT_MAX, 2 );
 		add_action(
-			'wp_ajax_nopriv_sugar_calendar_init_migrations',
+			'wp_ajax_sugar_calendar_init_migrations',
 			[ $this, 'init_migrations_ajax_handler' ]
 		);
 	}
@@ -72,6 +70,7 @@ class Migrations {
 
 		$migrations = [
 			Migration::class,
+			GeocodedCacheMigration::class,
 		];
 
 		/**
@@ -85,64 +84,22 @@ class Migrations {
 	}
 
 	/**
-	 * Initialize DB migrations after plugin update.
-	 * Initiate ajax call to perform the migration with the new plugin version code.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param WP_Upgrader $upgrader WP_Upgrader instance.
-	 * @param array       $options  Array of update data.
-	 */
-	public function init_migrations_after_upgrade( $upgrader, $options ) {
-
-		if (
-			// Skip if in admin panel.
-			( is_admin() && ! wp_doing_ajax() ) ||
-			// Skip if it's update from plugins list page.
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			( wp_doing_ajax() && isset( $_REQUEST['action'] ) && $_REQUEST['action'] === 'update-plugin' )
-		) {
-			return;
-		}
-
-		$plugins = [];
-
-		if ( isset( $options['plugins'] ) && is_array( $options['plugins'] ) ) {
-			$plugins = $options['plugins'];
-		} elseif ( isset( $options['plugin'] ) && is_string( $options['plugin'] ) ) {
-			$plugins = [ $options['plugin'] ];
-		}
-
-		if (
-			! in_array( 'sugar-calendar-lite/sugar-calendar-lite.php', $plugins, true ) &&
-			! in_array( 'sugar-calendar/sugar-calendar.php', $plugins, true )
-		) {
-			return;
-		}
-
-		$url = add_query_arg(
-			[
-				'action' => 'sugar_calendar_init_migrations',
-			],
-			admin_url( 'admin-ajax.php' )
-		);
-
-		$timeout = (int) ini_get( 'max_execution_time' );
-
-		$args = [
-			'sslverify' => false,
-			'timeout'   => $timeout ? $timeout : 30,
-		];
-
-		wp_remote_post( $url, $args );
-	}
-
-	/**
 	 * Initialize migrations via AJAX request.
+	 *
+	 * Authenticated admins only. The handler is gated by a nonce keyed on
+	 * `sugar_calendar_init_migrations` and the `manage_options` capability.
 	 *
 	 * @since 3.0.0
 	 */
 	public function init_migrations_ajax_handler() {
+
+		if ( ! check_ajax_referer( 'sugar_calendar_init_migrations', false, false ) ) {
+			wp_send_json_error( esc_html__( 'Security check failed.', 'sugar-calendar-lite' ) );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( esc_html__( 'You do not have permission to run migrations.', 'sugar-calendar-lite' ) );
+		}
 
 		$this->init_migrations();
 

@@ -246,6 +246,7 @@ class Loader {
 	 * @since 3.5.0 Added `filter_event_more_string` filter.
 	 * @since 3.9.0 Prevented access to non-published events.
 	 * @since 3.10.0 Escaped the event description using wp_kses_post().
+	 * @since 3.11.1 Hide password-protected events from visitors who lack edit_post.
 	 */
 	public function ajax_event_popover() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
@@ -275,6 +276,21 @@ class Loader {
 			empty( $post_obj ) ||
 			empty( $post_obj->post_status ) ||
 			$post_obj->post_status !== 'publish'
+		) {
+			wp_send_json_error(
+				[
+					'message' => esc_attr__( 'Event does not exists.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
+		// Hide password-protected events from visitors who can't edit the
+		// underlying post. Return the same generic error as the unpublished
+		// branch above so the response shape doesn't leak whether the ID
+		// refers to a missing post, an unpublished post, or a protected one.
+		if (
+			! empty( $post_obj->post_password ) &&
+			! current_user_can( 'edit_post', $post_obj->ID )
 		) {
 			wp_send_json_error(
 				[

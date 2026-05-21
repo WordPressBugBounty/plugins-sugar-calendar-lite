@@ -381,21 +381,12 @@ class Stripe extends Checkout {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.1 Validate the Payment intent.
+	 * @since 3.11.1 Server-side amount recompute; never trust $_POST['sc_et_payment_amount'].
 	 */
 	public function process() {
 
 		// Default order data array
 		$order_data = [];
-
-		// Get amount
-		$amount = ! empty( $_POST['sc_et_payment_amount'] )
-			? sanitize_text_field( $_POST['sc_et_payment_amount'] )
-			: 0;
-
-		// Maybe round
-		if ( ! Functions\is_zero_decimal_currency() ) {
-			$amount /= 100;
-		}
 
 		// Event ID
 		$event_id = ! empty( $_POST['sc_et_event_id'] )
@@ -411,6 +402,24 @@ class Stripe extends Checkout {
 		$date = ! empty( $event->start )
 			? $event->start
 			: '0000-00-00 00:00:00';
+
+		// Quantity — read once for amount recompute and downstream validation.
+		$quantity = max( 1, ! empty( $_POST['sc_et_quantity'] )
+			? absint( $_POST['sc_et_quantity'] )
+			: 1
+		);
+
+		// Server-side amount recompute. NEVER trust $_POST['sc_et_payment_amount']
+		// for the recorded order total. get_amount() returns minor units (cents)
+		// for non-zero-decimal currencies; convert back to dollars for storage to
+		// match the rest of the order schema.
+		$expected_amount = ! empty( $event_id )
+			? (int) $this->get_amount( $event_id, $quantity )
+			: 0;
+
+		$amount = Functions\is_zero_decimal_currency()
+			? $expected_amount
+			: ( $expected_amount / 100 );
 
 		// Transaction ID
 		$order_data['transaction_id'] = ! empty( $_POST['sc_et_payment_intent'] )
@@ -521,6 +530,9 @@ class Stripe extends Checkout {
 	/**
 	 * Whether a Stripe Intent is valid or not.
 	 *
+	 * @since 3.6.1
+	 * @since 3.11.1 Bind PaymentIntent to order: verify event_id, amount, currency, replay.
+	 *
 	 * @param string $intent     The Stripe Intent.
 	 * @param array  $order_data The order data.
 	 *
@@ -528,18 +540,48 @@ class Stripe extends Checkout {
 	 */
 	private function is_valid_intent( $intent, $order_data ) {
 
-		$this->load_sdk();
+		$event_id = (int) ( $order_data['event_id'] ?? 0 );
+		$quantity = max( 1, ! empty( $_POST['sc_et_quantity'] )
+			? absint( $_POST['sc_et_quantity'] )
+			: 1
+		);
 
-		$retrieve = false;
+		// Replay protection — has this PaymentIntent already been recorded
+		// against a paid or refunded order? Cheap DB hit, runs before any
+		// network call so a known-replayed pi is rejected fast.
+		global $wpdb;
+		$orders_table = $wpdb->prefix . 'sc_orders';
+		$already      = $wpdb->get_var( $wpdb->prepare(
+			"SELECT id FROM {$orders_table}
+			 WHERE transaction_id = %s
+			   AND status IN ( 'paid', 'refunded' )
+			 LIMIT 1",
+			$intent
+		) );
+
 		$is_valid = false;
+		$retrieve = false;
 
-		try {
-			$retrieve = \Stripe\PaymentIntent::retrieve( $intent );
+		if ( empty( $already ) ) {
+			$this->load_sdk();
 
-			if ( $retrieve->status === 'succeeded' ) {
-				$is_valid = true;
-			}
-		} catch ( \Exception $e ) {}
+			// phpcs:ignore WPForms.PHP.BackSlash.UseShortSyntax
+			try {
+				$retrieve = \Stripe\PaymentIntent::retrieve( $intent );
+
+				$expected_amount   = (int) $this->get_amount( $event_id, $quantity );
+				$expected_currency = strtolower( (string) Functions\get_currency() );
+
+				if (
+					$retrieve->status === 'succeeded'
+					&& (int) $retrieve->amount === $expected_amount
+					&& strtolower( (string) $retrieve->currency ) === $expected_currency
+					&& (int) ( $retrieve->metadata->event_id ?? 0 ) === $event_id
+				) {
+					$is_valid = true;
+				}
+			} catch ( \Exception $e ) {}
+		}
 
 		/**
 		 * Filters the validity of an intent.

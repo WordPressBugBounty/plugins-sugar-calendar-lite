@@ -202,6 +202,14 @@ class TicketsTab extends Tickets {
 			return;
 		}
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die(
+				esc_html__( 'You do not have the necessary capabilities to manage tickets.', 'sugar-calendar-lite' ),
+				esc_html__( 'Error', 'sugar-calendar-lite' ),
+				array( 'response' => 403 )
+			);
+		}
+
 		$action = sanitize_key( $_REQUEST['action'] );
 
 		// Get ticket IDs.

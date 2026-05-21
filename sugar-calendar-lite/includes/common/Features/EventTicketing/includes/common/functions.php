@@ -54,6 +54,154 @@ function get_order( $order_id = 0 ) {
 }
 
 /**
+ * Return the order's uuid, lazy-filling rows that pre-date the BerlinDB
+ * auto-population.
+ *
+ * A per-request static cache prevents repeat `$wpdb->update` calls when the
+ * same order is touched twice in a single request (e.g. email tag + checkout
+ * redirect on the same request lifecycle).
+ *
+ * @since 3.11.1
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order|object|null $order Order object.
+ *
+ * @return string Order uuid, or '' if $order is missing/has no id.
+ */
+function get_or_fill_order_uuid( $order ) {
+
+	static $cache = [];
+
+	if ( empty( $order ) || empty( $order->id ) ) {
+		return '';
+	}
+
+	$id = (int) $order->id;
+
+	if ( isset( $cache[ $id ] ) ) {
+		return $cache[ $id ];
+	}
+
+	if ( ! empty( $order->uuid ) ) {
+		$cache[ $id ] = (string) $order->uuid;
+		return $cache[ $id ];
+	}
+
+	global $wpdb;
+
+	$new = 'urn:uuid:' . wp_generate_uuid4();
+
+	$wpdb->update(
+		$wpdb->prefix . 'sc_orders',
+		[ 'uuid' => $new ],
+		[ 'id'   => $id ],
+	);
+
+	$cache[ $id ] = $new;
+
+	return $cache[ $id ];
+}
+
+/**
+ * Issue a fresh receipt link.
+ *
+ * @since 3.11.1
+ *
+ * @param object|null $order Order object.
+ *
+ * @return string Receipt URL, or '' if $order is missing/has no id.
+ */
+function issue_new_receipt_link( $order ) {
+
+	if ( empty( $order ) || empty( $order->id ) ) {
+		return '';
+	}
+
+	$uuid_pretty = preg_replace(
+		'/^urn:uuid:/',
+		'',
+		get_or_fill_order_uuid( $order )
+	);
+
+	$sce = bin2hex( random_bytes( 6 ) );
+
+	/**
+	 * Filter the TTL (in seconds) for a freshly-issued receipt link.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @param int $ttl      Default 72 hours.
+	 * @param int $order_id The order the link is being issued for.
+	 */
+	$ttl = (int) apply_filters(
+		'sc_et_receipt_link_ttl',
+		72 * HOUR_IN_SECONDS,
+		(int) $order->id
+	);
+
+	set_transient(
+		"sc_et_receipt_{$uuid_pretty}_{$sce}",
+		(int) $order->id,
+		max( 1, $ttl )
+	);
+
+	$page = Settings\get_setting( 'receipt_page' );
+
+	return add_query_arg(
+		array(
+			'order' => $uuid_pretty,
+			'sce'   => $sce,
+		),
+		get_permalink( $page )
+	);
+}
+
+/**
+ * Send a fresh receipt email to the order's stored address, gated by the
+ * `sc_et_resend_<order_id>` rate-limit transient.
+ *
+ * Returns true if an email was dispatched, false if the rate-limit blocked
+ * it (or the order is missing).
+ *
+ * @since 3.11.1
+ *
+ * @param object|null $order Order object.
+ * @return bool
+ */
+function maybe_send_fresh_receipt_email( $order ) {
+
+	if ( empty( $order ) || empty( $order->id ) ) {
+		return false;
+	}
+
+	$order_id = (int) $order->id;
+	$ttl_key  = 'sc_et_resend_' . $order_id;
+
+	if ( false !== get_transient( $ttl_key ) ) {
+		return false;
+	}
+
+	/**
+	 * Filter the rate-limit TTL (in seconds) for the receipt-resend gate.
+	 *
+	 * Shared between the Tier-1 expired-sce auto-resend branch and the
+	 * Tier-2 legacy-URL auto-resend branch — every call to
+	 * `maybe_send_fresh_receipt_email()` is gated by this transient.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @param int $ttl      Default 5 minutes.
+	 * @param int $order_id The order being resent.
+	 */
+	$ttl = (int) apply_filters( 'sc_et_resend_receipt_rate_limit', 5 * MINUTE_IN_SECONDS, $order_id );
+
+	set_transient( $ttl_key, 1, max( 1, $ttl ) );
+
+	send_order_receipt_email( $order_id );
+
+	return true;
+}
+
+/**
  * Query for orders.
  *
  * @see \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query()::__construct()
@@ -1279,16 +1427,9 @@ function get_email_tag_order_date( $order_id = 0 ) {
  */
 function get_email_tag_receipt_url( $order_id = 0 ) {
 	$order = get_order( $order_id );
-	$page  = Settings\get_setting( 'receipt_page' );
-	$url   = add_query_arg(
-		array(
-			'order_id' => $order_id,
-			'email'    => $order->email
-		),
-		get_permalink( $page )
-	);
+	$url   = issue_new_receipt_link( $order );
 
-	return esc_url( $url );
+	return $url === '' ? '' : esc_url( $url );
 }
 
 /**

@@ -59,7 +59,6 @@ class Feature extends FeatureAbstract {
 		add_action( 'wp_head', [ $this, 'map_css' ] );
 		add_action( 'save_post', [ $this, 'meta_box_save' ] );
 		add_action( 'wp_ajax_sugar_calendar_venue_save_coordinates', [ $this, 'save_coordinates' ] );
-		add_action( 'wp_ajax_nopriv_sugar_calendar_venue_save_coordinates', [ $this, 'save_coordinates' ] );
 
 		if ( ! $this->maps_is_20() ) {
 			add_action( 'sc_event_meta_box_after', [ $this, 'add_forms_meta_box' ] );
@@ -75,6 +74,10 @@ class Feature extends FeatureAbstract {
 
 		check_ajax_referer( 'sugar_calendar_venue_save_coordinates', 'nonce' );
 
+		if ( ! current_user_can( 'edit_events' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Insufficient permissions.', 'sugar-calendar-lite' ) ] );
+		}
+
 		if ( empty( $_POST['address'] ) || empty( $_POST['lat'] ) || empty( $_POST['lng'] ) ) {
 			wp_send_json_error( [ 'message' => esc_html__( 'Invalid request.', 'sugar-calendar-lite' ) ] );
 		}
@@ -87,14 +90,44 @@ class Feature extends FeatureAbstract {
 			wp_send_json_error( [ 'message' => esc_html__( 'Invalid request.', 'sugar-calendar-lite' ) ] );
 		}
 
-		$address_hash = 'scgm_' . md5( $address );
-		$cache_value  = [
-			'lat'     => $lat,
-			'lng'     => $lng,
-			'address' => $address,
-		];
+		// Range validation. Defense in depth alongside the DB-level DECIMAL(10, 7)
+		// columns. Geographic latitude is [-90, 90]; longitude is [-180, 180].
+		if (
+			! is_numeric( $lat ) || (float) $lat < -90 || (float) $lat > 90 ||
+			! is_numeric( $lng ) || (float) $lng < -180 || (float) $lng > 180
+		) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Invalid coordinates.', 'sugar-calendar-lite' ) ] );
+		}
 
-		set_transient( $address_hash, $cache_value );
+		global $wpdb;
+		$hash  = md5( $address );
+		$table = $wpdb->prefix . 'sc_geocoded';
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$table}
+					( address_hash, address, lat, lng )
+				 VALUES ( %s, %s, %f, %f )",
+				$hash,
+				$address,
+				(float) $lat,
+				(float) $lng
+			)
+		);
+
+		// Refresh the memo so the next get_coordinates() returns immediately
+		// from the transient layer without a fallback SELECT.
+		set_transient(
+			'scgm_' . $hash,
+			[
+				'lat'     => $lat,
+				'lng'     => $lng,
+				'address' => $address,
+			],
+			DAY_IN_SECONDS
+		);
+
+		wp_send_json_success();
 	}
 
 	/**
@@ -235,21 +268,26 @@ class Feature extends FeatureAbstract {
 			$coordinates = $this->get_coordinates( $address );
 		}
 
-		if ( empty( $coordinates ) && ! empty( $address ) ) {
-			printf(
-				'<div data-loc="%1$s" data-nonce="%2$s" class="sc_map_canvas"></div>',
-				esc_attr( $address ),
-				esc_attr( wp_create_nonce( 'sugar_calendar_venue_save_coordinates' ) )
-			);
-		} elseif ( ! empty( $coordinates ) ) {
+		// Cache hit (data resolved either via the filter or via get_coordinates).
+		if ( ! empty( $coordinates ) ) {
 			printf(
 				'<div data-lat="%1$s" data-lng="%2$s" class="sc_map_canvas"></div>',
 				esc_attr( $coordinates['lat'] ),
 				esc_attr( $coordinates['lng'] )
 			);
+
+			return;
 		}
-		?>
-		<?php
+
+		// Cache miss. Only emit the geocode-and-save nonce branch for users who
+		// can act on it.
+		if ( ! empty( $address ) && current_user_can( 'edit_events' ) ) {
+			printf(
+				'<div data-loc="%1$s" data-nonce="%2$s" class="sc_map_canvas"></div>',
+				esc_attr( $address ),
+				esc_attr( wp_create_nonce( 'sugar_calendar_venue_save_coordinates' ) )
+			);
+		}
 	}
 
 	/**
@@ -315,7 +353,7 @@ class Feature extends FeatureAbstract {
 	 *
 	 * @return array|string An array of coordinates or a string error message.
 	 */
-	public function get_coordinates( $address, $force_refresh = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh, Generic.Metrics.NestingLevel.MaxExceeded
+	public function get_coordinates( $address, $force_refresh = false ) {
 
 		// Check for API key.
 		if ( empty( $this->get_api_key() ) ) {
@@ -325,18 +363,46 @@ class Feature extends FeatureAbstract {
 			);
 		}
 
-		// Create the transient hash.
-		$address_hash = 'scgm_' . md5( $address );
+		$hash          = md5( $address );
+		$transient_key = 'scgm_' . $hash;
 
-		// Check for this transient.
-		$coordinates = get_transient( $address_hash );
-		$data        = $coordinates;
+		// Fast path — object-cache-friendly transient memo. Skipped when
+		// $force_refresh is true so callers can bypass a stale memo.
+		if ( ! $force_refresh ) {
+			$coordinates = get_transient( $transient_key );
 
-		if ( empty( $coordinates ) ) {
+			if ( ! empty( $coordinates ) && is_array( $coordinates ) ) {
+				return $coordinates;
+			}
+		}
+
+		// Durable path — query the wp_sc_geocoded table.
+		global $wpdb;
+		$table = $wpdb->prefix . 'sc_geocoded';
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT lat, lng, address FROM {$table} WHERE address_hash = %s LIMIT 1",
+				$hash
+			),
+			ARRAY_A
+		);
+
+		if ( empty( $row ) ) {
 			return false;
 		}
 
-		return $data;
+		$coordinates = [
+			'lat'     => $row['lat'],
+			'lng'     => $row['lng'],
+			'address' => $row['address'],
+		];
+
+		// Refresh the memo. The TTL here is hygiene only — the table is the
+		// durable source. On miss the next read costs one SELECT, ~1ms.
+		set_transient( $transient_key, $coordinates, DAY_IN_SECONDS );
+
+		return $coordinates;
 	}
 
 	/**

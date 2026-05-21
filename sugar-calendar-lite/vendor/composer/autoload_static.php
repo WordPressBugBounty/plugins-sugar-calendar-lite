@@ -566,6 +566,7 @@ class ComposerStaticInit9f288c98e125c117c69dff760362d379
         'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTitle' => __DIR__ . '/../..' . '/src/Integrations/Elementor/Widgets/EventTitle.php',
         'Sugar_Calendar\\Integrations\\Loader' => __DIR__ . '/../..' . '/src/Integrations/Loader.php',
         'Sugar_Calendar\\Integrations\\WPBakery\\WPBakery' => __DIR__ . '/../..' . '/src/Integrations/WPBakery/WPBakery.php',
+        'Sugar_Calendar\\Migrations\\GeocodedCacheMigration' => __DIR__ . '/../..' . '/src/Migrations/GeocodedCacheMigration.php',
         'Sugar_Calendar\\Migrations\\Migration' => __DIR__ . '/../..' . '/src/Migrations/Migration.php',
         'Sugar_Calendar\\Migrations\\MigrationAbstract' => __DIR__ . '/../..' . '/src/Migrations/MigrationAbstract.php',
         'Sugar_Calendar\\Migrations\\Migrations' => __DIR__ . '/../..' . '/src/Migrations/Migrations.php',

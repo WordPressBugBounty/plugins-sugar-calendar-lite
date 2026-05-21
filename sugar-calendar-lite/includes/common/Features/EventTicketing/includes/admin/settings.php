@@ -378,6 +378,11 @@ function payments_section() {
 function display_stripe_connect_field( $is_sandbox ) {
 
 	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
+	$url_payment_settings = add_query_arg(
+		[ '_wpnonce' => wp_create_nonce( 'sc-stripe-connect-completion' ) ],
+		$url_payment_settings
+	);
+
 	$stripe_connect_url   = Functions\get_stripe_connect_url( $is_sandbox, $url_payment_settings );
 
 	$stripe_disconnect_url = add_query_arg( [
@@ -510,11 +515,13 @@ function emails_section() {
  */
 function process_stripe_connect_completion() {
 
-	// Do not need to handle this request, bail.
+	// Bail unless the request is on the SC settings payments tab AND carries
+	// the trigger params. Mirror of process_stripe_disconnect() at line 588.
 	if (
-		! isset( $_GET['state'] )
+		! ( isset( $_GET['page'] ) && $_GET['page'] === PageSettings::get_slug() )
 		|| ! isset( $_GET['sc_gateway_connect_completion'] )
 		|| ( 'stripe_connect' !== $_GET['sc_gateway_connect_completion'] )
+		|| ! isset( $_GET['state'] )
 	) {
 		return;
 	}
@@ -524,15 +531,30 @@ function process_stripe_connect_completion() {
 		return;
 	}
 
+	// No nonce, bail.
+	if ( ! isset( $_GET['_wpnonce'] ) ) {
+		return;
+	}
+
 	// Current user cannot handle this request, bail.
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$is_sandbox           = Functions\is_sandbox();
-	$url_payment_settings = get_section_url( [ 'section' => 'payments' ] );
-	$state                = sanitize_text_field( $_GET['state'] );
-	$sc_credentials_url   = Functions\get_stripe_credentials_url( $is_sandbox, $state, $url_payment_settings );
+	// Invalid nonce, bail. Mirror of process_stripe_disconnect() at line 606.
+	if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'sc-stripe-connect-completion' ) ) {
+		return;
+	}
+
+	$is_sandbox               = Functions\is_sandbox();
+	$url_payment_settings     = get_section_url( [ 'section' => 'payments' ] );
+	$state                    = sanitize_text_field( $_GET['state'] );
+	$url_customer_site_for_am = add_query_arg(
+		[ '_wpnonce' => $_GET['_wpnonce'] ],
+		$url_payment_settings
+	);
+
+	$sc_credentials_url   = Functions\get_stripe_credentials_url( $is_sandbox, $state, $url_customer_site_for_am );
 	$response             = wp_remote_get( esc_url_raw( $sc_credentials_url ) );
 
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! wp_remote_retrieve_body( $response ) ) {
@@ -752,6 +774,16 @@ function handle_post_ajax() {
 			[
 				'success' => false,
 				'message' => esc_html__( 'Nonce verification failed.', 'sugar-calendar-lite' ),
+			]
+		);
+	}
+
+	// Current user cannot save these settings, bail.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error(
+			[
+				'success' => false,
+				'message' => esc_html__( 'You do not have permission to save these settings.', 'sugar-calendar-lite' ),
 			]
 		);
 	}

@@ -156,11 +156,13 @@ class List_Table extends \WP_List_Table {
 
 			$views['trash'] = sprintf(
 				'<a href="%s"%s>%s</a>',
-				add_query_arg(
-					[
-						'status' => 'trash',
-						'paged'  => false,
-					]
+				esc_url(
+					add_query_arg(
+						[
+							'status' => 'trash',
+							'paged'  => false,
+						]
+					)
 				),
 				$current === 'trash' ? ' class="current"' : '',
 				wp_kses(

@@ -74,11 +74,13 @@ class List_Table extends \WP_List_Table {
 		$views = [
 			'all' => sprintf(
 				'<a href="%s"%s>%s</a>',
-				remove_query_arg(
-					[
-						'status',
-						'paged',
-					]
+				esc_url(
+					remove_query_arg(
+						[
+							'status',
+							'paged',
+						]
+					)
 				),
 				$current === 'all' || $current === '' ? ' class="current"' : '',
 				__( 'All', 'sugar-calendar-lite' ) . $total_count
@@ -95,11 +97,13 @@ class List_Table extends \WP_List_Table {
 
 			$views['trash'] = sprintf(
 				'<a href="%s"%s>%s</a>',
-				add_query_arg(
-					[
-						'status' => 'trash',
-						'paged'  => false,
-					]
+				esc_url(
+					add_query_arg(
+						[
+							'status' => 'trash',
+							'paged'  => false,
+						]
+					)
 				),
 				$current === 'trash' ? ' class="current"' : '',
 				__( 'Trash', 'sugar-calendar-lite' ) . $trash_count_html

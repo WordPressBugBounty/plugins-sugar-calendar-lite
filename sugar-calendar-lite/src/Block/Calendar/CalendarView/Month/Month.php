@@ -129,14 +129,15 @@ class Month implements InterfaceBaseView, InterfaceView {
 			// Get all the events on the calendar period.
 			$calendar_events = sugar_calendar_get_events_within_range(
 				[
-					'start_range' => $start_period_range,
-					'end_range'   => $end_period_range,
-					'category'    => $block_categories,
-					'search'      => $search_term,
-					'number'      => $this->block->get_max_events_count(),
-					'venues'      => $block_venues,
-					'tags'        => $block_tags,
-					'speakers'    => $block_speakers,
+					'start_range'  => $start_period_range,
+					'end_range'    => $end_period_range,
+					'category'     => $block_categories,
+					'search'       => $search_term,
+					'number'       => $this->block->get_max_events_count(),
+					'venues'       => $block_venues,
+					'tags'         => $block_tags,
+					'speakers'     => $block_speakers,
+					'has_password' => false,
 				]
 			);
 

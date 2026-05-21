@@ -259,7 +259,11 @@ function view( $order_id = 0 ) {
 									<?php
 
 									if ( ! empty( $attendee->email ) ) :
-										echo '<br>' . make_clickable( $attendee->email );
+										printf(
+											'<br><a href="mailto:%1$s">%2$s</a>',
+											esc_attr( $attendee->email ),
+											esc_html( $attendee->email )
+										);
 									endif;
 
 									?>
@@ -450,6 +454,10 @@ function resend_receipt() {
 	// Bail if nonce fails
 	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
 		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You do not have the necessary capabilities to resend receipt emails.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 ) );
 	}
 
 	// Get order ID

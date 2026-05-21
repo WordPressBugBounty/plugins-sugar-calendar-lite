@@ -211,6 +211,7 @@ final class Plugin {
 		// Database tables.
 		new Events_Table();
 		new Meta_Table();
+		new Geocoded_Table();
 
 		// Backwards Compatibility.
 		new Posts\Meta\Back_Compat();
@@ -348,6 +349,8 @@ final class Plugin {
 		require_once SC_PLUGIN_DIR . 'includes/classes/database/events/Schema.php';
 		require_once SC_PLUGIN_DIR . 'includes/classes/database/events/TableEvents.php';
 		require_once SC_PLUGIN_DIR . 'includes/classes/database/events/TableEventmeta.php';
+		require_once SC_PLUGIN_DIR . 'includes/classes/database/geocoded/Schema.php';
+		require_once SC_PLUGIN_DIR . 'includes/classes/database/geocoded/Table.php';
 
 		// Utilities
 		require_once SC_PLUGIN_DIR . 'includes/classes/utilities/class-term-meta-ui.php';

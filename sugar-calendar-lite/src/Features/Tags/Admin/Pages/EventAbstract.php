@@ -217,16 +217,36 @@ abstract class EventAbstract {
 			wp_send_json_error( esc_html__( 'You do not have permission to edit events.', 'sugar-calendar-lite' ) );
 		}
 
-		// Get event ID.
-		$event_ids = isset( $_POST['events'] ) ? array_map( 'absint', $_POST['events'] ) : [];
+		// Get event IDs.
+		$event_ids = isset( $_POST['events'] ) ? array_map( 'absint', (array) $_POST['events'] ) : [];
 
 		if ( empty( $event_ids ) ) {
 			wp_send_json_error( esc_html__( 'No event specified.', 'sugar-calendar-lite' ) );
 		}
 
+		// Per-event object-level cap check. $event_id is already the WordPress
+		// post ID (matches the ?post= URL parameter on Edit Event), so it can
+		// be passed directly to current_user_can without resolving against the
+		// sc_events table.
+		$editable_events = array_filter(
+			$event_ids,
+			function( $event_id ) {
+				return current_user_can( 'edit_post', $event_id );
+			}
+		);
+
+		if ( empty( $editable_events ) ) {
+			wp_send_json_error( esc_html__( 'You do not have permission to edit the selected events.', 'sugar-calendar-lite' ) );
+		}
+
 		// Get tags data.
-		$tags_data = isset( $_POST['tags'] ) ? array_map( [ $this, 'ajax_sanitize_tag' ], $_POST['tags'] ) : [];
+		$tags_data = isset( $_POST['tags'] ) ? array_map( [ $this, 'ajax_sanitize_tag' ], (array) $_POST['tags'] ) : [];
 		$tag_ids   = [];
+
+		// Mirror the manage_terms capability the sc_event_tags taxonomy
+		// declares — wp_insert_term() does NOT enforce this on its own; the
+		// caller is responsible.
+		$can_create_terms = current_user_can( 'manage_event_calendars' );
 
 		// Process tags.
 		foreach ( $tags_data as $tag ) {
@@ -236,9 +256,9 @@ abstract class EventAbstract {
 				// Existing tag.
 				$tag_ids[] = absint( $tag['value'] );
 
-			} elseif ( isset( $tag['label'] ) ) {
+			} elseif ( isset( $tag['label'] ) && $can_create_terms ) {
 
-				// New tag.
+				// New tag — only when the user actually has the cap.
 				$new_tag = wp_insert_term( sanitize_text_field( $tag['label'] ), Helpers::get_tags_taxonomy_id() );
 
 				if ( ! is_wp_error( $new_tag ) ) {
@@ -247,15 +267,17 @@ abstract class EventAbstract {
 			}
 		}
 
-		// Update event tags.
-		foreach ( $event_ids as $event_id ) {
+		// Update event tags. Iterate $editable_events so we never touch an
+		// event the caller cannot edit.
+		foreach ( $editable_events as $event_id ) {
 			wp_set_object_terms( $event_id, $tag_ids, Helpers::get_tags_taxonomy_id() );
 		}
 
-		// Get updated tags.
+		// Get updated tags. Iterate $editable_events so the response only
+		// describes events that were authorized for this request.
 		$tags = [];
 
-		foreach ( $event_ids as $event_id ) {
+		foreach ( $editable_events as $event_id ) {
 
 			$terms = get_the_terms( $event_id, Helpers::get_tags_taxonomy_id() );
 

@@ -523,6 +523,7 @@ return array(
     'Sugar_Calendar\\Integrations\\Elementor\\Widgets\\EventTitle' => $baseDir . '/src/Integrations/Elementor/Widgets/EventTitle.php',
     'Sugar_Calendar\\Integrations\\Loader' => $baseDir . '/src/Integrations/Loader.php',
     'Sugar_Calendar\\Integrations\\WPBakery\\WPBakery' => $baseDir . '/src/Integrations/WPBakery/WPBakery.php',
+    'Sugar_Calendar\\Migrations\\GeocodedCacheMigration' => $baseDir . '/src/Migrations/GeocodedCacheMigration.php',
     'Sugar_Calendar\\Migrations\\Migration' => $baseDir . '/src/Migrations/Migration.php',
     'Sugar_Calendar\\Migrations\\MigrationAbstract' => $baseDir . '/src/Migrations/MigrationAbstract.php',
     'Sugar_Calendar\\Migrations\\Migrations' => $baseDir . '/src/Migrations/Migrations.php',

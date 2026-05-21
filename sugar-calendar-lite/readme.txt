@@ -1,5 +1,5 @@
 === Sugar Calendar - Events Calendar, Event Tickets, and Events Management Platform ===
-Contributors:      jaredatch, smub, capuderg, donmhico
+Contributors:      smub, capuderg, donmhico
 Author:            Sugar Calendar
 Author URI:        https://sugarcalendar.com
 Plugin URI:        https://sugarcalendar.com
@@ -8,8 +8,8 @@ License:           GNU General Public License v2 or later
 Tags:              events, calendar, event calendar, event management, event tickets
 Requires PHP:      7.4
 Requires at least: 6.2
-Tested up to:      6.9
-Stable tag:        3.11.0
+Tested up to:      7.0
+Stable tag:        3.11.1
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,26 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.11.1 - 2026-05-20 =
+- Fixed: PHP 8 type error when the filter `wp_insert_post_empty_content` is used with type hinting.
+- Fixed: PHP 8.1+ PHP warning logs.
+- Fixed: Security improvements.
+- Changed: Google Maps integration optimization.
+
+= 3.11.0 - 2026-04-01 =
+- Added: Easily get in touch with event attendees through Email Notification for Event Attendees.
+- Added: Support to `show_past_only` args to Event List Block.
+- Added: WP7 admin UI compatibility.
+- Changed: Removed cap limit on the "Events per page" and "Max events to show" fields in the Events List Elementor Widget.
+- Changed: Bump minimum WP version required to v6.2.
+- Fixed: Event Content from WPBakery is not saved.
+- Fixed: Event Tickets can still be purchased after limit is hit.
+- Fixed: Optimized how assets are loaded.
+- Fixed: Edge-case in a specific non-english locale that triggers error in some admin pages.
+- Fixed: Calendar date badge in Event List Block not converting to Visitor's timezone.
+- Fixed: Unintended slash before the apostrophe character in the Ticket and Order receipt emails.
+- Fixed: Removed Ghost events.
+
 = 3.10.1 - 2025-12-18 =
 - Fixed: Update URLs.
 

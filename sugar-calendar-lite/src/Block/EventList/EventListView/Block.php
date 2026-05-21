@@ -564,6 +564,10 @@ class Block extends AbstractBlock {
 		// Store the resolved show_past_only flag for no-events message.
 		$this->show_past_only = ! empty( $args['show_past_only'] );
 
+		// Opt in to hiding password-protected events from visitors who lack
+		// edit_posts. See Helpers::should_filter_password_protected_events().
+		$args['has_password'] = false;
+
 		$upcoming_events = Helpers::get_upcoming_events_list_with_recurring(
 			$args,
 			$this->get_attributes()

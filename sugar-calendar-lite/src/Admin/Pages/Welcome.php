@@ -83,7 +83,7 @@ class Welcome extends PageAbstract {
 		$class                     = Plugin::instance()->is_pro() ? 'pro' : 'lite';
 		$post_type                 = sugar_calendar_get_event_post_type_id();
 		$setup_wizard              = sugar_calendar()->get_setup_wizard();
-		$setup_wizard_url          = $setup_wizard->get_url();
+		$setup_wizard_url          = $setup_wizard->get_start_url();
 		$setup_wizard_is_first_run = $setup_wizard->is_first_run();
 		$new_event_url             = "post-new.php?post_type={$post_type}";
 		?>

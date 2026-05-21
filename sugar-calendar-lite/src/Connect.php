@@ -27,6 +27,8 @@ class Connect {
 
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_scripts' ] );
 		add_action( 'sugar_calendar_ajax_connect_url', [ $this, 'ajax_generate_url' ] );
+		// _nopriv_ is intentional — server-to-server callback with no cookies.
+		// Gated by the OTH and the install URL host allowlist. Do not change to wp_ajax_.
 		add_action( 'wp_ajax_nopriv_sugar_calendar_connect_process', [ $this, 'process' ] );
 	}
 
@@ -192,7 +194,7 @@ class Connect {
 			wp_send_json_error( $error );
 		}
 
-		if ( hash_hmac( 'sha512', $oth, wp_salt() ) !== $post_oth ) {
+		if ( ! hash_equals( hash_hmac( 'sha512', $oth, wp_salt() ), $post_oth ) ) {
 			wp_send_json_error( $error );
 		}
 
@@ -263,6 +265,45 @@ class Connect {
 					'403',
 					esc_html__( 'There was an error while installing the upgrade. Please try again.', 'sugar-calendar-lite' )
 				)
+			);
+		}
+
+		/**
+		 * Filters the hosts allowed to serve the Lite-to-Pro install zip.
+		 *
+		 * Restrict installs to known hosts. Allowing arbitrary hosts here
+		 * would turn this method into a generic remote plugin installer
+		 * for anyone holding a valid OTH.
+		 *
+		 * @since 3.11.1
+		 *
+		 * @param string[] $allowed_hosts Hostnames (no scheme, no path).
+		 */
+		$allowed_hosts = apply_filters(
+			'sugar_calendar_connect_process_install_allowed_hosts',
+			[ 'events.sugarcalendarapi.com' ]
+		);
+
+		$post_url_host   = wp_parse_url( $post_url, PHP_URL_HOST );
+		$is_allowed_host = false;
+
+		if ( is_string( $post_url_host ) && $post_url_host !== '' ) {
+			foreach ( (array) $allowed_hosts as $allowed ) {
+				if ( ! is_string( $allowed ) || $allowed === '' ) {
+					continue;
+				}
+
+				// Strict, case-insensitive host match (no subdomain wildcard).
+				if ( strcasecmp( $post_url_host, $allowed ) === 0 ) {
+					$is_allowed_host = true;
+					break;
+				}
+			}
+		}
+
+		if ( ! $is_allowed_host ) {
+			wp_send_json_error(
+				esc_html__( 'The upgrade URL host is not allowed.', 'sugar-calendar-lite' )
 			);
 		}
 

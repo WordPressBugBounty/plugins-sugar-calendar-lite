@@ -324,6 +324,7 @@ class Area {
 	 * @since 3.3.0 Added 'Tools' submenu.
 	 * @since 3.5.0 Added 'Venues' submenu.
 	 * @since 3.7.0 Added 'RSVP' submenu.
+	 * @since 3.11.1 Fixed PHP warning for `null` parent slug.
 	 *
 	 * @return void
 	 */
@@ -468,7 +469,7 @@ class Area {
 
 		// Hidden SMTP page.
 		add_submenu_page(
-			null,
+			'',
 			__( 'SMTP', 'sugar-calendar-lite' ),
 			__( 'SMTP', 'sugar-calendar-lite' ),
 			'manage_options',
@@ -900,6 +901,10 @@ class Area {
 	 */
 	public function maybe_redirect_welcome() {
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		// Check if we should consider redirection.
 		if ( ! get_transient( self::TRANSIENT_REDIRECT ) ) {
 			return;
@@ -923,7 +928,7 @@ class Area {
 			return;
 		}
 
-		wp_safe_redirect( sugar_calendar()->get_setup_wizard()->get_url() );
+		sugar_calendar()->get_setup_wizard()->render_bridge();
 		exit;
 	}
 

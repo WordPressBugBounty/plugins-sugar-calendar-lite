@@ -1074,6 +1074,16 @@ class Query extends Base {
 					continue;
 				}
 
+				// Reject __in-suffixed keys whose bare column does not exist.
+				// Defense-in-depth: parse_orderby() also guards this, but bailing
+				// here keeps malformed __in keys out of the unsafe branch entirely.
+				if ( false !== strstr( (string) $_orderby, '__in' ) ) {
+					$_bare = str_replace( '__in', '', $_orderby );
+					if ( empty( $this->get_column_by( array( 'name' => $_bare ) ) ) ) {
+						continue;
+					}
+				}
+
 				// Parse orderby
 				$parsed = $this->parse_orderby( $_orderby );
 
@@ -1509,9 +1519,19 @@ class Query extends Base {
 		if ( false !== strstr( $orderby, '__in' ) ) {
 			$column_name = str_replace( '__in', '', $orderby );
 			$column      = $this->get_column_by( array( 'name' => $column_name ) );
-			$item_in     = $column->is_numeric()
-				? implode( ',', array_map( 'absint', $this->query_vars[ $orderby ] ) )
-				: implode( ',', $this->query_vars[ $orderby ] );
+
+			// Bail if the bare column name does not resolve. Prevents a null
+			// method call on $column and avoids emitting a malformed FIELD().
+			if ( empty( $column ) ) {
+				return $parsed;
+			}
+
+			if ( $column->is_numeric() ) {
+				$item_in = implode( ',', array_map( 'absint', (array) $this->query_vars[ $orderby ] ) );
+			} else {
+				$escaped = $this->get_db()->_escape( (array) $this->query_vars[ $orderby ] );
+				$item_in = "'" . implode( "', '", $escaped ) . "'";
+			}
 
 			$parsed = "FIELD( {$this->table_alias}.{$column->name}, {$item_in} )";
 

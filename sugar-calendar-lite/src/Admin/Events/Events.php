@@ -20,7 +20,7 @@ class Events {
 	 */
 	public function hooks() {
 
-		add_action( 'wp_insert_post_empty_content', [ $this, 'validate_event_creation' ], 10, 2 );
+		add_filter( 'wp_insert_post_empty_content', [ $this, 'validate_event_creation' ], 10, 2 );
 		add_action( 'save_post_sc_event', [ $this, 'save' ], 10, 2 );
 		add_action( 'admin_notices', [ $this, 'admin_notices_display_error' ] );
 	}
@@ -70,6 +70,7 @@ class Events {
 	 * Validate event creation. Redirect if event title is empty.
 	 *
 	 * @since 3.3.0
+	 * @since 3.11.1 Return correct value on bail paths.
 	 *
 	 * @param bool  $maybe_empty Whether the post should be considered "empty".
 	 * @param array $postarr     Array of post data.
@@ -88,7 +89,7 @@ class Events {
 			||
 			! empty( $postarr['post_title'] )
 		) {
-			return;
+			return boolval( $maybe_empty );
 		}
 
 		// Determine the redirect URL based on the screen context.
@@ -97,7 +98,7 @@ class Events {
 		} elseif ( $this->is_from_edit_event_screen() ) {
 			$redirect_url = get_edit_post_link( $postarr['ID'], null );
 		} else {
-			return; // No valid context, do not redirect.
+			return boolval( $maybe_empty );
 		}
 
 		// Append the error message and redirect.

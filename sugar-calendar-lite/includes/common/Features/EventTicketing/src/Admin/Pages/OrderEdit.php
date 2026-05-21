@@ -378,7 +378,11 @@ class OrderEdit {
 										echo esc_html( $name );
 
 										if ( ! empty( $attendee->email ) ) :
-											echo '<br>' . make_clickable( $attendee->email );
+											printf(
+												'<br><a href="mailto:%1$s">%2$s</a>',
+												esc_attr( $attendee->email ),
+												esc_html( $attendee->email )
+											);
 										endif;
 										?>
 

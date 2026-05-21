@@ -304,7 +304,7 @@ class EventCell implements InterfaceView {
 
 		foreach ( $calendars as $cal ) {
 			$calendars_info['calendars'][] = [
-				'name'  => $cal->name,
+				'name'  => esc_html( $cal->name ),
 				'color' => sugar_calendar_get_calendar_color( $cal->term_id ),
 			];
 		}

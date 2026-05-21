@@ -832,6 +832,65 @@ class Helpers {
 	}
 
 	/**
+	 * Whether password-protected events should be filtered out of front-end
+	 * block queries for the current request.
+	 *
+	 * Returns true for anonymous visitors and roles below editor.
+	 * Returns false for editor, admin, and any custom role granted edit_posts.
+	 *
+	 * Used by the Calendar block, the Event List block, and the popover AJAX
+	 * endpoint to scope password-protected event exclusion at the request
+	 * level. Per-row capability checks (current_user_can('edit_post', $id))
+	 * cannot be expressed in SQL, so we use the broader edit_posts cap as
+	 * the request-scope gate — matching WP_Query's has_password semantics.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @return bool True when password-protected events should be hidden.
+	 */
+	public static function should_filter_password_protected_events() {
+
+		return ! current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * Get the wp_posts IDs of every published, password-protected event post.
+	 *
+	 * Covers both the core `sc_event` post type and the Pro `sc_recurring_event`
+	 * post type (used by AdvancedRecurring after migrating an event with a
+	 * recurrence pattern). Cached per-request via a static property so repeat
+	 * calls within a single block render don't re-query. Typically returns an
+	 * empty array because most sites have no password-protected events.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @return int[] Post IDs of password-protected event posts (both post types).
+	 */
+	public static function get_password_protected_event_ids() {
+
+		static $cache = null;
+
+		if ( $cache !== null ) {
+			return $cache;
+		}
+
+		global $wpdb;
+
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( %s, %s ) AND post_status = %s AND post_password != ''",
+				'sc_event',
+				'sc_recurring_event',
+				'publish'
+			)
+		);
+
+		$cache = array_map( 'intval', $ids );
+
+		return $cache;
+	}
+
+	/**
 	 * Get the upcoming events list with recurring events.
 	 *
 	 * @since 3.3.0
@@ -843,8 +902,12 @@ class Helpers {
 	 * @since 3.7.0 Added support for the 'tags' parameter.
 	 * @since 3.7.2 Fixed issue with non-array calendar args.
 	 * @since 3.11.0 Added support to `show_past_only` args.
+	 * @since 3.11.1 Added optional `has_password` arg.
 	 *
 	 * @param array $args       The arguments to get the events.
+	 *                          Pass `'has_password' => false` to exclude password-protected
+	 *                          events when the current user lacks the `edit_posts` capability.
+	 *                          Omit (default) to preserve current behavior for non-block callers.
 	 * @param array $attributes The block attributes.
 	 *
 	 * @return Event[]
@@ -940,8 +1003,19 @@ class Helpers {
 
 		$select_query = 'SELECT ' . $wpdb->prefix . 'sc_events.id FROM ' . $wpdb->prefix . 'sc_events';
 
-		// Exclude ghost events (sc_events records whose WP post was deleted).
-		if ( apply_filters( 'sugar_calendar_exclude_ghost_events', true ) ) {
+		// Whether the caller opted in to hiding password-protected events
+		// (the Calendar / Event List blocks set this; other callers don't).
+		$filter_password_protected =
+			isset( $args['has_password'] )
+			&& $args['has_password'] === false
+			&& self::should_filter_password_protected_events();
+
+		// Force the wp_posts JOIN if the password filter is active, even when
+		// the ghost-event filter is overridden off — we need the post_password
+		// column in scope for the WHERE clause below.
+		$exclude_ghost = apply_filters( 'sugar_calendar_exclude_ghost_events', true );
+
+		if ( $exclude_ghost || $filter_password_protected ) {
 			$select_query .= ' INNER JOIN ' . $wpdb->posts . ' ON ' . $wpdb->prefix . 'sc_events.object_id = ' . $wpdb->posts . '.ID';
 		}
 
@@ -960,6 +1034,11 @@ class Helpers {
 			. $wpdb->prefix . 'sc_events.`end` ' . $date_operator . ' %s',
 			$now
 		);
+
+		// Exclude password-protected events when the caller opted in.
+		if ( $filter_password_protected ) {
+			$where_query .= ' AND ' . $wpdb->posts . '.post_password = \'\'';
+		}
 
 		if ( ! empty( $where_calendars ) ) {
 			$where_query .= ' ' . $where_calendars;

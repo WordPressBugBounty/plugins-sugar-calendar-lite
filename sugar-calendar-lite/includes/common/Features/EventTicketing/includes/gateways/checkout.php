@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
 use Sugar_Calendar\Event;
+use Sugar_Calendar\Helper;
 
 class Checkout {
 
@@ -126,24 +127,77 @@ class Checkout {
 			return;
 		}
 
-		$this->validate();
+		if ( ! $this->validate() ) {
+			$this->halt_with_validation_error();
+			return;
+		}
 
 		$this->send_to_gateway();
+	}
+
+	/**
+	 * Redirect back to the event page with an error_code on validation failure.
+	 *
+	 * Mirrors the existing Stripe::process() pattern. If the event can't be
+	 * resolved, falls back to home_url() — that path only runs when
+	 * sc_et_event_id is malformed, which is itself a validation failure.
+	 *
+	 * @since 3.11.1
+	 */
+	private function halt_with_validation_error() {
+
+		$event_id = ! empty( $_POST['sc_et_event_id'] )
+			? absint( $_POST['sc_et_event_id'] )
+			: 0;
+
+		$event = ! empty( $event_id )
+			? sugar_calendar_get_event( $event_id )
+			: false;
+
+		$redirect_url = ! empty( $event )
+			? Helper::get_event_frontend_url( $event )
+			: home_url();
+
+		wp_safe_redirect(
+			add_query_arg(
+				[ 'error_code' => 'sc_et_validation_failed' ],
+				$redirect_url
+			)
+		);
+		exit;
 	}
 
 	/**
 	 * AJAX validation process.
 	 *
 	 * @since 1.0.0
+	 * @since 3.11.1 Verify sc_et_nonce. The nonce travels inside
+	 *                  $_POST['data'] (the serialized modal form), so it can
+	 *                  only be checked after parse_str(); parse_str itself has
+	 *                  no side effects beyond populating $_POST.
 	 *
 	 * @return void
 	 */
 	public function process_ajax_validation() {
 
-		// @todo - Add nonce verification
-
 		// Fill the POST super global with our form data.
-		parse_str( $_POST['data'], $_POST );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified below after parse_str.
+		parse_str( wp_unslash( $_POST['data'] ?? '' ), $_POST );
+
+		if (
+			! isset( $_POST['sc_et_nonce'] )
+			|| ! wp_verify_nonce( wp_unslash( $_POST['sc_et_nonce'] ), self::NONCE_KEY ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		) {
+			wp_send_json_error( [
+				'errors' => [
+					'invalid_nonce' => [
+						'id'       => 'invalid_nonce',
+						'msg'      => esc_html__( 'Security token expired. Please refresh the page and try again.', 'sugar-calendar-lite' ),
+						'selector' => '#sc-event-ticketing-modal-fieldset',
+					],
+				],
+			] );
+		}
 
 		$success = $this->validate();
 
@@ -185,6 +239,7 @@ class Checkout {
 	 * @since 1.0.0
 	 * @since 3.6.0 Add required condition for attendee fields.
 	 * @since 3.11.0 Fixed the condition for limit capacity.
+	 * @since 3.11.1 Reject submissions where count(attendees) > sc_et_quantity.
 	 */
 	public function validate_data() {
 
@@ -219,33 +274,52 @@ class Checkout {
 		}
 
 		// Validate attendees if present.
-		if (
-			$this->is_attendee_validation_enabled()
-			&&
-			! empty( $_POST['attendees'] )
-			&&
-			is_array( $_POST['attendees'] )
-		) {
+		if ( ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] ) ) {
+
+			// Reject any submission whose attendees[] count exceeds the
+			// quantity the buyer is paying for. complete() mints one ticket
+			// per attendee row, so without this check the array becomes a
+			// capacity bypass.
+			if ( count( $_POST['attendees'] ) > $qty ) {
+				$this->add_error(
+					'attendees_exceed_quantity',
+					esc_html__( 'The number of attendees exceeds the selected ticket quantity.', 'sugar-calendar-lite' ),
+					'#sc-event-ticketing-modal-attendee-fieldset'
+				);
+			}
 
 			foreach ( $_POST['attendees'] as $index => $attendee ) {
 
 				$fieldset_selector = '.sc-et-form-group.sc-event-ticketing-attendee[attendee-key=\'' . absint( $index ) . '\']';
 
-				// Check if any required field is missing or invalid.
+				// Always: if an email was submitted, it must be a valid email address.
 				if (
-					empty( $attendee['full_name'] )
-					||
-					empty( $attendee['email'] )
-					||
-					! is_email( wp_unslash( $attendee['email'] ) )
+					isset( $attendee['email'] )
+					&& $attendee['email'] !== ''
+					&& ! is_email( wp_unslash( $attendee['email'] ) )
 				) {
-
-					// Set error message.
 					$this->add_error(
-						'missing_attendee_info_' . $index,
-						esc_html__( 'Please complete attendee\'s information.', 'sugar-calendar-lite' ),
+						'invalid_attendee_email_' . $index,
+						esc_html__( 'Please enter a valid attendee email address.', 'sugar-calendar-lite' ),
 						$fieldset_selector
 					);
+				}
+			}
+
+			// Gated: required-field enforcement only runs when the admin opted in.
+			if ( $this->is_attendee_validation_enabled() ) {
+
+				foreach ( $_POST['attendees'] as $index => $attendee ) {
+
+					$fieldset_selector = '.sc-et-form-group.sc-event-ticketing-attendee[attendee-key=\'' . absint( $index ) . '\']';
+
+					if ( empty( $attendee['full_name'] ) || empty( $attendee['email'] ) ) {
+						$this->add_error(
+							'missing_attendee_info_' . $index,
+							esc_html__( 'Please complete attendee\'s information.', 'sugar-calendar-lite' ),
+							$fieldset_selector
+						);
+					}
 				}
 			}
 		}
@@ -348,6 +422,10 @@ class Checkout {
 	 *
 	 * @since 3.1.0
 	 * @since 3.6.0
+	 * @since 3.11.1 Hard-fail (wp_die) when $quantity exceeds available
+	 *                  capacity or count($attendees) exceeds $quantity. Defense
+	 *                  in depth for code paths that reach complete() without
+	 *                  running validate_data().
 	 *
 	 * @param array $order_data Order data.
 	 */
@@ -360,7 +438,7 @@ class Checkout {
 		$anonymous_attendees = [];
 
 		$attendees = ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] )
-			? wp_unslash( $_POST['attendees'] )
+			? array_map( [ $this, 'sanitize_attendee_input' ], wp_unslash( $_POST['attendees'] ) )
 			: [];
 
 		$event_id = ! empty( $_POST['sc_et_event_id'] )
@@ -370,6 +448,28 @@ class Checkout {
 		$quantity = ! empty( $_POST['sc_et_quantity'] )
 			? max( absint( $_POST['sc_et_quantity'] ), 1 )
 			: 1;
+
+		// Defense in depth: validate_data() rejects oversold and mismatched
+		// payloads, but a code path reaching complete() without running
+		// validate_data() (e.g., a third-party gateway hooked via sc_et_gateways)
+		// must not be allowed to mint tickets that exceed capacity or the paid
+		// quantity. Fail loud rather than silently clamp — silent truncation
+		// would charge the buyer for tickets they don't receive.
+		$available = Functions\get_available_tickets( $event_id );
+
+		if ( $available !== -1 && $quantity > $available ) {
+			wp_die(
+				esc_html__( 'Insufficient tickets available.', 'sugar-calendar-lite' ),
+				400
+			);
+		}
+
+		if ( count( $attendees ) > $quantity ) {
+			wp_die(
+				esc_html__( 'The number of attendees exceeds the selected ticket quantity.', 'sugar-calendar-lite' ),
+				400
+			);
+		}
 
 		$event = ! empty( $event_id )
 			? sugar_calendar_get_event( $event_id )
@@ -472,8 +572,11 @@ class Checkout {
 
 		do_action( 'sc_et_checkout_pre_redirect', $order_id, $order_data );
 
-		$success_page = Settings\get_setting( 'receipt_page', 0 );
-		$redirect     = add_query_arg( array( 'order_id' => $order_id, 'email' => $order_data['email'] ), get_permalink( $success_page ) );
+		$redirect = Functions\issue_new_receipt_link( Functions\get_order( $order_id ) );
+		if ( '' === $redirect ) {
+			// Fallback only if the order disappeared between insert and redirect.
+			$redirect = get_permalink( Settings\get_setting( 'receipt_page', 0 ) );
+		}
 		$success_url  = apply_filters( 'sc_et_success_page_url', $redirect );
 
 		wp_safe_redirect( $success_url );
@@ -567,6 +670,37 @@ class Checkout {
 			$attendee_object,
 			$attendee
 		);
+	}
+
+	/**
+	 * Normalize an attendee record from $_POST.
+	 *
+	 * Applied at the input boundary so every downstream consumer
+	 * (maybe_create_attendee, add_attendee, filter hooks) sees safe values.
+	 *
+	 * @since 3.11.1
+	 *
+	 * @param mixed $attendee Raw $_POST['attendees'][$i] value.
+	 *
+	 * @return array Sanitized attendee fields.
+	 */
+	private function sanitize_attendee_input( $attendee ) {
+
+		if ( ! is_array( $attendee ) ) {
+			return [
+				'full_name'  => '',
+				'first_name' => '',
+				'last_name'  => '',
+				'email'      => '',
+			];
+		}
+
+		return [
+			'full_name'  => isset( $attendee['full_name'] )  ? sanitize_text_field( $attendee['full_name'] )  : '',
+			'first_name' => isset( $attendee['first_name'] ) ? sanitize_text_field( $attendee['first_name'] ) : '',
+			'last_name'  => isset( $attendee['last_name'] )  ? sanitize_text_field( $attendee['last_name'] )  : '',
+			'email'      => isset( $attendee['email'] )      ? sanitize_email( $attendee['email'] )           : '',
+		];
 	}
 
 	private function send_to_gateway() {

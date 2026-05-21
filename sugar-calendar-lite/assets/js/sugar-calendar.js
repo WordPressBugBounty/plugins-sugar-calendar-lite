@@ -162,18 +162,19 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		// Setup the calendar information if available.
 		let $calendarInfoContainer = this.$popover.find( '.sugar-calendar-block__popover__event__container__content__calendar' );
 		// Clear the calendar info container.
-		$calendarInfoContainer.html( '' );
+		$calendarInfoContainer.empty();
 
 		let calendarsInfo = $eventDataContainer.data( 'calendarsinfo' );
 
 		if ( calendarsInfo !== undefined && calendarsInfo.calendars !== undefined ) {
-			let calItems = [];
-
 			calendarsInfo.calendars.forEach( ( cal ) => {
-				calItems.push( `<div style="border-left: 2px solid ${cal.color ? cal.color : calendarsInfo.primary_event_color};" class="sugar-calendar-block__popover__event__container__content__calendar__item">${cal.name}</div>` );
-			});
-
-			$calendarInfoContainer.html( calItems.join( '' ) );
+				const borderColor = cal.color ? cal.color : calendarsInfo.primary_event_color;
+				$( '<div/>', {
+					'class': 'sugar-calendar-block__popover__event__container__content__calendar__item',
+					css: { 'border-left': '2px solid ' + borderColor },
+					text: cal.name,
+				} ).appendTo( $calendarInfoContainer );
+			} );
 		}
 
 		// Computer for the popover position.
