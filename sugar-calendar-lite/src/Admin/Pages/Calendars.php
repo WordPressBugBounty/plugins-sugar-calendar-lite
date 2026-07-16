@@ -97,8 +97,10 @@ class Calendars extends PageAbstract {
 
 		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
 
-		add_filter( 'screen_options_show_screen', '__return_true' );
+		add_filter( 'screen_options_show_screen', '__return_false' );
+		add_action( 'admin_init', [ $this, 'handle_screen_options_post' ] );
 		add_action( 'in_admin_header', [ $this, 'display_admin_subheader' ] );
+		add_action( 'all_admin_notices', [ $this, 'display_search_reset' ] );
 		add_filter( 'tag_row_actions', [ $this, 'row_actions' ], 10, 2 );
 		add_filter( 'get_edit_term_link', [ $this, 'get_edit_term_link' ], 10, 4 );
 		add_filter( 'redirect_term_location', [ $this, 'redirect_after_save' ], 10, 2 );
@@ -178,6 +180,10 @@ class Calendars extends PageAbstract {
 				]
 			);
 			?>
+
+			<div class="sugar-calendar-admin-subheader-tools">
+				<?php $this->display_cog(); ?>
+			</div>
         </div>
 
 		<?php
@@ -187,36 +193,37 @@ class Calendars extends PageAbstract {
 		 * @since 3.0.0
 		 */
 		do_action( 'sugar_calendar_admin_page_before' ); //phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
 
-		// Display search reset when searching calendars from taxonomy list screen.
-		if (
-			! empty( $_GET['s'] )
-			&&
-			isset( $_GET['taxonomy'] )
-			&&
-			sugar_calendar_get_calendar_taxonomy_id() === sanitize_key( wp_unslash( $_GET['taxonomy'] ) )
-		) {
+	/**
+	 * Display search reset bar when searching calendars.
+	 *
+	 * Hooked to `all_admin_notices` so it renders inside #wpbody-content
+	 * rather than outside #wpbody (where `in_admin_header` outputs).
+	 * Rendering outside #wpbody caused a layout flash on fractional
+	 * display scaling and throttled rendering.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return void
+	 */
+	public function display_search_reset() {
 
-			$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ) );
-			$results     = get_terms(
-				[
-					'taxonomy'   => sugar_calendar_get_calendar_taxonomy_id(),
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'search'     => $search_term,
-				]
-			);
-
-			$total_count = is_wp_error( $results ) ? 0 : count( (array) $results );
-
-			Helper::display_search_reset(
-				$total_count,
-				'calendar',
-				'calendars',
-				__( 'Calendars', 'sugar-calendar-lite' ),
-				admin_url( 'edit-tags.php?taxonomy=' . sugar_calendar_get_calendar_taxonomy_id() )
-			);
+		if ( ! Helper::is_taxonomy_search( sugar_calendar_get_calendar_taxonomy_id() ) ) {
+			return;
 		}
+
+		global $wp_list_table;
+
+		$total_count = (int) $wp_list_table->get_pagination_arg( 'total_items' );
+
+		Helper::display_search_reset(
+			$total_count,
+			'calendar',
+			'calendars',
+			__( 'Calendars', 'sugar-calendar-lite' ),
+			admin_url( 'edit-tags.php?taxonomy=' . sugar_calendar_get_calendar_taxonomy_id() )
+		);
 	}
 
 	/**
@@ -421,6 +428,8 @@ class Calendars extends PageAbstract {
 				'searchCalendarsSubmit'      => sugar_calendar_get_calendar_taxonomy_labels( 'search_submit' ),
 			]
 		);
+
+		wp_enqueue_script( 'sugar-calendar-admin-column-control' );
 	}
 
 	/**
@@ -509,5 +518,116 @@ class Calendars extends PageAbstract {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Render the SC cog dropdown.
+	 *
+	 * @since 3.12.0
+	 */
+	private function display_cog() {
+
+		$taxonomy  = sugar_calendar_get_calendar_taxonomy_id();
+		$per_page  = (int) get_user_option( "edit_{$taxonomy}_per_page" );
+		$per_page  = $per_page > 0 ? $per_page : 20;
+		$columns   = get_column_headers( get_current_screen() );
+		$hidden    = get_hidden_columns( get_current_screen() );
+		$skipped   = [ 'cb', 'name' ];
+		$togglable = array_diff( array_keys( $columns ), $skipped );
+		?>
+		<div class="sugar-calendar-screen-options sugar-calendar-table-screen-options">
+			<button id="sugar-calendar-table-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button" title="<?php esc_attr_e( 'Change columns to display', 'sugar-calendar-lite' ); ?>">
+				<?php UI::svg_icon( 'cog' ); ?>
+			</button>
+
+			<div class="sugar-calendar-screen-options-menu sugar-calendar-table-screen-options-menu" style="display: none;">
+				<form method="post" action="">
+					<?php wp_nonce_field( 'sugar-calendar-calendars-screen-options', 'sugar-calendar-calendars-screen-options-nonce' ); ?>
+					<input type="hidden" name="sugar-calendar-calendars-all-columns" value="<?php echo esc_attr( implode( ',', $togglable ) ); ?>">
+
+					<fieldset>
+						<legend><?php esc_html_e( 'Columns', 'sugar-calendar-lite' ); ?></legend>
+						<?php foreach ( $togglable as $column_key ) :
+							$column_label = $columns[ $column_key ] ?? '';
+							?>
+							<label>
+								<input type="checkbox" name="sugar-calendar-calendars-visible-columns[]" value="<?php echo esc_attr( $column_key ); ?>" <?php checked( ! in_array( $column_key, $hidden, true ) ); ?>>
+								<?php echo esc_html( wp_strip_all_tags( $column_label ) ); ?>
+							</label>
+						<?php endforeach; ?>
+					</fieldset>
+
+					<fieldset>
+						<legend><?php esc_html_e( 'Items per page', 'sugar-calendar-lite' ); ?></legend>
+						<input type="number" id="sugar-calendar-calendars-per-page" name="sugar-calendar-calendars-per-page" value="<?php echo esc_attr( $per_page ); ?>" min="1" max="999" step="1" aria-label="<?php esc_attr_e( 'Number of items per page', 'sugar-calendar-lite' ); ?>">
+					</fieldset>
+
+					<p class="submit">
+						<button type="submit" name="sugar-calendar-calendars-screen-options-submit" value="submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar-lite' ); ?></button>
+					</p>
+				</form>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Persist the cog form on submit.
+	 *
+	 * @since 3.12.0
+	 */
+	public function handle_screen_options_post() {
+
+		if ( empty( $_POST['sugar-calendar-calendars-screen-options-submit'] ) ) {
+			return;
+		}
+
+		if (
+			! isset( $_POST['sugar-calendar-calendars-screen-options-nonce'] ) ||
+			! wp_verify_nonce(
+				sanitize_text_field( wp_unslash( $_POST['sugar-calendar-calendars-screen-options-nonce'] ) ),
+				'sugar-calendar-calendars-screen-options'
+			)
+		) {
+			return;
+		}
+
+		if ( ! current_user_can( $this->get_capability() ) ) {
+			return;
+		}
+
+		$user_id  = get_current_user_id();
+		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
+
+		// Per-page.
+		$per_page = isset( $_POST['sugar-calendar-calendars-per-page'] )
+			? absint( $_POST['sugar-calendar-calendars-per-page'] )
+			: 0;
+
+		if ( $per_page >= 1 && $per_page <= 999 ) {
+			update_user_option( $user_id, "edit_{$taxonomy}_per_page", $per_page );
+		}
+
+		// Hidden columns (derive from the visible set + the rendered "all" list).
+		if ( isset( $_POST['sugar-calendar-calendars-all-columns'] ) ) {
+			$all_raw = sanitize_text_field( wp_unslash( $_POST['sugar-calendar-calendars-all-columns'] ) );
+			$all     = array_filter( array_map( 'sanitize_key', explode( ',', $all_raw ) ) );
+			$visible = isset( $_POST['sugar-calendar-calendars-visible-columns'] )
+				? array_map( 'sanitize_key', (array) wp_unslash( $_POST['sugar-calendar-calendars-visible-columns'] ) )
+				: [];
+			$hidden  = array_values( array_diff( $all, $visible ) );
+
+			update_user_option( $user_id, "manageedit-{$taxonomy}columnshidden", $hidden );
+		}
+
+		// PRG: clear POST so a refresh doesn't resubmit.
+		$redirect = wp_get_referer();
+
+		if ( ! $redirect ) {
+			$redirect = admin_url( "edit-tags.php?taxonomy={$taxonomy}" );
+		}
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 }

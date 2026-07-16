@@ -193,7 +193,9 @@ class Settings extends PageTabAbstract {
 		$sections   = array_keys( $this->get_tabs() );
 
 		if ( ! in_array( $section_id, $sections ) ) {
-			wp_safe_redirect( Plugin::instance()->get_admin()->get_page_url( 'settings_general' ) );
+			// Fall back to the default tab (License & Usage) — keep this in sync
+			// with the empty-section default in Area::get_settings_page_id().
+			wp_safe_redirect( Plugin::instance()->get_admin()->get_page_url( 'settings_license_usage' ) );
 			exit;
 		}
 
@@ -215,6 +217,15 @@ class Settings extends PageTabAbstract {
 
 			<div class="sugar-calendar-admin-content">
 				<h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
+
+				<?php
+				// Seam for notices/UI that must render at the very top of the page
+				// content (where core relocates admin notices to). Consumers render
+				// inline here to avoid the on-load notice "jump".
+				// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+				do_action( 'sugar_calendar_admin_page_content_top' );
+				?>
+
 				<form class="sugar-calendar-admin-content__settings-form" method="post" action="">
 
 					<?php $this->display_tab( static::get_tab_slug() ); ?>
@@ -260,9 +271,10 @@ class Settings extends PageTabAbstract {
 
 		if ( $sections === null ) {
 			$tabs = [
+				'settings_license_usage',
 				'settings_general',
 				'settings_feeds',
-				'settings_maps',
+				'settings_integrations',
 				'settings_misc',
 			];
 

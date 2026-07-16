@@ -225,17 +225,30 @@ function sugar_calendar_get_object_taxonomies( $types = '', $output = 'names' ) 
 }
 
 /**
- * Get the color of a calendar
+ * Get the color of a calendar.
  *
  * @since 2.0.0
+ * @since 3.12.0 Added filter support for $calendar_id.
  *
- * @param int $calendar_id
+ * @param int $calendar_id Calendar term ID.
  *
  * @return string
  */
 function sugar_calendar_get_calendar_color( $calendar_id = 0 ) {
 
-	$meta = get_term_meta( $calendar_id, 'color', true );
+	/**
+	 * Filter the calendar term ID used to read color meta.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param int $calendar_id Calendar term ID.
+	 */
+	$calendar_id = apply_filters(
+		'sugar_calendar_get_calendar_color_term_id',
+		intval( $calendar_id )
+	);
+
+	$meta = get_term_meta( intval( $calendar_id ), 'color', true );
 
 	// Default color.
 	if ( empty( $meta ) ) {

@@ -8,6 +8,11 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+use Exception;
+use Stripe\Customer;
+use Stripe\PaymentIntent;
+use Stripe\Refund;
+use Stripe\Stripe as StripeSDK;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
@@ -21,7 +26,7 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class Stripe extends Checkout {
+class Stripe extends Checkout implements GatewayInterface {
 
 	/**
 	 * Error code for missing event.
@@ -342,8 +347,8 @@ class Stripe extends Checkout {
 
 		// phpcs:ignore WPForms.PHP.BackSlash.UseShortSyntax
 		try {
-			$payment_intent = \Stripe\PaymentIntent::create( $args );
-		} catch ( \Exception $e ) {
+			$payment_intent = PaymentIntent::create( $args );
+		} catch ( Exception $e ) {
 			return new WP_Error(
 				'sc_et_create_payment_intent_error',
 				$e->getMessage()
@@ -365,15 +370,15 @@ class Stripe extends Checkout {
 	 */
 	public function load_sdk() {
 
-		\Stripe\Stripe::setAppInfo(
+		StripeSDK::setAppInfo(
 			'Sugar Calendar - Event Tickets',
 			SC_PLUGIN_VERSION,
 			'https://sugarcalendar.com',
 			'pp_partner_HxGcEqfw4pwJeS'
 		);
 
-		\Stripe\Stripe::setApiKey( Functions\get_stripe_secret_key() );
-		\Stripe\Stripe::setApiVersion( '2020-08-27' );
+		StripeSDK::setApiKey( Functions\get_stripe_secret_key() );
+		StripeSDK::setApiVersion( '2020-08-27' );
 	}
 
 	/**
@@ -421,10 +426,12 @@ class Stripe extends Checkout {
 			? $expected_amount
 			: ( $expected_amount / 100 );
 
-		// Transaction ID
+		// Transaction ID — NULL (not '') when there is no payment intent, so the
+		// UNIQUE index on transaction_id treats no-transaction orders as absent
+		// (MySQL allows unlimited NULLs but only one '').
 		$order_data['transaction_id'] = ! empty( $_POST['sc_et_payment_intent'] )
 			? sanitize_text_field( $_POST['sc_et_payment_intent'] )
-			: '';
+			: null;
 
 		// Currency
 		$order_data['currency'] = Functions\get_currency();
@@ -478,6 +485,13 @@ class Stripe extends Checkout {
 	 * Validate the Stripe transaction.
 	 *
 	 * @since 3.6.1
+	 * @since 3.12.0 Gate on $order_data['total'] instead of the legacy
+	 *                  general ticket_price meta. get_amount() (which fills
+	 *                  $order_data['total']) is cart-aware via the
+	 *                  sc_et_stripe_get_amount filter, so a multi-ticket order
+	 *                  can have a non-zero total while the general price is
+	 *                  unset — the old check let such orders skip the Stripe
+	 *                  intent requirement entirely.
 	 *
 	 * @param \Sugar_Calendar\Event $event      The Event object.
 	 * @param array                 $order_data The order data.
@@ -493,9 +507,9 @@ class Stripe extends Checkout {
 				self::ERROR_MISSING_EVENT,
 				__( 'Event not found!', 'sugar-calendar-lite' )
 			);
-		} elseif ( $this->get_ticket_price( $event->id ) > 0 ) {
+		} elseif ( (float) ( $order_data['total'] ?? 0 ) > 0 ) {
 
-			// If we're then the event is not free.
+			// If we're here, the order has a non-zero total, so it's not free.
 
 			if ( empty( $_POST['sc_et_payment_intent'] ) ) {
 				$return_val = new WP_Error(
@@ -567,7 +581,7 @@ class Stripe extends Checkout {
 
 			// phpcs:ignore WPForms.PHP.BackSlash.UseShortSyntax
 			try {
-				$retrieve = \Stripe\PaymentIntent::retrieve( $intent );
+				$retrieve = PaymentIntent::retrieve( $intent );
 
 				$expected_amount   = (int) $this->get_amount( $event_id, $quantity );
 				$expected_currency = strtolower( (string) Functions\get_currency() );
@@ -580,7 +594,7 @@ class Stripe extends Checkout {
 				) {
 					$is_valid = true;
 				}
-			} catch ( \Exception $e ) {}
+			} catch ( Exception $e ) {}
 		}
 
 		/**
@@ -613,7 +627,7 @@ class Stripe extends Checkout {
 	 */
 	public function get_customer( $email = '', $name = '' ) {
 
-		$customers = \Stripe\Customer::all(
+		$customers = Customer::all(
 			[
 				'email' => $email,
 				'limit' => 3,
@@ -626,7 +640,7 @@ class Stripe extends Checkout {
 		} else {
 
 			$name     = ! empty( $name ) ? $name : sanitize_text_field( $_POST['name'] );
-			$customer = \Stripe\Customer::create(
+			$customer = Customer::create(
 				[
 					'email' => $email,
 					'name'  => $name,
@@ -663,8 +677,26 @@ class Stripe extends Checkout {
 		// Setup the price per ticket to return
 		$retval = $amount * $quantity;
 
-		// Return the amount
-		return $retval;
+		/**
+		 * Filter the expected charge amount, in the currency's minor units.
+		 *
+		 * Single-ticket events charge the general price × quantity (the default
+		 * below). Multi-ticket purchases are priced from the cart (per-type
+		 * prices), so the add-on overrides this with the cart total — keeping
+		 * both is_valid_intent()'s amount binding and the recorded order total
+		 * correct for multi-ticket events with differing per-type prices.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param int|float $retval   Expected amount in minor units.
+		 * @param int       $event_id The event ID.
+		 * @param int       $quantity The submitted quantity.
+		 */
+		$amount = apply_filters( 'sc_et_stripe_get_amount', $retval, $event_id, $quantity );
+
+		// Stripe requires an integer amount in minor units; round before casting
+		// so float math (e.g. 19.99 * 100 = 1998.9999…) doesn't truncate a cent.
+		return (int) round( $amount );
 	}
 
 	/**
@@ -692,7 +724,7 @@ class Stripe extends Checkout {
 		$this->load_sdk();
 
 		// Store order ID in Stripe meta data.
-		\Stripe\PaymentIntent::update(
+		PaymentIntent::update(
 			$order_data['transaction_id'],
 			[
 				'metadata' => [
@@ -700,5 +732,49 @@ class Stripe extends Checkout {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Refund an order through Stripe.
+	 *
+	 * Only Stripe PaymentIntent transactions (`pi_…`) are refundable here; any
+	 * other transaction is a legitimate no-op (e.g. a free order) so the caller
+	 * still flips the order status. Wraps the Stripe call so a gateway failure
+	 * surfaces as a WP_Error instead of an uncaught exception.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param object $order The order object.
+	 *
+	 * @return bool|WP_Error True on success or legitimate no-op; WP_Error on failure.
+	 */
+	public function refund( $order ) {
+
+		// Nothing to refund at Stripe for non-PaymentIntent transactions.
+		// PaymentIntent ids are prefixed `pi_`, so match the prefix (not anywhere).
+		if ( empty( $order->transaction_id ) || strpos( $order->transaction_id, 'pi_' ) !== 0 ) {
+			return true;
+		}
+
+		if ( empty( Functions\get_stripe_secret_key() ) && ! Functions\is_sandbox() ) {
+			return new WP_Error(
+				'sc_et_refund_no_secret_key',
+				esc_html__( 'No Stripe API key found.', 'sugar-calendar-lite' )
+			);
+		}
+
+		$this->load_sdk();
+
+		try {
+			Refund::create(
+				[
+					'payment_intent' => $order->transaction_id,
+				]
+			);
+		} catch ( Exception $e ) {
+			return new WP_Error( 'sc_et_refund_failed', $e->getMessage() );
+		}
+
+		return true;
 	}
 }

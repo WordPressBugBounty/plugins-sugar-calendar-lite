@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\SetupWizard;
 
 use Sugar_Calendar\Admin\Pages\Settings;
+use Sugar_Calendar\Admin\Pages\SettingsGeneralTab;
 use Sugar_Calendar\Admin\Pages\Welcome;
 use Sugar_Calendar\Helpers\WP;
 
@@ -315,9 +316,14 @@ HTML;
 	 */
 	public function get_start_url() {
 
+		// The redirect gate in maybe_redirect() only fires on the General tab,
+		// so pin the section — the settings page's default landing tab is
+		// License & Usage, which would bail the gate.
 		return add_query_arg(
-			self::REDIRECT_PARAMETER,
-			1,
+			[
+				'section'                => SettingsGeneralTab::get_tab_slug(),
+				self::REDIRECT_PARAMETER => 1,
+			],
 			Settings::get_url()
 		);
 	}
@@ -331,9 +337,12 @@ HTML;
 	 */
 	public function get_restart_url() {
 
+		// See get_start_url(): pin the General tab so the redirect gate fires.
 		return add_query_arg(
-			self::REDIRECT_PARAMETER,
-			1,
+			[
+				'section'                => SettingsGeneralTab::get_tab_slug(),
+				self::REDIRECT_PARAMETER => 1,
+			],
 			Settings::get_url()
 		);
 	}

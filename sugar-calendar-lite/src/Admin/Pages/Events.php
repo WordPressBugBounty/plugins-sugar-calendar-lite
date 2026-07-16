@@ -185,6 +185,11 @@ class Events extends PageAbstract {
                 <h1 class="screen-reader-text"><?php esc_html_e( 'Events', 'sugar-calendar-lite' ); ?></h1>
 
 				<?php
+				// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+				do_action( 'sugar_calendar_admin_page_content_top' );
+				?>
+
+				<?php
 				/**
 				 * Runs before the page content is displayed.
 				 *
@@ -367,6 +372,8 @@ class Events extends PageAbstract {
 	 * Update hidden columns.
 	 *
 	 * @since 3.0.0
+	 * @since 3.12.0 Use the shared admin-page-id helper so the saved key always
+	 *                  matches the key the table reads when rendering.
 	 *
 	 * @param WP_User $user    Current user.
 	 * @param array   $columns Array of columns.
@@ -378,7 +385,7 @@ class Events extends PageAbstract {
 		$table           = $this->get_list_table();
 		$allowed_columns = array_keys( $table->get_columns() );
 		$hidden_columns  = array_intersect( $columns, $allowed_columns );
-		$screen_id       = 'toplevel_page_sugar-calendar';
+		$screen_id       = sugar_calendar_get_admin_page_id();
 
 		update_user_meta( $user->ID, "manage{$screen_id}columnshidden", $hidden_columns );
 	}

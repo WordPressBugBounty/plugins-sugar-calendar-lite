@@ -17,6 +17,7 @@ use Sugar_Calendar\Migrations\Migrations;
 use Sugar_Calendar\SetupWizard\SetupWizard;
 use Sugar_Calendar\Tasks\Tasks;
 use Sugar_Calendar\UsageTracking\UsageTracking;
+use Sugar_Calendar\Tasks\OrphanedEventsCleanupTask;
 use Sugar_Calendar\Features\Loader as FeaturesLoader;
 use Sugar_Calendar\Shortcodes\ModernShortcodes;
 use Sugar_Calendar\Admin\Tools\DashboardWidget;
@@ -577,6 +578,7 @@ final class Plugin {
 	 *
 	 * @since 3.0.0
 	 * @since 3.5.0 Add the `perform_post_upgrade` hook.
+	 * @since 3.12.0 Register the orphaned-events cleanup task.
 	 */
 	public function hooks() {
 
@@ -585,6 +587,9 @@ final class Plugin {
 
 		// Initialize Action Scheduler tasks.
 		add_action( 'init', [ $this, 'get_tasks' ], 5 );
+
+		// Register the orphaned-events cleanup task (removes ghost events).
+		add_filter( 'sugar_calendar_tasks_get_tasks', [ $this, 'register_orphaned_events_cleanup_task' ] );
 
 		add_action( 'plugins_loaded', [ $this, 'get_migrations' ] );
 		add_action( 'plugins_loaded', [ $this, 'get_usage_tracking' ] );
@@ -790,6 +795,25 @@ final class Plugin {
 				$tasks->init();
 			}
 		}
+
+		return $tasks;
+	}
+
+	/**
+	 * Register the orphaned-events cleanup task (removes ghost events).
+	 *
+	 * When Pro is active, this base task is swapped for a Pro subclass that also
+	 * cleans orphaned occurrences — see Pro\Features\Loader::get_tasks() (priority 20).
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $tasks Registered task classes.
+	 *
+	 * @return array
+	 */
+	public function register_orphaned_events_cleanup_task( $tasks ) {
+
+		$tasks[] = OrphanedEventsCleanupTask::class;
 
 		return $tasks;
 	}

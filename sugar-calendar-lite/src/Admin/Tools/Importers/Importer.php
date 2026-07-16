@@ -780,7 +780,7 @@ abstract class Importer implements ImporterInterface {
 		}
 
 		$new_order_data = [
-			'transaction_id' => $order_data['transaction_id'],
+			'transaction_id' => ! empty( $order_data['transaction_id'] ) ? $order_data['transaction_id'] : null,
 			'currency'       => $order_data['currency'],
 			'status'         => $order_data['status'],
 			'discount_id'    => '',

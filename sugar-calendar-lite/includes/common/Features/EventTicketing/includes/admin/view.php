@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
-use Sugar_Calendar\AddOn\Ticketing\Gateways as Gateways;
 
 /**
  * Render the order details page
@@ -290,25 +289,19 @@ function view( $order_id = 0 ) {
 }
 
 /**
- * Update an order update request
+ * Handle an order update request.
  *
  * @since 1.0.0
+ * @since 3.12.0 Dispatch refunds through the order's gateway (refund_order());
+ *                  fail loud without flipping status on gateway error. Method
+ *                  split into request-verification, status-change, and redirect
+ *                  helpers.
  */
 function update() {
 
-	// Bail if not updating order
-	if ( empty( $_POST['sc_et_update_order'] ) || empty( $_POST['sc_event_tickets_nonce'] ) ) {
+	// Bail (or wp_die) if this is not an authorized order-update request.
+	if ( ! verify_order_update_request() ) {
 		return;
-	}
-
-	// Bail if user cannot manage options
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have the necessary capabilities to modify orders.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 )  );
-	}
-
-	// Bail if nonce fails
-	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
-		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
 	}
 
 	// Order ID
@@ -322,57 +315,117 @@ function update() {
 		: '';
 
 	// Get the order
-	$order  = Functions\get_order( $order_id );
+	$order = Functions\get_order( $order_id );
 
-	// Default notice ID
-	$notice_id = 'order-update';
-
-	// Order exists
+	// Apply the change (or record why it couldn't be applied).
 	if ( ! empty( $order->id ) ) {
-
-		// Do we need to refund in Stripe?
-		if ( ( 'refunded' === $status ) && ( 'paid' === $order->status ) && ( false !== strpos( $order->transaction_id, 'pi_' ) ) ) {
-
-			// Setup stripe
-			$stripe = new Gateways\Stripe;
-
-			// Load the SDK
-			$stripe->load_sdk();
-
-			// Refund payment in Stripe
-			\Stripe\Refund::create(
-				array(
-					'payment_intent' => $order->transaction_id,
-				)
-			);
-
-			// Update notice ID
-			$notice_id = 'order-refund';
-		}
-
-		// New status
-		$to_update = array(
-			'status' => $status
-		);
-
-		// Update the order
-		$notice_type = Functions\update_order( $order_id, $to_update )
-			? 'updated'
-			: 'error';
+		list( $notice_id, $notice_type ) = apply_order_status_change( $order, $order_id, $status );
+	} else {
+		$notice_id   = 'order-update';
+		$notice_type = 'error';
 	}
 
-	// Setup URL
+	redirect_with_order_notice( $order_id, $notice_id, $notice_type );
+}
+
+/**
+ * Verify an incoming order-update request.
+ *
+ * Returns false when the request is simply not ours (so the caller returns
+ * quietly); wp_die()s on a real authorization failure (capability or nonce).
+ *
+ * @since 3.12.0
+ *
+ * @return bool True when the request is authorized and should be handled.
+ */
+function verify_order_update_request() {
+
+	// Not an order-update submission.
+	if ( empty( $_POST['sc_et_update_order'] ) || empty( $_POST['sc_event_tickets_nonce'] ) ) {
+		return false;
+	}
+
+	// Bail if user cannot manage options.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You do not have the necessary capabilities to modify orders.', 'sugar-calendar-lite' ), esc_html__( 'Error', 'sugar-calendar-lite' ), array( 'response' => 403 ) );
+	}
+
+	// Bail if nonce fails.
+	if ( ! wp_verify_nonce( $_POST['sc_event_tickets_nonce'], 'sc_event_tickets' ) ) {
+		wp_die( esc_html__( 'This URL has expired. Please refresh and try again.', 'sugar-calendar-lite' ) );
+	}
+
+	return true;
+}
+
+/**
+ * Apply a status change to an existing order and resolve the admin notice.
+ *
+ * Refunding a paid order first dispatches to the gateway that processed it
+ * (`refund_order()`). On a gateway failure the status is left unchanged (fail
+ * loud). If the gateway refund succeeds but persisting the new status fails, a
+ * distinct notice warns the admin to fix the status manually rather than
+ * re-submitting — which would issue a SECOND refund (the double-refund guard
+ * keys off status='paid').
+ *
+ * @since 3.12.0
+ *
+ * @param object $order    The order object.
+ * @param int    $order_id The order ID.
+ * @param string $status   The requested new status.
+ *
+ * @return array [ string $notice_id, string $notice_type ].
+ */
+function apply_order_status_change( $order, $order_id, $status ) {
+
+	$notice_id = 'order-update';
+
+	// Refunding a paid order: dispatch to the gateway that processed it.
+	if ( ( 'refunded' === $status ) && ( 'paid' === $order->status ) ) {
+
+		$refund = Functions\refund_order( $order );
+
+		// Fail loud: gateway refund failed → do NOT flip status.
+		if ( is_wp_error( $refund ) ) {
+			return array( 'order-refund', 'error' );
+		}
+
+		// Refund succeeded (or was a no-op); use the refund notice.
+		$notice_id = 'order-refund';
+	}
+
+	// Persist the new status.
+	$updated = Functions\update_order( $order_id, array( 'status' => $status ) );
+
+	// Refund executed but the status write failed — warn distinctly.
+	if ( ! $updated && ( 'order-refund' === $notice_id ) ) {
+		return array( 'order-refund-status-failed', 'error' );
+	}
+
+	return array( $notice_id, $updated ? 'updated' : 'error' );
+}
+
+/**
+ * Redirect back to the orders admin with a notice, then exit.
+ *
+ * @since 3.12.0
+ *
+ * @param int    $order_id    The order ID.
+ * @param string $notice_id   The notice key (see Admin\notices()).
+ * @param string $notice_type The notice type (`updated` | `error`).
+ */
+function redirect_with_order_notice( $order_id, $notice_id, $notice_type ) {
+
 	$url = add_query_arg(
 		array(
 			'page'           => 'sc-event-ticketing',
 			'order_id'       => $order_id,
 			'sc-notice-id'   => $notice_id,
-			'sc-notice-type' => $notice_type
+			'sc-notice-type' => $notice_type,
 		),
 		admin_url( 'admin.php' )
 	);
 
-	// Redirect
 	wp_safe_redirect( $url );
 	exit;
 }

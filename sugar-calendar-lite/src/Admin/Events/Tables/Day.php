@@ -155,9 +155,10 @@ class Day extends Grid {
 
 		// Maybe skip an event in a cell.
 		switch ( $cell_type ) {
-			// Only allow all-day events in all-day cells.
+			// The Day view shows multi-day events in the All Day row alongside
+			// all-day events, so accept both here.
 			case 'all_day':
-				if ( ! $item->is_all_day() ) {
+				if ( ! $item->is_all_day() && ! $item->is_multi( 'j' ) ) {
 					$retval = true;
 				}
 				break;
@@ -173,12 +174,30 @@ class Day extends Grid {
 			default:
 				if ( $item->is_all_day() || $item->is_multi( 'j' ) ) {
 					$retval = true;
+					break;
+				}
+
+				// Multi-hour events render once in their start cell.
+				if ( $this->skip_multi_hour_in_cell( $item ) ) {
+					$retval = true;
 				}
 				break;
 		}
 
 		// Return if skipping.
 		return (bool) $retval;
+	}
+
+	/**
+	 * Week and day hour-grid views render timed events as intra-day cards.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return bool
+	 */
+	protected function supports_intra_day_cards() {
+
+		return true;
 	}
 
 	/**
@@ -263,10 +282,27 @@ class Day extends Grid {
 
 					$events = $this->get_current_cell( 'items', [] );
 
+					$day_ymd = gmdate( 'Y-m-d', $this->grid_start );
+
 					foreach ( $events as $event ) :
+
+						$span_classes = [ 'event-span' ];
+
+						// Multi-day events get directional arrow caps: a point on
+						// the side the event continues toward. A flat edge means
+						// the event starts/ends on this day.
+						if ( $event->is_multi( 'j' ) ) {
+							if ( $event->start_date( 'Y-m-d' ) < $day_ymd ) {
+								$span_classes[] = 'event-span--continues-before';
+							}
+
+							if ( $event->end_date( 'Y-m-d' ) > $day_ymd ) {
+								$span_classes[] = 'event-span--continues-after';
+							}
+						}
 						?>
 
-                        <div class="event-span" data-days="<?php echo esc_attr( $day_name ); ?>">
+                        <div class="<?php echo esc_attr( implode( ' ', $span_classes ) ); ?>" data-days="<?php echo esc_attr( $day_name ); ?>">
 							<?php
 							echo $this->get_event( $event ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							?>
@@ -398,7 +434,8 @@ class Day extends Grid {
 	 */
 	protected function set_cells() {
 
-		// All Day, Multi Day cells.
+		// All-day cells. Multi-day events render in the All Day row too, so they
+		// are gathered here rather than in a separate multi-day cell.
 		for ( $i = 0; $i <= $this->day_count - 1; $i++ ) {
 
 			// Setup the row and offset.
@@ -422,19 +459,10 @@ class Day extends Grid {
 				'index' => $i,
 			];
 
-			// Setup all-daycell boundaries.
+			// Setup all-day cell boundaries.
 			$this->set_cell_boundaries( $args );
 
 			// Setup all-day cell items.
-			$this->set_cell_items();
-
-			// Set type to multi-day.
-			$args['type'] = 'multi_day';
-
-			// Setup multi-day cell boundaries.
-			$this->set_cell_boundaries( $args );
-
-			// Setup multi-day cell items.
 			$this->set_cell_items();
 
 			// Bump the day.
@@ -478,11 +506,12 @@ class Day extends Grid {
 	 */
 	protected function display_mode() {
 
-		// All day events.
-		echo $this->get_event_spans_row( 'all_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// Stamp SCB-style cluster layout (column / N / nesting) before the cell
+		// loop reads it, for the proportional overlap rendering.
+		$this->precompute_intra_day_clusters();
 
-		// Multi day events.
-		echo $this->get_event_spans_row( 'multi_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// All-day and multi-day events share the All Day row in the Day view.
+		echo $this->get_event_spans_row( 'all_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		// Loop through days of the month.
 		for ( $i = 0; $i <= ( $this->day_count * 24 ) - 1; $i++ ) {

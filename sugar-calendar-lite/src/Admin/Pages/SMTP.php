@@ -119,6 +119,15 @@ class SMTP extends PageAbstract {
 			wp_send_json_error( __( 'You do not have permission.', 'sugar-calendar-lite' ) );
 		}
 
+		/**
+		 * Fires when the promo page's step-1 install/activate button is clicked.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param string $type Button variant: 'install' or 'activate'.
+		 */
+		do_action( 'sugar_calendar_admin_pages_smtp_install_clicked', 'install' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		$error      = esc_html__( 'Could not install the plugin. Please download and install it manually.', 'sugar-calendar-lite' );
 		$plugin_url = ! empty( $_POST['plugin'] ) ? esc_url_raw( wp_unslash( $_POST['plugin'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
@@ -182,6 +191,9 @@ class SMTP extends PageAbstract {
 		if ( ! current_user_can( 'activate_plugins' ) ) {
 			wp_send_json_error( esc_html__( 'Plugin activation is disabled for you on this site.', 'sugar-calendar-lite' ) );
 		}
+
+		/** This action is documented in src/Admin/Pages/SMTP.php (ajax_install_smtp). */
+		do_action( 'sugar_calendar_admin_pages_smtp_install_clicked', 'activate' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 		$success_message = __( 'Plugin activated.', 'sugar-calendar-lite' );
 		$error_message   = __( 'Could not activate the plugin. Please activate it on the Plugins page.', 'sugar-calendar-lite' );
@@ -387,7 +399,7 @@ class SMTP extends PageAbstract {
 			esc_url( SC_PLUGIN_ASSETS_URL . '/images/smtp/sugar-calendar-wpmailsmtp@2x.png' ),
 			esc_attr__( 'Sugar Calendar ♥ WP Mail SMTP', 'sugar-calendar-lite' ),
 			esc_html__( 'Making Email Deliverability Easy for WordPress', 'sugar-calendar-lite' ),
-			esc_html__( 'WP Mail SMTP fixes deliverability problems with your WordPress emails and event notifications. It\'s built by the same folks behind Sugar Calendar.', 'sugar-calendar-lite' )
+			esc_html__( 'WP Mail SMTP fixes deliverability problems with your WordPress emails and event notifications. It\'s built by the same folks behind Sugar Calendar and is used by more than 4 million websites.', 'sugar-calendar-lite' )
 		);
 	}
 
@@ -409,16 +421,14 @@ class SMTP extends PageAbstract {
 					<li>%4$s</li>
 					<li>%5$s</li>
 					<li>%6$s</li>
-					<li>%7$s</li>
 				</ul>
 			</section>',
 			esc_url( SC_PLUGIN_ASSETS_URL . 'images/smtp/screenshot-tnail.png?ver=' . BaseHelpers::get_asset_version() ),
 			esc_attr__( 'WP Mail SMTP screenshot', 'sugar-calendar-lite' ),
 			esc_url( SC_PLUGIN_ASSETS_URL . 'images/smtp/screenshot-full.png?ver=' . BaseHelpers::get_asset_version() ),
-			esc_html__( 'Improves email deliverability in WordPress.', 'sugar-calendar-lite' ),
-			esc_html__( 'Used by 4+ million websites.', 'sugar-calendar-lite' ),
-			esc_html__( 'Free mailers: SendLayer, SMTP.com, Brevo, Google Workspace / Gmail, Mailgun, Postmark, SendGrid.', 'sugar-calendar-lite' ),
-			esc_html__( 'Pro mailers: Amazon SES, Microsoft 365 / Outlook.com, Zoho Mail.', 'sugar-calendar-lite' )
+			esc_html__( 'Resolves email deliverability for your site.', 'sugar-calendar-lite' ),
+			esc_html__( 'Email logs allow you to resend failed emails, alerts notify you about failures and you can set a backup provider for total peace of mind.', 'sugar-calendar-lite' ),
+			esc_html__( 'Choose from many providers: SendLayer, SMTP.com, Brevo, Gmail, Outlook, SES, and more.', 'sugar-calendar-lite' )
 		);
 	}
 
@@ -435,13 +445,14 @@ class SMTP extends PageAbstract {
 			return;
 		}
 
-		$button_format       = '<button class="button %3$s" data-plugin="%1$s" data-action="%4$s" data-source="%5$s">%2$s</button>';
+		$button_format       = '<button class="button %3$s" data-plugin="%1$s" data-action="%4$s" data-source="%5$s"%6$s>%2$s</button>';
 		$button_allowed_html = [
 			'button' => [
 				'class'       => true,
 				'data-plugin' => true,
 				'data-action' => true,
 				'data-source' => true,
+				'disabled'    => true,
 			],
 		];
 
@@ -467,7 +478,25 @@ class SMTP extends PageAbstract {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$source = 'sugar-calendar-events';
-		$button = sprintf( $button_format, esc_attr( $step['plugin'] ), esc_html( $step['button_text'] ), esc_attr( $step['button_class'] ), esc_attr( $step['button_action'] ), esc_attr( $source ) );
+
+		// Render the actionable button disabled + dimmed until sc-admin-smtp.js binds its
+		// click handler (the script loads in the footer). This prevents a click made before
+		// the handler exists — likely on a slow admin page — from being silently dropped.
+		$awaiting_js = in_array( $step['button_action'] ?? '', [ 'install', 'activate' ], true );
+
+		if ( $awaiting_js ) {
+			$step['button_class'] .= ' grey';
+		}
+
+		$button = sprintf(
+			$button_format,
+			esc_attr( $step['plugin'] ),
+			esc_html( $step['button_text'] ),
+			esc_attr( $step['button_class'] ),
+			esc_attr( $step['button_action'] ),
+			esc_attr( $source ),
+			$awaiting_js ? ' disabled="disabled"' : ''
+		);
 
 		printf(
 			'<section class="step step-install">

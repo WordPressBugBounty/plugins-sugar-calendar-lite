@@ -565,6 +565,24 @@ class Renderer {
 			get_admin_url( null, 'admin.php' )
 		);
 
+		/**
+		 * Filter the admin ticket stats for an event.
+		 *
+		 * `ticket_total` here reads only the legacy general `ticket_quantity`.
+		 * The multi-ticket add-on hooks this to replace it with the sum of the
+		 * per-type capacities so the admin list shows the true total.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param array  $event_data Ticket stats: ticket_total, tickets_purchased, ticket_url.
+		 * @param object $event      The event object.
+		 */
+		$event_data = (array) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sc_et_admin_event_ticket_stats',
+			$event_data,
+			$this->event
+		);
+
 		$this->extra_data = $event_data;
 
 		return $this->extra_data;

@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 6.2
 Tested up to:      7.0
-Stable tag:        3.11.1
+Stable tag:        3.12.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,28 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.12.0 - 2026-07-16 =
+- Added: **NEW** Online Meetings: connect your Zoom account with a guided one-click setup and add a Zoom meeting to any event, right from the event editor.
+- Added: **NEW** AI-ready events: AI assistants and automation tools can now work with your events (via the WordPress Abilities API).
+- Added: Redesigned Integrations settings area that shows all your connections in one place.
+- Added: New License & Usage tab: see your license details and integration usage at a glance.
+- Added: Unified Location tab in the event editor: set the venue address, the online meeting, or both in one place.
+- Added: Online events now include structured data, so Google can display them properly in search results.
+- Added: Visitors can now click "Register Now" or "Buy Tickets" directly in the calendar popup.
+- Added: Event images in the Event List and Event Calendar blocks now load faster and look sharper on any screen size.
+- Added: New developer actions and filters for Event Ticketing.
+- Changed: Events spanning multiple hours now show their real length in the Calendar block week view.
+- Changed: Design consistency and quality-of-life improvements across the admin.
+- Fixed: Compatibility issues with the WPML translation plugin.
+- Fixed: Links were being removed from the Email Message field.
+- Fixed: Deleted events no longer leave "ghost" entries behind.
+- Fixed: Checkout with multiple tickets could fail at the payment step.
+- Fixed: Error when opening the admin Day view with an invalid date in the link.
+- Fixed: All-day events now display correctly in the Calendar block week and day views.
+- Fixed: Restored the missing "Edit Tag" link on the Events list view.
+- Fixed: PHP warning that could appear in event blocks when an event had no tag.
+- Fixed: Security improvements.
+
 = 3.11.1 - 2026-05-20 =
 - Fixed: PHP 8 type error when the filter `wp_insert_post_empty_content` is used with type hinting.
 - Fixed: PHP 8.1+ PHP warning logs.

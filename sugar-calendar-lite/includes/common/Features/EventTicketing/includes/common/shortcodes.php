@@ -7,6 +7,8 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
+use Sugar_Calendar\Integrations\OnlineMeeting;
+use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
 
 /**
  * Outputs the content for the [sc_event_tickets_receipt] shortcode.
@@ -304,7 +306,7 @@ function render_receipt_body( $order, $event ) {
 				<th colspan="3"><?php esc_html_e( 'Transaction ID', 'sugar-calendar-lite' ); ?></th>
 			</tr>
 			<tr>
-				<td colspan="3"><?php echo esc_html( $order->transaction_id ); ?></td>
+				<td colspan="3"><?php echo esc_html( (string) $order->transaction_id ); ?></td>
 			</tr>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Status', 'sugar-calendar-lite' ); ?></th>
@@ -318,6 +320,22 @@ function render_receipt_body( $order, $event ) {
 			<tr>
 				<td colspan="3"><?php echo esc_html( get_event_meta( $event->id, 'location', true ) ); ?></td>
 			</tr>
+			<?php
+			$sc_online = OnlineMeeting::for_event( $event );
+			if ( $sc_online !== null ) :
+			?>
+			<tr>
+				<th colspan="3"><?php esc_html_e( 'Online Meeting', 'sugar-calendar-lite' ); ?></th>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<?php
+					// Pre-escaped by the presenter.
+					echo OnlineMeetingPresenter::front_end_html( $sc_online ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+				</td>
+			</tr>
+			<?php endif; ?>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Event', 'sugar-calendar-lite' ); ?></th>
 			</tr>
@@ -353,7 +371,16 @@ function render_receipt_body( $order, $event ) {
 
 								<?php if ( ! empty( $attendee ) ) : ?>
 
-									<div class="sc-event-ticketing-attendee"><?php printf( esc_html__( 'For: %s', 'sugar-calendar-lite' ), esc_html( $attendee->first_name . ' ' . $attendee->last_name ) . ', ' . esc_html( $attendee->email ) ); ?></div>
+									<div class="sc-event-ticketing-attendee">
+										<?php
+										$attendee_name = trim( $attendee->first_name . ' ' . $attendee->last_name );
+										$for_value     = ( '' !== $attendee_name )
+											? $attendee_name . ', ' . $attendee->email
+											: $attendee->email;
+
+										printf( esc_html__( 'For: %s', 'sugar-calendar-lite' ), esc_html( $for_value ) );
+										?>
+									</div>
 									<a href="<?php echo wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'email_ticket', 'ticket_code' => $ticket->code ), $home ), $ticket->code ); ?>"><?php esc_html_e( 'Send via Email', 'sugar-calendar-lite' ); ?></a>
 									&nbsp;|&nbsp;
 

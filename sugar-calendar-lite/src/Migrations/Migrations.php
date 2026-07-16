@@ -63,6 +63,7 @@ class Migrations {
 	 * Get migrations classes.
 	 *
 	 * @since 3.0.0
+	 * @since 3.12.0 Register the orphaned-events cleanup migration.
 	 *
 	 * @return array Migrations classes.
 	 */
@@ -71,6 +72,8 @@ class Migrations {
 		$migrations = [
 			Migration::class,
 			GeocodedCacheMigration::class,
+			EventTermCountMigration::class,
+			OrphanedEventsCleanupMigration::class,
 		];
 
 		/**

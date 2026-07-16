@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Block\Calendar\CalendarView\Day;
 use Sugar_Calendar\Block\Calendar\CalendarView\Block;
 use Sugar_Calendar\Block\Common\InterfaceBaseView;
 use Sugar_Calendar\Block\Common\Template;
+use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
 use Sugar_Calendar\Helper;
 
 /**
@@ -161,9 +162,20 @@ class Day implements InterfaceBaseView {
 			);
 		}
 
+		$visitor_timezone = $this->get_block()->get_visitor_timezone();
+
 		foreach ( $events as $event ) {
 
-			if ( $event->is_all_day() ) {
+			// Multi-day events span the whole day in the hour grid and would
+			// cover the timed events (and each other). Group them with the
+			// all-day events so they render in the All-Day row instead of the
+			// hour grid. Use timezone-aware detection when a visitor timezone
+			// is available.
+			$event_is_multi = $visitor_timezone
+				? TimezoneConversionHelper::is_multi_day_in_timezone( $event, $visitor_timezone )
+				: $event->is_multi();
+
+			if ( $event_is_multi || $event->is_all_day() ) {
 				$this->all_day_events[] = $event;
 
 				continue;

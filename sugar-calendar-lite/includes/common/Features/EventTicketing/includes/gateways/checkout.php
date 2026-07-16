@@ -28,11 +28,25 @@ class Checkout {
 	 */
 	const NONCE_KEY = 'sc_et_nonce';
 
+	/**
+	 * The built-in gateway map used as the `sc_et_gateways` filter default.
+	 *
+	 * Single source of truth so the constructor and any other caller (e.g.
+	 * refund dispatch) share one default and stay rename-safe via ::class.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return array Map of gateway slug => gateway class FQCN.
+	 */
+	public static function default_gateways() {
+		return [
+			'stripe' => Stripe::class,
+		];
+	}
+
 	public function __construct() {
 
-		$this->gateways = apply_filters( 'sc_et_gateways', [
-			'stripe' => __NAMESPACE__ . '\\Stripe'
-		] );
+		$this->gateways = apply_filters( 'sc_et_gateways', self::default_gateways() );
 
 		add_action( 'init',                                   array( $this, 'load_gateways' ), 9 );
 		add_action( 'init',                                   array( $this, 'process_form' ) );
@@ -234,12 +248,42 @@ class Checkout {
 	}
 
 	/**
+	 * Resolve an event and report whether it is a multi-ticket event.
+	 *
+	 * Single source of truth for the multi-ticket check shared by validate_data()
+	 * and complete(): both exempt multi-ticket events from the single-ticket
+	 * count(attendees) > quantity guard, so the detection must stay identical.
+	 * Defaults to false (single-ticket) when the event can't be resolved or the
+	 * add-on isn't filtering.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param int $event_id The event ID.
+	 *
+	 * @return bool
+	 */
+	private function is_multiple_tickets_event( $event_id ) {
+
+		$event = ! empty( $event_id )
+			? sugar_calendar_get_event( $event_id )
+			: false;
+
+		return ! empty( $event )
+			? (bool) apply_filters( 'sc_et_is_multiple_tickets', false, $event, $event->object_id )
+			: false;
+	}
+
+	/**
 	 * Validate the checkout form data.
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Add required condition for attendee fields.
 	 * @since 3.11.0 Fixed the condition for limit capacity.
 	 * @since 3.11.1 Reject submissions where count(attendees) > sc_et_quantity.
+	 * @since 3.12.0 Skip the count(attendees) > sc_et_quantity guard for
+	 *                  multi-ticket events, where attendees[] legitimately spans
+	 *                  all ticket types and the add-on's per-type cart/attendee
+	 *                  parity gate validates the composition instead.
 	 */
 	public function validate_data() {
 
@@ -263,6 +307,12 @@ class Checkout {
 			? absint( $_POST['sc_et_event_id'] )
 			: 0;
 
+		// Multi-ticket orders submit one attendees[] row per ticket across every
+		// selected type, so the single-ticket count <= quantity guard below does
+		// not apply; the add-on's per-type cart/attendee parity gate (hooked on
+		// sc_et_checkout_validate_data) validates that case instead.
+		$is_multiple_tickets = $this->is_multiple_tickets_event( $event_id );
+
 		// Check if capacity limitation is enabled.
 		$limit_capacity = absint( get_event_meta( $event_id, 'ticket_limit_capacity', true ) );
 		$available      = Functions\get_available_tickets( $event_id );
@@ -276,11 +326,13 @@ class Checkout {
 		// Validate attendees if present.
 		if ( ! empty( $_POST['attendees'] ) && is_array( $_POST['attendees'] ) ) {
 
-			// Reject any submission whose attendees[] count exceeds the
-			// quantity the buyer is paying for. complete() mints one ticket
+			// Reject any single-ticket submission whose attendees[] count exceeds
+			// the quantity the buyer is paying for. complete() mints one ticket
 			// per attendee row, so without this check the array becomes a
-			// capacity bypass.
-			if ( count( $_POST['attendees'] ) > $qty ) {
+			// capacity bypass. Multi-ticket events are exempt: attendees[] spans
+			// all ticket types there, and the add-on's cart/attendee parity gate
+			// enforces the per-type composition instead.
+			if ( ! $is_multiple_tickets && count( $_POST['attendees'] ) > $qty ) {
 				$this->add_error(
 					'attendees_exceed_quantity',
 					esc_html__( 'The number of attendees exceeds the selected ticket quantity.', 'sugar-calendar-lite' ),
@@ -426,6 +478,12 @@ class Checkout {
 	 *                  capacity or count($attendees) exceeds $quantity. Defense
 	 *                  in depth for code paths that reach complete() without
 	 *                  running validate_data().
+	 * @since 3.12.0 Exempt multi-ticket events from the count($attendees) >
+	 *                  $quantity hard-fail (attendees[] spans all ticket types;
+	 *                  the add-on's parity gate validates the composition).
+	 * @since 3.12.0 Fire the sc_et_checkout_complete action with the full
+	 *                  order snapshot once the order is persisted.
+	 * @since 3.12.0 Stamp the processing gateway on the order.
 	 *
 	 * @param array $order_data Order data.
 	 */
@@ -449,6 +507,13 @@ class Checkout {
 			? max( absint( $_POST['sc_et_quantity'] ), 1 )
 			: 1;
 
+		// Resolve the event up front; used for the event date further down.
+		$event = ! empty( $event_id )
+			? sugar_calendar_get_event( $event_id )
+			: false;
+
+		$is_multiple_tickets = $this->is_multiple_tickets_event( $event_id );
+
 		// Defense in depth: validate_data() rejects oversold and mismatched
 		// payloads, but a code path reaching complete() without running
 		// validate_data() (e.g., a third-party gateway hooked via sc_et_gateways)
@@ -464,16 +529,14 @@ class Checkout {
 			);
 		}
 
-		if ( count( $attendees ) > $quantity ) {
+		// Single-ticket only: attendees[] spans all types in multi-ticket mode,
+		// where the add-on's cart/attendee parity gate enforces composition.
+		if ( ! $is_multiple_tickets && count( $attendees ) > $quantity ) {
 			wp_die(
 				esc_html__( 'The number of attendees exceeds the selected ticket quantity.', 'sugar-calendar-lite' ),
 				400
 			);
 		}
-
-		$event = ! empty( $event_id )
-			? sugar_calendar_get_event( $event_id )
-			: false;
 
 		$event_date = ! empty( $event )
 			? $event->start
@@ -509,7 +572,28 @@ class Checkout {
 			}
 		}
 
+		// Record the processing gateway on the order (its key in the
+		// sc_et_gateways map). Refunds dispatch back to this gateway.
+		$order_data['gateway'] = ! empty( $this->gateway )
+			? $this->gateway
+			: 'stripe';
+
 		$order_id = Functions\add_order( $order_data );
+
+		// The UNIQUE constraint on transaction_id rejects a second order
+		// that reuses a paid PaymentIntent — the losing side of a replay race.
+		// Bail before minting any tickets so we never create tickets bound to a
+		// non-existent order. The app-level replay SELECT catches the common
+		// case earlier; this guard covers the concurrent race.
+		if ( empty( $order_id ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					[ 'error_code' => 'sc_et_order_not_created' ],
+					Helper::get_event_frontend_url( $event )
+				)
+			);
+			exit;
+		}
 
 		// Create tickets.
 		foreach ( $stored_attendees as $attendee ) {
@@ -571,6 +655,20 @@ class Checkout {
 		}
 
 		do_action( 'sc_et_checkout_pre_redirect', $order_id, $order_data );
+
+		/**
+		 * Fires once after a ticket order is fully persisted (order, tickets,
+		 * and attendees saved), for every gateway and the free-ticket path.
+		 *
+		 * Provides a single, complete snapshot of the purchase so integrations
+		 * don't have to reassemble it from the individual checkout hooks.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param array $payload  Order snapshot. See get_checkout_complete_payload().
+		 * @param int   $order_id Order ID.
+		 */
+		do_action( 'sc_et_checkout_complete', Functions\get_checkout_complete_payload( $order_id ), $order_id );
 
 		$redirect = Functions\issue_new_receipt_link( Functions\get_order( $order_id ) );
 		if ( '' === $redirect ) {
@@ -692,6 +790,7 @@ class Checkout {
 				'first_name' => '',
 				'last_name'  => '',
 				'email'      => '',
+				'ticket_type' => 0,
 			];
 		}
 
@@ -700,11 +799,19 @@ class Checkout {
 			'first_name' => isset( $attendee['first_name'] ) ? sanitize_text_field( $attendee['first_name'] ) : '',
 			'last_name'  => isset( $attendee['last_name'] )  ? sanitize_text_field( $attendee['last_name'] )  : '',
 			'email'      => isset( $attendee['email'] )      ? sanitize_email( $attendee['email'] )           : '',
+			// Preserve the multi-ticket type id so the ticketing add-on can bind
+			// each minted ticket to its purchased type. The add-on validates the
+			// id against the event before use; core keeps it as an opaque absint.
+			'ticket_type' => isset( $attendee['ticket_type'] ) ? absint( $attendee['ticket_type'] ) : 0,
 		];
 	}
 
 	private function send_to_gateway() {
 		$gateway_obj = new $this->gateways[ $this->gateway ];
+
+		// Record which gateway is processing so complete() can stamp the order.
+		$gateway_obj->gateway = $this->gateway;
+
 		$gateway_obj->process();
 	}
 }

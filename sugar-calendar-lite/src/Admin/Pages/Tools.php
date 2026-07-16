@@ -139,6 +139,11 @@ class Tools extends PageTabAbstract {
 			<div class="sugar-calendar-admin-content">
 				<h1 class="screen-reader-text"><?php esc_html_e( 'Tools', 'sugar-calendar-lite' ); ?></h1>
 
+				<?php
+				// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+				do_action( 'sugar_calendar_admin_page_content_top' );
+				?>
+
 				<?php static::display_tab(); ?>
 			</div>
 		</div>

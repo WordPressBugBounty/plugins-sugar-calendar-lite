@@ -1771,7 +1771,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		$order_data = [
-			'transaction_id' => $tec_order['gateway_order_id'],
+			'transaction_id' => ! empty( $tec_order['gateway_order_id'] ) ? $tec_order['gateway_order_id'] : null,
 			'currency'       => $tec_order['currency'],
 			'status'         => $order_status,
 			'discount_id'    => '',

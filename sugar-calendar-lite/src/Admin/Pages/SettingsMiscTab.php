@@ -7,6 +7,7 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Helpers as BaseHelper;
+use Sugar_Calendar\Integrations\IntegrationsDisabler;
 
 /**
  * General Settings tab.
@@ -25,6 +26,48 @@ class SettingsMiscTab extends Settings {
 		parent::hooks();
 
 		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
+	}
+
+	/**
+	 * Enqueue page assets.
+	 *
+	 * Adds the jQuery-Confirm library + localized strings used to confirm the
+	 * Lite "Disable Integrations" toggle before it tears down every connection.
+	 * Scoped to Lite, where that toggle is the only one rendered.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets() {
+
+		parent::enqueue_assets();
+
+		// The Disable Integrations toggle (and its confirm) only exist on Lite.
+		if ( sugar_calendar()->is_pro() ) {
+			return;
+		}
+
+		// Use the Sugar Calendar jQuery-Confirm theme (a full stylesheet that
+		// replaces the vendor CSS), not the raw vendor style — the raw style
+		// would load after the theme and override it (icon inline instead of
+		// centered). Mirrors how Connect enqueues the confirm dialog.
+		wp_enqueue_style( 'sugar-calendar-admin-confirm' );
+		wp_enqueue_script( 'sugar-calendar-vendor-jquery-confirm' );
+
+		wp_localize_script(
+			'sugar-calendar-admin-settings',
+			'sugar_calendar_admin_settings_misc',
+			[
+				'disable_integrations_confirm' => [
+					'title'   => esc_html__( 'Disable Integrations?', 'sugar-calendar-lite' ),
+					'message' => esc_html__( 'All existing integration connections will be permanently removed. This action cannot be undone.', 'sugar-calendar-lite' ),
+					'confirm' => esc_html__( 'Disable', 'sugar-calendar-lite' ),
+					'cancel'  => esc_html__( 'Cancel', 'sugar-calendar-lite' ),
+					'icon'    => SC_PLUGIN_ASSETS_URL . 'images/icons/exclamation-circle-solid-yellow.svg',
+				],
+			]
+		);
 	}
 
 	/**
@@ -111,25 +154,21 @@ class SettingsMiscTab extends Settings {
 			]
 		);
 
-		/**
-		 * Whether to allow tracking of user settings.
-		 *
-		 * @since 3.0.0
-		 *
-		 * @param bool $allow Whether to allow tracking of user settings.
-		 */
-		if ( apply_filters( 'sugar_calendar_admin_pages_settings_misc_tab_show_allow_usage_tracking_setting', true ) ) {
+		// Lite-only kill-switch: disables every external integration AND usage
+		// tracking (tracking is derived from this option). Pro is always enabled
+		// and always tracks (forced via the sugar_calendar_usage_tracking_is_enabled
+		// filter in includes/pro/Pro.php), so the toggle is never shown there.
+		if ( ! sugar_calendar()->is_pro() ) {
 
-			$allow_usage_tracking = Options::get( 'allow_usage_tracking', false );
+			$disable_integrations = Options::get( 'disable_integrations', false );
 
-			// Hide Announcements.
 			UI::toggle_control(
 				[
-					'id'          => 'allow_usage_tracking',
-					'name'        => 'allow_usage_tracking',
-					'value'       => $allow_usage_tracking,
-					'label'       => esc_html__( 'Allow Usage Tracking', 'sugar-calendar-lite' ),
-					'description' => __( 'By allowing us to track usage data we can better help you because we know with which WordPress configurations, themes and plugins we should test.', 'sugar-calendar-lite' ),
+					'id'          => 'disable_integrations',
+					'name'        => 'disable_integrations',
+					'value'       => $disable_integrations,
+					'label'       => esc_html__( 'Disable Integrations', 'sugar-calendar-lite' ),
+					'description' => esc_html__( 'Disconnect and disable all external integrations and usage tracking for Sugar Calendar.', 'sugar-calendar-lite' ),
 				]
 			);
 		}
@@ -142,24 +181,24 @@ class SettingsMiscTab extends Settings {
 	 *
 	 * @param array $post_data Post data.
 	 */
-	public function handle_post( $post_data = [] ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
+	public function handle_post( $post_data = [] ) {
 
-		$settings = [
-			'hide_announcements',
-			'allow_usage_tracking',
-		];
+		// Hide Announcements (all editions).
+		Options::update( 'hide_announcements', isset( $post_data['hide_announcements'] ) );
 
-		foreach ( $settings as $key ) {
-			$value = $post_data[ $key ] ?? '';
+		// Disable Integrations is a Lite-only control; never let a Pro request
+		// write it (the toggle is not rendered there).
+		if ( ! sugar_calendar()->is_pro() ) {
 
-			switch ( $key ) {
-				case 'hide_announcements':
-				case 'allow_usage_tracking':
-					$value = isset( $post_data[ $key ] );
-					break;
+			$was_disabled = (bool) Options::get( 'disable_integrations', false );
+			$now_disabled = isset( $post_data['disable_integrations'] );
+
+			Options::update( 'disable_integrations', $now_disabled );
+
+			// On the off -> on transition, tear down every external connection.
+			if ( ! $was_disabled && $now_disabled ) {
+				( new IntegrationsDisabler() )->disable();
 			}
-
-			Options::update( $key, $value );
 		}
 
 		WP::add_admin_notice( esc_html__( 'Settings saved.', 'sugar-calendar-lite' ), WP::ADMIN_NOTICE_SUCCESS );

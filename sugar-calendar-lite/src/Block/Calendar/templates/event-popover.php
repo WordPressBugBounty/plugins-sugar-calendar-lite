@@ -7,6 +7,7 @@
 			<div class="sugar-calendar-block__popover__event__container__content__time"></div>
 			<div class="sugar-calendar-block__popover__event__container__content__calendar"></div>
 			<div class="sugar-calendar-block__popover__event__container__content__description"></div>
+			<a href="#" class="sugar-calendar-block__popover__event__container__content__cta" style="display: none;"></a>
 		</div>
 	</div>
 </div>

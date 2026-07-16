@@ -118,16 +118,20 @@ class Events extends EventAbstract {
 	 * Check if current screen is in list mode.
 	 *
 	 * @since 3.7.0
+	 * @since 3.12.0 Fall back to the saved view preference when no ?mode is present.
 	 *
 	 * @return bool
 	 */
 	public function is_list_mode() {
 
-		// Get current screen mode.
-		$mode = isset( $_GET['mode'] ) ? sanitize_text_field( wp_unslash( $_GET['mode'] ) ) : '';
+		// Honor an explicit ?mode override, otherwise use the saved view preference the page renders from.
+		if ( isset( $_GET['mode'] ) ) {
+			$mode = sanitize_text_field( wp_unslash( $_GET['mode'] ) );
+		} else {
+			$mode = sugar_calendar_get_user_preference( 'events_view_mode' );
+		}
 
-		// Return true if mode is 'list'.
-		return ! empty( $mode ) && $mode === 'list';
+		return $mode === 'list';
 	}
 
 	/**

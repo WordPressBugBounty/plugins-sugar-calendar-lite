@@ -9,6 +9,7 @@ use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Helpers\OverlapClusters;
 use Sugar_Calendar\Options;
 
 /**
@@ -19,6 +20,29 @@ use Sugar_Calendar\Options;
  * @since 3.0.0
  */
 class EventCell implements InterfaceView {
+
+	/**
+	 * Right-edge gap (px) for block intra-day cards. Differs from the admin
+	 * Grid's INTRA_DAY_CARD_RIGHT_GAP_PX (10) by design — block columns are
+	 * narrower.
+	 *
+	 * @since 3.12.0
+	 */
+	private const CLUSTER_GAP_PX = 6;
+
+	/**
+	 * Left indent (px) applied per nesting level, mirroring the admin layout.
+	 *
+	 * @since 3.12.0
+	 */
+	private const CLUSTER_NESTING_INDENT_PX = 10;
+
+	/**
+	 * Base z-index for clustered cards; later columns and nesting stack above it.
+	 *
+	 * @since 3.12.0
+	 */
+	private const CLUSTER_Z_INDEX_BASE = 10;
 
 	/**
 	 * Event.
@@ -135,41 +159,54 @@ class EventCell implements InterfaceView {
 	 *
 	 * @return string
 	 */
-	public function get_style() {
+	public function get_style() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded, Generic.Metrics.NestingLevel.MaxExceeded
 
 		$styles = $this->get_border_styles();
 
 		if ( ! $this->is_all_day ) {
 			$styles['height'] = $this->get_height() . 'px';
 
-			if ( $this->has_overlap() ) {
+			if ( $this->has_cluster() ) {
 
-				$padding_modifier = $this->is_day_view() ? 36 : 12;
+				// SCB-style proportional layout (Week and Day block): divide the
+				// (cell width − gap) into N columns; each card spans its column
+				// to the right edge, and nesting indents within a shared column.
+				$event   = $this->get_event();
+				$columns = max( 1, (int) ( $event->overlap_columns ?? 1 ) );
+				$column  = max( 1, (int) ( $event->overlap_column ?? 1 ) );
+				$nesting = max( 0, (int) ( $event->overlap_nesting ?? 0 ) );
 
-				$dynamic_padding = $this->get_event()->overlap_count * $padding_modifier;
+				$gap      = self::CLUSTER_GAP_PX;
+				$indent   = $nesting * self::CLUSTER_NESTING_INDENT_PX;
+				$fraction = ( $column - 1 ) / $columns;
 
-				if ( $this->is_day_view() ) {
-					$left  = $dynamic_padding;
-					$width = 14 + $dynamic_padding;
+				if ( $fraction <= 0 ) {
+					$styles['left'] = ( $indent > 0 ) ? sprintf( '%dpx', $indent ) : '0';
 				} else {
-					$left  = 6 + $dynamic_padding;
-					$width = 12 + $dynamic_padding;
+					$left_expr = sprintf( '%s * (100%% - %dpx)', OverlapClusters::format_number( $fraction ), $gap );
+
+					if ( $indent > 0 ) {
+						$left_expr .= sprintf( ' + %dpx', $indent );
+					}
+
+					$styles['left'] = sprintf( 'calc(%s)', $left_expr );
 				}
 
-				$styles['left'] = sprintf(
-					'%dpx',
-					$left
-				);
+				$width_expr = sprintf( '%s * (100%% - %dpx)', OverlapClusters::format_number( 1 - $fraction ), $gap );
 
-				$styles['width'] = sprintf(
-					'calc(100%% - %dpx)',
-					$width
-				);
+				if ( $indent > 0 ) {
+					$width_expr .= sprintf( ' - %dpx', $indent );
+				}
 
-				$styles['z-index'] = 10 + $this->get_event()->overlap_count;
+				$styles['width'] = sprintf( 'calc(%s)', $width_expr );
+
+				if ( ( $columns > 1 ) || ( $nesting > 0 ) ) {
+					// Column-dominant so later columns and deeper nesting stack on
+					// top, but kept in a low band (step of 10, nesting is single
+					// digit) so cards stay below the event popover's z-index.
+					$styles['z-index'] = self::CLUSTER_Z_INDEX_BASE + ( $column * 10 ) + $nesting;
+				}
 			}
-		} else {
-			$styles['background-color'] = $this->get_color();
 		}
 
 		$style_string = '';
@@ -196,31 +233,38 @@ class EventCell implements InterfaceView {
 
 		$secondary_border_color = $is_dark ? $dark : $light;
 
+		// All event cards — including all-day — intentionally share this border
+		// treatment: the calendar color on the left edge, the secondary color on
+		// the other three sides. (All-day cards previously kept the accent color
+		// on all sides.)
 		$default_border_styles = [
 			'border-color'        => $this->get_color(),
+			'border-top-color'    => $secondary_border_color,
+			'border-right-color'  => $secondary_border_color,
+			'border-bottom-color' => $secondary_border_color,
 		];
-
-		if ( ! $this->is_all_day ) {
-			$default_border_styles['border-top-color']    = $secondary_border_color;
-			$default_border_styles['border-right-color']  = $secondary_border_color;
-			$default_border_styles['border-bottom-color'] = $secondary_border_color;
-		}
 
 		return $default_border_styles;
 	}
 
 	/**
-	 * Whether the event has overlap.
+	 * Whether the event has SCB-style cluster layout (column / N / nesting).
 	 *
-	 * @since 3.0.0
+	 * True only when the event actually shares its time with others, so single
+	 * events keep their default full width.
+	 *
+	 * @since 3.12.0
 	 *
 	 * @return bool
 	 */
-	private function has_overlap() {
+	private function has_cluster() {
 
-		return property_exists( $this->get_event(), 'overlap_count' )
-				&& $this->get_event()->overlap_count > 0;
+		$event = $this->get_event();
+
+		return property_exists( $event, 'overlap_columns' )
+				&& ( ( (int) $event->overlap_columns > 1 ) || ( (int) $event->overlap_nesting > 0 ) );
 	}
+
 
 	/**
 	 * Get the event classes.
@@ -278,18 +322,74 @@ class EventCell implements InterfaceView {
 					'sugar-calendar-block__calendar-week__event-cell--multi-day--%d',
 					$get_event_offset_width['width']
 				);
+
+				// An event that began before this week can also continue past
+				// its end. get_event_offset_width()'s overflow flag misses the
+				// exact-boundary case, so compare the event's true end against
+				// the week's last visible day directly. week_day_ctr is 1-based
+				// (1 for the first column), so ( 7 - week_day_ctr ) reaches the
+				// last day regardless of which column this cell is.
+				$week_last_day = $this->day->modify( '+' . ( 7 - (int) $this->args['week_day_ctr'] ) . ' days' );
+
+				if (
+					! empty( $this->get_event()->end_dto )
+					&& $this->get_event()->end_dto->format( 'Y-m-d' ) > $week_last_day->format( 'Y-m-d' )
+				) {
+					$classes[] = 'sugar-calendar-block__calendar-week__event-cell--multi-day--overflow-week';
+				}
 			} else {
 				$classes[] = 'sugar-calendar-block__calendar-week__event-cell--multi-day--offset';
 			}
-		} elseif ( $this->has_overlap() ) {
+		} elseif ( $this->has_cluster() ) {
 			$classes[] = 'sugar-calendar-block__calendar-week__event-cell--has-overlap';
+		}
+
+		// In the Day view, multi-day events render in the all-day row. Give them
+		// directional arrow caps: a point on the left edge when the event began
+		// before this day, and a point on the right edge when it continues past
+		// it. A flat edge means the event starts/ends on this day.
+		if ( $this->is_day_view() && $this->get_event_multiday() ) {
+			foreach ( $this->get_multiday_continuation_classes() as $continuation_class ) {
+				$classes[] = $continuation_class;
+			}
 		}
 
 		if ( $this->get_height() <= 50 && ! $this->is_all_day ) {
 			$classes[] = 'sugar-calendar-block__calendar-week__event-cell--single-hour';
 		}
 
+		// Short events (30 minutes or less) switch to a compact single-row layout
+		// that places the time beside the title (see is_compact_duration()).
+		if ( ! $this->is_all_day && $this->is_compact_duration() ) {
+			$classes[] = 'sugar-calendar-block__calendar-week__event-cell--compact';
+		}
+
 		return $classes;
+	}
+
+	/**
+	 * Whether the event is short enough (30 minutes or less) to use the compact
+	 * single-row layout.
+	 *
+	 * Short events lack the vertical room to stack the title and time, so they
+	 * place the time beside the title instead. start_dto / end_dto can be null
+	 * for events with unparseable dates, so guard before diff() to avoid a fatal
+	 * on a malformed event.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return bool
+	 */
+	private function is_compact_duration() {
+
+		if ( empty( $this->get_event()->start_dto ) || empty( $this->get_event()->end_dto ) ) {
+			return false;
+		}
+
+		$duration      = $this->get_event()->end_dto->diff( $this->get_event()->start_dto );
+		$total_minutes = ( $duration->days * 24 * 60 ) + ( $duration->h * 60 ) + $duration->i;
+
+		return ( $total_minutes > 0 ) && ( $total_minutes <= 30 );
 	}
 
 	/**
@@ -303,6 +403,49 @@ class EventCell implements InterfaceView {
 
 		return ! empty( $this->args['block_attributes']['display'] )
 			&& $this->args['block_attributes']['display'] === 'day';
+	}
+
+	/**
+	 * Get the multi-day continuation classes for the Day view all-day row.
+	 *
+	 * Returns a `--continues-before` class when the event began on an earlier
+	 * day and a `--continues-after` class when it runs onto a later day,
+	 * relative to the day being displayed. These drive the directional arrow
+	 * caps on the event bar.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return string[]
+	 */
+	private function get_multiday_continuation_classes() {
+
+		$visitor_timezone = $this->block ? $this->block->get_visitor_timezone() : false;
+
+		if ( $visitor_timezone ) {
+			$event_start = TimezoneConversionHelper::convert_event_start( $this->get_event(), $visitor_timezone );
+			$event_end   = TimezoneConversionHelper::convert_event_end( $this->get_event(), $visitor_timezone );
+		} else {
+			$event_start = $this->get_event()->start_dto;
+			$event_end   = $this->get_event()->end_dto;
+		}
+
+		// start_dto / end_dto can be null for events with unparseable dates.
+		if ( empty( $event_start ) || empty( $event_end ) ) {
+			return [];
+		}
+
+		$current_day = $this->day->format( 'Y-m-d' );
+		$classes     = [];
+
+		if ( $event_start->format( 'Y-m-d' ) < $current_day ) {
+			$classes[] = 'sugar-calendar-block__calendar-day__event-cell--continues-before';
+		}
+
+		if ( $event_end->format( 'Y-m-d' ) > $current_day ) {
+			$classes[] = 'sugar-calendar-block__calendar-day__event-cell--continues-after';
+		}
+
+		return $classes;
 	}
 
 	/**
@@ -457,7 +600,10 @@ class EventCell implements InterfaceView {
 		 */
 		$height = ( ( $render_hours * 51 ) + ( $render_minutes * 0.9 ) ) - $pixel_cutoff;
 
-		return $height;
+		// Height is proportional to duration with no minimum, so short events
+		// render as thin cards. Guard against a negative value for very short
+		// events where the pixel cutoff would exceed the computed height.
+		return max( 0, $height );
 	}
 
 	/**

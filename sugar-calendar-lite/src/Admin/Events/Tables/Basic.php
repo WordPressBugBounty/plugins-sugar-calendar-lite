@@ -395,6 +395,20 @@ class Basic extends Base {
 
 		$columns['attendees'] = esc_html_x( 'Attendees', 'Noun', 'sugar-calendar-lite' );
 
+		/**
+		 * Filter the Events list table columns for Sugar Calendar's custom admin list.
+		 *
+		 * This mirrors WordPress' `manage_{post_type}_posts_columns` filter used on
+		 * edit.php screens, allowing integrations to inject columns
+		 * like a languages/translation status column when rendering the custom
+		 * Sugar Calendar list table under `admin.php?page=sugar-calendar`.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param array $columns Associative array of column ID => label.
+		 */
+		$columns = apply_filters( 'sugar_calendar_manage_sc_event_posts_columns', $columns ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		return $columns;
 	}
 
@@ -1023,6 +1037,7 @@ class Basic extends Base {
 	 * Output all rows.
 	 *
 	 * @since 2.0.0
+	 * @since 3.12.0 Apply the Maximum Events cap honoring the chosen sort column.
 	 */
 	public function display_mode() {
 
@@ -1039,6 +1054,10 @@ class Basic extends Base {
 			$this->filtered_items,
 			$this
 		);
+
+		// Enforce the Maximum Events cap using the column the user is sorting by,
+		// after recurring occurrences are merged in.
+		$list_items = $this->limit_list_items_to_max( $list_items );
 
 		// Attempt to display rows.
 		if ( ! empty( $list_items ) ) {
@@ -1070,6 +1089,58 @@ class Basic extends Base {
 		} else {
 			$this->no_items();
 		}
+	}
+
+	/**
+	 * Cap the list to the Maximum Events preference.
+	 *
+	 * Unlike the calendar grid (always chronological), the List view is
+	 * sortable, so the cap honors the column the user is sorting by — Title,
+	 * Start, or End — and the chosen direction before keeping the first N.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $items List items (each exposes `title`, `start_dto`, `end_dto`).
+	 *
+	 * @return array
+	 */
+	private function limit_list_items_to_max( $items ) {
+
+		if ( ! is_array( $items ) ) {
+			return [];
+		}
+
+		if ( count( $items ) <= $this->get_max() ) {
+			return $items;
+		}
+
+		$orderby = $this->get_orderby();
+		$order   = $this->get_order();
+
+		usort(
+			$items,
+			static function ( $a, $b ) use ( $orderby, $order ) {
+
+				switch ( $orderby ) {
+					case 'title':
+						$cmp = strnatcasecmp( (string) ( $a->title ?? '' ), (string) ( $b->title ?? '' ) );
+						break;
+
+					case 'end':
+						$cmp = ( $a->end_dto ?? null ) <=> ( $b->end_dto ?? null );
+						break;
+
+					case 'start':
+					default:
+						$cmp = ( $a->start_dto ?? null ) <=> ( $b->start_dto ?? null );
+						break;
+				}
+
+				return $order === 'desc' ? -$cmp : $cmp;
+			}
+		);
+
+		return array_slice( $items, 0, $this->get_max() );
 	}
 
 	/**

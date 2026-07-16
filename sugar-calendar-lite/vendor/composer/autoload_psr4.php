@@ -10,4 +10,5 @@ return array(
     'Sugar_Calendar\\AddOn\\Ticketing\\' => array($baseDir . '/includes/common/Features/EventTicketing/src'),
     'Sugar_Calendar\\' => array($baseDir . '/src'),
     'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
+    'ProductApi\\' => array($vendorDir . '/awesomemotive/wpforms-product-api-client/src'),
 );

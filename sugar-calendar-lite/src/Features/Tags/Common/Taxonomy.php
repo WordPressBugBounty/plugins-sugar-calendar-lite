@@ -19,6 +19,7 @@ class Taxonomy {
 	public function hooks() {
 
 		add_action( 'init', [ $this, 'register_taxonomy' ] );
+		add_action( 'init', [ $this, 'relate_taxonomy_to_post_types' ], 11 );
 		add_action( 'init', [ $this, 'prioritize_sc_event_tags_rewrite_rules' ], 100 );
 
 		add_filter( 'sugar_calendar_query_vars_contains_taxonomies', [ $this, 'add_tags_taxonomies' ], 10 );
@@ -69,6 +70,24 @@ class Taxonomy {
 			sugar_calendar_get_event_post_type_id(),
 			$args
 		);
+	}
+
+	/**
+	 * Relate the tags taxonomy to every event post type.
+	 *
+	 * Recurring events use the `sc_recurring_event` post type; without this they
+	 * drop out of the term counts. Mirrors `sugar_calendar_relate_taxonomy_to_post_types()`.
+	 * Priority 11 so the taxonomy and recurring post type (both init:10) exist first.
+	 *
+	 * @since 3.12.0
+	 */
+	public function relate_taxonomy_to_post_types() {
+
+		$taxonomy = Helpers::get_tags_taxonomy_id();
+
+		foreach ( sugar_calendar_allowed_post_types() as $post_type ) {
+			register_taxonomy_for_object_type( $taxonomy, $post_type );
+		}
 	}
 
 	/**

@@ -8,7 +8,11 @@ use Sugar_Calendar\Admin\Tools\Importers\TheEventCalendar;
 use Sugar_Calendar\Connect;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\Installer;
+use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Options;
+use Sugar_Calendar\Vendor\ProductApi\Auth\SiteRegistration;
+use Sugar_Calendar\Vendor\ProductApi\ProductApi;
+use Throwable;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -192,6 +196,27 @@ class RestApi {
 
 		$data = $request->get_json_params();
 		$data = ! empty( $data ) ? $data : [];
+
+		// Opt-in for usage tracking + integrations (Lite). A directive, not an
+		// option: map it to the disable_integrations kill-switch (inverted) and,
+		// when opting in, register the site so integrations can connect. Pro drops
+		// it (is_pro guard in set_disable_integrations). Unset so the loop below
+		// never treats it as an option key.
+		if ( array_key_exists( 'opt_in_tracking_and_integrations', $data ) ) {
+
+			if ( ! sugar_calendar()->is_pro() ) {
+
+				$opted_in = (bool) $data['opt_in_tracking_and_integrations'];
+
+				$this->set_disable_integrations( ! $opted_in );
+
+				if ( $opted_in ) {
+					$this->maybe_register_site();
+				}
+			}
+
+			unset( $data['opt_in_tracking_and_integrations'] );
+		}
 
 		foreach ( $data as $option_name => $option_data ) {
 			$callback = null;
@@ -545,6 +570,12 @@ class RestApi {
 				'is_pro'               => $is_pro,
 				'plugin_version'       => $plugin_version,
 				'wpforms_version_type' => $wpforms_version_type,
+				// Marketing/help links the wizard SPA renders (upgrade CTAs, the
+				// opt-in Terms link, the completion docs link). Sent bare — the
+				// SPA's getUTMUrl() appends its own source/medium/content.
+				'upgrade_url'          => 'https://sugarcalendar.com/lite-upgrade/',
+				'terms_url'            => 'https://sugarcalendar.com/terms/',
+				'documentation_url'    => 'https://sugarcalendar.com/docs/',
 			],
 			'license'         => [
 				'type' => $license_type,
@@ -554,8 +585,10 @@ class RestApi {
 				'currencies' => $currencies,
 			],
 			'stripe'          => [
-				'connect_url' => $stripe_connect_url,
-				'connected'   => $stripe_is_connected,
+				'connect_url'       => $stripe_connect_url,
+				'connected'         => $stripe_is_connected,
+				// Stripe help link on the wizard's Stripe step (getUTMUrl consumes it).
+				'documentation_url' => 'https://sugarcalendar.com/docs/events/event-ticketing-addon/#connecting-stripe',
 			],
 			'tec'             => [
 				'entries' => $tec_entries,
@@ -588,10 +621,6 @@ class RestApi {
 			],
 		];
 
-		if ( ! sugar_calendar()->is_pro() ) {
-			unset( $options['core']['allow_usage_tracking'] );
-		}
-
 		return $options;
 	}
 
@@ -607,7 +636,79 @@ class RestApi {
 	 */
 	private function update_core_option( $option_key, $option_value ) {
 
+		// "Disable integrations" is a Lite-only kill-switch; a Pro wizard must
+		// never write it or run the teardown (it would delete Pro's live
+		// connections). Delegated to set_disable_integrations(), which is shared
+		// with the opt_in_tracking_and_integrations directive in update().
+		if ( $option_key === 'disable_integrations' ) {
+			$this->set_disable_integrations( (bool) $option_value );
+
+			return;
+		}
+
 		Options::update( $option_key, $option_value );
+	}
+
+	/**
+	 * Set the Lite "disable integrations" kill-switch, running teardown on the enable->disable edge.
+	 *
+	 * Lite-only: Pro must never write this (it would delete Pro's live connections).
+	 * Shared by update_core_option() and the opt_in_tracking_and_integrations flag.
+	 * Mirrors the `! is_pro()` guard in SettingsMiscTab::handle_post().
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param bool $now_disabled Whether integrations should be disabled.
+	 *
+	 * @return void
+	 */
+	private function set_disable_integrations( $now_disabled ) {
+
+		if ( sugar_calendar()->is_pro() ) {
+			return;
+		}
+
+		$was_disabled = (bool) Options::get( 'disable_integrations', false );
+		$now_disabled = (bool) $now_disabled;
+
+		Options::update( 'disable_integrations', $now_disabled );
+
+		// On the off -> on transition, tear down every external connection.
+		if ( ! $was_disabled && $now_disabled ) {
+			( new IntegrationsDisabler() )->disable();
+		}
+	}
+
+	/**
+	 * Best-effort site registration with the Product API on Lite opt-in.
+	 *
+	 * Failures are swallowed and it is skipped under SC_OAUTH_RELAY_TEST_MODE — the
+	 * wizard must never fail because the relay is unreachable (integrations still
+	 * register lazily on the first connect). Mirrors Zoom::maybe_register_site()
+	 * without the stale-reset/rate-limit handling (first-run wizard context).
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return void
+	 */
+	private function maybe_register_site() {
+
+		if ( defined( 'SC_OAUTH_RELAY_TEST_MODE' ) && SC_OAUTH_RELAY_TEST_MODE ) {
+			return;
+		}
+
+		try {
+			$registration = ProductApi::get( SiteRegistration::class );
+
+			if ( $registration->is_registered() ) {
+				return;
+			}
+
+			$registration->register();
+		} catch ( Throwable $e ) {
+			// Best-effort — swallow relay errors so the wizard always proceeds.
+			return;
+		}
 	}
 
 	/**

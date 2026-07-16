@@ -5,14 +5,39 @@ use Sugar_Calendar\Block\Calendar\CalendarView\Week;
 /**
  * @var Week\Week $context
  */
-$multi_and_all_day_events = [
-	'all_day'   => __( 'All Day', 'sugar-calendar-lite' ),
-	'multi_day' => __( 'Multi-day', 'sugar-calendar-lite' ),
-];
+// All-day and multi-day events share one "All Day" section: multi-day spanning
+// bars in a top band, per-day all-day cards in a band below (joined via CSS).
+// Render each band only when it actually has events, so an empty band never
+// reserves a ~50px row of its own. Always keep the all-day band when there are
+// no multi-day events, so the "All Day" label/row still shows on empty weeks.
+// The label always sits on the top (first) band.
+$has_multi_day = $context->has_multi_day_events();
+$has_all_day   = $context->has_all_day_events();
 
-foreach ( $multi_and_all_day_events as $key => $label ) {
+$bands = [];
+
+if ( $has_multi_day ) {
+	$bands[] = 'multi_day';
+}
+
+if ( $has_all_day || ! $has_multi_day ) {
+	$bands[] = 'all_day';
+}
+
+foreach ( $bands as $band_index => $band ) {
+	$band_classes   = [ 'sugar-calendar-block__calendar-week__all-day' ];
+	$band_classes[] = "sugar-calendar-block__calendar-week__all-day--{$band}";
+
+	// A lone all-day band has no multi-day band above it to carry the section's
+	// top border, so tag it for the border restore in CSS.
+	if ( count( $bands ) === 1 ) {
+		$band_classes[] = 'sugar-calendar-block__calendar-week__all-day--solo';
+	}
+
+	// Only the top band shows the section's single "All Day" label.
+	$label = ( $band_index === 0 ) ? __( 'All Day', 'sugar-calendar-lite' ) : '';
 	?>
-	<div class="sugar-calendar-block__calendar-week__all-day">
+	<div class="<?php echo esc_attr( implode( ' ', $band_classes ) ); ?>">
 		<div class="sugar-calendar-block__calendar-week__time-label-cell">
 			<div>
 				<?php echo esc_html( $label ); ?>
@@ -51,7 +76,7 @@ foreach ( $multi_and_all_day_events as $key => $label ) {
 				class="<?php echo esc_attr( implode( ' ', $weekday_col_classes ) ); ?>">
 
 				<?php
-				foreach ( $context->get_day_events_by_type( $week_day, $key ) as $event ) {
+				foreach ( $context->get_day_events_by_type( $week_day, $band ) as $event ) {
 
 					// If `$event` is string, then it's a spacer.
 					if ( is_string( $event ) ) {

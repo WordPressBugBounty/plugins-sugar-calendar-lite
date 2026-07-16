@@ -180,6 +180,41 @@ class Week implements InterfaceBaseView {
 	}
 
 	/**
+	 * Whether the current week contains any multi-day (spanning) events.
+	 *
+	 * Used to decide whether the "All Day" section needs the multi-day band
+	 * at all: with no multi-day events it collapses to a single all-day band.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return bool
+	 */
+	public function has_multi_day_events() {
+
+		$this->setup_formatted_events();
+
+		return ! empty( $this->multi_day_events );
+	}
+
+	/**
+	 * Whether the current week contains any per-day all-day events.
+	 *
+	 * The counterpart to has_multi_day_events(): lets the "All Day" section drop
+	 * the all-day band when only multi-day (spanning) events are present, so the
+	 * empty band does not reserve a row of its own.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return bool
+	 */
+	public function has_all_day_events() {
+
+		$this->setup_formatted_events();
+
+		return ! empty( $this->all_day_events );
+	}
+
+	/**
 	 * Setup the formatted events.
 	 *
 	 * @since 3.0.0
@@ -478,6 +513,7 @@ class Week implements InterfaceBaseView {
 	 *
 	 * @since 3.0.0
 	 * @since 3.4.0
+	 * @since 3.12.0 Changed the date range separator from hyphen to en-dash.
 	 *
 	 * @param bool $use_abbreviated_month Whether to use abbreviated month or not.
 	 *
@@ -496,7 +532,7 @@ class Week implements InterfaceBaseView {
 		}
 
 		return sprintf(
-			'%1$s %2$d - %3$s %4$d',
+			'%1$s %2$d – %3$s %4$d',
 			$start_date,
 			$this->get_block()->get_week_period()->getStartDate()->format( 'd' ),
 			$end_date,

@@ -1084,9 +1084,52 @@ class UI {
 	}
 
 	/**
+	 * Print inline SVG markup from the bundled icons directory.
+	 *
+	 * Reads `assets/images/icons/{$name}.svg` and echoes its markup. Unless
+	 * `$original_color` is true, fill colors are swapped for `currentColor` so
+	 * the icon inherits the surrounding text color.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param string $name           Icon file name, without the `.svg` extension.
+	 * @param bool   $original_color Whether to keep the file's own colors. Default false.
+	 */
+	public static function svg_icon( string $name, bool $original_color = false ) {
+
+		// Restrict to a safe file-name charset so $name can never escape the icons directory.
+		$name = preg_replace( '/[^a-z0-9_-]/i', '', $name );
+
+		$path = SC_PLUGIN_DIR . 'assets/images/icons/' . $name . '.svg';
+
+		if ( ! is_readable( $path ) ) {
+			return;
+		}
+
+		$svg = file_get_contents( $path );
+
+		if ( $svg === false ) {
+			return;
+		}
+
+		if ( ! $original_color ) {
+
+			// Force fills to inherit the surrounding text color.
+			$svg = preg_replace( '/fill="[^"]*"/', 'fill="currentColor"', $svg );
+
+			if ( strpos( $svg, 'fill=' ) === false ) {
+				$svg = str_replace( '<svg', '<svg fill="currentColor"', $svg );
+			}
+		}
+
+		echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
 	 * Output the table screen options.
 	 *
 	 * @since 3.8.0
+	 * @since 3.12.0 Render the cog icon via the shared SVG helper.
 	 *
 	 * @param array $args Arguments.
 	 * - string table_name: The identifier name of the table.
@@ -1109,9 +1152,7 @@ class UI {
 		?>
 		<div class="sugar-calendar-screen-options sugar-calendar-table-screen-options">
 			<button id="sugar-calendar-table-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button" title="<?php esc_attr_e( 'Change columns to display', 'sugar-calendar-lite' ); ?>">
-				<svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-					<path d="M16.9922 10H14.8047C14.6224 10.7031 14.349 11.3542 13.9844 11.9531L15.5469 13.4766L13.4375 15.5859L11.875 14.0234C11.3021 14.388 10.6771 14.6615 10 14.8438V16.9922H6.99219V14.8438C6.3151 14.6615 5.67708 14.388 5.07812 14.0234L3.51562 15.5859L1.40625 13.4766L2.96875 11.9141C2.60417 11.3151 2.33073 10.6771 2.14844 10H0V7.03125H2.14844C2.30469 6.35417 2.57812 5.71615 2.96875 5.11719L1.40625 3.55469L3.51562 1.44531L5.03906 3.00781C5.61198 2.64323 6.26302 2.36979 6.99219 2.1875V0H10V2.1875C10.6771 2.34375 11.3021 2.60417 11.875 2.96875L13.4375 1.44531L15.5469 3.55469L14.0234 5.11719C14.388 5.71615 14.6484 6.35417 14.8047 7.03125H16.9922V10ZM8.47656 11.5234C9.3099 11.5234 10.013 11.237 10.5859 10.6641C11.1849 10.0651 11.4844 9.34896 11.4844 8.51562C11.4844 7.68229 11.1849 6.97917 10.5859 6.40625C10.013 5.80729 9.3099 5.50781 8.47656 5.50781C7.64323 5.50781 6.92708 5.80729 6.32812 6.40625C5.75521 6.97917 5.46875 7.68229 5.46875 8.51562C5.46875 9.34896 5.75521 10.0651 6.32812 10.6641C6.92708 11.237 7.64323 11.5234 8.47656 11.5234Z" fill="currentColor"/>
-				</svg>
+				<?php self::svg_icon( 'cog' ); ?>
 			</button>
 
 			<div class="sugar-calendar-screen-options-menu sugar-calendar-table-screen-options-menu" style="display: none;">
@@ -1153,6 +1194,8 @@ class UI {
 						<?php endforeach; ?>
 					</fieldset>
 
+					<?php self::render_screen_options_fieldsets(); ?>
+
 					<p class="submit">
 						<button type="submit" name="sugar-calendar-table-active-columns-submit" value="submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar-lite' ); ?></button>
 					</p>
@@ -1160,5 +1203,81 @@ class UI {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the screen-options fieldsets for the current admin screen.
+	 *
+	 * @since 3.12.0
+	 */
+	public static function render_screen_options_fieldsets() {
+
+		$screen_options    = sugar_calendar()->get_admin_screen_options();
+		$screen_options_id = $screen_options ? $screen_options->get_screen_options_id() : '';
+
+		if ( empty( $screen_options_id ) ) {
+			return;
+		}
+
+		$groups = $screen_options->get_options();
+
+		if ( empty( $groups ) ) {
+			return;
+		}
+
+		$user_saved = get_user_option( $screen_options_id );
+		$user_saved = is_array( $user_saved ) ? $user_saved : [];
+
+		foreach ( $groups as $group_key => $group ) :
+			?>
+			<fieldset>
+				<legend><?php echo esc_html( $group['heading'] ); ?></legend>
+				<?php
+				foreach ( $group['options'] as $option ) :
+					$saved_key = $group_key . '_' . $option['option'];
+					$value     = $user_saved[ $saved_key ] ?? $option['default'];
+					$input_id  = 'sc-screen-option-' . $saved_key;
+					$input_name = 'sugar-calendar-table-active-columns[screen_options][' . $saved_key . ']';
+
+					if ( $option['input_type'] === 'number' ) :
+						$min  = $option['min'] ?? 1;
+						$max  = $option['max'] ?? 999;
+						$step = $option['step'] ?? 1;
+
+						// The fieldset legend already names this field, so the
+						// input renders on its own line (matching the Events cog).
+						// The descriptive label, minus its trailing colon, is the
+						// input's accessible name.
+						?>
+						<input
+							type="number"
+							id="<?php echo esc_attr( $input_id ); ?>"
+							name="<?php echo esc_attr( $input_name ); ?>"
+							value="<?php echo esc_attr( $value ); ?>"
+							min="<?php echo esc_attr( $min ); ?>"
+							max="<?php echo esc_attr( $max ); ?>"
+							step="<?php echo esc_attr( $step ); ?>"
+							aria-label="<?php echo esc_attr( rtrim( $option['label'], ': ' ) ); ?>"
+						>
+						<?php
+					elseif ( $option['input_type'] === 'checkbox' ) :
+						?>
+						<label>
+							<input
+								type="checkbox"
+								id="<?php echo esc_attr( $input_id ); ?>"
+								name="<?php echo esc_attr( $input_name ); ?>"
+								value="1"
+								<?php checked( ! empty( $value ) ); ?>
+							>
+							<?php echo esc_html( $option['label'] ); ?>
+						</label>
+						<?php
+					endif;
+				endforeach;
+				?>
+			</fieldset>
+			<?php
+		endforeach;
 	}
 }

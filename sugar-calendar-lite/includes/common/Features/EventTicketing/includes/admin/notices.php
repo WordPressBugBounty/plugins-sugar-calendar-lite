@@ -37,6 +37,10 @@ function notices() {
 				: esc_html__( 'Order not refunded.', 'sugar-calendar-lite' );
 			break;
 
+		case 'order-refund-status-failed':
+			$notice_text = esc_html__( 'The order was refunded at the payment gateway, but its status could not be updated. Please set the status to Refunded manually — do not refund again.', 'sugar-calendar-lite' );
+			break;
+
 		case 'order-update':
 			$notice_text = $notice_type === 'updated'
 				? esc_html__( 'Order successfully updated.', 'sugar-calendar-lite' )

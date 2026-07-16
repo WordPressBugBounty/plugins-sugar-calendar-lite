@@ -84,6 +84,124 @@
 			this.initSandboxToggleListener();
 
 			this.maybeInitDismissEmailWpMailSmtpNotice();
+
+			// Collapse the Integrations sidebar disclosure on mobile.
+			this.maybeInitIntegrationsSidebar();
+
+			// Confirm before enabling the Lite "Disable Integrations" toggle.
+			this.initDisableIntegrationsConfirm();
+		},
+
+		/**
+		 * Confirm before enabling the Lite "Disable Integrations" kill-switch.
+		 *
+		 * Turning it on disconnects and removes every external integration, so
+		 * require an explicit confirmation first (mirrors Sugar Calendar Bookings).
+		 *
+		 * @since 3.8.0
+		 * @since 3.12.0 Styled the confirm dialog (warning icon + branded
+		 *                  primary/light buttons) to match the design.
+		 *
+		 * @return {void}
+		 */
+		initDisableIntegrationsConfirm: function () {
+
+			const labels =
+				window.sugar_calendar_admin_settings_misc &&
+				window.sugar_calendar_admin_settings_misc.disable_integrations_confirm;
+
+			if ( ! labels ) {
+				return;
+			}
+
+			const $toggle = $( '#sugar-calendar-setting-disable_integrations' );
+
+			if ( ! $toggle.length ) {
+				return;
+			}
+
+			$toggle.on( 'change', function ( e ) {
+
+				// Only intercept turning the switch ON.
+				if ( ! this.checked ) {
+					return;
+				}
+
+				// Revert immediately; re-check only on explicit confirm.
+				e.preventDefault();
+				this.checked = false;
+
+				// Fall back to a native confirm if the library is unavailable.
+				if ( typeof $.confirm !== 'function' ) {
+					if ( window.confirm( labels.message ) ) {
+						$toggle.prop( 'checked', true );
+					}
+
+					return;
+				}
+
+				// Splice an <img> into jQuery-Confirm's icon <i> slot so the
+				// modal shows the branded warning icon (mirrors admin-connect.js).
+				const icon = labels.icon
+					? `"></i><img src="${labels.icon}" style="width: 46px; height: 46px;"><i class="`
+					: '';
+
+				$.confirm( {
+					title: labels.title,
+					content: labels.message,
+					icon: icon,
+					type: 'yellow',
+					boxWidth: '450px',
+					useBootstrap: false,
+					buttons: {
+						confirm: {
+							text: labels.confirm,
+							btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg sugar-calendar-btn-primary',
+							action: function () {
+								$toggle.prop( 'checked', true );
+							},
+						},
+						cancel: {
+							// Light "cancel" button. Uses the base button (so it shares
+							// the primary's box model and aligns exactly) as a tertiary;
+							// the yellow theme has a scoped rule that keeps tertiary light
+							// instead of gold. See admin-alerts.scss (jconfirm-type-yellow).
+							text: labels.cancel,
+							btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg sugar-calendar-btn-tertiary',
+						},
+					},
+				} );
+			} );
+		},
+
+		/**
+		 * Collapse the Integrations sidebar `<details>` on mobile.
+		 *
+		 * The sidebar is rendered `open` so desktop and no-JS clients always
+		 * see the full integration list; here we sync the open state to the
+		 * WordPress admin mobile breakpoint (782px) so mobile gets a
+		 * content-first disclosure (tap the active integration to reveal the
+		 * list). No-op on every other settings tab.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @return {void}
+		 */
+		maybeInitIntegrationsSidebar: function () {
+
+			const nav = document.querySelector( '.sugar-calendar-integrations-sidebar' );
+
+			if ( ! nav || nav.tagName !== 'DETAILS' ) {
+				return;
+			}
+
+			const mq = window.matchMedia( '(max-width: 782px)' );
+			const sync = () => {
+				nav.open = ! mq.matches;
+			};
+
+			sync();
+			mq.addEventListener( 'change', sync );
 		},
 
 		/**

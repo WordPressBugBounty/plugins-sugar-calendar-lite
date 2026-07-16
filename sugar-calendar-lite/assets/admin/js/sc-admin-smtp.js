@@ -47,6 +47,7 @@ var SugarCalendarAdminSMTP = window.SugarCalendarAdminSMTP || ( function( docume
 
 			app.initVars();
 			app.events();
+			app.enableButtons();
 		},
 
 		/**
@@ -76,6 +77,20 @@ var SugarCalendarAdminSMTP = window.SugarCalendarAdminSMTP || ( function( docume
 
 			// Step 'Setup' button click.
 			el.$stepSetup.on( 'click', 'button', app.gotoURL );
+		},
+
+		/**
+		 * Enable the install/activate button now that its click handler is bound.
+		 *
+		 * The button is rendered disabled + dimmed server-side so a click made
+		 * before this script loads (the script is enqueued in the footer) can't be
+		 * silently dropped. Once the handler above is registered, it's safe to enable.
+		 *
+		 * @since 3.12.0
+		 */
+		enableButtons: function() {
+
+			el.$stepInstall.find( 'button[disabled]' ).prop( 'disabled', false ).removeClass( 'grey' );
 		},
 
 		/**

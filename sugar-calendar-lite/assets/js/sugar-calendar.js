@@ -47,6 +47,44 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Populate and show the event popover call-to-action button.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param {jQuery} $cta                The CTA button element.
+	 * @param {Object} cta                 The CTA data: { label, anchor, type }.
+	 * @param {jQuery} $eventDataContainer The clicked event cell.
+	 */
+	function setupEventPopoverCta( $cta, cta, $eventDataContainer ) {
+
+		let ctaUrl = $eventDataContainer.data( 'eventurl' );
+
+		if ( ! cta || ! ctaUrl ) {
+			return;
+		}
+
+		// Append the anchor only if it's a bare "#section-id" fragment
+		// (a "#" followed by letters, numbers, "-" or "_") — never a full URL.
+		const isSectionFragment = /^#[\w-]*$/.test( cta.anchor );
+
+		if ( isSectionFragment ) {
+			ctaUrl += cta.anchor;
+		}
+
+		$cta
+			.text( cta.label )
+			.attr( 'href', ctaUrl );
+
+		if ( $eventDataContainer.data( 'openinnewtab' ) === 1 ) {
+			$cta.attr( { target: '_blank', rel: 'noopener noreferrer' } );
+		} else {
+			$cta.removeAttr( 'target' ).removeAttr( 'rel' );
+		}
+
+		$cta.show();
+	}
+
+	/**
 	 * FloatingUIDOM object cache.
 	 *
 	 * @since 3.0.0
@@ -88,11 +126,13 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		let $popoverImageContainer = this.$popover.find( '.sugar-calendar-block__popover__event__container__image' );
 		let $popoverDescContainer = this.$popover.find( '.sugar-calendar-block__popover__event__container__content__description' );
+		let $popoverCta = this.$popover.find( '.sugar-calendar-block__popover__event__container__content__cta' );
 
 		// Clear the current popover.
 		$popoverImageContainer.hide();
-		$popoverImageContainer.css( 'background-image', '' );
+		$popoverImageContainer.empty();
 		$popoverDescContainer.text( '' );
+		$popoverCta.hide().text( '' ).removeAttr( 'href target rel' );
 
 		if ( eventObjId !== undefined ) {
 
@@ -103,6 +143,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 				{
 					action: 'sugar_calendar_event_popover',
 					event_object_id: eventObjId,
+					event_id: $eventDataContainer.data( 'eventid' ),
 					nonce: sugar_calendar_obj.nonce
 				},
 				function ( response ) {
@@ -110,12 +151,17 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 					if ( response.success && response.data ) {
 
 						if ( response.data.image ) {
-							$popoverImageContainer.css( 'background-image', `url(${response.data.image})` );
+							$popoverImageContainer.html( response.data.image );
 							$popoverImageContainer.show();
 						}
 
 						$popoverDescContainer.html( '' );
-						$popoverDescContainer.html( response.data.description.trim() );
+
+						if ( response.data.description ) {
+							$popoverDescContainer.html( response.data.description.trim() );
+						}
+
+						setupEventPopoverCta( $popoverCta, response.data.cta, $eventDataContainer );
 					}
 				}
 			);
@@ -132,9 +178,9 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 
 		// Set target attribute if event should open in new tab
 		if ( $eventDataContainer.data( 'openinnewtab' ) === 1 ) {
-			eventLink.attr( 'target', '_blank' );
+			eventLink.attr( { target: '_blank', rel: 'noopener noreferrer' } );
 		} else {
-			eventLink.removeAttr( 'target' );
+			eventLink.removeAttr( 'target' ).removeAttr( 'rel' );
 		}
 
 		// Handle the date.

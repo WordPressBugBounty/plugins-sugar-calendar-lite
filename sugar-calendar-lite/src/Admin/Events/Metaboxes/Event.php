@@ -914,8 +914,10 @@ class Event implements MetaboxInterface {
 	/**
 	 * Output the event location meta-box section.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @since 3.5.0 Added the venue education.
+	 * @since 3.12.0 Unified Location/Venue tab: gate the Address field behind a
+	 *                  filter and expose an action hook for feature UI (Venue, Online).
 	 *
 	 * @param Event $event The event object.
 	 */
@@ -929,50 +931,50 @@ class Event implements MetaboxInterface {
 		// Location.
 		$location = $event->location;
 
+		/**
+		 * Filter whether the Address field renders inside the Location section.
+		 *
+		 * Pro (Venues) uses this to hide the Address field when a venue is
+		 * selected or when no address was ever saved. Default true (Lite always
+		 * shows the Address field).
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param bool  $show_address Whether to render the Address field.
+		 * @param Event $event        The event being edited.
+		 */
+		$show_address = (bool) apply_filters( 'sugar_calendar_admin_meta_box_show_location_address', true, $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		// Start an output buffer.
 		ob_start();
-		?>
 
-        <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--location">
-            <label for="location"><?php esc_html_e( 'Address', 'sugar-calendar-lite' ); ?></label>
-            <div class="sugar-calendar-metabox__field">
-                <textarea name="location"
-                          id="location"><?php echo esc_textarea( $location ); ?></textarea>
-            </div>
-        </div>
+		if ( $show_address ) :
+			?>
 
-		<?php if ( ! sugar_calendar()->is_pro() ) : ?>
-			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
-				<p class="desc">
-					<?php
-					echo wp_kses(
-						sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
-							'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
-							esc_url(
-								Helpers\Helpers::get_upgrade_link(
-									[
-										'medium'  => 'lite-event-location',
-										'content' => 'Upgrade to Sugar Calendar Pro',
-									]
-								)
-							),
-							esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-							esc_html__( 'to manage venues for your events plus a lot more features!', 'sugar-calendar-lite' )
-						),
-						[
-							'a' => [
-								'href'   => [],
-								'rel'    => [],
-								'target' => [],
-							],
-						]
-					);
-					?>
-				</p>
+			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--location">
+				<label for="location"><?php esc_html_e( 'Address', 'sugar-calendar-lite' ); ?></label>
+				<div class="sugar-calendar-metabox__field">
+					<textarea name="location"
+							  id="location"><?php echo esc_textarea( $location ); ?></textarea>
+				</div>
 			</div>
-		<?php endif; ?>
 
-		<?php
+			<?php
+		endif;
+
+		/**
+		 * Fires inside the Location section, after the Address field.
+		 *
+		 * Features append their Location UI here — the Venue selector (Pro), the
+		 * Lite venue product-education block, and (later) the Online meeting
+		 * provider dropdown. Fires unconditionally, even when the Address field
+		 * is gated off, so the venue selector always renders.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param Event $event The event being edited.
+		 */
+		do_action( 'sugar_calendar_admin_meta_box_location_section', $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 		// End & flush the output buffer.
 		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -1029,315 +1031,7 @@ class Event implements MetaboxInterface {
 	 */
 	public function save_post( $data ) {
 
-		// Prepare event parameters.
-		$all_day  = $this->prepare_all_day();
-		$start    = $this->prepare_start();
-		$end      = $this->prepare_end();
-		$start_tz = $this->prepare_timezone( 'start' );
-		$end_tz   = $this->prepare_timezone( 'end' );
-
-		// Sanitize to prevent data entry errors.
-		$start    = Helpers::sanitize_start( $start, $end, $all_day );
-		$end      = $this->sanitize_end( $end, $start, $all_day );
-		$all_day  = Helpers::sanitize_all_day( $all_day, $start, $end );
-		$start_tz = Helpers::sanitize_timezone( $start_tz, $end_tz, $all_day );
-		$end_tz   = Helpers::sanitize_timezone( $end_tz, $start_tz, $all_day );
-
-		$data = array_merge(
-			[
-				'start'    => $start,
-				'start_tz' => $start_tz,
-				'end'      => $end,
-				'end_tz'   => $end_tz,
-				'all_day'  => $all_day,
-			],
-			$data
-		);
-
-		return $data;
-	}
-
-	/**
-	 * Prepare the all-day value to be saved to the database.
-	 *
-	 * @since 2.0.5
-	 *
-	 * @return bool
-	 */
-	private function prepare_all_day() {
-
-		return ! empty( $_POST['all_day'] ) && (bool) $_POST['all_day']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Prepare the start value to be saved to the database.
-	 *
-	 * @since 2.0.5
-	 *
-	 * @return string The MySQL formatted datetime to start.
-	 */
-	private function prepare_start() {
-
-		return $this->prepare_date_time( 'start' );
-	}
-
-	/**
-	 * Prepare the start value to be saved to the database.
-	 *
-	 * @since 2.0.5
-	 *
-	 * @return string The MySQL formatted datetime to start.
-	 */
-	private function prepare_end() {
-
-		return $this->prepare_date_time( 'end' );
-	}
-
-	/**
-	 * Prepare a time zone value to be saved to the database.
-	 *
-	 * @since 2.1.0
-	 *
-	 * @param string $prefix Timezone prefix.
-	 *
-	 * @return string The PHP/Olson time zone to save.
-	 */
-	private function prepare_timezone( $prefix = 'start' ) {
-
-		// Sanity check the prefix.
-		if ( empty( $prefix ) || ! is_string( $prefix ) ) {
-			$prefix = 'start';
-		}
-
-		// Sanitize the prefix, and append an underscore.
-		$prefix = sanitize_key( $prefix ) . '_';
-		$field  = "{$prefix}tz";
-
-		// Sanitize time zone.
-		$zone = ! empty( $_POST[ $field ] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			? sanitize_text_field( $_POST[ $field ] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			: '';
-
-		// Return the prepared time zone.
-		return $zone;
-	}
-
-	/**
-	 * Sanitizes the end MySQL datetime.
-	 *
-	 * - It does not end before it starts
-	 * - It is at least as long as the minimum event duration (if exists)
-	 * - If the date is empty, the time can still be used
-	 * - If both the date and the time are empty, it will equal the start
-	 *
-	 * @since 2.0.5
-	 *
-	 * @param string $end     The end time, in MySQL format.
-	 * @param string $start   The start time, in MySQL format.
-	 * @param bool   $all_day True|False, whether the event is all-day.
-	 *
-	 * @return string
-	 */
-	private function sanitize_end( $end = '', $start = '', $all_day = false ) {
-
-		// Bail early if start or end are empty or malformed.
-		if ( empty( $start ) || empty( $end ) || ! is_string( $start ) || ! is_string( $end ) ) {
-			return $end;
-		}
-
-		// Convert to integers for faster comparisons.
-		$start_int = strtotime( $start );
-		$end_int   = strtotime( $end );
-
-		// Check if the user attempted to set an end date and/or time.
-		$has_end = $this->has_end();
-
-		// The user attempted an end date and this isn't an all-day event.
-		if ( ( $has_end === true ) && ( $all_day === false ) ) {
-
-			// See if there a minimum duration to enforce.
-			$minimum = sugar_calendar_get_minimum_event_duration();
-
-			// Calculate a minimum end, maybe using the minimum duration.
-			$end_compare = ! empty( $minimum )
-				? strtotime( '+' . $minimum, $start_int )
-				: $end_int;
-
-			// Bail if event duration exceeds the minimum (great!).
-			if ( $end_compare > $start_int ) {
-				return $end;
-
-				// If there is a minimum, the new end is the start + the minimum.
-			} elseif ( ! empty( $minimum ) ) {
-				$end_int = $end_compare;
-
-				// If there isn't a minimum, then the end needs to be rejected.
-			} else {
-				$has_end = false;
-			}
-		}
-
-		// The above logic deterimned that the end needs to equal the start.
-		// This is how events are allowed to have a start without a known end.
-		if ( $has_end === false ) {
-			$end_int = $start_int;
-		}
-
-		// All day events end at the final second.
-		if ( $all_day === true ) {
-			$end_int = gmmktime(
-				23,
-				59,
-				59,
-				gmdate( 'n', $end_int ),
-				gmdate( 'j', $end_int ),
-				gmdate( 'Y', $end_int )
-			);
-		}
-
-		// Format.
-		$retval = gmdate( 'Y-m-d H:i:s', $end_int );
-
-		// Return the new end.
-		return $retval;
-	}
-
-	/**
-	 * Helper function to prepare any combined date/hour/minute/meridiem fields.
-	 *
-	 * Used by start & end, but could reliably be used elsewhere.
-	 *
-	 * This helper exists to eliminate duplicated code, and to provide a single
-	 * function to funnel different field formats through, I.E. 12/24 hour clocks.
-	 *
-	 * @since 2.0.5
-	 *
-	 * @param type $prefix Datetime prefix.
-	 *
-	 * @return type
-	 */
-	private function prepare_date_time( $prefix = 'start' ) {
-
-		// Sanity check the prefix.
-		if ( empty( $prefix ) || ! is_string( $prefix ) ) {
-			$prefix = 'start';
-		}
-
-		// Sanitize the prefix, and append an underscore.
-		$prefix = sanitize_key( $prefix ) . '_';
-
-		// Get the current time.
-		$now = sugar_calendar_get_request_time();
-
-		// Get the current Year, Month, and Day, without any time.
-		$nt = gmdate(
-			'Y-m-d H:i:s',
-			gmmktime(
-				0,
-				0,
-				0,
-				gmdate( 'n', $now ),
-				gmdate( 'j', $now ),
-				gmdate( 'Y', $now )
-			)
-		);
-
-		// Calendar date is set.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.NonceVerification.Missing
-		$date = ! empty( $_POST[ $prefix . 'date' ] )
-			? strtotime( sanitize_text_field( $_POST[ $prefix . 'date' ] ) )
-			: strtotime( $nt );
-
-		// Hour.
-		$hour = ! empty( $_POST[ $prefix . 'time_hour' ] )
-			? sanitize_text_field( $_POST[ $prefix . 'time_hour' ] )
-			: 0;
-
-		// Minutes.
-		$minutes = ! empty( $_POST[ $prefix . 'time_minute' ] )
-			? sanitize_text_field( $_POST[ $prefix . 'time_minute' ] )
-			: 0;
-
-		// Seconds.
-		$seconds = ! empty( $_POST[ $prefix . 'time_second' ] )
-			? sanitize_text_field( $_POST[ $prefix . 'time_second' ] )
-			: 0;
-
-		// Maybe adjust for meridiem.
-		if ( '12' === sugar_calendar_get_clock_type() ) {
-
-			// Day/night.
-			$am_pm = ! empty( $_POST[ $prefix . 'time_am_pm' ] )
-				? sanitize_text_field( $_POST[ $prefix . 'time_am_pm' ] )
-				: 'am';
-
-			// Maybe tweak hours.
-			$hour = $this->adjust_hour_for_meridiem( $hour, $am_pm );
-		}
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.NonceVerification.Missing
-
-		// Make timestamp from pieces.
-		$timestamp = gmmktime(
-			intval( $hour ),
-			intval( $minutes ),
-			intval( $seconds ),
-			gmdate( 'n', $date ),
-			gmdate( 'j', $date ),
-			gmdate( 'Y', $date )
-		);
-
-		// Format for MySQL.
-		$retval = gmdate( 'Y-m-d H:i:s', $timestamp );
-
-		// Return.
-		return $retval;
-	}
-
-
-	/**
-	 * Does the event that is trying to be saved have an end date & time?
-	 *
-	 * @since 2.0.5
-	 *
-	 * @return bool
-	 */
-	private function has_end() {
-
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		return ! (
-			empty( $_POST['end_date'] )
-			&& empty( $_POST['end_time_hour'] )
-			&& empty( $_POST['end_time_minute'] )
-		);
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Offset hour based on meridiem.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param int    $hour     Hour.
-	 * @param string $meridiem Meridiem.
-	 *
-	 * @return int
-	 */
-	private function adjust_hour_for_meridiem( $hour = 0, $meridiem = 'am' ) {
-
-		// Store new hour.
-		$new_hour = $hour;
-
-		// Bump by 12 hours.
-		if ( $meridiem === 'pm' && ( $new_hour < 12 ) ) {
-			$new_hour += 12;
-
-			// Decrease by 12 hours.
-		} elseif ( $meridiem === 'am' && ( $new_hour >= 12 ) ) {
-			$new_hour -= 12;
-		}
-
-		// Filter & return.
-		return (int) $new_hour;
+		return array_merge( EventDateTimeRequest::from_request(), $data );
 	}
 
 	/**
@@ -1352,6 +1046,14 @@ class Event implements MetaboxInterface {
 		wp_enqueue_style( 'sugar-calendar-admin-event-meta-box' );
 
 		wp_enqueue_script( 'sugar-calendar-admin-event-meta-box' );
+
+		// jQuery-Confirm powers the online-meeting "Remove" danger-zone modal.
+		// Enqueue only the vendor SCRIPT + SC's branded `admin-confirm` theme —
+		// NOT the vendor stylesheet, whose default `.btn` styles (uppercase, small)
+		// would override the SC button theme. This mirrors what the Integrations
+		// page loads (admin-alerts only), so the modal matches there.
+		wp_enqueue_script( 'sugar-calendar-vendor-jquery-confirm' );
+		wp_enqueue_style( 'sugar-calendar-admin-confirm' );
 
 		/**
 		 * Filter the localize script for the admin event meta box.

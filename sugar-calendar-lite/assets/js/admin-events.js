@@ -194,6 +194,17 @@
 			} );
 		},
 
+		/**
+		 * Initialize the event detail popovers for calendar entries.
+		 *
+		 * Most entries trigger the popover from their title link. Multi-hour
+		 * week-view events render as a larger card, so we trigger from the whole
+		 * card instead: clicking anywhere on the block — not just the title —
+		 * opens the popover, which is the behavior users expect from a sizeable
+		 * event block.
+		 *
+		 * @since 3.12.0
+		 */
 		initializeTooltips: function () {
 
 			const $links = $( '.sugar-calendar-event-entry' );
@@ -202,12 +213,20 @@
 			$links.on( 'click', e => e.preventDefault() );
 
 			$targets.each( function () {
-				tippy( $( this ).get( 0 ), {
+				const $target = $( this );
+
+				// Prefer the multi-hour card wrapper, then the title anchor, then
+				// the target itself so tippy always receives a defined element.
+				const triggerTarget = $target.closest( '.sugar-calendar-event-entry-wrap--multi-hour' ).get( 0 )
+					|| $target.parent( 'a' ).get( 0 )
+					|| $target.get( 0 );
+
+				tippy( $target.get( 0 ), {
 					trigger: 'click',
 					allowHTML: true,
 					interactive: true,
 					appendTo: document.body,
-					triggerTarget: $( this ).parent( 'a' ).get( 0 ),
+					triggerTarget,
 					offset: [0, 12],
 
 					content( el ) {

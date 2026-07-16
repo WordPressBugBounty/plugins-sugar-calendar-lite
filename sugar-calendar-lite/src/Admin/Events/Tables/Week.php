@@ -190,9 +190,10 @@ class Week extends Grid {
 
 		// Maybe skip an event in a cell.
 		switch ( $cell_type ) {
-			// Only allow all-day events in all-day cells.
+			// The Week view shows multi-day events in the All Day row alongside
+			// all-day events, so accept both here.
 			case 'all_day':
-				if ( ! $item->is_all_day() ) {
+				if ( ! $item->is_all_day() && ! $item->is_multi( 'j' ) ) {
 					$retval = true;
 				}
 				break;
@@ -208,12 +209,30 @@ class Week extends Grid {
 			default:
 				if ( $item->is_all_day() || $item->is_multi( 'j' ) ) {
 					$retval = true;
+					break;
+				}
+
+				// Multi-hour events render once in their start cell.
+				if ( $this->skip_multi_hour_in_cell( $item ) ) {
+					$retval = true;
 				}
 				break;
 		}
 
 		// Return if skipping.
 		return (bool) $retval;
+	}
+
+	/**
+	 * Week and day hour-grid views render timed events as intra-day cards.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return bool
+	 */
+	protected function supports_intra_day_cards() {
+
+		return true;
 	}
 
 	/**
@@ -298,6 +317,22 @@ class Week extends Grid {
 			}
 		}
 
+		// Multi-day events take the top lanes of the row; per-day all-day
+		// events stack below them. Grid auto-placement follows DOM order, so
+		// emit the multi-day spans first. ( `+` preserves keys and order. )
+		$multi_day  = [];
+		$single_day = [];
+
+		foreach ( $items as $id => $item ) {
+			if ( $item['event']->is_multi( 'j' ) ) {
+				$multi_day[ $id ] = $item;
+			} else {
+				$single_day[ $id ] = $item;
+			}
+		}
+
+		$items = $multi_day + $single_day;
+
 		// Start an output buffer.
 		ob_start();
 		?>
@@ -334,6 +369,11 @@ class Week extends Grid {
 
 			<div class="row event-spans">
 
+				<?php
+				$week_start_ymd = gmdate( 'Y-m-d', $this->grid_start );
+				$week_end_ymd   = gmdate( 'Y-m-d', $this->grid_end );
+				?>
+
 				<?php foreach ( $items as $item ) : ?>
 
 					<?php
@@ -350,6 +390,16 @@ class Week extends Grid {
 					$data_days = array_map( 'sanitize_key', $days );
 					$data_days = implode( ',', $data_days );
 					$classes   = [ 'event-span' ];
+
+					// Directional arrow caps when the event continues beyond the
+					// visible week: a point on the side it carries on toward.
+					if ( $event->start_date( 'Y-m-d' ) < $week_start_ymd ) {
+						$classes[] = 'event-span--continues-before';
+					}
+
+					if ( $event->end_date( 'Y-m-d' ) > $week_end_ymd ) {
+						$classes[] = 'event-span--continues-after';
+					}
 
 					$is_hidden = array_diff( $days, $this->get_hidden_columns() ) === [];
 
@@ -469,7 +519,8 @@ class Week extends Grid {
 	 */
 	protected function set_cells() {
 
-		// All Day, Multi Day cells.
+		// All-day cells. Multi-day events render in the All Day row too, so they
+		// are gathered here rather than in a separate multi-day cell.
 		for ( $i = 0; $i <= $this->day_count - 1; $i++ ) {
 
 			// Setup the row and offset.
@@ -493,19 +544,10 @@ class Week extends Grid {
 				'index' => $i,
 			];
 
-			// Setup all-daycell boundaries.
+			// Setup all-day cell boundaries.
 			$this->set_cell_boundaries( $args );
 
 			// Setup all-day cell items.
-			$this->set_cell_items();
-
-			// Set type to multi-day.
-			$args['type'] = 'multi_day';
-
-			// Setup multi-day cell boundaries.
-			$this->set_cell_boundaries( $args );
-
-			// Setup multi-day cell items.
 			$this->set_cell_items();
 
 			// Bump the day.
@@ -567,11 +609,12 @@ class Week extends Grid {
 	 */
 	protected function display_mode() {
 
-		// All day events.
-		echo $this->get_event_spans_row( 'all_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// Stamp SCB-style cluster layout (column / N / nesting) before the cell
+		// loop reads it, for the proportional overlap rendering.
+		$this->precompute_intra_day_clusters();
 
-		// Multi day events.
-		echo $this->get_event_spans_row( 'multi_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// All-day and multi-day events share the All Day row in the Week view.
+		echo $this->get_event_spans_row( 'all_day' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		// Default column.
 		$column = 0;

@@ -32,15 +32,19 @@ if ( ! $context->get_block()->should_render_block_header() ) {
 		foreach ( $events[ $day->format( 'Y-m-d' ) ] as $event ) {
 
 			// We should only display an event once when grouping by week.
+			// Composite key (ID + occurrence start) keeps multi-day events
+			// deduped while letting each recurring occurrence render.
+			$dedup_key = $event->id . '|' . $event->start;
+
 			if (
 				$context->get_block()->should_group_events_by_week()
 				&&
-				in_array( $event->id, $context->get_block()->get_displayed_events(), true )
+				in_array( $dedup_key, $context->get_block()->get_displayed_events(), true )
 			) {
 				continue;
 			}
 
-			$context->get_block()->add_displayed_event( $event->id );
+			$context->get_block()->add_displayed_event( $dedup_key );
 
 			$event_view = new EventView( $event, $context->get_block() );
 			?>

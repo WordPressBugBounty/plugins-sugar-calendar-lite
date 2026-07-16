@@ -8,7 +8,17 @@ namespace Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query;
+use Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query;
+use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
+use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
+use Sugar_Calendar\AddOn\Ticketing\Emails;
+use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Integrations\OnlineMeeting;
+use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
+use Throwable;
+use WP_Error;
 
 /**
  * Add an order.
@@ -19,7 +29,7 @@ use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
  * @return int
  */
 function add_order( $data = array() ) {
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$orders = new Order_Query();
 
 	return $orders->add_item( $data );
 }
@@ -34,9 +44,84 @@ function add_order( $data = array() ) {
  * @return bool Whether or not the order was updated.
  */
 function update_order( $order_id = 0, $data = array() ) {
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$orders = new Order_Query();
 
 	return $orders->update_item( $order_id, $data );
+}
+
+/**
+ * Refund an order through the gateway that processed it.
+ *
+ * Resolves the order's gateway (recorded in the `gateway` column at checkout),
+ * then calls that gateway's refund() if it provides one. Gateways that refund on
+ * their own side (or don't implement refund()) result in a no-op true, letting the
+ * caller flip the order status only. A free order with no transaction is likewise
+ * a no-op true. But a paid order (has a transaction) whose gateway cannot be
+ * resolved is a hard failure — we return WP_Error rather than mark it refunded
+ * without moving any money.
+ *
+ * @since 3.12.0
+ *
+ * @param object $order The order object (from get_order()).
+ *
+ * @return true|\WP_Error True on success or a legitimate no-op; WP_Error when the
+ *                        gateway refund failed or the gateway of a paid order
+ *                        cannot be resolved (caller must NOT mark it refunded).
+ */
+function refund_order( $order ) {
+
+	if ( empty( $order ) || empty( $order->id ) ) {
+		return new WP_Error( 'sc_et_refund_no_order', esc_html__( 'Order not found.', 'sugar-calendar-lite' ) );
+	}
+
+	// Resolve the processing gateway slug (recorded on the order at checkout).
+	$slug = ! empty( $order->gateway )
+		? $order->gateway
+		: '';
+
+	// No resolvable gateway.
+	if ( empty( $slug ) ) {
+
+		// A paid order with a transaction but no gateway slug means we cannot
+		// tell where the money went — e.g. a row fetched in the brief window
+		// after a plugin update but before the `gateway` column upgrade runs.
+		// Fail loud rather than flip the status without moving any money.
+		if ( ! empty( $order->transaction_id ) ) {
+			return new WP_Error(
+				'sc_et_refund_no_gateway',
+				esc_html__( 'Could not determine which payment gateway processed this order, so no refund was issued.', 'sugar-calendar-lite' )
+			);
+		}
+
+		// Genuinely nothing to refund (e.g. a free order); caller flips status only.
+		return true;
+	}
+
+	// Cast to array — a third-party sc_et_gateways filter could return a non-array.
+	$gateways = (array) apply_filters(
+		'sc_et_gateways',
+		Checkout::default_gateways()
+	);
+
+	// No such registered gateway → nothing to dispatch.
+	if ( empty( $gateways[ $slug ] ) || ! class_exists( $gateways[ $slug ] ) ) {
+		return true;
+	}
+
+	// A filter could register an abstract class/interface, or a class whose
+	// constructor throws; instantiating it must not fatal the refund request.
+	try {
+		$gateway_obj = new $gateways[ $slug ];
+	} catch ( Throwable $e ) {
+		return true;
+	}
+
+	// Gateways that don't implement refund() refund on their own side.
+	if ( ! is_callable( [ $gateway_obj, 'refund' ] ) ) {
+		return true;
+	}
+
+	return $gateway_obj->refund( $order );
 }
 
 /**
@@ -48,9 +133,184 @@ function update_order( $order_id = 0, $data = array() ) {
  * @return Order
  */
 function get_order( $order_id = 0 ) {
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$orders = new Order_Query();
 
 	return $orders->get_item_by( 'id', $order_id );
+}
+
+/**
+ * Assemble a complete, self-contained snapshot of a finished ticket order.
+ *
+ * Built by re-querying the saved order, tickets, and attendees, so the payload
+ * stays stable regardless of how the checkout flow that produced the order is
+ * later refactored. Values are passed through exactly as stored — no formatting
+ * or type coercion — so consumers receive what Sugar Calendar actually records.
+ *
+ * Ticket-type details (name, price) are not added here: ticket types live in
+ * the Event Ticketing add-on, which enriches named types (`ticket_type_id > 0`)
+ * via the `sc_et_checkout_complete_payload` filter.
+ *
+ * @since 3.12.0
+ *
+ * @param int $order_id Order ID.
+ *
+ * @return array Order snapshot, or an empty array when the order can't be found.
+ */
+function get_checkout_complete_payload( $order_id = 0 ) {
+
+	$order = get_order( $order_id );
+
+	// Bail if the order can't be resolved.
+	if ( empty( $order ) || empty( $order->id ) ) {
+		return array();
+	}
+
+	// Re-queried from the saved order — not passed out of the checkout loop.
+	$tickets   = get_order_tickets( $order_id );
+	$attendees = get_attendees_by_order_id( $order_id );
+
+	// One entry per ticket. Anonymous attendees leave attendee_id at 0.
+	$ticket_payload = array();
+
+	foreach ( (array) $tickets as $ticket ) {
+		$ticket_payload[] = array(
+			'ticket_id'      => $ticket->id,
+			'ticket_type_id' => $ticket->ticket_type_id,
+			'attendee_id'    => $ticket->attendee_id,
+			'code'           => $ticket->code,
+			'status'         => $ticket->status,
+			'event_date'     => $ticket->event_date,
+			'occurrence_id'  => $ticket->occurrence_id,
+		);
+	}
+
+	// Attendees actually recorded for this order (anonymous tickets have none).
+	$attendee_payload = array();
+	$attendee_ids     = array();
+
+	foreach ( (array) $attendees as $attendee ) {
+		$attendee_ids[]     = $attendee->id;
+		$attendee_payload[] = array(
+			'id'         => $attendee->id,
+			'email'      => $attendee->email,
+			'first_name' => $attendee->first_name,
+			'last_name'  => $attendee->last_name,
+		);
+	}
+
+	$payload = array(
+		'order_id'     => $order->id,
+		'uuid'         => $order->uuid,
+		'event_id'     => $order->event_id,
+		'event_date'   => $order->event_date,
+		'date_created' => $order->date_created,
+		'payment'      => array(
+			'transaction_id' => $order->transaction_id,
+			'status'         => $order->status,
+			'currency'       => $order->currency,
+			'subtotal'       => $order->subtotal,
+			'discount'       => $order->discount,
+			'tax'            => $order->tax,
+			'total'          => $order->total,
+		),
+		'customer'     => array(
+			'email'      => $order->email,
+			'first_name' => $order->first_name,
+			'last_name'  => $order->last_name,
+		),
+		'attendee_ids' => $attendee_ids,
+		'attendees'    => $attendee_payload,
+		'tickets'      => $ticket_payload,
+	);
+
+	/**
+	 * Filter the completed-checkout payload.
+	 *
+	 * Lets add-ons enrich the snapshot before it is passed to the
+	 * `sc_et_checkout_complete` action — e.g. the Event Ticketing add-on adds
+	 * ticket-type name/price for named types.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $payload  Order snapshot.
+	 * @param int   $order_id Order ID.
+	 */
+	return apply_filters( 'sc_et_checkout_complete_payload', $payload, $order_id );
+}
+
+/**
+ * Fire a per-status action when an existing order transitions to a recognized status.
+ *
+ * Hooked to the engine's `sc_transition_order_status` action, which BerlinDB
+ * fires from both order creation and update whenever the `status` column value
+ * actually changes (see the transition mechanism in the base Query class). This
+ * gives integrations one reliable signal per order lifecycle change, regardless
+ * of which code path (admin, gateway, WooCommerce, …) made the change.
+ *
+ * Order creation is intentionally skipped: on a new row the engine passes `'new'`
+ * as the old value, and a completed sale is already covered — with a fully built
+ * payload including tickets — by the `sc_et_checkout_complete` action. At creation
+ * time the order's tickets are not saved yet, so firing here would emit an
+ * incomplete payload. Only genuine transitions of an already-persisted order fire.
+ *
+ * For each recognized status the dynamic action `sc_et_order_{status}` fires,
+ * e.g. `sc_et_order_refunded` when an order is refunded.
+ *
+ * @since 3.12.0
+ *
+ * @param string $old_status The status transitioned from (`'new'` on order creation).
+ * @param string $new_status The status transitioned to.
+ * @param int    $order_id   The order ID.
+ */
+function trigger_order_status_changed( $old_status = '', $new_status = '', $order_id = 0 ) {
+
+	// Skip order creation — sales fire sc_et_checkout_complete, and the order's
+	// tickets are not persisted yet at this point.
+	if ( 'new' === $old_status ) {
+		return;
+	}
+
+	/**
+	 * Filter the order statuses that fire a dedicated `sc_et_order_{status}` action.
+	 *
+	 * Lets add-ons opt a status in or out without touching core — e.g. to expose
+	 * a custom gateway status, or to suppress one that isn't relevant.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param string[] $statuses   Order statuses that fire a per-status action.
+	 * @param int      $order_id   The order ID.
+	 * @param string   $new_status The status transitioned to.
+	 * @param string   $old_status The status transitioned from.
+	 */
+	$statuses = apply_filters(
+		'sc_et_order_status_actions',
+		array( 'paid', 'pending', 'refunded', 'trash' ),
+		$order_id,
+		$new_status,
+		$old_status
+	);
+
+	// Bail if this status has no dedicated action.
+	if ( ! in_array( $new_status, (array) $statuses, true ) ) {
+		return;
+	}
+
+	/**
+	 * Fires when an existing order transitions to `{$new_status}`.
+	 *
+	 * The dynamic portion of the hook name refers to the order's new status —
+	 * e.g. `sc_et_order_refunded`, `sc_et_order_paid`. The payload mirrors the
+	 * `sc_et_checkout_complete` snapshot (re-queried after the status is written,
+	 * so `payment.status` reflects the new value).
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array  $payload    Order snapshot. See get_checkout_complete_payload().
+	 * @param int    $order_id   The order ID.
+	 * @param string $old_status The status the order transitioned from.
+	 */
+	do_action( "sc_et_order_{$new_status}", get_checkout_complete_payload( $order_id ), $order_id, $old_status ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 }
 
 /**
@@ -220,7 +480,7 @@ function get_orders( $args = array() ) {
 	) );
 
 	// Instantiate a query object
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$orders = new Order_Query();
 
 	// Return orders
 	return $orders->query( $r );
@@ -235,7 +495,7 @@ function get_orders( $args = array() ) {
  * @return Order
  */
 function get_order_by_checkout_id( $checkout_id = '' ) {
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$tickets = new Order_Query();
 
 	return $tickets->get_item_by( 'checkout_id', $checkout_id );
 }
@@ -256,7 +516,7 @@ function count_orders( $args = array() ) {
 	) );
 
 	// Query for count(s)
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query( $r );
+	$orders = new Order_Query( $r );
 
 	// Return count(s)
 	return absint( $orders->found_items );
@@ -271,7 +531,7 @@ function count_orders( $args = array() ) {
  * @return Bool
  */
 function delete_order( $order_id = 0 ) {
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Order_Query();
+	$orders = new Order_Query();
 
 	return $orders->delete_item( $order_id );
 }
@@ -330,7 +590,7 @@ function order_status_label( $status = '' ) {
 function add_ticket( $data = array() ) {
 
 	// Instantiate a query object
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$tickets = new Ticket_Query();
 
 	$data['code'] = wp_generate_password( 20, false );
 
@@ -351,7 +611,7 @@ function add_ticket( $data = array() ) {
  * @return bool Whether or not the ticket was updated.
  */
 function update_ticket( $ticket_id = 0, $data = array() ) {
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$tickets = new Ticket_Query();
 
 	return $tickets->update_item( $ticket_id, $data );
 }
@@ -365,7 +625,7 @@ function update_ticket( $ticket_id = 0, $data = array() ) {
  * @return Ticket
  */
 function get_ticket( $ticket_id = 0 ) {
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$tickets = new Ticket_Query();
 
 	return $tickets->get_item_by( 'id', $ticket_id );
 }
@@ -389,7 +649,7 @@ function get_tickets( $args = array() ) {
 	) );
 
 	// Instantiate a query object
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$orders = new Ticket_Query();
 
 	// Return tickets
 	return $orders->query( $r );
@@ -404,7 +664,7 @@ function get_tickets( $args = array() ) {
  * @return Ticket
  */
 function get_ticket_by_code( $code = '' ) {
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$tickets = new Ticket_Query();
 
 	return $tickets->get_item_by( 'code', $code );
 }
@@ -485,7 +745,7 @@ function count_tickets( $args = array() ) {
 	) );
 
 	// Query for count(s)
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query( $r );
+	$tickets = new Ticket_Query( $r );
 
 	// Return count(s)
 	return absint( $tickets->found_items );
@@ -500,7 +760,7 @@ function count_tickets( $args = array() ) {
  * @return Bool
  */
 function delete_ticket( $ticket_id = 0 ) {
-	$tickets = new \Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query();
+	$tickets = new Ticket_Query();
 
 	return $tickets->delete_item( $ticket_id );
 }
@@ -552,7 +812,7 @@ function restore_ticket( $ticket_id = 0 ) {
  * @return int
  */
 function add_attendee( $data = array() ) {
-	$attendees = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$attendees = new Attendee_Query();
 
 	return $attendees->add_item( $data );
 }
@@ -567,7 +827,7 @@ function add_attendee( $data = array() ) {
  * @return bool Whether or not the attendee was updated.
  */
 function update_attendee( $attendee_id = 0, $data = array() ) {
-	$attendees = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$attendees = new Attendee_Query();
 
 	return $attendees->update_item( $attendee_id, $data );
 }
@@ -581,7 +841,7 @@ function update_attendee( $attendee_id = 0, $data = array() ) {
  * @return Attendee
  */
 function get_attendee( $attendee_id = 0 ) {
-	$attendees = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$attendees = new Attendee_Query();
 
 	return $attendees->get_item_by( 'id', $attendee_id );
 }
@@ -605,7 +865,7 @@ function get_attendees( $args = array() ) {
 	) );
 
 	// Instantiate a query object
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$orders = new Attendee_Query();
 
 	// Return orders
 	return $orders->query( $r );
@@ -620,7 +880,7 @@ function get_attendees( $args = array() ) {
  * @return Attendee
  */
 function get_attendee_by_email( $email = '' ) {
-	$attendees = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$attendees = new Attendee_Query();
 
 	return $attendees->get_item_by( 'email', $email );
 }
@@ -669,7 +929,7 @@ function get_attendees_by_order_id( $order_id = 0 ) {
  * @return Bool
  */
 function delete_attendee( $attendee_id = 0 ) {
-	$attendees = new \Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query();
+	$attendees = new Attendee_Query();
 
 	return $attendees->delete_item( $attendee_id );
 }
@@ -683,7 +943,7 @@ function delete_attendee( $attendee_id = 0 ) {
  * @return int
  */
 function add_discount( $data = array() ) {
-	$discounts = new \Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query();
+	$discounts = new Discount_Query();
 
 	return $discounts->add_item( $data );
 }
@@ -698,7 +958,7 @@ function add_discount( $data = array() ) {
  * @return bool Whether or not the discount was updated.
  */
 function update_discount( $discount_id = 0, $data = array() ) {
-	$discounts = new \Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query();
+	$discounts = new Discount_Query();
 
 	return $discounts->update_item( $discount_id, $data );
 }
@@ -712,7 +972,7 @@ function update_discount( $discount_id = 0, $data = array() ) {
  * @return Discount
  */
 function get_discount( $discount_id = 0 ) {
-	$discounts = new \Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query();
+	$discounts = new Discount_Query();
 
 	return $discounts->get_item_by( 'id', $discount_id );
 }
@@ -736,7 +996,7 @@ function get_discounts( $args = array() ) {
 	) );
 
 	// Instantiate a query object
-	$orders = new \Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query();
+	$orders = new Discount_Query();
 
 	// Return discounts
 	return $orders->query( $r );
@@ -751,7 +1011,7 @@ function get_discounts( $args = array() ) {
  * @return Bool
  */
 function delete_discount( $discount_id = 0 ) {
-	$discounts = new \Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query();
+	$discounts = new Discount_Query();
 
 	return $discounts->delete_item( $discount_id );
 }
@@ -1294,6 +1554,9 @@ function get_stripe_secret_key() {
  * Send order receipt email.
  *
  * @since 1.0.0
+ * @since 3.12.0 Allow an external receipt provider to short-circuit the
+ *                  send via the sc_et_use_external_receipt filter, and fire
+ *                  sc_et_send_external_receipt_email so it can send its own.
  *
  * @param int $order_id ID of the order to send receipt for.
  *
@@ -1309,7 +1572,45 @@ function send_order_receipt_email( $order_id = 0 ) {
 		return;
 	}
 
-	$emails              = new \Sugar_Calendar\AddOn\Ticketing\Emails;
+	/**
+	 * Let an external receipt provider take over the order receipt email.
+	 *
+	 * Return true from a third-party integration (e.g. one that issues its
+	 * own receipt) to stop Sugar Calendar from sending its receipt email for
+	 * this order. Default false preserves the built-in behavior.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param bool   $use_external Whether an external provider handles the receipt. Default false.
+	 * @param int    $order_id     Order ID.
+	 * @param object $order        The order object.
+	 */
+	if ( apply_filters( 'sc_et_use_external_receipt', false, $order_id, $order ) ) {
+
+		/**
+		 * Fires when an external provider has taken over the order receipt email.
+		 *
+		 * Sugar Calendar will NOT send its own receipt for this order. Hook this
+		 * to send your own receipt email — it fires on every receipt path
+		 * (post-purchase, customer resend, and admin resend). Send from here
+		 * only; do not also hook sc_et_checkout_complete for the receipt, or a
+		 * new purchase will send two emails.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param int    $order_id Order ID.
+		 * @param object $order    The order object.
+		 */
+		do_action( 'sc_et_send_external_receipt_email', $order_id, $order );
+
+		return;
+	}
+
+	if ( ! empty( $order->event_id ) ) {
+		add_online_meeting_email_filter( (int) $order->event_id );
+	}
+
+	$emails              = new Emails;
 	$emails->object_id   = $order_id;
 	$emails->object_type = 'order';
 	$emails->heading     = esc_html__( 'Order Receipt', 'sugar-calendar-lite' );
@@ -1346,7 +1647,11 @@ function send_ticket_email( $ticket_id = 0 ) {
 		return;
 	}
 
-	$emails              = new \Sugar_Calendar\AddOn\Ticketing\Emails;
+	if ( ! empty( $ticket->event_id ) ) {
+		add_online_meeting_email_filter( (int) $ticket->event_id );
+	}
+
+	$emails              = new Emails;
 	$emails->object_id   = $ticket_id;
 	$emails->object_type = 'ticket';
 	$emails->heading     = esc_html__( 'Event Ticket', 'sugar-calendar-lite' );
@@ -1967,4 +2272,96 @@ function restore_order( $order_id = 0 ) {
 			'status' => 'pending',
 		]
 	);
+}
+
+/**
+ * Render the online-meeting Join Link block on the admin Order Edit page.
+ *
+ * Hooked to sc_et_admin_order_top. Admins always see the link (the page
+ * requires manage_options), so the only gate is "a meeting exists".
+ *
+ * @since 3.12.0
+ *
+ * @param object $order The order object.
+ *
+ * @return void
+ */
+function render_admin_order_online_meeting( $order ) {
+
+	if ( empty( $order->event_id ) ) {
+		return;
+	}
+
+	$event = sugar_calendar_get_event( (int) $order->event_id );
+
+	$details = OnlineMeeting::for_event( $event );
+
+	if ( $details === null ) {
+		return;
+	}
+	?>
+	<div class="sugar-calendar-metabox__field-row">
+		<label><?php esc_html_e( 'Online Meeting', 'sugar-calendar-lite' ); ?></label>
+		<div class="sugar-calendar-metabox__field">
+			<?php
+			// Pre-escaped by the presenter.
+			echo OnlineMeetingPresenter::front_end_html( $details ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Build a one-shot sc_email_message filter that injects the online-meeting
+ * Join Link for a specific event.
+ *
+ * The Emails class stores object_type/object_id as private properties with no
+ * public __get, so they cannot be read from inside the sc_email_message filter
+ * callback. Instead, callers (send_order_receipt_email, send_ticket_email)
+ * resolve the event_id themselves and install this closure-based, self-removing
+ * filter before handing off to Emails::send().
+ *
+ * HTML emails carry the `<!-- End Content -->` template marker; we inject the
+ * HTML block just before it (inside the body container). Without the marker the
+ * message is plain text, so we append the plain-text block.
+ *
+ * @since 3.12.0
+ *
+ * @param int $event_id SC event ID.
+ *
+ * @return void
+ */
+function add_online_meeting_email_filter( $event_id ) {
+
+	$event   = sugar_calendar_get_event( (int) $event_id );
+	$details = OnlineMeeting::for_event( $event );
+
+	if ( $details === null ) {
+		return;
+	}
+
+	$callback = null;
+	$callback = function ( $message ) use ( $details, &$callback ) {
+		// Self-remove: fire exactly once per send() call.
+		remove_filter( 'sc_email_message', $callback, 20 );
+
+		// HTML template → inject before the content-closing marker.
+		if ( strpos( $message, '<!-- End Content -->' ) !== false ) {
+			$block = OnlineMeetingPresenter::email_html( $details );
+
+			return str_replace( '<!-- End Content -->', $block . '<!-- End Content -->', $message );
+		}
+
+		// Plain-text fallback → append the plain block.
+		return $message . OnlineMeetingPresenter::email_text( $details );
+	};
+
+	// Contract: callers MUST install this immediately before Emails::send(),
+	// which always reaches build_email() and applies sc_email_message exactly
+	// once — so the closure fires and self-removes. Installing it without a
+	// guaranteed send() would leave it registered and inject into the next
+	// email; the two callers (send_order_receipt_email / send_ticket_email)
+	// honor this.
+	add_filter( 'sc_email_message', $callback, 20 );
 }

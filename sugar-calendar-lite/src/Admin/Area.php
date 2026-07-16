@@ -16,7 +16,8 @@ use Sugar_Calendar\Admin\Pages\Rsvp;
 use Sugar_Calendar\Admin\Pages\Settings;
 use Sugar_Calendar\Admin\Pages\SettingsFeedsTab;
 use Sugar_Calendar\Admin\Pages\SettingsGeneralTab;
-use Sugar_Calendar\Admin\Pages\SettingsMapsTab;
+use Sugar_Calendar\Admin\Pages\SettingsIntegrationsTab;
+use Sugar_Calendar\Admin\Pages\SettingsLicenseUsageTab;
 use Sugar_Calendar\Admin\Pages\SettingsMiscTab;
 use Sugar_Calendar\Admin\Pages\SettingsRsvpTab;
 use Sugar_Calendar\Admin\Pages\SettingsZapierTab;
@@ -449,6 +450,16 @@ class Area {
 
 		add_submenu_page(
 			self::SLUG,
+			__( 'SMTP', 'sugar-calendar-lite' ),
+			__( 'Email issues?', 'sugar-calendar-lite' ),
+			'manage_options',
+			SMTP::get_slug(),
+			[ $this, 'display' ],
+			SMTP::get_priority()
+		);
+
+		add_submenu_page(
+			self::SLUG,
 			Addons::get_title(),
 			Addons::get_title(),
 			Addons::get_capability(),
@@ -465,16 +476,6 @@ class Area {
 			Welcome::get_slug(),
 			[ $this, 'display' ],
 			Welcome::get_priority()
-		);
-
-		// Hidden SMTP page.
-		add_submenu_page(
-			'',
-			__( 'SMTP', 'sugar-calendar-lite' ),
-			__( 'SMTP', 'sugar-calendar-lite' ),
-			'manage_options',
-			SMTP::get_slug(),
-			[ $this, 'display' ]
 		);
 
 		if ( ! Plugin::instance()->is_pro() ) {
@@ -679,12 +680,18 @@ class Area {
 	private function get_settings_page_id() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		if ( empty( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return 'settings_general';
+			// Default landing tab is License & Usage — the lowest-priority tab,
+			// so it sits first in the strip (mirrors Sugar Calendar Bookings,
+			// where the lowest-priority tab is the default selection).
+			return 'settings_license_usage';
 		}
 
 		// phpcs:disable WPForms.Formatting.EmptyLineBeforeReturn.AddEmptyLineBeforeReturnStatement
 
 		switch ( $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			case 'license-usage':
+				return 'settings_license_usage';
+
 			case 'general':
 				return 'settings_general';
 
@@ -692,7 +699,10 @@ class Area {
 				return 'settings_feeds';
 
 			case 'maps':
-				return 'settings_maps';
+				return 'settings_integrations';
+
+			case 'integrations':
+				return 'settings_integrations';
 
 			case 'misc':
 				return 'settings_misc';
@@ -746,27 +756,28 @@ class Area {
 	private function get_pages() {
 
 		$pages = [
-			'welcome'          => Welcome::class,
-			'events'           => Events::class,
-			'event_new'        => EventNew::class,
-			'event_edit'       => EventEdit::class,
-			'calendars'        => Calendars::class,
-			'calendar_new'     => CalendarNew::class,
-			'calendar_edit'    => CalendarEdit::class,
-			'settings'         => Settings::class,
-			'settings_general' => SettingsGeneralTab::class,
-			'settings_feeds'   => SettingsFeedsTab::class,
-			'settings_maps'    => SettingsMapsTab::class,
-			'settings_misc'    => SettingsMiscTab::class,
-			'tools'            => Tools::class,
-			'tools_import'     => ToolsImportTab::class,
-			'tools_export'     => ToolsExportTab::class,
-			'tools_migrate'    => ToolsMigrateTab::class,
-			'venues'           => Venues::class,
-			'speakers'         => Speakers::class,
-			'rsvp'             => Rsvp::class,
-			'addons'           => Addons::class,
-			'smtp'             => SMTP::class,
+			'welcome'                => Welcome::class,
+			'events'                 => Events::class,
+			'event_new'              => EventNew::class,
+			'event_edit'             => EventEdit::class,
+			'calendars'              => Calendars::class,
+			'calendar_new'           => CalendarNew::class,
+			'calendar_edit'          => CalendarEdit::class,
+			'settings'               => Settings::class,
+			'settings_license_usage' => SettingsLicenseUsageTab::class,
+			'settings_general'       => SettingsGeneralTab::class,
+			'settings_feeds'         => SettingsFeedsTab::class,
+			'settings_integrations'  => SettingsIntegrationsTab::class,
+			'settings_misc'          => SettingsMiscTab::class,
+			'tools'                  => Tools::class,
+			'tools_import'           => ToolsImportTab::class,
+			'tools_export'           => ToolsExportTab::class,
+			'tools_migrate'          => ToolsMigrateTab::class,
+			'venues'                 => Venues::class,
+			'speakers'               => Speakers::class,
+			'rsvp'                   => Rsvp::class,
+			'addons'                 => Addons::class,
+			'smtp'                   => SMTP::class,
 		];
 
 		/**
@@ -1046,19 +1057,11 @@ class Area {
 		// Construct user meta key.
 		$meta_key = "{$table_name}_active_columns";
 
-		// Store columns in user meta.
-		$result = update_user_meta( get_current_user_id(), $meta_key, $columns );
+		// update_user_meta() returns false on no-op; don't treat as an error.
+		update_user_meta( get_current_user_id(), $meta_key, $columns );
 
-		// Check if update was successful.
-		if ( $result === false ) {
-			WP::add_admin_notice(
-				esc_html__( 'Failed to save column preferences. Please try again.', 'sugar-calendar-lite' ),
-				'error'
-			);
-
-			add_action( 'admin_notices', [ $this, 'display_admin_notices' ], 5 );
-
-			return;
+		if ( ! empty( $post_data['screen_options'] ) ) {
+			ScreenOptions::persist_from_post( $post_data['screen_options'] );
 		}
 	}
 

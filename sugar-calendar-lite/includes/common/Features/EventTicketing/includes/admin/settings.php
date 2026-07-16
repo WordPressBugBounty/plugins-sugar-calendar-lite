@@ -709,6 +709,26 @@ function get_setting_names() {
 }
 
 /**
+ * Sanitize a settings value by its key.
+ *
+ * Message fields render via wp_editor and are sent as text/html, so they keep
+ * safe HTML via wp_kses_post(); every other field is treated as plain text.
+ *
+ * @since 3.12.0
+ *
+ * @param string $key   The setting key.
+ * @param mixed  $value The raw value to sanitize.
+ *
+ * @return mixed
+ */
+function sanitize_setting_value( $key, $value ) {
+
+	return in_array( $key, [ 'receipt_message', 'ticket_message' ], true )
+		? wp_kses_post( $value )
+		: sanitize_textarea_field( $value );
+}
+
+/**
  * Save the settings.
  *
  * @since 2.2.4
@@ -739,7 +759,7 @@ function handle_post( $post_data ) {
 			continue;
 		}
 
-		$options[ $key ] = sanitize_textarea_field( $value );
+		$options[ $key ] = sanitize_setting_value( $key, $value );
 	}
 
 	if ( ! empty( $post_data['currency'] ) ) {
@@ -829,7 +849,7 @@ function handle_post_ajax() {
 				break;
 
 			default:
-				$options[ $key ] = sanitize_textarea_field( $value );
+				$options[ $key ] = sanitize_setting_value( $key, $value );
 				break;
 		}
 	}

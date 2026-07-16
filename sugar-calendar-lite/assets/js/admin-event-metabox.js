@@ -33,7 +33,22 @@
 			this.$allDay = $( '#all_day', this.$el );
 			this.$timezones = $( '.sugar-calendar-metabox__field-row--time-zone, .event-time-zone, .event-time', this.$el );
 			this.$submitButton = $( '#publish' );
+			this.$onlineProvider = $( '#online_provider', this.$el );
+			this.$createMeetingBtn = $( '.sugar-calendar-metabox__create-meeting', this.$el );
+			this.$createMeetingError = $( '.sugar-calendar-metabox__create-meeting-error', this.$el );
+			this.$onlineDescription = $( '.sugar-calendar-metabox__online-description', this.$el );
+			this.onlineDescriptionDefault = this.$onlineDescription.text();
+			this.$onlineCreditsError = $( '.sugar-calendar-metabox__online-credits-error', this.$el );
+			this.$recurrence = $( '#recurrence', this.$el );
 			this.$tagsSelect = $( '.sugar-calendar-column-tags-form select' );
+
+			// Remember each Online Platform option's server-rendered disabled state,
+			// so the recurrence lock can restore it (rather than blanket-enabling
+			// options the server intentionally disabled, e.g. out-of-credits) when
+			// the event stops being recurring.
+			this.$onlineProvider.find( 'option' ).each( function () {
+				$( this ).data( 'scBaseDisabled', $( this ).prop( 'disabled' ) );
+			} );
 			this.$helpUrl = $( '#sugar-calendar-header-help' );
 			this.helpUrl = false;
 
@@ -58,6 +73,9 @@
 
 			// Block adjustments.
 			this.initBlockAdjustments();
+
+			// Set the initial Online-section UI state (meeting block + Create button).
+			this.syncOnlineMeetingUI();
 		},
 
 		bindEvents: function () {
@@ -66,6 +84,15 @@
 			this.$allDay.on( 'change', this.toggleTimezones.bind( this ) );
 
 			this.$submitButton.on( 'click', this.validateDates.bind( this ) );
+
+			this.$el.on( 'click', '.sugar-calendar-metabox__copy', this.onCopyClick.bind( this ) );
+			this.$onlineProvider.on( 'change', this.syncOnlineMeetingUI.bind( this ) );
+			this.$recurrence.on( 'change', this.syncOnlineMeetingUI.bind( this ) );
+			this.$createMeetingBtn.on( 'click', this.onCreateMeetingClick.bind( this ) );
+
+			// Delegated: the meeting card (with its Remove button) is re-inserted
+			// after a create, so bind on the container rather than the element.
+			this.$el.on( 'click', '.sugar-calendar-metabox__online-card-remove', this.onRemoveMeetingClick.bind( this ) );
 		},
 
 		/**
@@ -98,6 +125,502 @@
 				// Update the Help URL.
 				this.$helpUrl.attr( 'href', this.helpUrl.toString() );
 			}
+		},
+
+		/**
+		 * Copy a read-only field's value to the clipboard and flash "Copied!".
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param {Event} e Click event.
+		 */
+		onCopyClick: function ( e ) {
+
+			e.preventDefault();
+
+			const $button = $( e.currentTarget );
+			const field = document.getElementById( $button.attr( 'data-copy-target' ) );
+
+			if ( ! field ) {
+				return;
+			}
+
+			const flash = () => {
+				if ( ! $button.data( 'copyLabel' ) ) {
+					$button.data( 'copyLabel', $button.text() );
+				}
+
+				if ( $button.data( 'copyTimer' ) ) {
+					clearTimeout( $button.data( 'copyTimer' ) );
+				}
+
+				$button.text( wp.i18n.__( 'Copied!', 'sugar-calendar-lite' ) );
+
+				$button.data( 'copyTimer', setTimeout( () => {
+					$button.text( $button.data( 'copyLabel' ) );
+					$button.removeData( 'copyTimer' );
+				}, 1500 ) );
+			};
+
+			if ( navigator.clipboard && navigator.clipboard.writeText ) {
+				navigator.clipboard.writeText( field.value ).then( flash, () => {
+					field.select();
+					document.execCommand( 'copy' );
+					flash();
+				} );
+			} else {
+				field.select();
+				document.execCommand( 'copy' );
+				flash();
+			}
+		},
+
+		/**
+		 * Read the post id, editor-aware (auto-draft id exists before save).
+		 *
+		 * @since 3.12.0
+		 *
+		 * @return {number|string}
+		 */
+		getEditorPostId: function () {
+
+			if (
+				this.settings.editor && this.settings.editor.type === 'block'
+				&& window.wp && wp.data && wp.data.select( 'core/editor' )
+			) {
+				return wp.data.select( 'core/editor' ).getCurrentPostId();
+			}
+
+			return $( '#post_ID' ).val();
+		},
+
+		/**
+		 * Read the post title, editor-aware.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @return {string}
+		 */
+		getEditorTitle: function () {
+
+			if (
+				this.settings.editor && this.settings.editor.type === 'block'
+				&& window.wp && wp.data && wp.data.select( 'core/editor' )
+			) {
+				return wp.data.select( 'core/editor' ).getEditedPostAttribute( 'title' ) || '';
+			}
+
+			return $( '#title' ).val() || '';
+		},
+
+		/**
+		 * Lock the Online Platform picker while the event is recurring.
+		 *
+		 * Online meetings (Zoom) are not supported for recurring events yet — the
+		 * save path (EventMeetingManager::sync / CreateMeetingAjax) rejects them.
+		 * So when the Recurrence type is anything other than "Never" we reset the
+		 * provider to None (a recurring save then never submits a provider),
+		 * disable the provider options, and surface the notice. Lite renders a
+		 * DISABLED "Repeat" teaser (recurrence is Pro); we treat a disabled
+		 * control as not-recurring so the picker is never locked there.
+		 *
+		 * Unlike the provider-change hide in syncOnlineMeetingUI, this lock is NOT a
+		 * reversible "no data loss" affordance when the event already has a
+		 * provisioned meeting: the options are disabled so the user cannot re-select
+		 * the provider, and EventMeetingManager::sync skips recurring events, so an
+		 * existing meeting is left in place at the provider rather than torn down.
+		 *
+		 * @since 3.12.0
+		 */
+		applyRecurrenceLock: function () {
+
+			const recurring = !! (
+				this.$recurrence
+				&& this.$recurrence.length
+				&& ! this.$recurrence.prop( 'disabled' )
+				&& this.$recurrence.val()
+				&& this.$recurrence.val() !== '0'
+			);
+
+			// Only external integration providers (e.g. Zoom) are locked for recurring
+			// events — they don't support recurrence yet. "None" (value="") and
+			// "Custom Link" (a plain URL with no API call) are always allowed.
+			const $providerOptions = this.$onlineProvider.find( 'option' ).filter( function () {
+				const val = $( this ).val();
+
+				return val !== '' && val !== 'custom';
+			} );
+
+			if ( recurring ) {
+
+				// Reset an integration-provider selection to None so a recurring save
+				// never carries it, then lock those options. None / Custom Link stay.
+				const current = this.$onlineProvider.val();
+
+				if ( current !== '' && current !== 'custom' ) {
+					this.$onlineProvider.val( '' );
+				}
+
+				$providerOptions.prop( 'disabled', true );
+
+				return;
+			}
+
+			// Not recurring: restore each option's server-rendered disabled state.
+			$providerOptions.each( function () {
+				$( this ).prop( 'disabled', !! $( this ).data( 'scBaseDisabled' ) );
+			} );
+		},
+
+		/**
+		 * Sync the Online Platform UI to the selected provider:
+		 *  - show the existing meeting block only when its provider matches the
+		 *    current selection (hide it for None or any other provider);
+		 *  - show the Create-Meeting button only for a creatable provider that has
+		 *    no matching meeting block.
+		 *
+		 * Hiding the block is a non-destructive, pre-save affordance: the block (and
+		 * its meeting meta) stay in the DOM, so re-selecting the provider restores
+		 * it with no data loss. The save path (EventMeetingManager) still owns the
+		 * destructive None-on-save removal.
+		 *
+		 * @since 3.12.0
+		 */
+		syncOnlineMeetingUI: function () {
+
+			if ( ! this.$onlineProvider || ! this.$onlineProvider.length ) {
+				return;
+			}
+
+			// Recurring events lock the picker to None before anything else runs.
+			this.applyRecurrenceLock();
+
+			const $opt = this.$onlineProvider.find( 'option:selected' );
+			const slug = this.$onlineProvider.val();
+			const $meeting = this.$el.find( '.sugar-calendar-metabox__online-meeting' );
+			const $custom = this.$el.find( '.sugar-calendar-metabox__online-custom' );
+			const $visibility = this.$el.find( '.sugar-calendar-metabox__field-row--online-visibility' );
+
+			// The provider block belongs to a specific provider (data-provider).
+			// Show it only when that provider is the current selection.
+			const matches = $meeting.length > 0 && !! slug && slug === String( $meeting.data( 'provider' ) );
+			const isCustom = slug === 'custom';
+
+			$meeting.toggle( matches );
+
+			// Custom Link shows the editable Event Link field instead of a card.
+			$custom.toggle( isCustom );
+
+			// "Show to" is shared: visible when a provider meeting is shown OR
+			// Custom Link is selected.
+			$visibility.toggle( matches || isCustom );
+
+			// The selected provider being out of credits drives the invalid field
+			// state (red border + credits message) and blocks meeting creation. The
+			// server flags out-of-credits options with data-out-of-credits; track it
+			// here so switching the dropdown updates the state without a reload.
+			const outOfCredits = $opt.attr( 'data-out-of-credits' ) === '1';
+
+			this.$onlineProvider.toggleClass( 'sugar-calendar-metabox__online-provider--invalid', outOfCredits );
+
+			if ( this.$onlineCreditsError && this.$onlineCreditsError.length ) {
+				this.$onlineCreditsError.toggle( outOfCredits );
+			}
+
+			if ( ! this.$createMeetingBtn || ! this.$createMeetingBtn.length ) {
+				return;
+			}
+
+			const creatable = slug && slug !== '' && ! isCustom && ! $opt.prop( 'disabled' ) && ! outOfCredits;
+
+			this.$createMeetingError.hide().text( '' );
+
+			if ( creatable && ! matches ) {
+				this.$createMeetingBtn
+					.text( wp.i18n.sprintf( wp.i18n.__( 'Create %s Meeting', 'sugar-calendar-lite' ), $opt.text().trim() ) )
+					.show();
+
+				if ( this.$onlineDescription && this.$onlineDescription.length ) {
+					this.$onlineDescription
+						.text( wp.i18n.sprintf( wp.i18n.__( 'Click on create link, to generate the %s meeting for this event.', 'sugar-calendar-lite' ), $opt.text().trim() ) )
+						.show();
+				}
+			} else {
+				this.$createMeetingBtn.hide();
+
+				if ( this.$onlineDescription && this.$onlineDescription.length ) {
+					if ( outOfCredits ) {
+						// Out-of-credits: Figma shows only the red credits message.
+						this.$onlineDescription.hide();
+					} else {
+						this.$onlineDescription.text( this.onlineDescriptionDefault ).show();
+					}
+				}
+			}
+		},
+
+		/**
+		 * Create the meeting via AJAX, then inject the returned card in place.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param {Event} e Click event.
+		 */
+		onCreateMeetingClick: function ( e ) {
+
+			e.preventDefault();
+
+			// Guard against double-submit: pointer-events:none (is-busy) blocks a
+			// second mouse click, but a keyboard user can still re-activate the
+			// focused link with Enter while the create request is in flight.
+			if ( this.$createMeetingBtn.hasClass( 'is-busy' ) ) {
+				return;
+			}
+
+			const title = this.getEditorTitle();
+			const postId = this.getEditorPostId();
+			const provider = this.$onlineProvider.val();
+			const cfg = this.settings.create_meeting || {};
+
+			if ( ! title || ! this.$startDate.val() ) {
+				this.$createMeetingError
+					.text( wp.i18n.__( 'Add a title and start date/time before creating the meeting.', 'sugar-calendar-lite' ) )
+					.show();
+				return;
+			}
+
+			const $btn = this.$createMeetingBtn;
+			const providerName = this.$onlineProvider.find( 'option:selected' ).text().trim();
+
+			// Hide the link and drop a full-width loading card into the slot the
+			// finished meeting card will occupy (right after the Online row).
+			$btn.addClass( 'is-busy' ).hide();
+			this.$createMeetingError.hide().text( '' );
+
+			const $loadingCard = $(
+				'<div class="sugar-calendar-metabox__online-loading" role="status" aria-live="polite">' +
+					'<span class="sugar-calendar-metabox__online-loading-spinner" aria-hidden="true">' +
+						'<svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+							'<path d="M2 18C2 26.8366 9.16344 34 18 34C26.8366 34 34 26.8366 34 18C34 9.16344 26.8366 2 18 2C9.16345 2 2 9.16344 2 18Z" stroke="#DCDCDE" stroke-width="4"/>' +
+							'<path fill-rule="evenodd" clip-rule="evenodd" d="M31.8987 9.71298C32.8889 9.29268 34.0323 9.75465 34.4526 10.7448C36.3434 15.1993 36.536 20.3815 34.579 25.2253C34.176 26.2227 33.0408 26.7045 32.0435 26.3016C31.0461 25.8986 30.5643 24.7634 30.9672 23.7661C32.5217 19.9187 32.3705 15.8092 30.8669 12.2669C30.4466 11.2767 30.9085 10.1333 31.8987 9.71298Z" fill="#C3C4C7"/>' +
+						'</svg>' +
+					'</span>' +
+					'<span class="sugar-calendar-metabox__online-loading-text"></span>' +
+				'</div>'
+			);
+
+			$loadingCard.find( '.sugar-calendar-metabox__online-loading-text' ).text(
+				wp.i18n.sprintf(
+					// translators: %s is the online meeting provider name, e.g. "Zoom".
+					wp.i18n.__( 'Creating %s Meeting…', 'sugar-calendar-lite' ),
+					providerName
+				)
+			);
+
+			this.$onlineProvider
+				.closest( '.sugar-calendar-metabox__field-row' )
+				.after( $loadingCard );
+
+			const showError = ( msg, linkUrl, linkText ) => {
+				$loadingCard.remove();
+				$btn.removeClass( 'is-busy' ).show();
+
+				const $err = this.$createMeetingError.empty();
+
+				// Build with the DOM API so the (server-controlled) URL/text can
+				// never inject markup — the anchor is rendered, not the string.
+				$err.append(
+					document.createTextNode(
+						msg || wp.i18n.__( 'Couldn’t create the meeting — try again.', 'sugar-calendar-lite' )
+					)
+				);
+
+				if ( linkUrl ) {
+					$err
+						.append( ' ' )
+						.append(
+							$( '<a>' )
+								.attr( 'href', linkUrl )
+								.text( linkText || wp.i18n.__( 'Connect', 'sugar-calendar-lite' ) )
+						);
+				}
+
+				$err.show();
+			};
+
+			// All metabox fields by name (start/end/tz/all_day/online_provider…),
+			// plus the action/nonce/post id/provider/title.
+			const data = this.$el.find( ':input' ).serialize()
+				+ '&action=' + encodeURIComponent( cfg.action )
+				+ '&nonce=' + encodeURIComponent( cfg.nonce )
+				+ '&post_id=' + encodeURIComponent( postId )
+				+ '&provider=' + encodeURIComponent( provider )
+				+ '&title=' + encodeURIComponent( title );
+
+			$.post( window.ajaxurl, data )
+				.done( ( resp ) => {
+
+					if ( ! resp || ! resp.success || ! resp.data ) {
+						const data = ( resp && resp.data ) || {};
+						showError( data.message, data.settings_url, data.settings_text );
+						return;
+					}
+
+					// Swap the loading card for the real meeting card in the same
+					// slot; the link stays hidden (a meeting now exists).
+					$loadingCard.remove();
+					$btn.removeClass( 'is-busy' );
+
+					this.$onlineProvider
+						.closest( '.sugar-calendar-metabox__field-row' )
+						.after( resp.data.card_html );
+
+					// syncOnlineMeetingUI owns the Online-section UI state; run it now
+					// that a meeting block exists so the Create button stays hidden and
+					// the description reverts from the "click to generate" prompt.
+					this.syncOnlineMeetingUI();
+
+					if ( resp.data.nonce ) {
+						this.settings.create_meeting.nonce = resp.data.nonce;
+					}
+
+					// Classic: reflect the now-real post in the URL so a manual
+					// reload keeps editing the same event.
+					const isBlock = this.settings.editor && this.settings.editor.type === 'block';
+
+					if ( ! isBlock && resp.data.post_id ) {
+						window.history.replaceState( {}, '', 'post.php?post=' + resp.data.post_id + '&action=edit' );
+					}
+				} )
+				.fail( () => showError() );
+		},
+
+		/**
+		 * Remove the meeting: confirm, then delete via AJAX and revert the Online
+		 * dropdown to None. Editor-agnostic (Classic + Block), no reload.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param {Event} e Click event.
+		 */
+		onRemoveMeetingClick: function ( e ) {
+
+			e.preventDefault();
+
+			const $btn = $( e.currentTarget );
+
+			// Guard against a double-submit while a request is in flight.
+			if ( $btn.hasClass( 'is-busy' ) ) {
+				return;
+			}
+
+			const providerName = $btn.data( 'providerName' ) || wp.i18n.__( 'online', 'sugar-calendar-lite' );
+
+			const title = wp.i18n.sprintf(
+				// translators: %s is the online meeting provider name, e.g. "Zoom".
+				wp.i18n.__( 'Remove %s meeting?', 'sugar-calendar-lite' ),
+				providerName
+			);
+			const message = wp.i18n.sprintf(
+				// translators: %s is the online meeting provider name, e.g. "Zoom".
+				wp.i18n.__( 'This deletes the meeting from %s and switches this event’s online location to None. Existing link will no longer work.', 'sugar-calendar-lite' ),
+				providerName
+			);
+
+			const doRemove = () => this.removeMeeting( $btn );
+
+			// jQuery-Confirm renders `icon` inside `<i class="…"></i>`; closing that
+			// tag, inserting the SVG, and reopening it swaps in the image — the same
+			// injection the Zoom disconnect modal uses.
+			const iconUrl = ( this.settings.remove_meeting || {} ).icon_url;
+			const icon = iconUrl
+				? '"></i><img src="' + iconUrl + '" alt="" width="36" height="36"><i class="'
+				: '';
+
+			// Styled danger-zone modal (same jQuery-Confirm dialog the Zoom
+			// disconnect uses). Fall back to the native confirm if it isn't loaded.
+			if ( $.confirm ) {
+				$.confirm( {
+					typeAnimated:       false,
+					draggable:          false,
+					animateFromElement: false,
+					boxWidth:           '400px',
+					useBootstrap:       false,
+					type:               'red',
+					// This bundled jQuery-Confirm has no `boxClass` option (and
+					// `columnClass` needs useBootstrap). Add the scoping class to the
+					// dialog box directly so the modal-specific CSS can target it.
+					onOpenBefore: function () {
+						this.$jconfirmBox.addClass( 'sugar-calendar-online-remove-confirm' );
+					},
+					icon,
+					title,
+					content:            message,
+					buttons: {
+						confirm: {
+							text:     wp.i18n.__( 'Remove', 'sugar-calendar-lite' ),
+							btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg sugar-calendar-btn-red',
+							action:   doRemove,
+						},
+						cancel: {
+							text:     wp.i18n.__( 'Cancel', 'sugar-calendar-lite' ),
+							btnClass: 'sugar-calendar-btn sugar-calendar-btn-lg',
+						},
+					},
+				} );
+			} else if ( window.confirm( message ) ) { // eslint-disable-line no-alert
+				doRemove();
+			}
+		},
+
+		/**
+		 * POST the remove request, then drop the card and reset the dropdown.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param {jQuery} $btn The clicked Remove button.
+		 */
+		removeMeeting: function ( $btn ) {
+
+			const cfg = this.settings.remove_meeting || {};
+			const postId = this.getEditorPostId();
+
+			$btn.addClass( 'is-busy' );
+
+			const data = {
+				action:  cfg.action,
+				nonce:   cfg.nonce,
+				post_id: postId,
+			};
+
+			$.post( window.ajaxurl, data )
+				.done( ( resp ) => {
+
+					if ( ! resp || ! resp.success ) {
+						$btn.removeClass( 'is-busy' );
+						window.alert( // eslint-disable-line no-alert
+							( resp && resp.data && resp.data.message ) ||
+							wp.i18n.__( 'Couldn’t remove the meeting — try again.', 'sugar-calendar-lite' )
+						);
+						return;
+					}
+
+					if ( resp.data && resp.data.nonce ) {
+						this.settings.remove_meeting.nonce = resp.data.nonce;
+					}
+
+					// Drop the whole meeting block and revert the Online dropdown to
+					// None. syncOnlineMeetingUI (bound to change) then restores the
+					// default section state.
+					$btn.closest( '.sugar-calendar-metabox__online-meeting' ).remove();
+					this.$onlineProvider.val( '' ).trigger( 'change' );
+				} )
+				.fail( () => {
+					$btn.removeClass( 'is-busy' );
+					window.alert( // eslint-disable-line no-alert
+						wp.i18n.__( 'Couldn’t remove the meeting — try again.', 'sugar-calendar-lite' )
+					);
+				} );
 		},
 
 		initChoicesJS: function () {

@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Frontend;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Common\Editor;
+use Sugar_Calendar\Frontend\StructuredData\StructuredData;
 
 /**
  * Frontend Loader.
@@ -49,6 +50,9 @@ class Loader {
 		add_filter( 'body_class', [ $this, 'sc_modify_single_event_body_classes' ] );
 
 		add_filter( 'pre_get_shortlink', [ $this, 'filter_pre_get_shortlink' ], 10, 4 );
+
+		// JSON-LD structured data in the single-event <head>.
+		( new StructuredData() )->hooks();
 	}
 
 	/**

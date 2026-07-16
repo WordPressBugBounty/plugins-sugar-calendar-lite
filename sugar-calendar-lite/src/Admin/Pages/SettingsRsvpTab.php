@@ -105,6 +105,11 @@ class SettingsRsvpTab extends Settings {
 			<?php UI::tabs( $this->get_tabs(), static::get_tab_slug() ); ?>
 			<div class="sugar-calendar-admin-content">
 				<h1 class="screen-reader-text"><?php esc_html_e( 'Settings', 'sugar-calendar-lite' ); ?></h1>
+
+				<?php
+				// phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+				do_action( 'sugar_calendar_admin_page_content_top' );
+				?>
 				<?php
 
 				$heading_classes = [ 'sugar-calendar--pro-only', 'sugar-calendar__admin__settings__rsvp__heading' ];

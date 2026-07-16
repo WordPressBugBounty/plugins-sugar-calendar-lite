@@ -2,8 +2,11 @@
 
 namespace Sugar_Calendar\Integrations;
 
+use Sugar_Calendar\Integrations\Abilities\Abilities;
 use Sugar_Calendar\Integrations\Elementor\Elementor;
+use Sugar_Calendar\Integrations\OAuthRelay\Loader as OAuthRelayLoader;
 use Sugar_Calendar\Integrations\WPBakery\WPBakery;
+use Sugar_Calendar\Integrations\Wpml\Wpml;
 
 /**
  * Integrations Loader.
@@ -21,8 +24,11 @@ class Loader {
 	 * @var array
 	 */
 	private $integrations_classes = [
+		Abilities::class,
 		Elementor::class,
 		WPBakery::class,
+		OAuthRelayLoader::class,
+		Wpml::class,
 	];
 
 	/**

@@ -92,7 +92,7 @@ class Options {
 			'custom_fields'                => true,
 			'default_calendar'             => null,
 			'hide_announcements'           => false,
-			'allow_usage_tracking'         => false,
+			'disable_integrations'         => false,
 			'maps_google_api_key'          => '',
 			'single_event_appearance_mode' => 'light',
 		];

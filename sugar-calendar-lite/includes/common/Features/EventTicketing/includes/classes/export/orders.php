@@ -136,7 +136,7 @@ class Orders_Export extends CSV_Export {
 
 				// Order.
 				'id'               => $order->id,
-				'transaction_id'   => $order->transaction_id,
+				'transaction_id'   => (string) $order->transaction_id,
 				'status'           => $order->status,
 				'currency'         => $order->currency,
 				'subtotal'         => $order->subtotal,

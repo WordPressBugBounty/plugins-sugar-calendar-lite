@@ -14,13 +14,6 @@ use Sugar_Calendar\Plugin;
 class UsageTracking {
 
 	/**
-	 * The slug that will be used to save the option of Usage Tracker.
-	 *
-	 * @since 3.0.0
-	 */
-	const SETTINGS_SLUG = 'allow_usage_tracking';
-
-	/**
 	 * Load usage tracking functionality.
 	 *
 	 * @since 3.0.0
@@ -50,6 +43,9 @@ class UsageTracking {
 	 */
 	public function hooks() {
 
+		// Track WP Mail SMTP promo-page install clicks (both editions).
+		( new SmtpProductEvents() )->init();
+
 		// Deregister the action if option is disabled.
 		add_action(
 			'sugar_calendar_options_set_after',
@@ -77,7 +73,6 @@ class UsageTracking {
 
 	/**
 	 * Whether Usage Tracking is enabled.
-	 * Needs to check with a fresh copy of options in order to provide accurate results.
 	 *
 	 * @since 3.0.0
 	 *
@@ -88,13 +83,17 @@ class UsageTracking {
 		/**
 		 * Whether usage tracking is enabled.
 		 *
+		 * Derived from the `disable_integrations` kill-switch: tracking is on
+		 * unless integrations are disabled (Lite). Pro forces this true via the
+		 * filter below (see includes/pro/Pro.php).
+		 *
 		 * @since 3.0.0
 		 *
 		 * @param bool $enabled Whether usage tracking is enabled.
 		 */
 		return (bool) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_usage_tracking_is_enabled',
-			Options::get( self::SETTINGS_SLUG, false )
+			! Options::get( 'disable_integrations', false )
 		);
 	}
 

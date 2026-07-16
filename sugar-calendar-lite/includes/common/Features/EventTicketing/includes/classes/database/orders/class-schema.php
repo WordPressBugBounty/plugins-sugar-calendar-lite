@@ -45,6 +45,8 @@ final class Order_Schema extends Schema {
 			'name'       => 'transaction_id',
 			'type'       => 'varchar',
 			'length'     => '100',
+			'allow_null' => true,
+			'default'    => null,
 			'searchable' => true,
 			'sortable'   => true
 		),
@@ -222,6 +224,16 @@ final class Order_Schema extends Schema {
 			'unsigned' => true,
 			'default'  => '0',
 			'sortable' => true,
+		),
+
+		// gateway
+		array(
+			'name'       => 'gateway',
+			'type'       => 'varchar',
+			'length'     => '20',
+			'default'    => 'stripe',
+			'searchable' => true,
+			'sortable'   => false,
 		),
 	);
 }

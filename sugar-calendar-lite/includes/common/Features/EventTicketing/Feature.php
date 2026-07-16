@@ -287,8 +287,11 @@ class Feature extends FeatureAbstract {
 		// Database tables.
 		new Database\Attendees_Table();
 		new Database\Discounts_Table();
-		new Database\Orders_Table();
+		$orders_table = new Database\Orders_Table();
 		new Database\Tickets_Table();
+
+		// Make sure that upgrades also happen in front-end (to account for auto-upgrades and WP_CLI upgrade).
+		add_action( 'init', [ $orders_table, 'maybe_upgrade' ], 5 );
 
 		// Instantiate any classes or setup any dependency injections here.
 		new \Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout();

@@ -117,6 +117,7 @@ class Tickets extends PageAbstract {
 	public function hooks() {
 
 		add_action( 'admin_init', [ $this, 'init' ] );
+		add_filter( 'screen_options_show_screen', '__return_false' );
 	}
 
 	/**

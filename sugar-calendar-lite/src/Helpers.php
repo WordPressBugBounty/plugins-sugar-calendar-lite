@@ -993,6 +993,24 @@ class Helpers {
 			);
 
 			if ( ! empty( $term_taxonomy_ids ) ) {
+				/**
+				 * Filters the term taxonomy IDs for calendar filters in upcoming events query.
+				 *
+				 * @since 3.12.0
+				 *
+				 * @param array $term_taxonomy_ids Array of term taxonomy IDs.
+				 * @param array $args              The arguments to get the events.
+				 * @param array $attributes        The block attributes.
+				 */
+				$term_taxonomy_ids = apply_filters(
+					'sugar_calendar_helpers_upcoming_events_calendar_ids',
+					$term_taxonomy_ids,
+					$args,
+					$attributes
+				);
+			}
+
+			if ( ! empty( $term_taxonomy_ids ) ) {
 				$calendars_left_join = 'LEFT JOIN ' . $wpdb->term_relationships . ' AS cal_terms ON ' . $wpdb->prefix . 'sc_events.object_id = cal_terms.object_id';
 				$where_calendars     = $wpdb->prepare(
 					'AND ( cal_terms.term_taxonomy_id IN (%1$s) )',
@@ -1055,6 +1073,24 @@ class Helpers {
 		if ( ! empty( $attributes['tags'] ) ) {
 
 			$tag_ids = array_filter( array_map( 'absint', $attributes['tags'] ) );
+
+			if ( ! empty( $tag_ids ) ) {
+				/**
+				 * Filters the tag IDs for tag filters in upcoming events query.
+				 *
+				 * @since 3.12.0
+				 *
+				 * @param array $tag_ids     Array of tag IDs.
+				 * @param array $args        The arguments to get the events.
+				 * @param array $attributes  The block attributes.
+				 */
+				$tag_ids = apply_filters(
+					'sugar_calendar_helpers_upcoming_events_tag_ids',
+					$tag_ids,
+					$args,
+					$attributes
+				);
+			}
 
 			if ( ! empty( $tag_ids ) ) {
 				// Change the SELECT query to include tag term taxonomy ID.
@@ -1611,6 +1647,44 @@ class Helpers {
 	}
 
 	/**
+	 * Allowed HTML for outputting a responsive event featured image.
+	 *
+	 * `wp_kses_post()` sanitizes `<img>` markup but omits the `srcset`,
+	 * `sizes`, `decoding` and `fetchpriority` attributes from its allow-list
+	 * (a legacy gap that predates responsive images), which would strip the
+	 * responsive/perf markup that `get_the_post_thumbnail()` generates. This
+	 * reuses the standard post-context allow-list — keeping its `class`,
+	 * `data-*`, etc. so third-party image plugins keep working — and only
+	 * adds the missing attributes. The result is constant per request, so it
+	 * is built once and cached.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return array
+	 */
+	public static function get_event_image_allowed_html() {
+
+		static $cache = null;
+
+		if ( $cache !== null ) {
+			return $cache;
+		}
+
+		$allowed = wp_kses_allowed_html( 'post' );
+
+		if ( isset( $allowed['img'] ) ) {
+			$allowed['img']['srcset']        = true;
+			$allowed['img']['sizes']         = true;
+			$allowed['img']['decoding']      = true;
+			$allowed['img']['fetchpriority'] = true;
+		}
+
+		$cache = $allowed;
+
+		return $cache;
+	}
+
+	/**
 	 * Get the license key from the PHP constant.
 	 *
 	 * @since 3.10.0
@@ -1717,5 +1791,55 @@ class Helpers {
 			'content' => $content,
 			'ok'      => esc_html__( 'Ok', 'sugar-calendar-lite' ),
 		];
+	}
+
+	/**
+	 * Delete orphaned events: sc_events rows whose WordPress post no longer exists.
+	 *
+	 * These "ghost events" are left behind when an event's post is permanently
+	 * deleted without Sugar Calendar's deleted_post cleanup running. Deletion goes
+	 * through sugar_calendar_delete_event() so the proper hooks and caches fire.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param int $limit Maximum number of orphaned events to delete in one pass.
+	 *
+	 * @return int Number of orphaned events deleted.
+	 */
+	public static function cleanup_orphaned_events( $limit ) {
+
+		global $wpdb;
+
+		$limit = max( 0, (int) $limit );
+
+		if ( $limit === 0 ) {
+			return 0;
+		}
+
+		$event_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->prepare(
+				"SELECT e.id
+				 FROM {$wpdb->prefix}sc_events e
+				 LEFT JOIN {$wpdb->posts} p ON e.object_id = p.ID
+				 WHERE e.object_type = 'post'
+				   AND p.ID IS NULL
+				 LIMIT %d",
+				$limit
+			)
+		);
+
+		if ( empty( $event_ids ) ) {
+			return 0;
+		}
+
+		$deleted = 0;
+
+		foreach ( $event_ids as $event_id ) {
+			if ( sugar_calendar_delete_event( (int) $event_id ) ) {
+				++$deleted;
+			}
+		}
+
+		return $deleted;
 	}
 }

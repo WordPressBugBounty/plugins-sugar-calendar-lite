@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Event_Query;
 use Sugar_Calendar\Helper;
+use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelper;
 use WP_List_Table;
 use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
@@ -320,6 +321,15 @@ class Base extends WP_List_Table {
 	];
 
 	/**
+	 * Default Maximum Events value when the user has no saved preference.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @var int
+	 */
+	const DEFAULT_MAX = 100;
+
+	/**
 	 * Maximum number of events per iteration.
 	 *
 	 * @since 3.0.0
@@ -327,6 +337,17 @@ class Base extends WP_List_Table {
 	 * @var int
 	 */
 	protected $max = 0;
+
+	/**
+	 * Event IDs allowed to display under the Maximum Events cap.
+	 *
+	 * Counts use the full item set; only display is limited to these IDs.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @var array
+	 */
+	protected $display_ids = [];
 
 	/**
 	 * The main constructor method.
@@ -350,6 +371,8 @@ class Base extends WP_List_Table {
 	 * Initialize this class.
 	 *
 	 * @since 2.1.6
+	 * @since 3.12.0 Pin the screen so column visibility resolves correctly
+	 *                  when the table is built before the current screen is set.
 	 *
 	 * @param array $args Initialization arguments.
 	 *
@@ -379,6 +402,11 @@ class Base extends WP_List_Table {
 			[
 				'plural'   => sugar_calendar_get_post_type_label( $pt, 'name', esc_html__( 'Events', 'sugar-calendar-lite' ) ),
 				'singular' => sugar_calendar_get_post_type_label( $pt, 'singular_name', esc_html__( 'Event', 'sugar-calendar-lite' ) ),
+
+				// Pin the screen so the correct hidden-columns preference resolves
+				// even when the table is built before the current screen is set
+				// (e.g. on admin_init while handling a Save POST).
+				'screen'   => sugar_calendar_get_admin_page_id(),
 			]
 		);
 
@@ -432,6 +460,13 @@ class Base extends WP_List_Table {
 		$this->month = $this->get_month();
 		$this->day   = $this->get_day();
 
+		// Clamp out-of-range request values so date math always gets a valid date.
+		$this->month = min( max( (int) $this->month, 1 ), 12 );
+		$this->year  = min( max( (int) $this->year, 1970 ), 9999 );
+
+		$days_in_month = (int) gmdate( 't', gmmktime( 0, 0, 0, $this->month, 1, $this->year ) );
+		$this->day     = min( max( (int) $this->day, 1 ), $days_in_month );
+
 		// Set list-mode specific year.
 		$this->start_year = $this->get_start_year();
 
@@ -458,10 +493,11 @@ class Base extends WP_List_Table {
 	 * Set the maximum number of items per iteration.
 	 *
 	 * @since 2.0.0
+	 * @since 3.12.0 Default to self::DEFAULT_MAX when no preference is saved.
 	 */
 	protected function init_max() {
 
-		$this->max = sugar_calendar_get_user_preference( 'events_max_num', 100 );
+		$this->max = sugar_calendar_get_user_preference( 'events_max_num', self::DEFAULT_MAX );
 	}
 
 	/**
@@ -569,6 +605,7 @@ class Base extends WP_List_Table {
 	 * Set all of the items to loop through.
 	 *
 	 * @since 2.2.0
+	 * @since 3.12.0 Build the Maximum Events display allowlist (counts stay full).
 	 */
 	protected function set_all_items() {
 
@@ -613,6 +650,50 @@ class Base extends WP_List_Table {
 			$this->view_end,
 			$this->get_status()
 		);
+
+		// Build the allowlist of events that may display under the Maximum Events
+		// cap. all_items itself stays full so per-status counts remain accurate;
+		// only what renders into cells is limited (see set_cell_items()).
+		$capped            = $this->limit_items_to_max( $this->all_items );
+		$this->display_ids = wp_list_pluck( $capped, 'id' );
+	}
+
+	/**
+	 * Cap a collection of event items to the Maximum Events preference.
+	 *
+	 * Sorts by start date ascending (calendar views are chronological), then
+	 * keeps the earliest N. Recurring occurrences and one-off events count
+	 * equally; a multi-day event counts once.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $items Event items (each exposes `start_dto`).
+	 *
+	 * @return array
+	 */
+	protected function limit_items_to_max( $items ) {
+
+		if ( ! is_array( $items ) ) {
+			return [];
+		}
+
+		if ( count( $items ) <= $this->get_max() ) {
+			return $items;
+		}
+
+		usort(
+			$items,
+			static function ( $a, $b ) {
+
+				if ( ! isset( $a->start_dto, $b->start_dto ) ) {
+					return 0;
+				}
+
+				return $a->start_dto <=> $b->start_dto;
+			}
+		);
+
+		return array_slice( $items, 0, $this->get_max() );
 	}
 
 	/**
@@ -1026,7 +1107,6 @@ class Base extends WP_List_Table {
 			'cd'          => $this->get_day(),
 			'cz'          => $this->get_timezone(),
 			'mode'        => $this->get_mode(),
-			'max'         => $this->get_max(),
 			'status'      => $this->get_status(),
 			'object_type' => $this->get_object_type(),
 			's'           => $this->get_search(),
@@ -1422,12 +1502,15 @@ class Base extends WP_List_Table {
 	 * Get the maximum number of events per iteration.
 	 *
 	 * @since 2.0.0
+	 * @since 3.12.0 Falls back to 100 when unset or invalid, so a view never caps to zero.
 	 *
 	 * @return int
 	 */
 	protected function get_max() {
 
-		return $this->get_request_var( 'max', 'absint', $this->max );
+		$max = (int) $this->get_request_var( 'max', 'absint', $this->max );
+
+		return $max > 0 ? $max : self::DEFAULT_MAX;
 	}
 
 	/**
@@ -1608,6 +1691,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 2.0.0
 	 * @since 3.6.0 Add the 'object_subtype' arg.
+	 * @since 3.12.0 Drop the per-query `number` limit; the Maximum Events cap is applied at display time.
 	 *
 	 * @param array $args Query arguments.
 	 *
@@ -1623,8 +1707,10 @@ class Base extends WP_List_Table {
 		}
 
 		// Setup default args.
+		// Note: no `number` limit here — the Maximum Events cap is applied at
+		// display time (see limit_items_to_max()) so it counts recurring
+		// occurrences too, not just the base events this query returns.
 		$defaults = [
-			'number'         => $this->get_max(),
 			'orderby'        => $this->get_orderby(),
 			'order'          => $this->get_order(),
 			'search'         => $this->get_search(),
@@ -1643,8 +1729,19 @@ class Base extends WP_List_Table {
 			$r['sc_event_tags'] = $tags;
 		}
 
-		// Return parsed arguments.
-		return $r;
+		/**
+		 * Filter the query arguments used by the admin events list tables.
+		 *
+		 * The events tables query the custom events table directly via
+		 * Event_Query, so this filter is the extension point for adjusting or
+		 * scoping that query before it runs.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param array $r     Parsed Event_Query arguments.
+		 * @param Base  $table The events list table instance.
+		 */
+		return (array) apply_filters( 'sugar_calendar_admin_events_tables_base_query_args', $r, $this );
 	}
 
 	/**
@@ -1891,6 +1988,7 @@ class Base extends WP_List_Table {
 			'class'   => $this->get_event_classes( $event, $cell ),
 			'style'   => $this->get_event_link_styling( $event ),
 			'data-id' => $event->id,
+			'title'   => esc_attr( $event_title ),
 		];
 
 		// Default attribute string.
@@ -1969,6 +2067,7 @@ class Base extends WP_List_Table {
 	 * Set the items for the current cell.
 	 *
 	 * @since 2.1.3
+	 * @since 3.12.0 Limit displayed items to the Maximum Events allowlist; count all.
 	 */
 	protected function set_cell_items() {
 
@@ -1980,12 +2079,15 @@ class Base extends WP_List_Table {
 				continue;
 			}
 
-			// Filtered items only.
-			if ( in_array( $item->id, $this->filtered_ids, true ) ) {
+			// Filtered items only, and only those within the Maximum Events cap.
+			if (
+				in_array( $item->id, $this->filtered_ids, true )
+				&& in_array( $item->id, $this->display_ids, true )
+			) {
 				array_push( $this->current_cell['items'], $item );
 			}
 
-			// Count all items (reduced later).
+			// Count all items (the cap above is display-only).
 			array_push( $this->current_cell['countable'], $item );
 		}
 
@@ -3235,6 +3337,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 3.0.0
 	 * @since 3.8.2 Added tags parameter preservation for pagination.
+	 * @since 3.12.0 Stop emitting the `max` field so the saved preference stays authoritative.
 	 *
 	 * @param string $content Form contents.
 	 *
@@ -3275,7 +3378,6 @@ class Base extends WP_List_Table {
             <input type="hidden" name="cz" value="<?php echo esc_attr( $this->get_timezone() ); ?>"/>
             <input type="hidden" name="order" value="<?php echo esc_attr( $this->get_order() ); ?>"/>
             <input type="hidden" name="orderby" value="<?php echo esc_attr( $this->get_orderby() ); ?>"/>
-            <input type="hidden" name="max" value="<?php echo esc_attr( $this->get_max() ); ?>"/>
             <input type="hidden" name="s" value="<?php _admin_search_query(); ?>">
 
 			<?php foreach ( $taxonomies as $tax ) : ?>
@@ -3419,6 +3521,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 3.0.0
 	 * @since 3.7.0 Title is now mandatory in screen options.
+	 * @since 3.12.0 Render the cog icon via the shared SVG helper.
 	 *
 	 * @return void
 	 */
@@ -3434,9 +3537,7 @@ class Base extends WP_List_Table {
 		?>
 		<div class="sugar-calendar-screen-options">
 			<button id="sugar-calendar-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button">
-			<svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-				<path d="M16.9922 10H14.8047C14.6224 10.7031 14.349 11.3542 13.9844 11.9531L15.5469 13.4766L13.4375 15.5859L11.875 14.0234C11.3021 14.388 10.6771 14.6615 10 14.8438V16.9922H6.99219V14.8438C6.3151 14.6615 5.67708 14.388 5.07812 14.0234L3.51562 15.5859L1.40625 13.4766L2.96875 11.9141C2.60417 11.3151 2.33073 10.6771 2.14844 10H0V7.03125H2.14844C2.30469 6.35417 2.57812 5.71615 2.96875 5.11719L1.40625 3.55469L3.51562 1.44531L5.03906 3.00781C5.61198 2.64323 6.26302 2.36979 6.99219 2.1875V0H10V2.1875C10.6771 2.34375 11.3021 2.60417 11.875 2.96875L13.4375 1.44531L15.5469 3.55469L14.0234 5.11719C14.388 5.71615 14.6484 6.35417 14.8047 7.03125H16.9922V10ZM8.47656 11.5234C9.3099 11.5234 10.013 11.237 10.5859 10.6641C11.1849 10.0651 11.4844 9.34896 11.4844 8.51562C11.4844 7.68229 11.1849 6.97917 10.5859 6.40625C10.013 5.80729 9.3099 5.50781 8.47656 5.50781C7.64323 5.50781 6.92708 5.80729 6.32812 6.40625C5.75521 6.97917 5.46875 7.68229 5.46875 8.51562C5.46875 9.34896 5.75521 10.0651 6.32812 10.6641C6.92708 11.237 7.64323 11.5234 8.47656 11.5234Z" fill="currentColor"/>
-			</svg>
+			<?php UI::svg_icon( 'cog' ); ?>
 			</button>
 
             <div class="sugar-calendar-screen-options-menu" style="display: none;">
@@ -4057,7 +4158,8 @@ class Base extends WP_List_Table {
 				?>
 
                 <label for="cd" class="screen-reader-text"><?php esc_html_e( 'Set the day', 'sugar-calendar-lite' ); ?></label>
-                <input type="number" name="cd" id="cd" value="<?php echo (int) $this->day; ?>" size="2">
+					<?php $days_in_month = (int) gmdate( 't', gmmktime( 0, 0, 0, $this->month, 1, $this->year ) ); ?>
+                <input type="number" name="cd" id="cd" value="<?php echo (int) $this->day; ?>" min="1" max="<?php echo esc_attr( $days_in_month ); ?>" size="2">
 
 			<?php
 

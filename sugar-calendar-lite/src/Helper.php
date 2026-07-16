@@ -6,6 +6,7 @@ use DateTimeInterface;
 use Sugar_Calendar\Block\Calendar\CalendarView\Day\Day;
 use DateTimeImmutable;
 use Sugar_Calendar\Block\Common\TimezoneConversionHelper;
+use Sugar_Calendar\Helpers\OverlapClusters;
 
 class Helper {
 
@@ -406,9 +407,6 @@ class Helper {
 
 		$formatted_events = [];
 
-		// Holds the start and end times of each of the events for the day.
-		$events_start_and_end_times = [];
-
 		// Sort the events by start hour.
 		uasort(
 			$events,
@@ -417,45 +415,14 @@ class Helper {
 			}
 		);
 
+		// Stamp SCB-style cluster layout (column / N / nesting) on each event for
+		// the proportional overlap rendering in the calendar block.
+		self::stamp_overlap_clusters( $events, $visitor_timezone );
+
 		foreach ( $events as $event ) {
-			// Number of times the event overlaps with other events.
-			$overlap_count = 0;
 
 			$start_hour = 1 * $event->start_date_dto( 'G' );
 			$start_min  = 1 * $event->start_date_dto( 'i' );
-			$end_hour   = 1 * $event->end_date_dto( 'G' );
-			$end_min    = 1 * $event->end_date_dto( 'i' );
-
-			// Check if this event spans multiple days (crosses midnight).
-			$event_is_multi_day = $visitor_timezone
-				? TimezoneConversionHelper::is_multi_day_in_timezone( $event, $visitor_timezone )
-				: $event->is_multi();
-
-			foreach ( $events_start_and_end_times as $event_time ) {
-				if ( $event_is_multi_day && $end_hour < $start_hour ) {
-					// For multi-day events that cross midnight, only check the portion before midnight.
-					// Multi-day event runs from start_hour to 24:00 (on current day).
-					// Check if this overlaps with the comparison event.
-					if ( $start_hour < $event_time['end_hour'] && $event_time['start_hour'] < 24 ) {
-						++$overlap_count;
-					}
-				} elseif ( $start_hour >= $event_time['start_hour'] && $end_hour <= $event_time['end_hour'] ) {
-					// Original logic for same-day events - event is completely contained within another.
-					++$overlap_count;
-				} elseif ( $start_hour < $event_time['end_hour'] ) {
-					// Original logic for same-day events - event starts before another event ends.
-					++$overlap_count;
-				}
-			}
-
-			$events_start_and_end_times[] = [
-				'start_hour' => $start_hour,
-				'start_min'  => $start_min,
-				'end_hour'   => $end_hour,
-				'end_min'    => $end_min,
-			];
-
-			$event->overlap_count = $overlap_count;
 
 			foreach ( Day::get_division_by_hour() as $hour_int => $hour_name ) {
 
@@ -504,6 +471,97 @@ class Helper {
 		}
 
 		return $formatted_events;
+	}
+
+	/**
+	 * Stamp SCB-style overlap cluster fields on a day's events.
+	 *
+	 * Assigns each event a column, a per-cluster column count, and a nesting
+	 * depth via Helpers\OverlapClusters, so the calendar block can divide the
+	 * time cell proportionally instead of indenting overlaps by a fixed amount.
+	 * Resolves each event's times in the visitor timezone when provided (matching
+	 * the block's positioning), otherwise uses the event's own datetimes.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param Event[]            $events           Day's events.
+	 * @param \DateTimeZone|null $visitor_timezone Visitor timezone, when timezone-aware.
+	 *
+	 * @return void
+	 */
+	private static function stamp_overlap_clusters( $events, $visitor_timezone = null ) {
+
+		// A lone event can't overlap anything, so there's nothing to cluster.
+		if ( count( (array) $events ) < 2 ) {
+			return;
+		}
+
+		$items      = [];
+		$slot_start = null;
+		$slot_end   = null;
+
+		foreach ( $events as $event ) {
+
+			if ( empty( $event->start_dto ) || empty( $event->end_dto ) ) {
+				continue;
+			}
+
+			$start = $visitor_timezone
+				? TimezoneConversionHelper::convert_event_start( $event, $visitor_timezone )
+				: $event->start_dto;
+
+			$end = $visitor_timezone
+				? TimezoneConversionHelper::convert_event_end( $event, $visitor_timezone )
+				: $event->end_dto;
+
+			$start = self::to_immutable( $start );
+			$end   = self::to_immutable( $end );
+
+			$items[] = [
+				'ref'   => $event,
+				'start' => $start,
+				'end'   => $end,
+			];
+
+			// Widen the slot to span every event, so the grid clamp is a no-op
+			// and clustering keys purely off the events' own hour grid.
+			if ( $slot_start === null || $start < $slot_start ) {
+				$slot_start = $start;
+			}
+
+			if ( $slot_end === null || $end > $slot_end ) {
+				$slot_end = $end;
+			}
+		}
+
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		foreach ( OverlapClusters::build( $items, $slot_start, $slot_end ) as $node ) {
+			$event                  = $node['ref'];
+			$event->overlap_column  = $node['column'];
+			$event->overlap_columns = $node['columns'];
+			$event->overlap_nesting = $node['nesting'];
+		}
+	}
+
+	/**
+	 * Normalize a DateTimeInterface to a DateTimeImmutable, preserving timezone.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param DateTimeInterface $dt Datetime.
+	 *
+	 * @return DateTimeImmutable
+	 */
+	private static function to_immutable( DateTimeInterface $dt ) {
+
+		if ( $dt instanceof DateTimeImmutable ) {
+			return $dt;
+		}
+
+		return new DateTimeImmutable( $dt->format( 'Y-m-d H:i:s' ), $dt->getTimezone() );
 	}
 
 	/**
@@ -575,6 +633,31 @@ class Helper {
 	}
 
 	/**
+	 * Check whether the current request is a taxonomy search
+	 * that should display the search-reset bar.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param string $taxonomy_id Expected taxonomy identifier.
+	 *
+	 * @return bool
+	 */
+	public static function is_taxonomy_search( $taxonomy_id ) {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['s'] ) ) {
+			return false;
+		}
+
+		if ( ! isset( $_GET['taxonomy'] ) ) {
+			return false;
+		}
+
+		return $taxonomy_id === sanitize_key( wp_unslash( $_GET['taxonomy'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
 	 * Display search reset functionality for list tables.
 	 *
 	 * @since 3.8.0
@@ -595,7 +678,7 @@ class Helper {
 
 		$term = ( 1 === absint( $total_count ) ) ? $single : $plural;
 		?>
-		<div id="sugar-calendar-list__admin__reset-filter">
+		<div id="sugar-calendar-list__admin__reset-filter" class="notice">
 			<?php
 			printf(
 				'Found <strong>%1$d %2$s</strong> containing <em>"%3$s"</em>',

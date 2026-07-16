@@ -92,12 +92,21 @@ class Tags extends PageAbstract {
 
 		// Display the Sugar Calendar subheader.
 		add_action( 'in_admin_header', [ $this, 'display_admin_subheader' ] );
+		add_action( 'all_admin_notices', [ $this, 'display_search_reset' ] );
 
 		// Filter the edit link for tag entries.
 		add_filter( 'get_edit_term_link', [ $this, 'get_edit_term_link' ], 10, 3 );
 
 		// Redirect to newly created tag.
 		add_filter( 'redirect_term_location', [ $this, 'redirect_after_save' ], 10, 2 );
+
+		// Replace the default count column with an "Events" column that links to
+		// the Sugar Calendar events list, mirroring the Calendars page.
+		$taxonomy = Helpers::get_tags_taxonomy_id();
+
+		add_filter( "manage_edit-{$taxonomy}_columns", [ $this, 'change_count_column_label' ] );
+		add_filter( "manage_edit-{$taxonomy}_columns", [ $this, 'add_event_column' ] );
+		add_filter( "manage_{$taxonomy}_custom_column", [ $this, 'render_event_column' ], 10, 3 );
 	}
 
 	/**
@@ -167,36 +176,37 @@ class Tags extends PageAbstract {
 		 * @since 3.7.0
 		 */
 		do_action( 'sugar_calendar_admin_page_before' ); //phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
 
-		// Display search reset when searching calendars from taxonomy list screen.
-		if (
-			! empty( $_GET['s'] )
-			&&
-			isset( $_GET['taxonomy'] )
-			&&
-			Helpers::get_tags_taxonomy_id() === sanitize_key( wp_unslash( $_GET['taxonomy'] ) )
-		) {
+	/**
+	 * Display search reset bar when searching tags.
+	 *
+	 * Hooked to `all_admin_notices` so it renders inside #wpbody-content
+	 * rather than outside #wpbody (where `in_admin_header` outputs).
+	 * Rendering outside #wpbody caused a layout flash on fractional
+	 * display scaling and throttled rendering.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @return void
+	 */
+	public function display_search_reset() {
 
-			$search_term = sanitize_text_field( wp_unslash( $_GET['s'] ) );
-			$results     = get_terms(
-				[
-					'taxonomy'   => Helpers::get_tags_taxonomy_id(),
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'search'     => $search_term,
-				]
-			);
-
-			$total_count = is_wp_error( $results ) ? 0 : count( (array) $results );
-
-			Helper::display_search_reset(
-				$total_count,
-				'tag',
-				'tags',
-				__( 'Tags', 'sugar-calendar-lite' ),
-				admin_url( 'edit-tags.php?taxonomy=' . Helpers::get_tags_taxonomy_id() )
-			);
+		if ( ! Helper::is_taxonomy_search( Helpers::get_tags_taxonomy_id() ) ) {
+			return;
 		}
+
+		global $wp_list_table;
+
+		$total_count = (int) $wp_list_table->get_pagination_arg( 'total_items' );
+
+		Helper::display_search_reset(
+			$total_count,
+			'tag',
+			'tags',
+			__( 'Tags', 'sugar-calendar-lite' ),
+			admin_url( 'edit-tags.php?taxonomy=' . Helpers::get_tags_taxonomy_id() )
+		);
 	}
 
 	/**
@@ -235,6 +245,95 @@ class Tags extends PageAbstract {
 		}
 
 		return $location;
+	}
+
+	/**
+	 * Remove the default term-count column.
+	 *
+	 * Its link points at the WordPress posts list; the "Events" column replaces it.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $columns Table columns.
+	 *
+	 * @return array
+	 */
+	public function change_count_column_label( $columns ) {
+
+		if ( isset( $columns['posts'] ) ) {
+			unset( $columns['posts'] );
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * Add the custom "Events" column (slug: event) after the Slug column.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array $columns Table columns.
+	 *
+	 * @return array
+	 */
+	public function add_event_column( $columns ) {
+
+		$insertion = [ 'event' => esc_html__( 'Events', 'sugar-calendar-lite' ) ];
+
+		// Insert after the Slug column when possible.
+		if ( isset( $columns['slug'] ) ) {
+			$new = [];
+
+			foreach ( $columns as $key => $label ) {
+				$new[ $key ] = $label;
+
+				if ( $key === 'slug' ) {
+					$new = array_merge( $new, $insertion );
+				}
+			}
+
+			return $new;
+		}
+
+		// Fallback: append at the end.
+		return array_merge( $columns, $insertion );
+	}
+
+	/**
+	 * Render the "Events" column: the term's event count linked to the filtered
+	 * Sugar Calendar events list.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param string $content The custom column output. Default empty.
+	 * @param string $column  Name of the column being displayed.
+	 * @param int    $term_id Term ID.
+	 *
+	 * @return string
+	 */
+	public function render_event_column( $content, $column, $term_id ) { // phpcs:ignore WPForms.NamingConventions.ValidFunctionName.MethodNameInvalid
+
+		if ( $column === 'event' ) {
+			$term     = get_term( $term_id );
+			$is_valid = $term && ! is_wp_error( $term );
+			$count    = $is_valid ? (int) $term->count : 0;
+
+			// The events list filters tags by term ID (validated in
+			// Admin\Events\Tables\Base::get_tags()), unlike calendars which filter by slug.
+			$url = sugar_calendar_get_admin_url(
+				[
+					Helpers::get_tags_taxonomy_id() => $is_valid ? $term->term_id : '',
+				]
+			);
+
+			$content = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $url ),
+				number_format_i18n( $count )
+			);
+		}
+
+		return $content;
 	}
 
 	/**

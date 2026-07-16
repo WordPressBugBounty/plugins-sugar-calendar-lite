@@ -303,11 +303,41 @@ function sugar_calendar_join_by_taxonomy_term( $clauses = [], $query = false ) {
 		return;
 	}
 
+	/**
+	 * Filter taxonomy query arguments before creating WP_Tax_Query.
+	 *
+	 * Allows integrations (like WPML) to modify term IDs to include
+	 * translations before the SQL is generated.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array        $args  Taxonomy query arguments.
+	 * @param object|Query $query The Event_Query object.
+	 *
+	 * @return array Modified taxonomy query arguments.
+	 */
+	$args = apply_filters( 'sugar_calendar_taxonomy_relationships_query_args', $args, $query );
+
 	// Get a taxonomy query object.
 	$tax_query = new WP_Tax_Query( $args );
 
 	// Get clauses.
 	$sql_clauses   = $tax_query->get_sql( 'sc_e', 'object_id' );
+
+	/**
+	 * Filter taxonomy SQL clauses for multilingual support.
+	 *
+	 * Allows integrations (like WPML) to modify the JOIN/WHERE clauses
+	 * to handle translated posts that may have different object_ids.
+	 *
+	 * @since 3.12.0
+	 *
+	 * @param array  $sql_clauses Array with 'join' and 'where' keys.
+	 * @param object $tax_query   The WP_Tax_Query object.
+	 * @param object $query       The Event_Query object.
+	 */
+	$sql_clauses = apply_filters( 'sugar_calendar_taxonomy_relationships_query_clauses', $sql_clauses, $tax_query, $query );
+
 	$join_clauses  = [ $clauses['join'], $sql_clauses['join']  ];
 	$where_clauses = [ $clauses['where'], $sql_clauses['where'] ];
 

@@ -35,6 +35,11 @@ class Metaboxes {
 
 		// Education.
 		add_action( 'sugar_calendar_admin_meta_box_setup_sections', [ $this, 'event_metabox_education' ] );
+
+		// Lite: render the venue product-education inside the unified Location section.
+		if ( ! Plugin::instance()->is_pro() ) {
+			add_action( 'sugar_calendar_admin_meta_box_location_section', [ $this, 'event_metabox_venue_education' ] );
+		}
 	}
 
 	/**
@@ -302,14 +307,32 @@ class Metaboxes {
 
 		$this->get_meta_boxes( $object );
 
+		/**
+		 * Filter save context before persisting the event.
+		 *
+		 * @since 3.12.0
+		 *
+		 * @param array $context Save context.
+		 *
+		 * @return array
+		 */
+		$context = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_pre_save_context',
+			[
+				'object_id' => $object_id,
+				'object'    => $object,
+				'source'    => 'metabox_default_save',
+			]
+		);
+
 		// Shim these for now (need to make functions for them).
-		$title   = $object->post_title;
-		$content = $object->post_content;
-		$subtype = $object->post_type;
-		$status  = $object->post_status;
+		$title   = $context['object']->post_title;
+		$content = $context['object']->post_content;
+		$subtype = $context['object']->post_type;
+		$status  = $context['object']->post_status;
 
 		// Get an event.
-		$event = sugar_calendar_get_event_by_object( $object_id );
+		$event = sugar_calendar_get_event_by_object( $context['object_id'] );
 		$type  = ! empty( $event->object_type )
 			? $event->object_type
 			: 'post';
@@ -326,14 +349,15 @@ class Metaboxes {
 		$to_save = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_event_to_save',
 			[
-				'object_id'      => $object_id,
+				'object_id'      => $context['object_id'],
 				'object_type'    => $type,
 				'object_subtype' => $subtype,
 				'title'          => $title,
 				'content'        => $content,
 				'status'         => $status,
 			],
-			$event
+			$event,
+			$context
 		);
 
 		// Update or Add New.
@@ -387,17 +411,6 @@ class Metaboxes {
 			]
 		);
 
-		// Venue.
-		$box->add_section(
-			[
-				'id'       => 'venue',
-				'label'    => esc_html__( 'Venue', 'sugar-calendar-lite' ),
-				'icon'     => 'location',
-				'order'    => 50,
-				'callback' => [ $this, 'event_metabox_venue_education' ],
-			]
-		);
-
 		// Speakers.
 		$box->add_section(
 			[
@@ -435,7 +448,7 @@ class Metaboxes {
 			<label for="recurrence"><?php esc_html_e( 'Repeat', 'sugar-calendar-lite' ); ?></label>
 			<div class="sugar-calendar-metabox__field">
 				<select id="recurrence" class="recurrence" disabled>
-					<option><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></option>
+					<option value="0"><?php esc_html_e( 'Never', 'sugar-calendar-lite' ); ?></option>
 				</select>
 			</div>
 		</div>
@@ -596,6 +609,7 @@ class Metaboxes {
 	 * Event metabox venue section education.
 	 *
 	 * @since 3.5.0
+	 * @since 3.12.0 Simplified to a single PRO-badged field that opens the upgrade modal.
 	 *
 	 * @return void
 	 */
@@ -603,92 +617,30 @@ class Metaboxes {
 
 		?>
 		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--venue sugar-calendar-metabox__field-row--education">
-			<label for="venue"><?php esc_html_e( 'Venue', 'sugar-calendar-lite' ); ?></label>
-			<div class="sugar-calendar-metabox__field sugar-calendar-event-venue-selection">
+			<label>
+				<?php esc_html_e( 'Venue', 'sugar-calendar-lite' ); ?>
+				<span class="sugar-calendar__badge__pro-only sugar-calendar__badge__pro-only color-gray">PRO</span>
+			</label>
+			<div
+				class="sugar-calendar-metabox__field sugar-calendar-event-venue-selection sce-lite-education-modal-link"
+				data-feat-id="<?php echo esc_attr( 'event-venues' ); ?>"
+				data-feat-name="<?php esc_attr_e( 'Event Venues', 'sugar-calendar-lite' ); ?>"
+			>
 				<div id="sugar-calendar-setting-row-venue" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-setting-row-select">
 					<span class="sugar-calendar-setting-field choicesjs-select-wrap">
 						<div class="choices" data-type="select-one" tabindex="0" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
 							<div class="choices__inner">
 								<div class="choices__list choices__list--single">
 									<div class="choices__item choices__item--selectable" aria-selected="true">
-										<?php esc_html_e( 'Existing Venue', 'sugar-calendar-lite' ); ?>
+										<?php esc_html_e( 'Select a venue', 'sugar-calendar-lite' ); ?>
 									</div>
 								</div>
 							</div>
 						</div>
-						<p class="desc"><?php esc_html_e( 'Select an existing venue or create a new one.', 'sugar-calendar-lite' ); ?></p>
-					</span>
-				</div>
-			</div>
-			<span id="venue-add-new" class="sce-lite-education-modal-link" data-feat-id="<?php echo esc_attr( 'event-venues' ); ?>" data-feat-name="<?php esc_attr_e( 'Event Venues', 'sugar-calendar-lite' ); ?>"><?php esc_html_e( 'Add New Venue', 'sugar-calendar-lite' ); ?></span>
-			<div class="sugar-calendar-event-venue-summary">
-				<div class="sugar-calendar-event-venue-info-card active">
-					<div class="venue-info-card-display">
-						<h4>The Roxy</h4>
-						<p>9009 W Sunset Blvd</p>
-						<p>West Hollywood, CA, 90069</p>
-						<p>United States</p>
-						<p>310-278-9457</p>
-					</div>
-					<span id="venue-edit-open" aria-label="Edit Venue"></span>
-				</div>
-			</div>
-		</div>
-
-		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--venue_show_map sugar-calendar-metabox__field-row--education">
-			<label for="recurrence"><?php esc_html_e( 'Show Map', 'sugar-calendar-lite' ); ?></label>
-			<div class="sugar-calendar-metabox__field">
-				<div id="sugar-calendar-setting-row-show_map" class="sugar-calendar-setting-row sugar-calendar-clear sugar-calendar-setting-row-toggle">
-					<span class="sugar-calendar-setting-field">
-						<span class="sugar-calendar-toggle-control">
-							<label class="sugar-calendar-toggle-control-icon" for="sugar-calendar-setting-show_map"></label>
-							<label
-								class="sugar-calendar-toggle-control-status sugar-calendar-toggle-control-status-off"
-								for="sugar-calendar-setting-show_map"
-								style="display:block;"
-							><?php esc_html_e( 'Off', 'sugar-calendar-lite' ); ?></label>
-						</span>
-						<p class="desc">
-							<?php
-								echo wp_sprintf(
-									esc_html__( 'You need to configure Google API in %s to enable this feature.', 'sugar-calendar-lite' ),
-									'<span class="sce-link">' . esc_html__( 'settings', 'sugar-calendar-lite' ) . '</span>'
-								);
-							?>
-						</p>
 					</span>
 				</div>
 			</div>
 		</div>
-
-		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--upgrade">
-			<p class="desc">
-				<?php
-				echo wp_kses(
-					sprintf( /* translators: %1$s - SugarCalendar.com documentation URL; %2$s - link text; %2$3 - paragraph text. */
-						'<a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a> %3$s',
-						esc_url(
-							Helpers::get_upgrade_link(
-								[
-									'medium'  => 'lite-event-venue',
-									'content' => 'Upgrade to Sugar Calendar Pro',
-								]
-							)
-						),
-						esc_html__( 'Upgrade to Sugar Calendar Pro', 'sugar-calendar-lite' ),
-						esc_html__( 'for reusable venue profiles with interactive Google maps!', 'sugar-calendar-lite' )
-					),
-					[
-						'a' => [
-							'href'   => [],
-							'rel'    => [],
-							'target' => [],
-						],
-					]
-				);
-				?>
-            </p>
-        </div>
 		<?php
 	}
 

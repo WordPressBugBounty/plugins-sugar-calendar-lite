@@ -1,0 +1,14 @@
+<wpml-config>
+	<custom-types>
+		<custom-type translate="1">sc_event</custom-type>
+		<custom-type translate="1">sc_recurring_event</custom-type>
+		<custom-type translate="1">sugarcalendar_venue</custom-type>
+		<custom-type translate="1">sc_speakers</custom-type>
+	</custom-types>
+	<taxonomies>
+		<taxonomy translate="1">sc_event_category</taxonomy>
+		<taxonomy translate="1">sc_event_tags</taxonomy>
+	</taxonomies>
+	<custom-fields>
+	</custom-fields>
+</wpml-config>
