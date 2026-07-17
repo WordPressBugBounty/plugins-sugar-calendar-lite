@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Pages;
 use Sugar_Calendar\Admin\PageAbstract;
 use Sugar_Calendar\Admin\Pages\VenuesAbstract;
 use Sugar_Calendar\Admin\Pages\SpeakersAbstract;
+use Sugar_Calendar\Common\Editor;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\Helpers as ExtHelpers;
@@ -127,6 +128,12 @@ abstract class EventAbstract extends PageAbstract {
 	private function should_display_hand_holding() {
 
 		if ( ! is_null( $this->should_display_hand_holding ) ) {
+			return $this->should_display_hand_holding;
+		}
+
+		if ( Editor\current() === 'block' ) {
+			$this->should_display_hand_holding = false;
+
 			return $this->should_display_hand_holding;
 		}
 

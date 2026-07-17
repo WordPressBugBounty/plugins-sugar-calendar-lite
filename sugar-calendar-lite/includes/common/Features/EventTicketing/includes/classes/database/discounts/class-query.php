@@ -34,7 +34,7 @@ final class Discount_Query extends Query {
 	 * @since 1.0
 	 * @var   string
 	 */
-	protected $table_schema = __NAMESPACE__ . '\\Order_Schema';
+	protected $table_schema = __NAMESPACE__ . '\\Discount_Schema';
 
 	/** Item ******************************************************************/
 

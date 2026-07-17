@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.12.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.12.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-16T14:35:21+00:00\n"
+"POT-Creation-Date: 2026-07-17T15:53:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: sugar-calendar-lite\n"
@@ -2204,7 +2204,7 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:171
 #: includes/common/Features/EventTicketing/includes/gateways/stripe.php:316
 #: includes/common/Features/EventTicketing/src/Renderer.php:441
-#: src/Admin/Pages/EventAbstract.php:515
+#: src/Admin/Pages/EventAbstract.php:522
 #: src/Admin/Tools/DashboardWidget.php:533
 msgid "Event Tickets"
 msgstr ""
@@ -2670,7 +2670,7 @@ msgid "Invalid coordinates."
 msgstr ""
 
 #: includes/common/Features/GoogleMaps/Feature.php:149
-#: src/Admin/Pages/EventAbstract.php:500
+#: src/Admin/Pages/EventAbstract.php:507
 msgid "Event Location"
 msgstr ""
 
@@ -3043,7 +3043,7 @@ msgid "Previous"
 msgstr ""
 
 #: includes/themes/legacy/calendar.php:349
-#: src/Admin/Pages/EventAbstract.php:109
+#: src/Admin/Pages/EventAbstract.php:110
 #: src/Block/EventList/templates/base.php:43
 msgid "Next"
 msgstr ""
@@ -4160,147 +4160,147 @@ msgid "Number of items per page"
 msgstr ""
 
 #: src/Admin/Pages/Event.php:95
-#: src/Admin/Pages/EventAbstract.php:190
+#: src/Admin/Pages/EventAbstract.php:197
 msgid "Name this event"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:207
+#: src/Admin/Pages/EventAbstract.php:214
 msgid "Event name is required"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:282
+#: src/Admin/Pages/EventAbstract.php:289
 msgid "Join us for a night of soulful melodies and heartfelt performances at our Acoustic Open Mic Night! Whether you're a seasoned musician or just starting out, this is the perfect opportunity to showcase your talent in a warm and welcoming environment. Bring your guitar, ukulele, or just your voice, and share your favorite songs or original compositions with an appreciative audience."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:283
+#: src/Admin/Pages/EventAbstract.php:290
 msgid "Enjoy a cozy atmosphere, delicious snacks, and the chance to connect with fellow music lovers."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:284
+#: src/Admin/Pages/EventAbstract.php:291
 msgid "Don't miss out on this vibrant celebration of creativity and community!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:289
+#: src/Admin/Pages/EventAbstract.php:296
 msgid "To sell tickets, enable ticketing here, but ensure your Stripe account is connected first."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:299
+#: src/Admin/Pages/EventAbstract.php:306
 #: src/Admin/Tools/DashboardWidget.php:630
 msgid "Learn More"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:304
+#: src/Admin/Pages/EventAbstract.php:311
 msgid "Once all your event details are added, you can publish your event!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:305
+#: src/Admin/Pages/EventAbstract.php:312
 msgid "Your event can be edited anytime from the events page."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:349
+#: src/Admin/Pages/EventAbstract.php:356
 msgid "Are you sure you want to cancel our event creation guide?"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:353
+#: src/Admin/Pages/EventAbstract.php:360
 #: src/Integrations/Elementor/Widgets/EventTitle.php:130
 msgid "No"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:358
+#: src/Admin/Pages/EventAbstract.php:365
 #: src/Admin/Tools/Importers.php:161
 #: src/Integrations/Elementor/Widgets/EventTitle.php:129
 msgid "Yes"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:364
+#: src/Admin/Pages/EventAbstract.php:371
 msgid "Take a few minutes to walkthrough the whole guided process"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:367
+#: src/Admin/Pages/EventAbstract.php:374
 msgid "Let's create your first event!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:373
+#: src/Admin/Pages/EventAbstract.php:380
 msgid "Let's get started!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:378
+#: src/Admin/Pages/EventAbstract.php:385
 msgid "Finish Setup"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:381
+#: src/Admin/Pages/EventAbstract.php:388
 msgid "Check Documentation"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:384
+#: src/Admin/Pages/EventAbstract.php:391
 msgid "After publishing, display events on your website using our native blocks for Elementor and WP Block Editor, or use shortcodes found in our documentation."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:387
+#: src/Admin/Pages/EventAbstract.php:394
 msgid "Congratulations! You are ready to roll!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:394
+#: src/Admin/Pages/EventAbstract.php:401
 msgid "Done & Publish"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:404
+#: src/Admin/Pages/EventAbstract.php:411
 msgid "Acoustic Open Mic"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:413
+#: src/Admin/Pages/EventAbstract.php:420
 msgid "Every event must have a name for it to be published. For example, we'll add a name to get you started."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:418
+#: src/Admin/Pages/EventAbstract.php:425
 msgid "Event name"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:433
+#: src/Admin/Pages/EventAbstract.php:440
 msgid "Add your event description here, like a brief summary, agenda, requirements, and plans."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:438
+#: src/Admin/Pages/EventAbstract.php:445
 msgid "Event description"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:455
+#: src/Admin/Pages/EventAbstract.php:462
 msgid "Define the start and end times, or whether this is an all day event, to move to the next step."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:460
+#: src/Admin/Pages/EventAbstract.php:467
 msgid "Set event duration"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:475
+#: src/Admin/Pages/EventAbstract.php:482
 msgid "For repeating events, use the recurrence feature to easily set up & manage them."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:480
+#: src/Admin/Pages/EventAbstract.php:487
 msgid "Event recurrence"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:495
+#: src/Admin/Pages/EventAbstract.php:502
 msgid "You can add a simple address for your event. If you are managing multiple event locations, upgrade to Pro for our awesome Venues feature."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:528
+#: src/Admin/Pages/EventAbstract.php:535
 msgid "Set up which calendar you'd like this event to be connected to"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:533
+#: src/Admin/Pages/EventAbstract.php:540
 msgid "Set Calendars"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:546
+#: src/Admin/Pages/EventAbstract.php:553
 msgid "Publish"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:577
+#: src/Admin/Pages/EventAbstract.php:584
 msgid "Uprade to Pro"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:580
+#: src/Admin/Pages/EventAbstract.php:587
 msgid "feature"
 msgstr ""
 
