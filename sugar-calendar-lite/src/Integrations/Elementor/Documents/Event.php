@@ -53,7 +53,7 @@ class Event extends Single_Base {
 	 */
 	public static function get_title() {
 
-		return esc_html__( 'Single Event', 'sugar-calendar' );
+		return esc_html__( 'Single Event', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Event extends Single_Base {
 	 */
 	public static function get_plural_title() {
 
-		return esc_html__( 'Single Events', 'sugar-calendar' );
+		return esc_html__( 'Single Events', 'sugar-calendar-lite' );
 	}
 
 	/**

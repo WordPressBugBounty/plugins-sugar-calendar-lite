@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * @var \Sugar_Calendar\Block\EventList\EventListView\AbstractView $context
  */

@@ -118,6 +118,7 @@ class SettingsRsvpTab extends Settings {
 				if ( sugar_calendar()->get_license_type() === 'basic' ) {
 					$heading_classes[] = 'sugar-calendar__admin__settings__heading__notice-after';
 					$license_notice = sprintf(
+						/* translators: %1$s - URL to upgrade the plan. */
 						__( 'RSVP feature is available as an add-on. Please <a target="_blank" href="%1$s">upgrade your plan</a> to Plus, Pro or Elite, in order to get access to the RSVP add-on and others.', 'sugar-calendar-lite' ),
 						esc_url(
 							Helpers::get_utm_url(

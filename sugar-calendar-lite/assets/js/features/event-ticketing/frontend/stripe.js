@@ -51,6 +51,14 @@
 			// Set elements.
 			this.$el.$body = $( 'body' );
 			this.$el.$modalPaymentFieldset = $( '#sc-event-ticketing-modal-payment-fieldset' );
+			this.$el.$checkoutForm = $( '#sc-event-ticketing-checkout' );
+			this.$el.$errorContainer = $( '#sc-event-ticketing-card-errors' );
+
+			// Bind unconditionally: a free event (no Stripe key) still needs to submit
+			// the checkout form when the server reports `is_free_event`. The free-event
+			// branch of performStripeProcess() never touches `this.stripe`/`this.elements`,
+			// so this is safe without a Stripe key.
+			this.$el.$body.on( 'sc_et_gateway_ajax', this.performStripeProcess.bind( this ) );
 
 			if ( sc_event_ticket_vars.publishable_key ) {
 				this.setupStripe();
@@ -63,6 +71,9 @@
 		 * Setup Stripe.
 		 *
 		 * @since 3.6.0
+		 * @since 3.13.0 No longer sets $checkoutForm/$errorContainer or binds the
+		 *                   gateway-ajax listener — both moved to init() so a free
+		 *                   event (no publishable key) still has them.
 		 */
 		setupStripe: function() {
 
@@ -75,11 +86,6 @@
 
 			this.paymentElement = this.elements.create( 'payment' );
 			this.paymentElement.mount( '#sc-event-ticketing-card-element' );
-
-			this.$el.$checkoutForm = $( '#sc-event-ticketing-checkout' );
-			this.$el.$errorContainer = $( '#sc-event-ticketing-card-errors' );
-
-			this.$el.$body.on( 'sc_et_gateway_ajax', this.performStripeProcess.bind( this ) );
 		},
 
 		/**
@@ -190,13 +196,23 @@
 		},
 
 		/**
-		 * Hide the spinner.
+		 * Hide the spinner and release the checkout.
+		 *
+		 * Every gateway failure path already lands here, so unlocking here is what
+		 * lets a buyer retry after a decline without each branch knowing about it.
 		 *
 		 * @since 3.6.0
+		 * @since 3.13.0 Also unlocks the checkout.
 		 */
 		hideSpinner: function() {
 
 			$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
+
+			const ticketing = window.SugarCalendar && window.SugarCalendar.EventTicketing;
+
+			if ( ticketing && typeof ticketing.lockCheckout === 'function' ) {
+				ticketing.lockCheckout( false );
+			}
 		},
 	};
 

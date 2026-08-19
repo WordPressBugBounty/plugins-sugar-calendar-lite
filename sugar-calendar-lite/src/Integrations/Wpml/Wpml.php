@@ -163,7 +163,7 @@ class Wpml {
 		 * @param bool   $return_orig Return original if translation missing.
 		 * @param string $target_lang Target language code.
 		 */
-		$mapped = apply_filters( 'wpml_object_id', $post_id, $post_type, true, $default_lang ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		$mapped = apply_filters( 'wpml_object_id', $post_id, $post_type, true, $default_lang ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 
 		$mapped_id = absint( $mapped );
 
@@ -209,7 +209,7 @@ class Wpml {
 		 * @param bool   $return_orig Return original if translation missing.
 		 * @param string $target_lang Target language code.
 		 */
-		$mapped = apply_filters( 'wpml_object_id', $post_id, $post_type, true, $current_lang ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		$mapped = apply_filters( 'wpml_object_id', $post_id, $post_type, true, $current_lang ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 
 		$mapped_id = absint( $mapped );
 
@@ -265,7 +265,7 @@ class Wpml {
 		// Check if WPML translations table exists.
 		$table_name = $wpdb->prefix . 'icl_translations';
 
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against WPML tables.
 			return [];
 		}
 

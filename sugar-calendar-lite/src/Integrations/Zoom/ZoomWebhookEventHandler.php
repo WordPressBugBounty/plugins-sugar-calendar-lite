@@ -134,8 +134,6 @@ class ZoomWebhookEventHandler implements WebhookEventHandlerInterface {
 		$row = OAuthConnectionModel::find_by_provider( 'zoom' );
 
 		if ( $row === null ) {
-			error_log( '[SC Zoom] app_deauthorized received but no zoom connection exists.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
 			return;
 		}
 
@@ -152,8 +150,6 @@ class ZoomWebhookEventHandler implements WebhookEventHandlerInterface {
 		$payload_user = (string) ( $payload['payload']['user_id'] ?? $payload['payload']['account_id'] ?? '' );
 
 		if ( $payload_user !== '' && $payload_user !== (string) $row['account_id'] ) {
-			error_log( '[SC Zoom] app_deauthorized account mismatch — ignoring (payload account: ' . $payload_user . ').' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
 			return;
 		}
 
@@ -205,9 +201,11 @@ class ZoomWebhookEventHandler implements WebhookEventHandlerInterface {
 	/**
 	 * Meta keys cleared on a full event reset (meeting deleted at Zoom).
 	 *
-	 * The provider's meeting footprint PLUS the two keys a normal
-	 * EventMeetingManager::remove() does not touch — the manager-owned
-	 * meeting_sync_hash and the editor's online_provider selection. The footprint
+	 * The provider's meeting footprint PLUS meeting_sync_hash and
+	 * meeting_kind (both manager-owned, cleared the same way
+	 * EventMeetingManager::remove() clears them) and online_provider — the
+	 * one key a normal remove() does not touch, since a webhook-driven reset
+	 * also reverts the editor's Online selection to None. The footprint
 	 * is sourced from the provider so a new meeting meta key doesn't have to be
 	 * duplicated here; the fallback (registry lookup miss) reuses
 	 * ZoomIntegration::META_KEYS rather than a second copy of the literal list.
@@ -224,7 +222,7 @@ class ZoomWebhookEventHandler implements WebhookEventHandlerInterface {
 			? $provider->get_meeting_meta_keys()
 			: ZoomIntegration::META_KEYS;
 
-		return array_merge( $footprint, [ 'meeting_sync_hash', 'online_provider' ] );
+		return array_merge( $footprint, [ 'meeting_sync_hash', 'online_provider', 'meeting_kind' ] );
 	}
 
 	/**

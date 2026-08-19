@@ -30,6 +30,18 @@ class Orders_Export extends CSV_Export {
 	public $export_type = 'orders';
 
 	/**
+	 * Order query built by get_data().
+	 *
+	 * Declared because assigning it without a declaration creates a dynamic
+	 * property, which PHP 8.2 deprecates and PHP 9 rejects outright.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var Database\Order_Query
+	 */
+	public $query;
+
+	/**
 	 * Set the CSV columns.
 	 *
 	 * @since 1.0.0
@@ -82,8 +94,10 @@ class Orders_Export extends CSV_Export {
 	 * Retrieves the data being exported.
 	 *
 	 * @since 1.0.0
+	 * @since 3.13.0 Leave the date_paid cell blank for the zero-date (unpaid) case.
 	 *
 	 * @param array $args Array of query arguments.
+	 *
 	 * @return array Data for Export.
 	 */
 	public function get_data( $args = [] ) {
@@ -107,9 +121,12 @@ class Orders_Export extends CSV_Export {
 		foreach ( $this->query->items as $key => $order ) {
 
 			// Reset Event data.
-			$event_name = $event_id = '';
-			$event_start_date = $event_start_time = '';
-			$event_end_date = $event_end_time = '';
+			$event_id         = '';
+			$event_name       = '';
+			$event_start_date = '';
+			$event_start_time = '';
+			$event_end_date   = '';
+			$event_end_time   = '';
 
 			// Event for Order.
 			if ( ! empty( $order->event_id ) ) {
@@ -159,7 +176,12 @@ class Orders_Export extends CSV_Export {
 
 				// Dates.
 				'date_created'     => date_i18n( $date_format . ' ' . $time_format, strtotime( $order->date_created ) ),
-				'date_paid'        => ! empty( $order->date_paid ) ? date_i18n( $date_format . ' ' . $time_format, strtotime( $order->date_paid ) ) : '',
+				// An unpaid order stores the zero date, which is not empty() and
+				// which strtotime() reads as year -1 — blank the cell rather than
+				// exporting "November 30, -0001".
+				'date_paid'        => ( ! empty( $order->date_paid ) && strpos( $order->date_paid, '0000-00-00' ) !== 0 )
+					? date_i18n( $date_format . ' ' . $time_format, strtotime( $order->date_paid ) )
+					: '',
 				'date_modified'    => date_i18n( $date_format . ' ' . $time_format, strtotime( $order->date_modified ) ),
 
 				// Additional.

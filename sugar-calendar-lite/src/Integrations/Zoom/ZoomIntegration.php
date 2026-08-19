@@ -61,6 +61,15 @@ class ZoomIntegration implements MeetingProviderInterface {
 	private $actions_client = null;
 
 	/**
+	 * Lazily-instantiated meeting-data builder.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var ZoomMeetingBuilder|null
+	 */
+	private $builder = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.12.0
@@ -144,7 +153,7 @@ class ZoomIntegration implements MeetingProviderInterface {
 			return $connection;
 		}
 
-		$meeting_data = $this->build_meeting_data( $event );
+		$meeting_data = $this->get_builder()->build( $event );
 
 		if ( is_wp_error( $meeting_data ) ) {
 			return $meeting_data;
@@ -170,57 +179,31 @@ class ZoomIntegration implements MeetingProviderInterface {
 	}
 
 	/**
-	 * Build the Zoom meeting payload from an event (shared by create + update).
+	 * Lazily build the meeting-data builder.
 	 *
-	 * Sends local time + an explicit timezone (rather than a forced UTC
-	 * conversion) because SCE events can be floating-tz. Duration falls back
-	 * to 60 minutes when the event has no positive span.
+	 * @since 3.13.0
 	 *
-	 * @since 3.12.0
+	 * @return ZoomMeetingBuilder
+	 */
+	private function get_builder(): ZoomMeetingBuilder {
+
+		if ( $this->builder === null ) {
+			$this->builder = new ZoomMeetingBuilder();
+		}
+
+		return $this->builder;
+	}
+
+	/**
+	 * @since 3.13.0
 	 *
 	 * @param object $event SCE Event object.
 	 *
-	 * @return array|WP_Error Payload array, or WP_Error when the start can't be resolved.
+	 * @return array{kind:string,fingerprint:string}
 	 */
-	private function build_meeting_data( $event ) {
+	public function get_sync_signature( $event ): array {
 
-		$start_dto = ( isset( $event->start_dto ) && $event->start_dto instanceof \DateTimeInterface )
-			? $event->start_dto
-			: sugar_calendar_get_datetime_object( $event->start, $event->start_tz );
-
-		// Reachable from the create-meeting AJAX path with date/time straight from
-		// $_POST — a malformed start would otherwise fatal on ->format() below.
-		if ( ! $start_dto instanceof \DateTimeInterface ) {
-			return new WP_Error( 'zoom_invalid_start', esc_html__( 'The event has no valid start date and time for the meeting.', 'sugar-calendar-lite' ) );
-		}
-
-		$start_ts = strtotime( $event->start );
-		$end_ts   = strtotime( $event->end );
-
-		$duration = ( $start_ts && $end_ts && $end_ts > $start_ts )
-			? (int) ceil( ( $end_ts - $start_ts ) / 60 )
-			: 60;
-
-		$settings = [ 'waiting_room' => false ];
-
-		/**
-		 * Filter the settings array sent to the Zoom create-meeting relay call.
-		 *
-		 * @since 3.12.0
-		 *
-		 * @param array  $settings Zoom meeting settings.
-		 * @param object $event    SCE Event object.
-		 */
-		$settings = (array) apply_filters( 'sugar_calendar_zoom_meeting_settings', $settings, $event );
-
-		return [
-			'topic'      => $event->title,
-			'type'       => 2, // Scheduled meeting.
-			'start_time' => $start_dto->format( 'Y-m-d\TH:i:s' ),
-			'timezone'   => $event->start_tz ? $event->start_tz : sugar_calendar_get_timezone(),
-			'duration'   => $duration,
-			'settings'   => $settings,
-		];
+		return $this->get_builder()->signature( $event );
 	}
 
 	/**
@@ -267,7 +250,7 @@ class ZoomIntegration implements MeetingProviderInterface {
 			return new WP_Error( 'zoom_no_meeting', esc_html__( 'No Zoom meeting to update.', 'sugar-calendar-lite' ) );
 		}
 
-		$meeting_data = $this->build_meeting_data( $event );
+		$meeting_data = $this->get_builder()->build( $event );
 
 		if ( is_wp_error( $meeting_data ) ) {
 			return $meeting_data;

@@ -300,7 +300,7 @@ function render_receipt_body( $order, $event ) {
 				<th colspan="3"><?php esc_html_e( 'Amount', 'sugar-calendar-lite' ); ?></th>
 			</tr>
 			<tr>
-				<td colspan="3"><?php echo Functions\currency_filter( $order->total ); ?></td>
+				<td colspan="3"><?php echo Functions\display_price( $order->total ); ?></td>
 			</tr>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Transaction ID', 'sugar-calendar-lite' ); ?></th>
@@ -397,6 +397,16 @@ function render_receipt_body( $order, $event ) {
 	</div>
 
 	<?php
+
+	/**
+	 * Fires after the receipt body has been rendered.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param object $order The order being shown.
+	 * @param object $event The order's event.
+	 */
+	do_action( 'sugar_calendar_ticketing_receipt_after', $order, $event );
 
 	return apply_filters( 'sc_event_tickets_ticket_shortcode_output', ob_get_clean() );
 }

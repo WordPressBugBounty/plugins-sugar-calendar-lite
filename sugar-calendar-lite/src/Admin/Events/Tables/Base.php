@@ -12,6 +12,10 @@ use WP_List_Table;
 use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
 use Sugar_Calendar\AddOn\Ticketing\Renderer as TicketingRenderer;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 // Include the main list table class if it's not included.
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -1935,7 +1939,7 @@ class Base extends WP_List_Table {
 	protected function get_event_title( $event = false ) {
 
 		$title = ! empty( $event->title )
-			? apply_filters( 'the_title', $event->title, $event->object_id ) // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+			? apply_filters( 'the_title', $event->title, $event->object_id ) // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WordPress hook, intentionally invoked.
 			: esc_html__( '(No title)', 'sugar-calendar-lite' );
 
 		if ( $event->status === 'draft' ) {
@@ -4613,7 +4617,7 @@ class Base extends WP_List_Table {
 		 * @param array  $links Array of links.
 		 * @param object $event Event object.
 		 */
-		return (array) apply_filters( $filter, $links, $object ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		return (array) apply_filters( $filter, $links, $object ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Dynamic hook name resolved at runtime.
 	}
 
 	/**

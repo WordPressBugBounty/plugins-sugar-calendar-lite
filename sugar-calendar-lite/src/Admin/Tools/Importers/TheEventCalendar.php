@@ -427,7 +427,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->get_var(
+		$result = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			"SELECT COUNT(*) FROM " . $wpdb->posts . " LEFT JOIN "
 			. $wpdb->postmeta . " ON " . $wpdb->postmeta . ".post_id = " . $wpdb->posts . ".ID AND "
 			. $wpdb->postmeta . ".meta_key = '_EventRecurrence' WHERE "
@@ -1391,7 +1391,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// Get term data directly from the database.
-		$term = $wpdb->get_row(
+		$term = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare(
 				"SELECT t.*, tt.description, tt.parent
 				FROM {$wpdb->terms} AS t
@@ -1706,7 +1706,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare(
 				'SELECT ' . $wpdb->prefix . esc_sql( self::MIGRATE_ORDERS_TABLE ) . '.*, '
 				. $wpdb->prefix . 'sc_orders.event_id AS sc_event_id, '
@@ -1871,7 +1871,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->prefix . 'tec_events'
 			. ' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_EVENTS_TABLE ) . ' ON ' . $wpdb->prefix . esc_sql( self::MIGRATE_EVENTS_TABLE ) . '.tec_event_id = ' . $wpdb->prefix . 'tec_events.event_id'
 			. ' LEFT JOIN ' . $wpdb->posts . ' ON ' . $wpdb->posts . '.ID = ' . $wpdb->prefix . 'tec_events.post_id' .
@@ -1935,7 +1935,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->terms . ' AS t'
 			. ' INNER JOIN ' . $wpdb->term_taxonomy . ' AS tt ON t.term_id = tt.term_id'
 			. ' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_CATEGORIES_TABLE ) . ' AS mtc'
@@ -1958,7 +1958,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->get_var(
+		$result = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			"SELECT COUNT(*) FROM " .
 			"(SELECT DISTINCT(" . $wpdb->postmeta . ".meta_value) AS tec_email FROM " . $wpdb->posts
 			. " LEFT JOIN " . $wpdb->postmeta . " ON " . $wpdb->postmeta . ".post_id = " . $wpdb->posts . ".ID AND "
@@ -2007,7 +2007,7 @@ class TheEventCalendar extends Importer {
 		 */
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->posts
 			. ' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_TICKETS_TABLE ) . ' ON '
 			. $wpdb->prefix . esc_sql( self::MIGRATE_TICKETS_TABLE ) . '.tec_ticket_id = ' . $wpdb->posts . '.ID WHERE '
@@ -2045,7 +2045,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->posts .
 			' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_ORDERS_TABLE ) .
 			' ON ' . $wpdb->prefix . esc_sql( self::MIGRATE_ORDERS_TABLE ) . '.tec_order_id = '
@@ -2083,7 +2083,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->posts
 			. ' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_ATTENDEES_TABLE )
 			. ' ON ' . $wpdb->posts . '.ID = ' . $wpdb->prefix . esc_sql( self::MIGRATE_ATTENDEES_TABLE ) . '.tec_attendees_id WHERE '
@@ -2112,7 +2112,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_row(
+		return $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare(
 				'SELECT * FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_EVENTS_TABLE ) . ' WHERE ' . esc_sql( $by ) . ' = %d',
 				$value
@@ -2133,7 +2133,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_EVENTS_TABLE,
 			[
 				'tec_event_id' => $tec_event_id,
@@ -2160,7 +2160,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->update(
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_EVENTS_TABLE,
 			[
 				'tec_event_post_id' => $tec_event_post_id,
@@ -2194,7 +2194,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_TICKETS_TABLE,
 			[
 				'tec_ticket_id' => $tec_ticket_id,
@@ -2227,7 +2227,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->update(
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_TICKETS_TABLE,
 			[
 				'sc_event_id' => $sc_event_id,
@@ -2259,7 +2259,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_CATEGORIES_TABLE,
 			[
 				'tec_category_id' => $tec_category_id,
@@ -2285,7 +2285,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->update(
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_CATEGORIES_TABLE,
 			[
 				'tec_category_parent_id' => $tec_category_parent_id,
@@ -2317,7 +2317,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_ORDERS_TABLE,
 			[
 				'tec_order_id' => $tec_order_id,
@@ -2342,7 +2342,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->update(
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_ORDERS_TABLE,
 			[
 				'sc_order_id' => $sc_order_id,
@@ -2372,7 +2372,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_ATTENDEES_TABLE,
 			[
 				'tec_attendees_id' => $tec_attendee_id,
@@ -2568,7 +2568,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			'DROP TABLE IF EXISTS ' . // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 			$wpdb->prefix . esc_sql( self::MIGRATE_EVENTS_TABLE ) . ', ' .
 			$wpdb->prefix . esc_sql( self::MIGRATE_VENUES_TABLE ) . ', ' .
@@ -2690,7 +2690,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		$results = $wpdb->get_results(
+		$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			'SELECT * FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_CATEGORIES_TABLE ),
 			OBJECT
 		);
@@ -2718,7 +2718,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->get_var(
+		return $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare( 'SELECT sc_category_id FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_CATEGORIES_TABLE ) . ' WHERE tec_category_id = %d', $tec_category_id )
 		);
 	}
@@ -2755,7 +2755,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			esc_sql( $select_query ) . ' FROM ' . $wpdb->posts .
 			' LEFT JOIN ' . $wpdb->prefix . esc_sql( self::MIGRATE_VENUES_TABLE ) .
 			' ON ' . $wpdb->prefix . esc_sql( self::MIGRATE_VENUES_TABLE ) . '.tec_venue_id = ' .
@@ -2847,7 +2847,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_VENUES_TABLE,
 			[
 				'tec_venue_id' => $tec_venue_id,
@@ -2872,7 +2872,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->update(
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_VENUES_TABLE,
 			[
 				'sc_venue_id' => $sc_venue_id,
@@ -2969,7 +2969,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// Query to get term IDs for a post by joining term_relationships and term_taxonomy tables.
-		$term_ids = $wpdb->get_col(
+		$term_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare(
 				"SELECT t.term_id
 				FROM {$wpdb->term_relationships} AS tr
@@ -2998,7 +2998,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// Get all migrated events with their TEC IDs.
-		$migrated_events = $wpdb->get_results(
+		$migrated_events = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			'SELECT
 				tec_event_id, sc_event_id, tec_event_post_id, sc_event_post_id
 			FROM
@@ -3070,7 +3070,7 @@ class TheEventCalendar extends Importer {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$sc_venue_id = $wpdb->get_var(
+		$sc_venue_id = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare(
 				'SELECT
 					sc_venue_id
@@ -3143,7 +3143,8 @@ class TheEventCalendar extends Importer {
 			. esc_sql( $group_by )
 			. esc_sql( $limit_query );
 
-		$results = $wpdb->get_results( $query );
+		// Query is static SQL plus esc_sql()'d clause fragments (importer, TEC tables).
+		$results = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $results;
 	}
@@ -3274,7 +3275,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->insert(
+		return $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prefix . self::MIGRATE_TAGS_TABLE,
 			[
 				'tec_tag_id' => $tec_tag_id,
@@ -3300,7 +3301,7 @@ class TheEventCalendar extends Importer {
 
 		global $wpdb;
 
-		return $wpdb->get_var(
+		return $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			$wpdb->prepare( 'SELECT sc_tag_id FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_TAGS_TABLE ) . ' WHERE tec_tag_id = %d', $tec_tag_id )
 		);
 	}
@@ -3317,7 +3318,7 @@ class TheEventCalendar extends Importer {
 		global $wpdb;
 
 		// Get all migrated events with their TEC IDs.
-		$migrated_events = $wpdb->get_results(
+		$migrated_events = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
 			'SELECT
 				tec_event_id, sc_event_id, tec_event_post_id, sc_event_post_id
 			FROM
@@ -3378,7 +3379,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC events to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_events_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_events_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			case 'categories':
 				/**
@@ -3388,7 +3389,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC categories to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_categories_limit', 100 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_categories_limit', 100 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			case 'tickets':
 				/**
@@ -3398,7 +3399,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC tickets to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_tickets_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_tickets_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			case 'orders':
 				/**
@@ -3408,7 +3409,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC orders to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_orders_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_orders_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			case 'attendees':
 				/**
@@ -3418,7 +3419,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC attendees to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_attendees_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_attendees_limit', 10 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			case 'venues':
 				/**
@@ -3428,7 +3429,7 @@ class TheEventCalendar extends Importer {
 				 *
 				 * @param int $limit The number of TEC venues to import per iteration.
 				 */
-				return apply_filters( 'sc_import_tec_venues_limit', 50 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				return apply_filters( 'sc_import_tec_venues_limit', 50 ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			default:
 				return 0;

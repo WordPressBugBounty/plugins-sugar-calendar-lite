@@ -8,6 +8,7 @@ use Sugar_Calendar\Event;
 
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket_data;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket_data_temporary;
+use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\is_ticket_price_stale;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\ticketing_provider_available_for_admin;
 
 defined( 'ABSPATH' ) || exit;
@@ -53,7 +54,7 @@ function metabox_section( $event = null ) {
 	</div>
 
 	<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--enable_tickets">
-		<label for="enable_tickets"><?php esc_html_e( 'Ticket Sales', 'sugar-calendar-lite' ); ?></label>
+		<label for="enable_tickets"><?php esc_html_e( 'Tickets', 'sugar-calendar-lite' ); ?></label>
 		<div class="sugar-calendar-metabox__field">
 			<?php
 			UI::toggle_control(
@@ -153,6 +154,18 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
 
 	$disabled = ! ticketing_provider_available_for_admin();
 
+	$price_field_value = $ticket_data['ticket_price'] ? $ticket_data['ticket_price'] : '';
+
+	// A disabled field with no stored price shows the "free" placeholder
+	// (0.00), per the original no-provider spec. A disabled field that DOES
+	// have a stored price — priced while a provider was connected, since
+	// disconnected — keeps showing that real (now stale) price instead, so
+	// the admin can see what it's currently locked at rather than have it
+	// silently blanked to 0.00.
+	if ( $disabled && empty( $price_field_value ) ) {
+		$price_field_value = '0.00';
+	}
+
 	/**
 	 * Fires before the ticket fields.
 	 *
@@ -179,7 +192,7 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
 				autocomplete="off"
 				placeholder="0.00"
 				pattern="^[0-9]{1,18}([,.][0-9]{1,9})?$"
-				data-lpignore="true" value="<?php echo $ticket_data['ticket_price'] ? esc_attr( $ticket_data['ticket_price'] ) : ''; ?>"
+				data-lpignore="true" value="<?php echo esc_attr( $price_field_value ); ?>"
 				<?php echo $disabled ? 'disabled' : ''; ?>
 			/>
 		</div>
@@ -243,7 +256,6 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
 				pattern="[0-9]"
 				data-lpignore="true"
 				value="<?php echo esc_attr( $ticket_data['ticket_quantity'] ); ?>"
-				<?php echo $disabled ? 'disabled' : ''; ?>
 			/>
 		</div>
 	</div>
@@ -267,26 +279,6 @@ function render_ticket_fields( $event, $ticket_type_id = 0, $is_temporary = fals
 }
 
 /**
- * Filter enable tickets toggle args to disable when Stripe is not connected.
- *
- * @since 3.8.0
- * @since 3.8.2 Changed: Gate by ticketing provider availability (Stripe connected or WooCommerce configured).
- *
- * @param array $args  Args for the UI toggle.
- * @param Event $event The Event object.
- *
- * @return array
- */
-function filter_enable_tickets_args_for_stripe( $args, $event ) {
-
-	if ( ! ticketing_provider_available_for_admin() ) {
-		$args['disabled'] = true;
-	}
-
-	return $args;
-}
-
-/**
  * Render Stripe connection notice after the enable tickets toggle.
  *
  * @since 3.8.0
@@ -296,33 +288,79 @@ function filter_enable_tickets_args_for_stripe( $args, $event ) {
  */
 function render_stripe_connection_notice( $event ) {
 
+	$provider_available = ticketing_provider_available_for_admin();
+	$has_stale_price    = is_ticket_price_stale( get_event_meta( $event->ID, 'ticket_price', true ) );
+
+	/**
+	 * Filter whether this event has a stale (pre-disconnect) ticket price,
+	 * for the admin warning notice above. Core only checks the general
+	 * ticket_price meta; add-ons with additional ticket types stored
+	 * elsewhere (e.g. sc-event-ticketing's wp_sc_ticket_types) should
+	 * extend this so the notice doesn't contradict what customers see.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param bool                  $has_stale_price Whether any ticket type has a stale price.
+	 * @param \Sugar_Calendar\Event $event           The event object.
+	 */
+	$has_stale_price = (bool) apply_filters( 'sc_et_metabox_has_stale_price', $has_stale_price, $event );
+
 	$hide_class = '';
 
-	if ( ticketing_provider_available_for_admin() ) {
+	if ( $provider_available ) {
 		$hide_class = 'sugar-calendar-metabox__notice__hide';
 	}
 
 	$settings_url = admin_url( 'admin.php?page=sugarcalendar-settings&section=payments#sugar-calendar-setting-stripe-connection' );
 
-	/**
-	 * Filter the Stripe connection notice text.
-	 *
-	 * @since 3.8.2
-	 *
-	 * @param string $notice_text  The notice text.
-	 * @param string $settings_url The settings URL.
-	 *
-	 * @return string
-	 */
-	$notice_text = apply_filters(
-		'sc_et_stripe_connection_notice_text',
-		sprintf(
-			/* translators: %s - URL to payment settings page. */
-			__( 'Ticket Sales cannot be used until <a href="%s">Stripe is connected</a>.', 'sugar-calendar-lite' ),
-			esc_url( $settings_url )
-		),
-		$settings_url
-	);
+	if ( $has_stale_price ) {
+
+		/**
+		 * Filter the stale ticket price notice text.
+		 *
+		 * Shown instead of `sc_et_stripe_connection_notice_text` when this
+		 * ticket was priced while a provider was connected and the provider
+		 * has since disconnected — the stored price is no longer 0, so the
+		 * generic "will be free" copy would be misleading.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param string $notice_text  The notice text.
+		 * @param string $settings_url The settings URL.
+		 *
+		 * @return string
+		 */
+		$notice_text = (string) apply_filters(
+			'sc_et_stripe_stale_price_notice_text',
+			sprintf(
+				/* translators: %1$s - URL to payment settings page. */
+				__( 'This event has a paid ticket price, but no payment method is connected. Customers can&#8217;t buy until you <a href="%1$s">reconnect a payment method</a> or set the price to 0.', 'sugar-calendar-lite' ),
+				esc_url( $settings_url )
+			),
+			$settings_url
+		);
+	} else {
+
+		/**
+		 * Filter the Stripe connection notice text.
+		 *
+		 * @since 3.8.2
+		 *
+		 * @param string $notice_text  The notice text.
+		 * @param string $settings_url The settings URL.
+		 *
+		 * @return string
+		 */
+		$notice_text = (string) apply_filters(
+			'sc_et_stripe_connection_notice_text',
+			sprintf(
+				/* translators: %1$s - URL to payment settings page. */
+				__( 'Tickets will be free until you set up a <a href="%1$s">payment method</a> for paid tickets.', 'sugar-calendar-lite' ),
+				esc_url( $settings_url )
+			),
+			$settings_url
+		);
+	}
 
 	?>
 	<div id="sugar-calendar-metabox__stripe-connection-notice" class="sugar-calendar-metabox__notice <?php echo esc_attr( $hide_class ); ?>">
@@ -332,24 +370,4 @@ function render_stripe_connection_notice( $event ) {
 		</p>
 	</div>
 	<?php
-}
-
-/**
- * Filter limit capacity toggle args to disable when Stripe is not connected.
- *
- * @since 3.8.0
- *
- * @param array $args           Args for the UI toggle.
- * @param Event $event          The Event object.
- * @param int   $ticket_type_id The ticket type ID.
- *
- * @return array
- */
-function filter_limit_capacity_toggle_args_for_stripe( $args, $event, $ticket_type_id ) {
-
-	if ( ! ticketing_provider_available_for_admin() ) {
-		$args['disabled'] = true;
-	}
-
-	return $args;
 }

@@ -563,7 +563,7 @@ function process_stripe_connect_completion() {
 		$message .= wp_sprintf(
 			__(
 				'There was an error getting your Stripe credentials. Please <a href="%s">try again</a>. If you continue to have this problem, please contact support.',
-				'sugar-calendar'
+				'sugar-calendar-lite'
 			),
 			esc_url( $url_payment_settings )
 		);

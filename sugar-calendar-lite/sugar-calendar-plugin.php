@@ -9,6 +9,7 @@ namespace Sugar_Calendar;
 
 use Sugar_Calendar\Admin\Addons\Addons;
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Admin\Events\EventPreview;
 use Sugar_Calendar\Admin\Notifications;
 use Sugar_Calendar\Admin\ScreenOptions;
 use Sugar_Calendar\Admin\Tools\Importers;
@@ -258,6 +259,11 @@ final class Plugin {
 		}
 
 		$this->get_frontend();
+
+		// Event preview is an editor feature, but its overlays render on the
+		// front-end single-event page, so it boots on every request (Lite and Pro).
+		// It is the sole engine; features hook their own capture/overlay seams.
+		$this->get_event_preview();
 
 		// Load the Shortcodes.
 		$this->get_modern_shortcodes();
@@ -904,6 +910,26 @@ final class Plugin {
 		}
 
 		return $frontend;
+	}
+
+	/**
+	 * Get the Event Preview engine (Lite).
+	 *
+	 * @since 3.13.0
+	 *
+	 * @return EventPreview
+	 */
+	public function get_event_preview() {
+
+		static $event_preview;
+
+		if ( ! isset( $event_preview ) ) {
+			$event_preview = new EventPreview();
+
+			$event_preview->init();
+		}
+
+		return $event_preview;
 	}
 
 	/**

@@ -259,6 +259,24 @@ function display() {
 										</div>
 									</div>
 								</fieldset>
+
+								<?php
+								/**
+								 * Fires at the bottom of the checkout modal's main column, inside the form.
+								 *
+								 * The seam for additional checkout steps that take over the column above
+								 * them while the summary beside it stays on screen. Deliberately not
+								 * sc_et_modal_form_bottom, which fires INSIDE
+								 * <div class="sc-et-row modal-footer"> — a display:flex button row — where
+								 * a multi-field panel would become a flex sibling of the Cancel/Purchase
+								 * buttons.
+								 *
+								 * @since 3.13.0
+								 *
+								 * @param Event $event The event object.
+								 */
+								do_action( 'sugar_calendar_ticketing_checkout_main_bottom', $event );
+								?>
 							</div>
 
 							<div class="sc-et-col-4" id="sc-event-ticketing-checkout-totals">
@@ -322,7 +340,7 @@ function display() {
 												sprintf(
 													/* translators: %s: Ticket Price. */
 													__( '<span>Ticket Price:</span> <strong>%s</strong>', 'sugar-calendar-lite' ),
-													Functions\currency_filter( $price )
+													Functions\display_price( $price )
 												),
 												[
 													'strong' => [],
@@ -366,6 +384,7 @@ function display() {
 							do_action( 'sc_et_modal_form_bottom', $event );
 							?>
 						</div>
+
 					</div>
 				</form>
 			</div>

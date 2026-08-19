@@ -56,7 +56,7 @@ class GeocodedCacheMigration extends MigrationAbstract {
 
 		// Pull legacy transient rows (the value rows, not the timeout rows).
 		// The double-backslash escapes are MySQL LIKE-escape syntax.
-		$rows = $wpdb->get_results(
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table during migration.
 			"SELECT option_value
 			   FROM {$wpdb->options}
 			  WHERE option_name LIKE '\\_transient\\_scgm\\_%'
@@ -90,7 +90,7 @@ class GeocodedCacheMigration extends MigrationAbstract {
 					continue;
 				}
 
-				$wpdb->query(
+				$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table during migration.
 					$wpdb->prepare(
 						"INSERT IGNORE INTO {$table}
 							( address_hash, address, lat, lng )
@@ -115,7 +115,7 @@ class GeocodedCacheMigration extends MigrationAbstract {
 
 		// Delete all legacy transient rows — value and timeout — whether or
 		// not we successfully migrated them.
-		$wpdb->query(
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table during migration.
 			"DELETE FROM {$wpdb->options}
 			  WHERE option_name LIKE '\\_transient\\_scgm\\_%'
 			     OR option_name LIKE '\\_transient\\_timeout\\_scgm\\_%'"

@@ -87,7 +87,7 @@ class RemoveMeetingAjax {
 			wp_send_json_error( [ 'message' => esc_html__( 'You are not allowed to do that.', 'sugar-calendar-lite' ) ] );
 		}
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		if ( empty( $event->id ) ) {
 			wp_send_json_error( [ 'message' => esc_html__( 'Could not load the event.', 'sugar-calendar-lite' ) ] );

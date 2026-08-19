@@ -22,6 +22,7 @@ use Sugar_Calendar\Admin\Pages\SettingsMiscTab;
 use Sugar_Calendar\Admin\Pages\SettingsRsvpTab;
 use Sugar_Calendar\Admin\Pages\SettingsZapierTab;
 use Sugar_Calendar\Admin\Pages\Tools;
+use Sugar_Calendar\Admin\Pages\ToolsAiTab;
 use Sugar_Calendar\Admin\Pages\ToolsExportTab;
 use Sugar_Calendar\Admin\Pages\ToolsImportTab;
 use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
@@ -34,6 +35,7 @@ use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Integrations\Abilities\Abilities;
 use Sugar_Calendar\Plugin;
 use WP_Exception;
 use WP_Screen;
@@ -232,6 +234,9 @@ class Area {
 
 		// Enqueue assets.
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
+		// Enqueue the Tailwind bundle.
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tailwind' ], 100 );
 
 		// Admin body class.
 		add_filter( 'admin_body_class', [ $this, 'body_class' ] );
@@ -738,6 +743,12 @@ class Area {
 			case 'migrate':
 				return 'tools_migrate';
 
+			case 'ai':
+				// Mirrors Tools::get_tabs()'s own Abilities::is_available()
+				// gate on this tab's visibility — without it, the route
+				// still resolves on WP < 6.9 even though the tab is hidden.
+				return Abilities::is_available() ? 'tools_ai' : 'tools';
+
 			default:
 				return 'tools';
 		}
@@ -773,6 +784,7 @@ class Area {
 			'tools_import'           => ToolsImportTab::class,
 			'tools_export'           => ToolsExportTab::class,
 			'tools_migrate'          => ToolsMigrateTab::class,
+			'tools_ai'               => ToolsAiTab::class,
 			'venues'                 => Venues::class,
 			'speakers'               => Speakers::class,
 			'rsvp'                   => Rsvp::class,
@@ -815,11 +827,19 @@ class Area {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param string $id Page id.
+	 * @param string|null $id Page id. Null when the request is not on a
+	 *                        Sugar Calendar admin screen (see get_current_page_id()).
 	 *
 	 * @return PageInterface|null
 	 */
 	public function get_page( $id ) {
+
+		// A null id means "no current Sugar Calendar page". Short-circuit before
+		// building the page list so null never reaches $pages[ $id ] — using
+		// null as an array offset is deprecated as of PHP 8.4.
+		if ( $id === null ) {
+			return null;
+		}
 
 		$pages = $this->get_pages();
 
@@ -909,6 +929,8 @@ class Area {
 	 * then we redirect the user to the appropriate page.
 	 *
 	 * @since 3.0.0
+	 * @since 3.13.0 The transient is consumed only when the welcome screen actually renders,
+	 *                  and the redirect is offered once per site rather than once per activation.
 	 */
 	public function maybe_redirect_welcome() {
 
@@ -920,9 +942,6 @@ class Area {
 		if ( ! get_transient( self::TRANSIENT_REDIRECT ) ) {
 			return;
 		}
-
-		// If we are redirecting, clear the transient, so it only happens once.
-		delete_transient( self::TRANSIENT_REDIRECT );
 
 		// Check option to disable welcome redirect.
 		if ( get_option( self::OPTION_REDIRECT, false ) ) {
@@ -938,6 +957,16 @@ class Area {
 		if ( WP::is_local_environment() ) {
 			return;
 		}
+
+		// Consume the transient only now that the screen is certain to render: any
+		// admin_init request that bailed above would otherwise have spent the site's
+		// single chance to see it.
+		delete_transient( self::TRANSIENT_REDIRECT );
+
+		// The automatic redirect is offered once. Re-activating the plugin no longer
+		// reopens it; Settings -> General still reaches it via SetupWizard::get_start_url(),
+		// which does not consult this option.
+		update_option( self::OPTION_REDIRECT, true );
 
 		sugar_calendar()->get_setup_wizard()->render_bridge();
 		exit;
@@ -1179,13 +1208,9 @@ class Area {
 			return $class;
 		}
 
-		$class .= ' sugar-calendar';
+		$class .= ' sugar-calendar sugar-calendar-scope';
 
-		if ( Plugin::instance()->is_pro() ) {
-			$class .= " {$class}-pro";
-		} else {
-			$class .= " {$class}-lite";
-		}
+		$class .= Plugin::instance()->is_pro() ? ' sugar-calendar-pro' : ' sugar-calendar-lite';
 
 		return $class;
 	}
@@ -1440,6 +1465,27 @@ class Area {
 		 * @param PageInterface $page Current page.
 		 */
 		do_action( 'sugar_calendar_admin_area_enqueue_assets', $this->current_page );
+	}
+
+	/**
+	 * Enqueue the Tailwind utility bundle.
+	 *
+	 * Hooked separately at a late priority so the bundle loads AFTER the
+	 * default-priority screen / ported-recipe styles.
+	 */
+	public function enqueue_tailwind() {
+
+		// SC admin screens only.
+		if ( $this->current_page === null ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'sugar-calendar-admin-tailwind',
+			SC_PLUGIN_ASSETS_URL . 'css/admin-tailwind' . WP::asset_min() . '.css',
+			[],
+			BaseHelpers::get_asset_version()
+		);
 	}
 
 	/**

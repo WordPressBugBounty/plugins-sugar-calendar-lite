@@ -62,7 +62,11 @@ class Event extends EventAbstract {
 
 		$contents .= wp_nonce_field( 'sc_event_tags_metabox', 'sc_event_tags_metabox_nonce', true, false );
 
-		echo $contents;
+		// $contents is trusted markup assembled from individually escaped
+		// pieces (esc_attr()/wp_kses() inside get_tags_form()) plus core's
+		// wp_nonce_field(); it contains <select>/<input> that wp_kses_post()
+		// would strip, so it is emitted as-is.
+		echo $contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

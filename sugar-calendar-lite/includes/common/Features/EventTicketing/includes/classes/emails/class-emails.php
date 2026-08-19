@@ -532,7 +532,7 @@ class Emails {
 			[
 				'tag'         => 'event_end_time',
 				'description' => esc_html__( 'The end time of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_start_time',
+				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_end_time',
 				'type'        => 'event',
 			],
 			[

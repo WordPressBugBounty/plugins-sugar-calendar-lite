@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin;
 
+use Sugar_Calendar\Admin\Tools\ScheduledImportsEducation;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Plugin;
@@ -69,6 +70,14 @@ class Education {
 
 		// Enqueue assets.
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
+
+		// Tools page -> Scheduled Imports preview (#729/#737). Guarded here
+		// rather than inside the class itself, so Lite and Pro's own
+		// `IcsSync\Admin::render_section()` can never both register on the
+		// same hook.
+		if ( ! Plugin::instance()->is_pro() ) {
+			( new ScheduledImportsEducation() )->hooks();
+		}
 	}
 
 	/**

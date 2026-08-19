@@ -1,4 +1,4 @@
-/* globals jQuery */
+/* globals jQuery, MutationObserver */
 ( function ( $ ) {
 
 	'use strict';
@@ -35,6 +35,9 @@
 			// Admin Event title field.
 			this.$eventTitle = $( 'body.wp-admin.sugar-calendar #title' );
 
+			// Original post status field. Stays "auto-draft" until the first real save.
+			this.$originalPostStatus = $( 'body.wp-admin.sugar-calendar #original_post_status' );
+
 			// Register localized scripts. Set defaults if not available.
 			this.getLocalizedScripts();
 
@@ -43,9 +46,13 @@
 			// Element manipulation.
 			this.manipulateElements();
 
+			// Keep Preview disabled while the event is unsaved, even when core autosave re-enables it.
+			this.watchPreviewButton();
+
 			// Run if using the block editor.
 			if ( 'object' === typeof( wp.blockEditor ) ) {
 				this.blockEditorCustomValidation();
+				this.interceptBlockEditorPreview();
 			}
 		},
 
@@ -63,6 +70,10 @@
 
 			if ( undefined === this.localizedScripts?.notice_title_required ) {
 				this.localizedScripts.notice_title_required = 'Event title is required';
+			}
+
+			if ( undefined === this.localizedScripts?.notice_preview_requires_save ) {
+				this.localizedScripts.notice_preview_requires_save = 'Save a draft to enable preview.';
 			}
 		},
 
@@ -174,33 +185,127 @@
 		 *
 		 * @since 3.3.0
 		 * @since 3.8.2 Add buttons in Publish metabox.
+		 * @since 3.13.0 Preview also requires the event to be saved as a draft.
 		 *
 		 * @returns {void}
 		 */
 		toggleActivatePublishGroupButtons: function () {
 
-			// If title is empty, disable the default publish metabox buttons.
-			if ( this.$eventTitle.val() === '' ) {
+			const isTitleEmpty = this.isTitleEmpty();
+
+			// Publish and Save Draft only require a title.
+			if ( isTitleEmpty ) {
 				this.$eventSubmitButton.attr( 'disabled', true );
 				this.$eventSaveDraftButton.attr( 'disabled', true );
-				this.$eventPreviewButton.attr( 'disabled', true );
 			} else {
 				this.$eventSubmitButton.removeAttr( 'disabled' );
 				this.$eventSaveDraftButton.removeAttr( 'disabled' );
-				this.$eventPreviewButton.removeAttr( 'disabled' );
 			}
+
+			// Preview also requires the event to be saved at least as a draft.
+			this.togglePreviewButton( isTitleEmpty );
 		},
 
 		/**
-		 * Prevent the preview button from being clicked if title is empty.
+		 * Toggle the Preview button.
+		 * Preview needs a non-empty title AND the event saved at least as a draft.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param {boolean} isTitleEmpty Whether the title field is empty.
+		 *
+		 * @returns {void}
+		 */
+		togglePreviewButton: function ( isTitleEmpty ) {
+
+			const isSaved = this.isEventSaved();
+			const disablePreview = isTitleEmpty || ! isSaved;
+
+			// Use the "disabled" class, not the attribute: WordPress core's own preview
+			// handler bails on this class. Core autosave strips it, so watchPreviewButton() re-asserts it.
+			this.$eventPreviewButton.toggleClass( 'disabled', disablePreview );
+
+			if ( ! disablePreview ) {
+				this.$eventPreviewButton.removeAttr( 'aria-disabled' ).removeAttr( 'title' );
+
+				return;
+			}
+
+			this.$eventPreviewButton
+				.attr( 'aria-disabled', 'true' )
+				.attr(
+					'title',
+					isTitleEmpty ?
+						this.localizedScripts.notice_title_required :
+						this.localizedScripts.notice_preview_requires_save
+				);
+		},
+
+		/**
+		 * Keep the Preview button disabled while the event is unsaved.
+		 * WordPress core autosave periodically re-enables the Preview button (it strips the
+		 * "disabled" class from an auto-draft), which would make an unsaved event previewable.
+		 * Re-assert the disabled state whenever that happens.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @returns {void}
+		 */
+		watchPreviewButton: function () {
+
+			const button = this.$eventPreviewButton.get( 0 );
+
+			// Nothing to watch outside the classic editor or once the event is saved.
+			if ( ! button || this.isEventSaved() ) {
+				return;
+			}
+
+			const observer = new MutationObserver( () => {
+				this.togglePreviewButton( this.isTitleEmpty() );
+			} );
+
+			observer.observe( button, { attributes: true, attributeFilter: [ 'class' ] } );
+		},
+
+		/**
+		 * Whether the event title field is empty.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @returns {boolean}
+		 */
+		isTitleEmpty: function () {
+
+			return this.$eventTitle.val() === '';
+		},
+
+		/**
+		 * Whether the event has been saved at least as a draft.
+		 * A brand-new event stays an "auto-draft" until the first real save.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @returns {boolean}
+		 */
+		isEventSaved: function () {
+
+			const status = this.$originalPostStatus.val();
+
+			return ( typeof status !== 'undefined' ) && ( status !== '' ) && ( status !== 'auto-draft' );
+		},
+
+		/**
+		 * Prevent the preview button from being clicked if title is empty
+		 * or the event has not been saved at least as a draft.
 		 *
 		 * @since 3.8.2
+		 * @since 3.13.0 Also block when the event is not yet saved.
 		 *
 		 * @returns {void}
 		 */
 		preventPreviewButtonClick: function ( e ) {
 
-			if ( this.$eventTitle.val() === '' ) {
+			if ( this.isTitleEmpty() || ! this.isEventSaved() ) {
 				e.preventDefault();
 				e.stopImmediatePropagation();
 			}
@@ -229,6 +334,185 @@
 				// Use the legacy lockPostSaving approach for WordPress < 6.7.
 				this.useLegacyApproach( errorNoticeTitleMissing );
 			}
+		},
+
+		/**
+		 * Route the block editor's "Preview in new tab" through the classic preview flow.
+		 *
+		 * Gutenberg previews by autosaving first, which for an event triggers a real
+		 * save (for a recurring event: a page reload / the "Edit Recurring Event"
+		 * dialog). Instead we intercept the click and submit the same
+		 * wp-preview=dopreview request the classic editor sends — the current title
+		 * and content plus the event fields — which the server's existing preview
+		 * handler turns into a non-destructive, overlaid preview. Parity with classic,
+		 * no autosave.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @returns {void}
+		 */
+		interceptBlockEditorPreview: function () {
+
+			// Only on the SC event editor.
+			if ( ! $( 'body.wp-admin.sugar-calendar' ).length ) {
+				return;
+			}
+
+			// Capture phase, so we preempt Gutenberg's own React click handler.
+			document.addEventListener( 'click', ( e ) => {
+
+				const button = e.target.closest( '.editor-preview-dropdown__button-external' );
+
+				if ( ! button ) {
+					return;
+				}
+
+				// Building the classic request needs the post id + update nonce, which
+				// only exist once the event is saved. Otherwise let core handle it.
+				const fields = this.getBlockPreviewFields();
+
+				if ( ! fields ) {
+					return;
+				}
+
+				e.preventDefault();
+				e.stopImmediatePropagation();
+
+				this.submitBlockPreview( fields );
+			}, true );
+		},
+
+		/**
+		 * Assemble the classic preview submit fields, or null when preview is not
+		 * allowed yet — empty title, an unsaved (auto-draft) event, or no post id /
+		 * update nonce to build a valid request. Mirrors the classic-path gate.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @returns {Array|null}
+		 */
+		getBlockPreviewFields: function () {
+
+			if ( typeof wp === 'undefined' || ! wp.data || ! wp.data.select( 'core/editor' ) ) {
+				return null;
+			}
+
+			const editor = wp.data.select( 'core/editor' );
+			const postId = editor.getCurrentPostId();
+
+			// Same gate the classic path enforces (isTitleEmpty / isEventSaved), read
+			// from the block editor's own state: preview needs a non-empty title AND a
+			// saved event. An auto-draft stays "auto-draft" until the first real save.
+			const status = editor.getCurrentPost() ? editor.getCurrentPost().status : '';
+
+			if ( ( editor.getEditedPostAttribute( 'title' ) || '' ) === '' || status === 'auto-draft' || status === '' ) {
+				return null;
+			}
+
+			// The post-edit nonce lives in the base form that also carries post_ID (form#post in classic, .metabox-base-form in block).
+			const baseForm = document.getElementById( 'post_ID' )?.closest( 'form' );
+			const nonceField = baseForm ? baseForm.querySelector( 'input[name="_wpnonce"]' ) : null;
+
+			if ( ! postId || ! nonceField || ! nonceField.value ) {
+				return null;
+			}
+
+			const fields = [];
+			const seen = {};
+
+			// The post id + update nonce and the event Details fields live in separate
+			// forms in the block editor; serialize every event/metabox form. The
+			// classic metabox areas are included because Tags posts sc_event_tags[]
+			// from form.metabox-location-side.
+			$( 'form' ).each( function () {
+
+				if (
+					! this.querySelector( '[name="post_ID"]' ) &&
+					! this.querySelector( '#start_date' ) &&
+					! this.querySelector( '#sugarcalendar_block_editor_flag' ) &&
+					! this.matches( '[class*="metabox-location-"]' )
+				) {
+					return;
+				}
+
+				$( this ).find( 'input[name], select[name], textarea[name]' ).each( function () {
+
+					if ( ( this.type === 'checkbox' || this.type === 'radio' ) && ! this.checked ) {
+						return;
+					}
+
+					// A <select multiple> (e.g. Speakers) submits one value per selected option.
+					if ( this.tagName === 'SELECT' && this.multiple ) {
+						Array.from( this.selectedOptions ).forEach( ( option ) => {
+							fields.push( { name: this.name, value: option.value } );
+						} );
+
+						return;
+					}
+
+					// Keep bracketed/array names (e.g. tax_input[...]); dedupe scalars.
+					const isArray = /\]$/.test( this.name );
+
+					if ( ! isArray && seen[ this.name ] ) {
+						return;
+					}
+
+					seen[ this.name ] = true;
+					fields.push( { name: this.name, value: this.value } );
+				} );
+			} );
+
+			// Title and content live in Gutenberg, not a classic field.
+			fields.push( { name: 'post_title', value: editor.getEditedPostAttribute( 'title' ) || '' } );
+			fields.push( { name: 'content', value: editor.getEditedPostContent() || '' } );
+
+			// Featured image and excerpt have no classic input in the block editor either.
+			fields.push( { name: '_thumbnail_id', value: editor.getEditedPostAttribute( 'featured_media' ) || 0 } );
+			fields.push( { name: 'excerpt', value: editor.getEditedPostAttribute( 'excerpt' ) || '' } );
+
+			// No block-editor form carries the calendar, and an absent value reads as "cleared".
+			( editor.getEditedPostAttribute( 'sc_event_category' ) || [] ).forEach( ( termId ) => {
+				fields.push( { name: 'tax_input[sc_event_category][]', value: termId } );
+			} );
+
+			// The trigger the server preview handler keys on.
+			fields.push( { name: 'wp-preview', value: 'dopreview' } );
+
+			return fields;
+		},
+
+		/**
+		 * Submit the assembled preview request to a new tab.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param {Array} fields Name/value pairs to submit.
+		 *
+		 * @returns {void}
+		 */
+		submitBlockPreview: function ( fields ) {
+
+			const target = 'wp-preview-' + ( wp.data.select( 'core/editor' ).getCurrentPostId() || '0' );
+
+			// Open the tab from inside the click so the browser allows the popup.
+			window.open( '', target );
+
+			const form = document.createElement( 'form' );
+			form.method = 'POST';
+			form.action = window.location.pathname;
+			form.target = target;
+
+			fields.forEach( ( field ) => {
+				const input = document.createElement( 'input' );
+				input.type = 'hidden';
+				input.name = field.name;
+				input.value = field.value == null ? '' : field.value;
+				form.appendChild( input );
+			} );
+
+			document.body.appendChild( form );
+			form.submit();
+			form.remove();
 		},
 
 		/**

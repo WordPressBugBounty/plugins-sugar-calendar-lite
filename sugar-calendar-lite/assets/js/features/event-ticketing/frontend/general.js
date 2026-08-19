@@ -126,6 +126,46 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	/**
+	 * Lock or unlock the checkout while a request is in flight.
+	 *
+	 * Every visible control lives in the main column — billing, attendees, the card
+	 * fieldset and the registration step — so one `inert` on it covers them all
+	 * without touching a single field's own attributes. That matters: a successful
+	 * payment ends in a native form submit (see stripe.js), and `disabled` fields
+	 * are not submitted, so locking with `disabled` would silently drop attendee
+	 * names and registration answers from the order. `inert` fields still submit.
+	 *
+	 * Cancel stays live on purpose — a buyer must be able to leave a checkout that
+	 * is waiting on a gateway.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param {boolean} locked Whether to lock.
+	 */
+	function lockCheckout( locked ) {
+
+		const main = document.getElementById( 'sc-event-ticketing-checkout-main' );
+
+		if ( main ) {
+			if ( 'inert' in HTMLElement.prototype ) {
+				main.inert = locked;
+			} else {
+				// Safari < 15.5 / Firefox < 112: no focus trapping, but pointer edits stop.
+				main.style.pointerEvents = locked ? 'none' : '';
+			}
+		}
+
+		$( '#sc-event-ticketing-purchase, .sc-regform__back' ).prop( 'disabled', locked );
+		$modal.toggleClass( 'sc-et-checkout-locked', locked );
+	}
+
+	// stripe.js unlocks from hideSpinner(), so every gateway failure path releases
+	// the form without each one having to know about the lock.
+	window.SugarCalendar = window.SugarCalendar || {};
+	window.SugarCalendar.EventTicketing = window.SugarCalendar.EventTicketing || {};
+	window.SugarCalendar.EventTicketing.lockCheckout = lockCheckout;
+
+	/**
 	 * Setup attendee input id and name attributes.
 	 *
 	 * @since 3.6.0
@@ -315,6 +355,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$( '#sc-event-ticketing-cancel' ).on( 'click', function () {
 		$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
+		lockCheckout( false );
 	});
 
 	$( '#sc-event-ticketing-purchase' ).on( 'click', function () {
@@ -346,6 +387,8 @@ jQuery( document ).ready( function( $ ) {
 
 		$( '.sc-et-error', form ).remove();
 
+		lockCheckout( true );
+
 		$.ajax({
 			type:     'POST',
 			url:      sc_event_ticket_vars.ajaxurl,
@@ -362,18 +405,21 @@ jQuery( document ).ready( function( $ ) {
 					// Validation failed, display errors
 					$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
 
+					// The buyer has to be able to correct what the errors point at.
+					lockCheckout( false );
+
 					$.each( response.data.errors, function( index, error ) {
 						$( '<div class="sc-et-error alert alert-danger" role="alert">' + error.msg + '</div>' ).insertAfter( error.selector );
 					});
 				}
 			}
 
-		}).done(function() {
-
 		}).fail(function() {
 
-		}).always(function() {
+			// A dropped request left the spinner running forever; release it too.
+			$( '#sc-event-ticketing-modal .sc-et-spinner-border' ).hide();
 
+			lockCheckout( false );
 		});
 	});
 

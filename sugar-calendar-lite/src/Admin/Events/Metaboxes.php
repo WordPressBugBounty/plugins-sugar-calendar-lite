@@ -21,13 +21,15 @@ class Metaboxes {
 	 * Register hooks.
 	 *
 	 * @since 3.0.0
+	 * @since 3.13.0 Register meta boxes early so other plugins' panels don't outrank the Event box.
 	 *
 	 * @return void
 	 */
 	public function hooks() {
 
 		add_filter( 'sugar_calendar_helpers_ui_help_url', [ $this, 'help_url' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ], 10, 2 );
+
+		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ], 1, 2 );
 		add_filter( 'register_taxonomy_args', [ $this, 'taxonomy_args' ], 10, 2 );
 		add_filter( 'wp_terms_checklist_args', [ $this, 'checklist_args' ] );
 		add_filter( 'sc_event_supports', [ $this, 'custom_fields' ] );
@@ -417,7 +419,7 @@ class Metaboxes {
 				'id'       => 'speakers',
 				'label'    => esc_html__( 'Speakers', 'sugar-calendar-lite' ),
 				'icon'     => 'admin-users',
-				'order'    => 60,
+				'order'    => 65,
 				'callback' => [ $this, 'event_metabox_speakers_education' ],
 			]
 		);
@@ -426,7 +428,7 @@ class Metaboxes {
 		$box->add_section(
 			[
 				'id'       => 'rsvp',
-				'label'    => esc_html__( 'RSVP', 'sugar-calendar' ),
+				'label'    => esc_html__( 'RSVP', 'sugar-calendar-lite' ),
 				'icon'     => 'yes-alt',
 				'order'    => 50,
 				'callback' => [ $this, 'event_metabox_rsvp_education' ],

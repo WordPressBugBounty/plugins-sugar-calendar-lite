@@ -67,7 +67,7 @@ class EventLocationMap extends AbstractEventWidget {
 		$this->start_controls_section(
 			'section_style',
 			[
-				'label' => esc_html__( 'SC Event Venue Map', 'sugar-calendar' ),
+				'label' => esc_html__( 'SC Event Venue Map', 'sugar-calendar-lite' ),
 				'tab'   => Controls_Manager::TAB_STYLE,
 			]
 		);
@@ -75,7 +75,7 @@ class EventLocationMap extends AbstractEventWidget {
 		$this->add_control(
 			'event_venue_map_height',
 			[
-				'label'      => esc_html__( 'Height', 'sugar-calendar' ),
+				'label'      => esc_html__( 'Height', 'sugar-calendar-lite' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => [ 'px', 'em', 'rem', 'vh' ],
 				'range'      => [
@@ -120,7 +120,7 @@ class EventLocationMap extends AbstractEventWidget {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'SC Event Location Map', 'sugar-calendar' );
+		return esc_html__( 'SC Event Location Map', 'sugar-calendar-lite' );
 	}
 
 	/**

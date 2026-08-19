@@ -145,8 +145,6 @@ class IncomingWebhookHandler {
 		$expected = hash_hmac( 'sha256', "{$timestamp}.{$body}", $signing_secret );
 
 		if ( ! hash_equals( $expected, $signature ) ) {
-			error_log( '[SC Webhooks] invalid signature on incoming webhook.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
 			return new WP_Error( 'invalid_signature', 'Invalid signature.', [ 'status' => 401 ] );
 		}
 
@@ -187,7 +185,7 @@ class IncomingWebhookHandler {
 			// 200 on purpose (3a design §2 call 4): acknowledging a received,
 			// signature-valid payload is honest; a 500 would make the relay
 			// retry a deterministic failure forever. Bookings 500s here.
-			error_log( '[SC Webhooks] handler failed for ' . $provider . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			unset( $e );
 		} finally {
 			self::$processing = false;
 		}

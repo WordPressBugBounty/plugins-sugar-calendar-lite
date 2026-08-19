@@ -106,13 +106,13 @@ class WpmlSetup {
 		 *
 		 * @param array $post_type_flag Post type and translation flag.
 		 */
-		do_action( 'wpml_verify_post_translations', [ $post_type => $translate_flag ] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		do_action( 'wpml_verify_post_translations', [ $post_type => $translate_flag ] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 
 		/**
 		 * Notify that CPT sync settings were saved.
 		 *
 		 * @since 3.12.0
 		 */
-		do_action( 'wpml_save_cpt_sync_settings' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		do_action( 'wpml_save_cpt_sync_settings' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 	}
 }

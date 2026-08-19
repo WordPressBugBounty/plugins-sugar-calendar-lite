@@ -955,7 +955,7 @@ class Requirements {
 
 		$notice = sprintf(
 		/* translators: translators: %1$s - requirements message. */
-			__( 'It requires %1$s.', 'sugar-calendar' ),
+			__( 'It requires %1$s.', 'sugar-calendar-lite' ),
 			$message
 		);
 
@@ -988,18 +988,18 @@ class Requirements {
 		$is_sugar_calendar_plugin = false !== strpos( $basename, 'sugar-calendar.php' );
 
 		if ( $is_sugar_calendar_plugin || in_array( self::ADDON, $errors, true ) ) {
-			$source = __( 'Sugar Calendar plugin', 'sugar-calendar' );
+			$source = __( 'Sugar Calendar plugin', 'sugar-calendar-lite' );
 		} else {
 			$plugin_headers = $this->get_plugin_data( $this->requirements[ $basename ]['file'] );
 			$source         = sprintf( /* translators: translators: %1$s - Sugar Calendar addon name. */
-				__( '%1$s addon', 'sugar-calendar' ),
+				__( '%1$s addon', 'sugar-calendar-lite' ),
 				$plugin_headers['Name']
 			);
 		}
 
 		$notice = sprintf(
 		/* translators: translators: %1$s - Sugar Calendar plugin or addon name, %2$d - requirements message. */
-			__( 'The %1$s requires %2$s.', 'sugar-calendar' ),
+			__( 'The %1$s requires %2$s.', 'sugar-calendar-lite' ),
 			$source,
 			$message
 		);
@@ -1087,7 +1087,7 @@ class Requirements {
 					'%s PHP extension',
 					'%s PHP extensions',
 					count( $this->requirements[ $basename ][ self::EXT ] ),
-					'sugar-calendar'
+					'sugar-calendar-lite'
 				),
 				$extension
 			);
@@ -1154,7 +1154,7 @@ class Requirements {
 
 			return sprintf(
 			/* translators: %s - license name(s). */
-				__( '%s license', 'sugar-calendar' ),
+				__( '%s license', 'sugar-calendar-lite' ),
 				$license
 			);
 		}
@@ -1266,14 +1266,14 @@ class Requirements {
 
 		$compare_to_string = [
 			/* translators: %1$s - What is being checked (PHP, Sugar Calendar, etc.), %2$s - required version. This is used as the completion of the sentence "The {addon name} addon requires {here goes this string}". */
-			'>=' => __( '%1$s %2$s or above', 'sugar-calendar' ),
+			'>=' => __( '%1$s %2$s or above', 'sugar-calendar-lite' ),
 			/* translators: %1$s - What is being checked (PHP, Sugar Calendar, etc.), %2$s - required version. This is used as the completion of the sentence "The {addon name} addon requires {here goes this string}". */
-			'<=' => __( '%1$s %2$s or below', 'sugar-calendar' ),
+			'<=' => __( '%1$s %2$s or below', 'sugar-calendar-lite' ),
 			'='  => '%1$s %2$s',
 			/* translators: %1$s - What is being checked (PHP, Sugar Calendar, etc.), %2$s - required version. This is used as the completion of the sentence "The {addon name} addon requires {here goes this string}". */
-			'>'  => __( 'a newer version of %1$s than %2$s', 'sugar-calendar' ),
+			'>'  => __( 'a newer version of %1$s than %2$s', 'sugar-calendar-lite' ),
 			/* translators: %1$s - What is being checked (PHP, Sugar Calendar, etc.), %2$s - required version. This is used as the completion of the sentence "The {addon name} addon requires {here goes this string}". */
-			'<'  => __( 'an older version of %1$s than %2$s', 'sugar-calendar' ),
+			'<'  => __( 'an older version of %1$s than %2$s', 'sugar-calendar-lite' ),
 		];
 
 		foreach ( $compare_arr as $version2 => $compare ) {

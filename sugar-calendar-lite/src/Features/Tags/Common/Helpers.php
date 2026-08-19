@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Features\Tags\Common;
 
+use WP_Term;
+
 /**
  * Tags Feature Helper Functions.
  *
@@ -175,6 +177,83 @@ class Helpers {
 		}
 
 		return $valid_term_ids;
+	}
+
+	/**
+	 * Add the selected event tags to the event preview payload.
+	 *
+	 * Captures term ids only. A tag typed into the metabox but never saved has no
+	 * term id yet, and minting one here would make a preview write to the database.
+	 *
+	 * The capture caller (EventPreviewPayload::store) has already verified the
+	 * update-post nonce and the edit_post capability before this fires.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $payload The event preview payload.
+	 *
+	 * @return array
+	 */
+	public static function add_to_event_preview_payload( $payload ) {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified by the capture caller; the values are reduced to numeric term ids below.
+		$submitted = isset( $_POST['sc_event_tags'] ) ? (array) wp_unslash( $_POST['sc_event_tags'] ) : [];
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$payload['terms'][ self::get_tags_taxonomy_id() ] = array_values(
+			array_filter( array_map( 'absint', array_filter( $submitted, 'is_numeric' ) ) )
+		);
+
+		return $payload;
+	}
+
+	/**
+	 * Overlay the edited event tags on the previewed post's front-end render.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param WP_Term[]|\WP_Error $terms    The post's terms.
+	 * @param int                 $post_id  The post id.
+	 * @param string              $taxonomy The taxonomy name.
+	 *
+	 * @return WP_Term[]|\WP_Error
+	 */
+	public static function overlay_preview_tags( $terms, $post_id, $taxonomy ) {
+
+		$tags_taxonomy = self::get_tags_taxonomy_id();
+
+		if ( $taxonomy !== $tags_taxonomy ) {
+			return $terms;
+		}
+
+		$payload = sugar_calendar()->get_event_preview()->get_payload();
+
+		if (
+			empty( $payload['overlay_post_id'] )
+			|| (int) $post_id !== (int) $payload['overlay_post_id']
+			|| ! isset( $payload['terms'][ $tags_taxonomy ] )
+		) {
+			return $terms;
+		}
+
+		$term_ids = array_values( array_filter( array_map( 'absint', (array) $payload['terms'][ $tags_taxonomy ] ) ) );
+
+		// An empty selection is authoritative — the editor cleared every tag.
+		if ( empty( $term_ids ) ) {
+			return [];
+		}
+
+		// One query, not one per id. `orderby => include` keeps the editor's order.
+		$overlaid = get_terms(
+			[
+				'taxonomy'   => $tags_taxonomy,
+				'include'    => $term_ids,
+				'orderby'    => 'include',
+				'hide_empty' => false,
+			]
+		);
+
+		return is_array( $overlaid ) ? $overlaid : [];
 	}
 
 	/**

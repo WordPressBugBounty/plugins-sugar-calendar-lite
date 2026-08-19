@@ -11,10 +11,12 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Database\Attendee_Query;
 use Sugar_Calendar\AddOn\Ticketing\Database\Discount_Query;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
+use Sugar_Calendar\AddOn\Ticketing\Database\Ticket;
 use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
 use Sugar_Calendar\AddOn\Ticketing\Emails;
 use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Features\RegistrationForm\Frontend\OrderEmailResumeLink;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
 use Throwable;
@@ -533,7 +535,24 @@ function count_orders( $args = array() ) {
 function delete_order( $order_id = 0 ) {
 	$orders = new Order_Query();
 
-	return $orders->delete_item( $order_id );
+	$deleted = $orders->delete_item( $order_id );
+
+	if ( ! empty( $deleted ) ) {
+
+		/**
+		 * Fires after an order and its data have been deleted.
+		 *
+		 * BerlinDB's delete_item() fires no action of its own, so this is the
+		 * only seam for cleaning up data keyed on an order id.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param int $order_id The deleted order id.
+		 */
+		do_action( 'sugar_calendar_ticketing_order_deleted', absint( $order_id ) );
+	}
+
+	return $deleted;
 }
 
 /**
@@ -675,7 +694,7 @@ function get_ticket_by_code( $code = '' ) {
  * @since 1.0.0
  *
  * @param int $order_id Order ID.
- * @return Ticket
+ * @return Ticket[] Array of `Ticket` objects.
  */
 function get_order_tickets( $order_id = 0 ) {
 	return get_tickets( array(
@@ -1177,7 +1196,7 @@ function sanitize_amount( $amount ) {
 	 * @param int|string $amount Price
 	 */
 	$decimals = apply_filters( 'sc_et_sanitize_amount_decimals', get_decimal_count(), $amount );
-	$amount   = number_format( (double) $amount, $decimals, '.', '' );
+	$amount   = number_format( (float) $amount, $decimals, '.', '' );
 
 	if ( true === $is_negative ) {
 		$amount *= -1;
@@ -1335,7 +1354,7 @@ function is_zero_decimal_currency() {
  *
  * @param string $amount The amount.
  *
- * @return array $currency Currencies displayed correctly
+ * @return string $currency Currencies displayed correctly
  */
 function currency_filter( $amount ) {
 
@@ -1496,6 +1515,30 @@ function currency_filter( $amount ) {
 }
 
 /**
+ * Format a monetary amount for a customer-facing price surface, showing
+ * "Free" for a zero/non-positive amount instead of a formatted 0.
+ *
+ * Use this for ticket prices, buy buttons, checkout, order views, receipts
+ * and ticket/order emails. Do NOT use it for accounting surfaces where 0 is a
+ * meaningful value (e.g. the admin revenue-summary email) — call
+ * currency_filter() directly there.
+ *
+ * @since 3.13.0
+ *
+ * @param float|string $amount Amount to format.
+ *
+ * @return string
+ */
+function display_price( $amount ) {
+
+	if ( (float) $amount <= 0 ) {
+		return esc_html__( 'Free', 'sugar-calendar-lite' );
+	}
+
+	return currency_filter( $amount );
+}
+
+/**
  * Determines if we are in sandbox mode
  *
  * @since 1.0.0
@@ -1610,6 +1653,11 @@ function send_order_receipt_email( $order_id = 0 ) {
 		add_online_meeting_email_filter( (int) $order->event_id );
 	}
 
+	// The receipt page shows the registration form only to the browser that checked
+	// out, so this link is how any other device answers. Installed here, immediately
+	// before send(), for the same one-shot reason as the block above.
+	OrderEmailResumeLink::install( (int) $order_id );
+
 	$emails              = new Emails;
 	$emails->object_id   = $order_id;
 	$emails->object_type = 'order';
@@ -1708,7 +1756,7 @@ function get_email_tag_order_id( $order_id = 0 ) {
  */
 function get_email_tag_order_amount( $order_id = 0 ) {
 	$order = get_order( $order_id );
-	return currency_filter( $order->total );
+	return display_price( $order->total );
 }
 
 /**
@@ -1899,6 +1947,8 @@ function get_email_tag_event_date( $object_id = 0, $object_type = 'order' ) {
  * Email template tag: event_start_time
  *
  * @since 1.0.0
+ * @since 3.13.0 Return a readable all-day label and handle missing events.
+ *
  * @param int $object_id
  * @param string $object_type
  * @return string Event start time
@@ -1911,16 +1961,25 @@ function get_email_tag_event_start_time( $object_id = 0, $object_type = 'order' 
 		$object = get_ticket( $object_id );
 	}
 
-	$event  = sugar_calendar_get_event( $object->event_id );
-	$retval = $event->format_date( sc_get_time_format(), $event->start );
+	$event = sugar_calendar_get_event( $object->event_id );
 
-	return $retval;
+	if ( empty( $event ) ) {
+		return '';
+	}
+
+	if ( $event->is_all_day() ) {
+		return esc_html__( 'All-day', 'sugar-calendar-lite' );
+	}
+
+	return $event->format_date( sc_get_time_format(), $event->start );
 }
 
 /**
  * Email template tag: event_end_time
  *
  * @since 1.0.0
+ * @since 3.13.0 Return a readable all-day label and handle missing events.
+ *
  * @param int $object_id
  * @param string $object_type
  * @return string Event end time
@@ -1933,10 +1992,17 @@ function get_email_tag_event_end_time( $object_id = 0, $object_type = 'order' ) 
 		$object = get_ticket( $object_id );
 	}
 
-	$event  = sugar_calendar_get_event( $object->event_id );
-	$retval = $event->format_date( sc_get_time_format(), $event->end );
+	$event = sugar_calendar_get_event( $object->event_id );
 
-	return $retval;
+	if ( empty( $event ) ) {
+		return '';
+	}
+
+	if ( $event->is_all_day() ) {
+		return esc_html__( 'All-day', 'sugar-calendar-lite' );
+	}
+
+	return $event->format_date( sc_get_time_format(), $event->end );
 }
 
 /**
@@ -2011,6 +2077,25 @@ function get_email_tag_attendee_email( $ticket_id = 0 ) {
 }
 
 /**
+ * Whether a ticket's stored price is stale: it was set while a payment
+ * provider was connected, and that provider has since disconnected.
+ *
+ * Single source of truth for the "stale price" rule so core (the general
+ * ticket) and the sc-event-ticketing add-on (additional ticket types, each
+ * priced separately) can't drift out of sync on what "stale" means.
+ *
+ * @since 3.13.0
+ *
+ * @param float|string $price A ticket's stored price.
+ *
+ * @return bool True when no payment provider is currently available AND
+ *              the price is greater than 0.
+ */
+function is_ticket_price_stale( $price ) {
+	return ! ticketing_provider_available_for_admin() && (float) $price > 0;
+}
+
+/**
  * Whether or not to display tickets.
  *
  * @since 3.2.0
@@ -2021,17 +2106,23 @@ function get_email_tag_attendee_email( $ticket_id = 0 ) {
  */
 function should_display_tickets( $event ) {
 
+	$display_tickets = ! is_ticket_price_stale( get_event_meta( $event->id, 'ticket_price', true ) );
+
 	/**
 	 * Filters whether or not to display tickets.
 	 *
 	 * @since 3.2.0
+	 * @since 3.13.0 Also display tickets when no payment provider is available
+	 *                   AND the event's price is 0 — either server-clamped at save
+	 *                   time, or already free. A stale nonzero price with no
+	 *                   provider stays hidden.
 	 *
 	 * @param bool                  $display_tickets Whether or not to display tickets.
 	 * @param \Sugar_Calendar\Event $event The event object.
 	 */
-	return apply_filters(
+	return (bool) apply_filters(
 		'sc_et_should_display_tickets',
-		get_stripe_publishable_key() && get_stripe_secret_key(),
+		$display_tickets,
 		$event
 	);
 }

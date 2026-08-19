@@ -144,7 +144,7 @@ class Renderer {
 			 * translators: %1$s is the price of the ticket.
 			 */
 			__( 'Buy Tickets - %1$s', 'sugar-calendar-lite' ),
-			Functions\currency_filter( $price )
+			Functions\display_price( $price )
 		);
 
 		/**
@@ -232,7 +232,7 @@ class Renderer {
 				* translators: %1$s is the price of the ticket.
 				*/
 				__( 'Buy Tickets - %1$s', 'sugar-calendar-lite' ),
-				Functions\currency_filter( $price )
+				Functions\display_price( $price )
 			);
 		}
 
@@ -485,7 +485,7 @@ class Renderer {
 											'%s per ticket',
 											'sugar-calendar-lite'
 										),
-										wp_kses_post( Functions\currency_filter( $price ) )
+										wp_kses_post( Functions\display_price( $price ) )
 									);
 									?>
 								</div>

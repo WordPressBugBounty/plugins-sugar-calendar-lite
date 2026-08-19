@@ -106,22 +106,6 @@ class CreateMeetingAjax {
 			wp_send_json_error( [ 'message' => esc_html__( 'Unknown online platform.', 'sugar-calendar-lite' ) ] );
 		}
 
-		// Recurring events cannot get an online meeting yet. Enforce it here, before
-		// any post/event-row mutation: the editor JS lock is not a security boundary
-		// (a user can disable JS or hand-craft this request), and rejecting early
-		// also avoids the duplicate-event-row side effect of the lookup below.
-		if ( $this->is_recurring( $post_id ) ) {
-			wp_send_json_error(
-				[
-					'message' => sprintf(
-						/* translators: %s - online meeting provider name (e.g. Zoom). */
-						esc_html__( '%s is not supported for recurring events yet.', 'sugar-calendar-lite' ),
-						$provider->get_display_name()
-					),
-				]
-			);
-		}
-
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above.
 		$title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
 
@@ -142,7 +126,7 @@ class CreateMeetingAjax {
 
 		wp_update_post( $update );
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		// online_visibility: same default logic as OnlineMeetingSection::save() —
 		// defaults to 'attendees' when not posted (radio is only rendered after the
@@ -168,6 +152,8 @@ class CreateMeetingAjax {
 			]
 		);
 
+		$to_save = $this->merge_posted_recurrence( $to_save, $event, $post_id );
+
 		// The SC event row may not exist yet (auto-draft posts have no row until
 		// the first metabox save). Create it when missing, update otherwise.
 		if ( ! empty( $event->id ) ) {
@@ -179,7 +165,7 @@ class CreateMeetingAjax {
 			}
 		}
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		if ( empty( $event->start ) ) {
 			wp_send_json_error( [ 'message' => esc_html__( 'Add a title and start date/time before creating the meeting.', 'sugar-calendar-lite' ) ] );
@@ -207,7 +193,7 @@ class CreateMeetingAjax {
 		}
 
 		// Re-fetch so the renderer reads the freshly-written meeting meta.
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		wp_send_json_success(
 			[
@@ -219,31 +205,64 @@ class CreateMeetingAjax {
 	}
 
 	/**
-	 * Whether the event is recurring.
+	 * Merge the current request's recurrence columns into the save payload.
 	 *
-	 * The persisted `sc_recurring_event` post type is the tamper-proof signal for
-	 * an already-recurring event (a user cannot fake it through this request); the
-	 * posted `recurrence` field mirrors the editor's current — possibly unsaved —
-	 * selection, where '0'/'' means "Never". Either one being recurring blocks the
-	 * create. Reading `$event->recurrence` is deliberately NOT used: the lookup
-	 * here defaults to the `sc_event` subtype and resolves an empty event for a
-	 * recurring parent, so its recurrence is never populated.
+	 * Recurrence is parsed from $_POST only by consumers of the
+	 * `sugar_calendar_event_to_save` filter (Pro's AdvancedRecurring Meta\save,
+	 * active on admin-ajax) — which the hand-built create payload otherwise
+	 * bypasses. Without this, creating a meeting on a not-yet-saved recurring
+	 * event provisions a one-off (Zoom type 2) meeting that only self-corrects on
+	 * the later Publish at the cost of a wasted provider credit. Every consumer of
+	 * the filter is a pure array transform, so re-running it to harvest just the
+	 * recurrence columns has no side effects.
 	 *
-	 * @since 3.12.0
+	 * @since 3.13.0
 	 *
-	 * @param int $post_id Event post id.
+	 * @param array  $to_save Save payload built by handle().
+	 * @param object $event   Resolved event (may be a fresh empty Event).
+	 * @param int    $post_id Post ID being saved.
 	 *
-	 * @return bool
+	 * @return array
 	 */
-	private function is_recurring( $post_id ) {
+	private function merge_posted_recurrence( array $to_save, $event, int $post_id ): array {
 
-		if ( get_post_type( $post_id ) === 'sc_recurring_event' ) {
-			return true;
+		// Only the not-yet-saved case needs this: an already-recurring event has
+		// its recurrence columns persisted and read by provision_meeting() directly.
+		// Skipping here also avoids clobbering saved recurrence with an empty value
+		// on a create request that does not carry the recurrence form fields. A
+		// simple→recurring conversion made in the editor before saving still lands
+		// here (the DB row is still non-recurring at this point).
+		if ( ! empty( $event->recurrence ) ) {
+			return $to_save;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in handle().
-		$posted = isset( $_POST['recurrence'] ) ? sanitize_key( wp_unslash( $_POST['recurrence'] ) ) : '';
+		/**
+		 * Filter event data before saving. Re-applied here purely to resolve the
+		 * current request's recurrence columns (see the method docblock).
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array  $to_save Data to save.
+		 * @param object $event   Event object.
+		 * @param array  $context Save context.
+		 */
+		$filtered = (array) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_event_to_save',
+			$to_save,
+			$event,
+			[
+				'object_id' => $post_id,
+				'object'    => get_post( $post_id ),
+				'source'    => 'create_meeting_ajax',
+			]
+		);
 
-		return $posted !== '' && $posted !== '0';
+		foreach ( [ 'recurrence', 'recurrence_interval', 'recurrence_count', 'recurrence_end', 'recurrence_end_tz' ] as $recurrence_key ) {
+			if ( array_key_exists( $recurrence_key, $filtered ) ) {
+				$to_save[ $recurrence_key ] = $filtered[ $recurrence_key ];
+			}
+		}
+
+		return $to_save;
 	}
 }

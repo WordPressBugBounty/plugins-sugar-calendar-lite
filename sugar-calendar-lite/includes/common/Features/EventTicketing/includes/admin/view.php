@@ -107,7 +107,7 @@ function view( $order_id = 0 ) {
 										<label><?php esc_html_e( 'Total:', 'sugar-calendar-lite' ); ?></label>
 									</td>
 									<td>
-										<?php echo Functions\currency_filter( $order->total ); ?>
+										<?php echo Functions\display_price( $order->total ); ?>
 									</td>
 								</tr>
 								<tr>
@@ -296,6 +296,9 @@ function view( $order_id = 0 ) {
  *                  fail loud without flipping status on gateway error. Method
  *                  split into request-verification, status-change, and redirect
  *                  helpers.
+ * @since 3.13.0 Let a consumer refuse its own panel through
+ *                  `sc_et_admin_order_update_errors`, without blocking the status
+ *                  change.
  */
 function update() {
 
@@ -319,13 +322,73 @@ function update() {
 
 	// Apply the change (or record why it couldn't be applied).
 	if ( ! empty( $order->id ) ) {
+
+		/**
+		 * Filters the reasons the panels' own data must not be written.
+		 *
+		 * Veto seam for `sc_et_admin_order_panels` consumers, fires before anything
+		 * is written. A non-empty return suppresses `sc_et_admin_order_updated`, so
+		 * no consumer persists its panel. It deliberately does NOT touch the status
+		 * change: a panel's required field cannot be allowed to block a refund.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param array  $errors   Reasons to refuse the panels. Empty means they save.
+		 * @param int    $order_id The order ID.
+		 * @param object $order    The order object.
+		 */
+		$errors = apply_filters( 'sc_et_admin_order_update_errors', [], $order_id, $order );
+
 		list( $notice_id, $notice_type ) = apply_order_status_change( $order, $order_id, $status );
+
+		if ( empty( $errors ) ) {
+
+			/**
+			 * Fires after an authorized order-update request has been processed.
+			 *
+			 * "Processed", not "applied": still fires even if the status change was
+			 * refused (e.g. a failed gateway refund). Does not fire when a consumer
+			 * vetoed the panels through `sc_et_admin_order_update_errors`.
+			 *
+			 * @since 3.13.0
+			 *
+			 * @param int    $order_id The order ID.
+			 * @param object $order    The order object.
+			 */
+			do_action( 'sc_et_admin_order_updated', $order_id, $order );
+		} else {
+			list( $notice_id, $notice_type ) = vetoed_panels_notice( $notice_id, $notice_type );
+		}
 	} else {
 		$notice_id   = 'order-update';
 		$notice_type = 'error';
 	}
 
 	redirect_with_order_notice( $order_id, $notice_id, $notice_type );
+}
+
+/**
+ * The notice for an update whose panels were refused by a consumer.
+ *
+ * The vetoing consumer renders its own notice naming the panel at fault, so this only
+ * has to keep the request from reporting success. A status error the change itself
+ * produced wins: 'order-refund-status-failed' warns about a double refund and must not
+ * be traded for a generic message.
+ *
+ * @since 3.13.0
+ *
+ * @param string $notice_id   The notice key the status change resolved to.
+ * @param string $notice_type The notice type the status change resolved to.
+ *
+ * @return array [ string $notice_id, string $notice_type ].
+ */
+function vetoed_panels_notice( $notice_id, $notice_type ) {
+
+	if ( $notice_type === 'error' ) {
+		return [ $notice_id, $notice_type ];
+	}
+
+	return [ 'order-update', 'error' ];
 }
 
 /**
@@ -392,6 +455,13 @@ function apply_order_status_change( $order, $order_id, $status ) {
 
 		// Refund succeeded (or was a no-op); use the refund notice.
 		$notice_id = 'order-refund';
+	}
+
+	// An unchanged status is a successful no-op, not a failure: update_order()
+	// reports false when its UPDATE affects no rows, which is what re-submitting
+	// the same status does (e.g. saving registration answers without touching Status).
+	if ( (string) $status === (string) $order->status ) {
+		return [ $notice_id, 'updated' ];
 	}
 
 	// Persist the new status.

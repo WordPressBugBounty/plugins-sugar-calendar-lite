@@ -2,8 +2,6 @@
 /**
  * Data access for the WordPress Abilities API integration.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities
  * @since 3.12.0
  */
 
@@ -40,6 +38,29 @@ class EventRepository {
 	 * @var int
 	 */
 	private const CALENDAR_FILTER_POST_ID_CAP = 5000;
+
+	/**
+	 * Maximum number of a user's own event post IDs `resolve_own_post_ids()`
+	 * will scope a non-public-status query to. Kept as its own constant
+	 * rather than reusing `CALENDAR_FILTER_POST_ID_CAP` — that one is a
+	 * performance guard on calendar-filter results, this one is a security-
+	 * scoping cap; the two happen to share a value today but tuning one
+	 * shouldn't silently change the other.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var int
+	 */
+	private const OWN_EVENTS_SCOPE_CAP = 5000;
+
+	/**
+	 * Per-request memoization for resolve_own_post_ids(), keyed by user ID.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var array<int, int[]>
+	 */
+	private $own_post_ids_cache = [];
 
 	/**
 	 * Construct an Event_Query. Overridable seam for test doubles.
@@ -115,6 +136,25 @@ class EventRepository {
 			$query_args['status'] = $status;
 		}
 
+		// Non-public statuses (and 'any', which includes them) are only safe
+		// to show site-wide to a user who can edit others' events — mirrors
+		// how WP_REST_Posts_Controller scopes this same post type's REST
+		// collection endpoint (a non-privileged requester's status filter is
+		// implicitly narrowed to their own authored posts, not rejected
+		// outright). Without this, any Contributor could pass status=any/
+		// draft/pending/private and read every other author's unpublished
+		// event content through this ability.
+		if ( 'publish' !== $status && ! current_user_can( 'edit_others_events' ) ) {
+			$own_ids = $this->resolve_own_post_ids( get_current_user_id() );
+
+			// Guaranteed-empty match rather than an unrestricted query —
+			// Event_Query's handling of a genuinely empty object_id__in is
+			// untested territory; a nonexistent ID is the safe, deliberate
+			// way to force zero rows (same reasoning GetEventStats already
+			// applies for an empty calendar-filter result).
+			$query_args['object_id__in'] = ! empty( $own_ids ) ? $own_ids : [ 0 ];
+		}
+
 		$start_query = [];
 
 		if ( ! empty( $args['start_after'] ) ) {
@@ -179,6 +219,53 @@ class EventRepository {
 		}
 
 		return array_values( $ids );
+	}
+
+	/**
+	 * Resolve a user ID to the list of event post IDs they authored (capped).
+	 * Used to scope a non-public-status query down to "your own events" for a
+	 * caller who lacks `edit_others_events` — see `build_query_args()`.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int $user_id WP user ID.
+	 *
+	 * @return int[] Post IDs, or empty array if the user has authored none.
+	 */
+	public function resolve_own_post_ids( int $user_id ): array {
+
+		if ( $user_id <= 0 ) {
+			return [];
+		}
+
+		// Memoized on this instance so a request that calls this more than
+		// once doesn't re-run the query. This EventRepository instance is
+		// shared by every ability in a single request (see
+		// Abilities::build_abilities()), but is NOT shared across separate
+		// requests — an AI/MCP client polling repeatedly still re-queries
+		// each request. A cross-request cache would need invalidation on
+		// publish/delete of the user's own events, which is out of scope here.
+		if ( isset( $this->own_post_ids_cache[ $user_id ] ) ) {
+			return $this->own_post_ids_cache[ $user_id ];
+		}
+
+		$ids = get_posts(
+			[
+				'post_type'      => sugar_calendar_get_event_post_type_id(),
+				'author'         => $user_id,
+				// 'any' excludes 'trash' — add it explicitly so a caller
+				// requesting status=trash can still see their own trashed
+				// events, not an empty result.
+				'post_status'    => [ 'any', 'trash' ],
+				'posts_per_page' => self::OWN_EVENTS_SCOPE_CAP,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			]
+		);
+
+		$this->own_post_ids_cache[ $user_id ] = array_values( array_filter( array_map( 'absint', $ids ) ) );
+
+		return $this->own_post_ids_cache[ $user_id ];
 	}
 
 	/**

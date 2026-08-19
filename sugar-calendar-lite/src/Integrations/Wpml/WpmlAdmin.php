@@ -272,7 +272,7 @@ class WpmlAdmin {
 		$taxonomy_slug = sugar_calendar_get_calendar_taxonomy_id();
 
 		$mapped_term_id = apply_filters(
-			'wpml_object_id',
+			'wpml_object_id', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 			intval( $calendar_id ),
 			$taxonomy_slug,
 			true,

@@ -2,6 +2,9 @@
 
 namespace Sugar_Calendar;
 
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers\WP;
@@ -611,6 +614,91 @@ class Helpers {
 	}
 
 	/**
+	 * Get the UTC offset (e.g. `+0100`) for the `<time datetime>` attribute,
+	 * computed from the event's OWN stored time zone -- independent of the
+	 * site's `timezone_type` setting.
+	 *
+	 * `sugar_calendar_get_timezone_object()` bails to `false` whenever
+	 * `sugar_calendar_is_timezone_floating()` is true, which it is for any
+	 * site with `timezone_type` set to "off" (the plugin default). That
+	 * short-circuit is correct for the DISPLAYED time (a floating-mode site
+	 * intentionally shows the raw stored wall time with no conversion), but
+	 * it also discarded the timezone before the machine-readable `datetime`
+	 * attribute's offset was computed, so every event rendered `+0000`
+	 * regardless of its real zone. This replicates only the normalization
+	 * `sugar_calendar_get_timezone_object()` performs AFTER its floating
+	 * bail, so the attribute's offset is always correct while the
+	 * server-rendered text and `data-timezone` are left untouched. One
+	 * client-side consequence is intended: with "Visitor Conversion" on,
+	 * `sc-time-zones.js` re-formats the visible text from this attribute, so
+	 * those sites now convert from the event's real zone instead of reading
+	 * the stored wall time as UTC.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $event_time The event's stored datetime (e.g. `start`, `end`).
+	 * @param string $timezone   The event's stored time zone (Olson ID, manual
+	 *                           `UTC+N` offset, `floating`, or empty).
+	 *
+	 * @return string The offset in `+HHMM`/`-HHMM` format, or '' if the event
+	 *                is genuinely floating or the stored time zone can't be parsed.
+	 */
+	private static function get_event_time_output_offset( $event_time, $timezone ) {
+
+		$offset = '';
+
+		if ( ! empty( $timezone ) && ( strtolower( $timezone ) !== 'floating' ) ) {
+
+			// Same normalization `sugar_calendar_get_timezone_object()` does,
+			// minus its `sugar_calendar_is_timezone_floating()` bail.
+			$normalized_tz = sugar_calendar_validate_timezone(
+				$timezone,
+				[
+					'allow_utc'    => true,
+					'allow_manual' => true,
+					'allow_empty'  => true,
+				]
+			);
+
+			$normalized_tz = sugar_calendar_is_manual_timezone_offset( $normalized_tz )
+				? sugar_calendar_get_manual_timezone_offset_id( $normalized_tz )
+				: $normalized_tz;
+
+			if ( ! empty( $normalized_tz ) ) {
+
+				try {
+
+					$dto = new DateTime( $event_time, new DateTimeZone( $normalized_tz ) );
+
+					$offset = $dto->format( 'O' );
+
+				} catch ( Exception $e ) {
+
+					// Unparseable stored time zone -- degrade to no offset
+					// rather than fatal the page.
+					$offset = '';
+				}
+			}
+		}
+
+		/**
+		 * Filters the computed `<time datetime>` offset for an event time output.
+		 *
+		 * The pre-3.13.0 code path ran the offset through the
+		 * `sugar_calendar_get_timezone_offset` filter; this is the
+		 * equivalent extension point for the per-event-timezone offset
+		 * computed here.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param string $offset     The computed offset (e.g. `+0100`), or '' if none.
+		 * @param string $event_time The event's stored datetime.
+		 * @param string $timezone   The event's stored time zone.
+		 */
+		return apply_filters( 'sugar_calendar_helpers_event_time_output_offset', $offset, $event_time, $timezone );
+	}
+
+	/**
 	 * Get the event time output.
 	 *
 	 * The output is the event time wrapped in `<time>` tag with the datetime attribute.
@@ -618,6 +706,8 @@ class Helpers {
 	 * @since 3.1.2
 	 * @since 3.2.0 Support 'recurrence_end' as the event time type.
 	 * @since 3.8.2 Add support for conversion format.
+	 * @since 3.13.0 Compute the `<time datetime>` offset from the event's own
+	 *               time zone, independent of the `timezone_type` setting.
 	 *
 	 * @param Event  $event             The event object.
 	 * @param string $format            The format saved in the options.
@@ -655,12 +745,7 @@ class Helpers {
 
 		if ( ! empty( $event_timezone ) ) {
 
-			$offset = sugar_calendar_get_timezone_offset(
-				[
-					'time'     => $event_time,
-					'timezone' => $event_timezone,
-				]
-			);
+			$offset = self::get_event_time_output_offset( $event_time, $event_timezone );
 
 			$time_attr_format = "Y-m-d\TH:i:s{$offset}";
 			$time_attr_tz     = $event_timezone;
@@ -876,7 +961,7 @@ class Helpers {
 
 		global $wpdb;
 
-		$ids = $wpdb->get_col(
+		$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table.
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( %s, %s ) AND post_status = %s AND post_password != ''",
 				'sc_event',
@@ -1049,7 +1134,7 @@ class Helpers {
 
 		$where_query = $wpdb->prepare(
 			'WHERE ' . $wpdb->prefix . 'sc_events.status = "publish" AND ' . $wpdb->prefix . 'sc_events.object_subtype = "sc_event" AND '
-			. $wpdb->prefix . 'sc_events.`end` ' . $date_operator . ' %s',
+			. $wpdb->prefix . 'sc_events.`end` ' . $date_operator . ' %s', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Whitelisted comparison operator (< or >=), not user input.
 			$now
 		);
 
@@ -1096,6 +1181,11 @@ class Helpers {
 				// Change the SELECT query to include tag term taxonomy ID.
 				$select_query = 'SELECT ' . $wpdb->prefix . 'sc_events.id, tag_terms.term_taxonomy_id AS tag_term_taxonomy_id FROM ' . $wpdb->prefix . 'sc_events';
 
+				// Re-add the wp_posts JOIN dropped above — the WHERE clause may still need wp_posts.post_password.
+				if ( $exclude_ghost || $filter_password_protected ) {
+					$select_query .= ' INNER JOIN ' . $wpdb->posts . ' ON ' . $wpdb->prefix . 'sc_events.object_id = ' . $wpdb->posts . '.ID';
+				}
+
 				// Add tag JOIN - using standard WordPress term relationships table.
 				$tag_taxonomy_id = TagsHelpers::get_tags_taxonomy_id();
 
@@ -1116,7 +1206,7 @@ class Helpers {
 				// Add tag WHERE clause - filter by taxonomy and tag IDs.
 				$placeholders = implode( ',', array_fill( 0, count( $tag_ids ), '%d' ) );
 				$where_query .= $wpdb->prepare(
-					' AND tag_taxonomy.taxonomy = %s AND tag_taxonomy.term_id IN (' . $placeholders . ')',
+					' AND tag_taxonomy.taxonomy = %s AND tag_taxonomy.term_id IN (' . $placeholders . ')', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are a generated %d list; values bound below.
 					array_merge( [ $tag_taxonomy_id ], $tag_ids )
 				);
 			}
@@ -1129,16 +1219,15 @@ class Helpers {
 		}
 
 		$order_by = $wpdb->prepare(
-			'ORDER BY ' . $order_column . ' ' . $args['event_order'] . ' LIMIT %d OFFSET %d',
+			'ORDER BY ' . $order_column . ' ' . $args['event_order'] . ' LIMIT %d OFFSET %d', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Column name and asc/desc order are whitelisted above.
 			$args['number'],
 			$args['offset']
 		);
 
 		$final_query = $select_query . ' ' . $where_query . ' ' . $order_by;
 
-		// The query below is prepared/sanitized individually.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$event_ids = $wpdb->get_results( $final_query );
+		// The query below is prepared/sanitized individually: identifiers are code-controlled and all user values are bound via $wpdb->prepare() above.
+		$event_ids = $wpdb->get_results( $final_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table.
 
 		if ( empty( $event_ids ) ) {
 			return [];
@@ -1596,7 +1685,7 @@ class Helpers {
 			return (bool) $exists;
 		}
 
-		$exists = (int) $wpdb->get_var(
+		$exists = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table.
 			$wpdb->prepare(
 				'SELECT COUNT(id) FROM ' . $wpdb->prefix . 'sc_events WHERE id = %d',
 				absint( $event_id )
@@ -1710,7 +1799,7 @@ class Helpers {
 	public static function get_education_upgrade_modal_content() {
 
 		return [
-			'upgrade_bonus'   => wp_kses(
+			'upgrade_bonus'     => wp_kses(
 				sprintf(
 					/* translators: %1$s - Bonus label, %2$s - discount percentage. */
 					__( '%1$s Sugar Calendar Lite users get <span>%2$s off</span> regular price, automatically applied at checkout.', 'sugar-calendar-lite' ),
@@ -1722,9 +1811,11 @@ class Helpers {
 					'span'   => [],
 				]
 			),
-			'upgrade_title'   => esc_html__( 'is a Pro Feature', 'sugar-calendar-lite' ),
-			'upgrade_content' => esc_html__( "We're sorry, the [feat-name] is not available on your plan. Please upgrade to the Pro plan to unlock all these awesome features.", 'sugar-calendar-lite' ),
-			'utm_locale'      => esc_attr( strtolower( get_user_locale() ) ),
+			'upgrade_title'     => esc_html__( 'is a Pro Feature', 'sugar-calendar-lite' ),
+			'upgrade_content'   => esc_html__( "We're sorry, the [feat-name] is not available on your plan. Please upgrade to the Pro plan to unlock all these awesome features.", 'sugar-calendar-lite' ),
+			'upgrade_button'    => esc_html__( 'Upgrade to Pro', 'sugar-calendar-lite' ),
+			'already_purchased' => esc_html__( 'Already purchased?', 'sugar-calendar-lite' ),
+			'utm_locale'        => esc_attr( strtolower( get_user_locale() ) ),
 		];
 	}
 
@@ -1746,11 +1837,12 @@ class Helpers {
 		);
 
 		$content = '<p>' . sprintf(
+			/* translators: %1$s - contact URL. */
 			__( 'If you have any questions or issues just <a class="sce-upgrade-thank-you-modal-contact-link" href="%1$s" target="_blank" rel="noopener noreferrer">let us know</a>.', 'sugar-calendar-lite' ),
 			esc_url( $contact_url )
 		) . '</p>';
 
-		$content .= '<p>' . __( "After purchasing a license, just <strong>enter your license key on the Sugar Calendar Settings page</strong>. This will let your site automatically upgrade to Sugar Calendar Pro! (Don't worry, all your forms and settings will be preserved.)", 'sugar-calendar-lite' ) . '</p>';
+		$content .= '<p>' . __( "After purchasing a license, just <strong>enter your license key on the Sugar Calendar Settings page</strong>. This will let your site automatically upgrade to Sugar Calendar Pro! (Don't worry, all your events and settings will be preserved.)", 'sugar-calendar-lite' ) . '</p>';
 
 		$docs_url = CommonHelpers::get_utm_url(
 			'https://sugarcalendar.com/docs/events/upgrading-from-sugar-calendar-lite-to-a-paid-license/',
@@ -1761,6 +1853,7 @@ class Helpers {
 		);
 
 		$documentation = sprintf(
+			/* translators: %1$s - documentation URL. */
 			__( 'Check out <a class="sce-upgrade-thank-you-modal-documentation-link" href="%1$s" target="_blank" rel="noopener noreferrer">our documentation</a> for step-by-step instructions.', 'sugar-calendar-lite' ),
 			esc_url( $docs_url )
 		);

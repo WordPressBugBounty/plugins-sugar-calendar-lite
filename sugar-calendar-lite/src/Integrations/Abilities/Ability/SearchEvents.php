@@ -2,8 +2,6 @@
 /**
  * The sc-events/search-events ability.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities\Ability
  * @since 3.12.0
  */
 

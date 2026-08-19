@@ -1,0 +1,104 @@
+@charset "UTF-8";
+/* Ported from DS: checkbox */
+/* Source mtime: 2026-07-21T15:21:44.711Z */
+.sc-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  background: var(--sc-components-field-background);
+  border: 1px solid var(--sc-components-field-choice-off);
+  border-radius: var(--sc-radius-3);
+  cursor: pointer;
+  vertical-align: middle;
+  position: relative;
+  transition: background var(--sc-transition-normal), border-color var(--sc-transition-normal), box-shadow var(--sc-transition-normal);
+}
+
+.sc-checkbox:focus {
+  outline: none;
+}
+
+/* size — default = 16, lg = 20 */
+.sc-checkbox[data-size=lg] {
+  width: 20px;
+  height: 20px;
+}
+
+/* off → hover */
+.sc-checkbox:not(:checked):not(:disabled):hover {
+  border-color: var(--sc-components-field-choice-off--hover);
+}
+
+/* off → focus */
+.sc-checkbox:not(:checked):focus-visible {
+  border-color: var(--sc-components-field-border--focus);
+  border-width: 2px;
+}
+
+/* on */
+.sc-checkbox:checked {
+  background: var(--sc-components-field-choice-on);
+  border-color: var(--sc-components-field-choice-on);
+}
+
+/* on → white check, painted from the `--svg` mask. Centered with translate, not
+   `inset: 0`, which on a replaced <input> clips the check's right arm. */
+.sc-checkbox:checked::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: inherit;
+  height: inherit;
+  transform: translate(-50%, -50%);
+  background-color: var(--sc-text-white);
+  -webkit-mask: var(--svg) 50% calc(50% + 0.5px)/62% no-repeat;
+  mask: var(--svg) 50% calc(50% + 0.5px)/62% no-repeat;
+}
+
+/* on → hover */
+.sc-checkbox:checked:not(:disabled):hover {
+  background: var(--sc-components-field-choice-on--hover);
+  border-color: var(--sc-components-field-choice-on--hover);
+}
+
+/* on → focus — outer halo, no layout shift */
+.sc-checkbox:checked:focus-visible {
+  box-shadow: 0 0 0 2px var(--sc-components-field-border--focus);
+}
+
+/* disabled */
+.sc-checkbox:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* label-row layout — apply this class to the <label> wrapping a checkbox + text.
+   Combined rule lives here so consumers don't repeat the layout. */
+.sc-checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sc-spacing-10);
+  color: var(--sc-text-secondary);
+  cursor: pointer;
+}
+
+.sc-checkbox-row:has(> .sc-checkbox:disabled) {
+  color: var(--sc-text-tertiary);
+  cursor: default;
+}
+
+.sc-checkbox {
+  box-shadow: none;
+}
+
+.sc-checkbox:checked::before {
+  margin: 0;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vY2hlY2tib3guc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtFQUFxQjs7O0FBRXJCO0FBQ0E7RUFBK0I7RUFBYTs7O0FBRTVDO0FBQ0E7RUFDRTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7OztBQUdGO0FBQ0E7RUFDRTtFQUNBOzs7QUFHRjtBQUFBO0FBRUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7OztBQUdGO0FBQ0E7RUFDRTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFBQTtBQUVBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7RUFDRTtFQUNBOzs7QUFTRjtFQUNDOzs7QUFFRDtFQUNDIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi9jaGVja2JveC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogY2hlY2tib3ggKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0wNy0yMVQxNToyMTo0NC43MTFaICovXG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQb3J0ZWQgZnJvbSBEUyAoZG8gbm90IGVkaXQg4oCUIHJlLXBvcnQgaWYgRFMgc291cmNlIGNoYW5nZXMpXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLnNjLWNoZWNrYm94IHtcbiAgYXBwZWFyYW5jZTogbm9uZTtcbiAgLXdlYmtpdC1hcHBlYXJhbmNlOiBub25lO1xuICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG4gIGZsZXg6IDAgMCBhdXRvO1xuICB3aWR0aDogMTZweDtcbiAgaGVpZ2h0OiAxNnB4O1xuICBtYXJnaW46IDA7XG4gIHBhZGRpbmc6IDA7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtYmFja2dyb3VuZCk7XG4gIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtY2hvaWNlLW9mZik7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy0zKTtcbiAgY3Vyc29yOiBwb2ludGVyO1xuICB2ZXJ0aWNhbC1hbGlnbjogbWlkZGxlO1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIHRyYW5zaXRpb246IGJhY2tncm91bmQgdmFyKC0tc2MtdHJhbnNpdGlvbi1ub3JtYWwpLCBib3JkZXItY29sb3IgdmFyKC0tc2MtdHJhbnNpdGlvbi1ub3JtYWwpLCBib3gtc2hhZG93IHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKTtcbn1cbi5zYy1jaGVja2JveDpmb2N1cyB7IG91dGxpbmU6IG5vbmU7IH1cblxuLyogc2l6ZSDigJQgZGVmYXVsdCA9IDE2LCBsZyA9IDIwICovXG4uc2MtY2hlY2tib3hbZGF0YS1zaXplPVwibGdcIl0geyB3aWR0aDogMjBweDsgaGVpZ2h0OiAyMHB4OyB9XG5cbi8qIG9mZiDihpIgaG92ZXIgKi9cbi5zYy1jaGVja2JveDpub3QoOmNoZWNrZWQpOm5vdCg6ZGlzYWJsZWQpOmhvdmVyIHtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWNob2ljZS1vZmYtLWhvdmVyKTtcbn1cblxuLyogb2ZmIOKGkiBmb2N1cyAqL1xuLnNjLWNoZWNrYm94Om5vdCg6Y2hlY2tlZCk6Zm9jdXMtdmlzaWJsZSB7XG4gIGJvcmRlci1jb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1maWVsZC1ib3JkZXItLWZvY3VzKTtcbiAgYm9yZGVyLXdpZHRoOiAycHg7XG59XG5cbi8qIG9uICovXG4uc2MtY2hlY2tib3g6Y2hlY2tlZCB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtY2hvaWNlLW9uKTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWNob2ljZS1vbik7XG59XG5cbi8qIG9uIOKGkiB3aGl0ZSBjaGVjaywgcGFpbnRlZCBmcm9tIHRoZSBgLS1zdmdgIG1hc2suIENlbnRlcmVkIHdpdGggdHJhbnNsYXRlLCBub3RcbiAgIGBpbnNldDogMGAsIHdoaWNoIG9uIGEgcmVwbGFjZWQgPGlucHV0PiBjbGlwcyB0aGUgY2hlY2sncyByaWdodCBhcm0uICovXG4uc2MtY2hlY2tib3g6Y2hlY2tlZDo6YmVmb3JlIHtcbiAgY29udGVudDogXCJcIjtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDUwJTtcbiAgbGVmdDogNTAlO1xuICB3aWR0aDogaW5oZXJpdDtcbiAgaGVpZ2h0OiBpbmhlcml0O1xuICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tc2MtdGV4dC13aGl0ZSk7XG4gIC13ZWJraXQtbWFzazogdmFyKC0tc3ZnKSA1MCUgY2FsYyg1MCUgKyAwLjVweCkgLyA2MiUgbm8tcmVwZWF0O1xuICBtYXNrOiB2YXIoLS1zdmcpIDUwJSBjYWxjKDUwJSArIDAuNXB4KSAvIDYyJSBuby1yZXBlYXQ7XG59XG5cbi8qIG9uIOKGkiBob3ZlciAqL1xuLnNjLWNoZWNrYm94OmNoZWNrZWQ6bm90KDpkaXNhYmxlZCk6aG92ZXIge1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWNob2ljZS1vbi0taG92ZXIpO1xuICBib3JkZXItY29sb3I6IHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtY2hvaWNlLW9uLS1ob3Zlcik7XG59XG5cbi8qIG9uIOKGkiBmb2N1cyDigJQgb3V0ZXIgaGFsbywgbm8gbGF5b3V0IHNoaWZ0ICovXG4uc2MtY2hlY2tib3g6Y2hlY2tlZDpmb2N1cy12aXNpYmxlIHtcbiAgYm94LXNoYWRvdzogMCAwIDAgMnB4IHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtYm9yZGVyLS1mb2N1cyk7XG59XG5cbi8qIGRpc2FibGVkICovXG4uc2MtY2hlY2tib3g6ZGlzYWJsZWQge1xuICBvcGFjaXR5OiAwLjU7XG4gIGN1cnNvcjogZGVmYXVsdDtcbiAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG59XG5cbi8qIGxhYmVsLXJvdyBsYXlvdXQg4oCUIGFwcGx5IHRoaXMgY2xhc3MgdG8gdGhlIDxsYWJlbD4gd3JhcHBpbmcgYSBjaGVja2JveCArIHRleHQuXG4gICBDb21iaW5lZCBydWxlIGxpdmVzIGhlcmUgc28gY29uc3VtZXJzIGRvbid0IHJlcGVhdCB0aGUgbGF5b3V0LiAqL1xuLnNjLWNoZWNrYm94LXJvdyB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1zZWNvbmRhcnkpO1xuICBjdXJzb3I6IHBvaW50ZXI7XG59XG4uc2MtY2hlY2tib3gtcm93Omhhcyg+IC5zYy1jaGVja2JveDpkaXNhYmxlZCkge1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC10ZXJ0aWFyeSk7XG4gIGN1cnNvcjogZGVmYXVsdDtcbn1cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBsdWdpbiBvdmVycmlkZXMg4oCUIGNvbmZsaWN0cyBhbmQgZml4ZXMgZm9yIFRISVMgcGx1Z2luXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuXG4vLyBOZXV0cmFsaXplIFdQIGFkbWluIGZvcm1zLmNzcyAodW5sYXllcmVkIGlucHV0W3R5cGU9Y2hlY2tib3hdIHJ1bGVzKSB0aGF0IHRoZVxuLy8gcmVjaXBlIGRvZXNuJ3Qgb3ZlcnJpZGU6IGluc2V0IGJveC1zaGFkb3cgYW5kIHRoZSBtYXJnaW4gV1AgcHV0cyBvbiA6Y2hlY2tlZDo6YmVmb3JlLlxuLnNjLWNoZWNrYm94IHtcblx0Ym94LXNoYWRvdzogbm9uZTtcbn1cbi5zYy1jaGVja2JveDpjaGVja2VkOjpiZWZvcmUge1xuXHRtYXJnaW46IDA7XG59XG4iXX0= */

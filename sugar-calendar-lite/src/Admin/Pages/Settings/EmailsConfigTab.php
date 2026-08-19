@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Pages\Settings;
 
 use Sugar_Calendar\Helpers\UI;
+use Sugar_Calendar\AddOn\Ticketing\Emails;
 use Sugar_Calendar\AddOn\Ticketing\Settings as TicketingSettings;
 
 /**
@@ -124,11 +125,11 @@ class EmailsConfigTab {
 				if ( ! empty( $email_config['pro_only'] ) ) :
 					?>
 
-					<div class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo $email_block; ?></div>
+					<div class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo wp_kses_post( $email_block ); ?></div>
 
 				<?php else : ?>
 
-					<a href="<?php echo esc_url( $email_config_url ); ?>" class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo $email_block; ?></a>
+					<a href="<?php echo esc_url( $email_config_url ); ?>" class="sugar-calendar-settings-emails-configuration-lists__block"><?php echo wp_kses_post( $email_block ); ?></a>
 
 				<?php endif; ?>
 
@@ -236,12 +237,12 @@ class EmailsConfigTab {
 
 		<div class="sc-admin__settings__emails__tags">
 			<p class="description">
-				<?php esc_html_e( 'Dynamic Placeholders', 'sc-rsvp' ); ?>
+				<?php esc_html_e( 'Dynamic Placeholders', 'sugar-calendar-lite' ); ?>
 			</p>
 			<div class="sc-admin__settings__emails__tags__list">
 				<?php
-				echo $this->get_emails_tags_list( 'order' );
-				echo $this->get_emails_tags_list( 'event' );
+				echo wp_kses_post( $this->get_emails_tags_list( 'order' ) );
+				echo wp_kses_post( $this->get_emails_tags_list( 'event' ) );
 				?>
 			</div>
 		</div>
@@ -270,13 +271,13 @@ class EmailsConfigTab {
 		?>
 		<div class="sc-admin__settings__emails__tags">
 			<p class="description">
-				<?php esc_html_e( 'Dynamic Placeholders', 'sc-rsvp' ); ?>
+				<?php esc_html_e( 'Dynamic Placeholders', 'sugar-calendar-lite' ); ?>
 			</p>
 			<div class="sc-admin__settings__emails__tags__list">
 				<?php
-				echo $this->get_emails_tags_list( 'ticket' );
-				echo $this->get_emails_tags_list( 'event' );
-				echo $this->get_emails_tags_list( 'attendee' );
+				echo wp_kses_post( $this->get_emails_tags_list( 'ticket' ) );
+				echo wp_kses_post( $this->get_emails_tags_list( 'event' ) );
+				echo wp_kses_post( $this->get_emails_tags_list( 'attendee' ) );
 				?>
 			</div>
 		</div>
@@ -297,21 +298,27 @@ class EmailsConfigTab {
 	private function get_emails_tags_list( $object_type = 'order' ) {
 
 		$list       = '';
-		$emails     = new \Sugar_Calendar\AddOn\Ticketing\Emails();
+		$emails     = new Emails();
 		$email_tags = $emails->get_tags( $object_type );
 
-		if ( count( $email_tags ) > 0 ) :
-			foreach ( $email_tags as $email_tag ) : ?>
-				<div class="sc-admin__settings__emails__tags__list__item">
+		if ( empty( $email_tags ) ) {
+			return $list;
+		}
+
+		foreach ( $email_tags as $email_tag ) {
+			$list .= sprintf(
+				'<div class="sc-admin__settings__emails__tags__list__item">
 					<div class="sc-admin__settings__emails__tags__list__item__tag">
-						<code>{<?php echo $email_tag['tag']; ?>}</code>
+						<code>{%1$s}</code>
 					</div>
 					<div class="sc-admin__settings__emails__tags__list__item__desc">
-						<?php echo $email_tag['description']; ?>
+						%2$s
 					</div>
-				</div>
-			<?php endforeach;
-		endif;
+				</div>',
+				esc_html( $email_tag['tag'] ),
+				esc_html( $email_tag['description'] )
+			);
+		}
 
 		return $list;
 	}

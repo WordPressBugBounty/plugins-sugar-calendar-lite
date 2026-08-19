@@ -41,7 +41,7 @@ class ZoomActionsClient extends AbstractIntegrationActionsOAuthClient {
 			 * @param array                    $meeting_data The meeting payload the production code built.
 			 * @param OAuthConnectionInterface $connection   OAuth connection.
 			 */
-			return apply_filters( 'sc_zoom_test_create_meeting_response', null, $meeting_data, $connection );
+			return apply_filters( 'sc_zoom_test_create_meeting_response', null, $meeting_data, $connection ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		$response = $this->post( '/zoom/meetings', $connection )
@@ -79,7 +79,7 @@ class ZoomActionsClient extends AbstractIntegrationActionsOAuthClient {
 			 * @param array                    $meeting_data The meeting payload the production code built.
 			 * @param OAuthConnectionInterface $connection   OAuth connection.
 			 */
-			return apply_filters( 'sc_zoom_test_update_meeting_response', null, $meeting_id, $meeting_data, $connection );
+			return apply_filters( 'sc_zoom_test_update_meeting_response', null, $meeting_id, $meeting_data, $connection ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		$response = $this->patch( '/zoom/meetings/' . rawurlencode( $meeting_id ), $connection )
@@ -113,7 +113,7 @@ class ZoomActionsClient extends AbstractIntegrationActionsOAuthClient {
 			 * @param string                   $meeting_id The meeting id the production code passed.
 			 * @param OAuthConnectionInterface $connection OAuth connection.
 			 */
-			return apply_filters( 'sc_zoom_test_delete_meeting_response', null, $meeting_id, $connection );
+			return apply_filters( 'sc_zoom_test_delete_meeting_response', null, $meeting_id, $connection ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		$response = $this->delete( '/zoom/meetings/' . rawurlencode( $meeting_id ), $connection )->send();

@@ -4,6 +4,10 @@ namespace Sugar_Calendar\AddOn\Ticketing\Metadata;
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\Event;
+use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\sanitize_amount;
+use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\ticketing_provider_available_for_admin;
+
 /**
  * Meta schema.
  *
@@ -78,12 +82,15 @@ function register_meta_data( $schema = [] ) {
  *
  * @since 1.0.0
  * @since 3.8.0 Add limit capacity meta data.
+ * @since 3.13.0 Accept the already-fetched `$event` (2nd `sugar_calendar_event_to_save`
+ *                   filter arg) instead of re-querying it for the price-preservation branch.
  *
- * @param array $event_data Array of event data.
+ * @param array      $event_data Array of event data.
+ * @param Event|null $event      The existing event, or an empty Event for a brand-new one.
  *
  * @return array
  */
-function save_meta_data( $event_data = [] ) {
+function save_meta_data( $event_data = [], $event = null ) {
 
 	// Enable.
 	$event_data['tickets'] = ! empty( $_POST['enable_tickets'] )
@@ -91,9 +98,27 @@ function save_meta_data( $event_data = [] ) {
 		: 0;
 
 	// Price.
-	$event_data['ticket_price'] = ! empty( $_POST['ticket_price'] )
-		? sanitize_text_field( $_POST['ticket_price'] )
+	$event_data['ticket_price'] = isset( $_POST['ticket_price'] ) && $_POST['ticket_price'] !== ''
+		? sanitize_amount( wp_unslash( $_POST['ticket_price'] ) )
 		: '';
+
+	// Free events: when tickets are enabled but no payment provider is connected,
+	// a newly-submitted non-zero price can never be trusted (there's no gateway to
+	// charge against), so it's always clamped to 0. The rendered Price field is
+	// disabled in this state, though, so an *omitted* $_POST value doesn't mean
+	// "the admin cleared it" -- it means the field couldn't be touched. Preserve
+	// whatever price was already stored (e.g. set while a provider WAS connected)
+	// instead of silently wiping it on the next unrelated save; the checkout-time
+	// gates (Functions\is_ticket_price_stale(), the create_payment_intent() guard)
+	// are what actually stop a stale price from ever being charged, not this clamp.
+	if ( ! empty( $event_data['tickets'] ) && ! ticketing_provider_available_for_admin() ) {
+
+		if ( ! isset( $_POST['ticket_price'] ) && $event instanceof Event && ! empty( $event->id ) ) {
+			$event_data['ticket_price'] = get_event_meta( $event->id, 'ticket_price', true );
+		} else {
+			$event_data['ticket_price'] = 0;
+		}
+	}
 
 	// Limit capacity.
 	$event_data['ticket_limit_capacity'] = ! empty( $_POST['ticket_limit_capacity'] )

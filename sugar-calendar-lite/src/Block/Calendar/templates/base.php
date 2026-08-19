@@ -1,6 +1,10 @@
 <?php
 use Sugar_Calendar\Block\Common\Template;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * @var \Sugar_Calendar\Block\Calendar\CalendarView\Block $context
  */

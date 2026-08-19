@@ -100,7 +100,7 @@ class WpmlFrontend {
 		foreach ( $posts as $post ) {
 
 			// Get the translation ID (trid) for this post.
-			$trid = apply_filters( 'wpml_element_trid', null, $post->ID, 'post_' . $post_type );
+			$trid = apply_filters( 'wpml_element_trid', null, $post->ID, 'post_' . $post_type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 
 			if ( empty( $trid ) ) {
 				// Not a translatable post or WPML filter not available.
@@ -118,7 +118,7 @@ class WpmlFrontend {
 			$original_id = Wpml::get_original_post_id( $post->ID, $post_type );
 
 			// Get the translated title for the current language.
-			$current_lang_id = apply_filters( 'wpml_object_id', $original_id, $post_type, true );
+			$current_lang_id = apply_filters( 'wpml_object_id', $original_id, $post_type, true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML integration API hook.
 
 			// If we have a current language version different from the original, get its translated title.
 			if ( ! empty( $current_lang_id ) && (int) $current_lang_id !== (int) $original_id ) {

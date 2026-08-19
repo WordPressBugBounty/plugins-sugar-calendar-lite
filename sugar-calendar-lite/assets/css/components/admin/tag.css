@@ -1,0 +1,57 @@
+@charset "UTF-8";
+/* Ported from DS: tag */
+/* Source mtime: 2026-07-21T15:21:44.717Z */
+.sc-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  gap: var(--sc-spacing-5);
+  padding: 0 var(--sc-padding-8);
+  background: var(--sc-components-button-secondary-background);
+  border-radius: var(--sc-radius-badge);
+  color: var(--sc-components-button-secondary-text);
+  white-space: nowrap;
+}
+
+/* Hover deepens the chip. Excludes the overflow placeholder — it's a static
+   indicator on its own neutral surface, not an interactive chip. */
+.sc-tag:hover:not([data-state=overflow]) {
+  background: var(--sc-components-button-secondary-background--hover);
+}
+
+/* Close button — inherits color from .sc-tag. Sized to match the
+   12px icon glyph for cap-line alignment. */
+.sc-tag-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Close button icon — sub-element of .sc-tag-close. */
+.sc-tag-close__icon {
+  font-size: var(--sc-typography-font-size-12);
+  opacity: 0.5;
+}
+
+.sc-tag-close:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 1px;
+}
+
+/* Overflow indicator — replaces the last chip when the row truncates.
+   Tertiary-button surface + text, matching Figma's State=Overflow. The
+   overflow variant renders no close button (consumer markup omits it). */
+.sc-tag[data-state=overflow] {
+  background: var(--sc-components-button-tertiary-background);
+  color: var(--sc-components-button-tertiary-text);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vdGFnLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBO0FBQ0E7QUFLQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUFBO0FBRUE7RUFDRTs7O0FBR0Y7QUFBQTtBQUVBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTs7O0FBR0Y7QUFBQTtBQUFBO0FBR0E7RUFDRTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi90YWcuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLyogUG9ydGVkIGZyb20gRFM6IHRhZyAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA3LTIxVDE1OjIxOjQ0LjcxN1ogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4uc2MtdGFnIHtcbiAgZGlzcGxheTogaW5saW5lLWZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICBoZWlnaHQ6IDI0cHg7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy01KTtcbiAgcGFkZGluZzogMCB2YXIoLS1zYy1wYWRkaW5nLTgpO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi1zZWNvbmRhcnktYmFja2dyb3VuZCk7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy1iYWRnZSk7XG4gIGNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi1zZWNvbmRhcnktdGV4dCk7XG4gIHdoaXRlLXNwYWNlOiBub3dyYXA7XG59XG5cbi8qIEhvdmVyIGRlZXBlbnMgdGhlIGNoaXAuIEV4Y2x1ZGVzIHRoZSBvdmVyZmxvdyBwbGFjZWhvbGRlciDigJQgaXQncyBhIHN0YXRpY1xuICAgaW5kaWNhdG9yIG9uIGl0cyBvd24gbmV1dHJhbCBzdXJmYWNlLCBub3QgYW4gaW50ZXJhY3RpdmUgY2hpcC4gKi9cbi5zYy10YWc6aG92ZXI6bm90KFtkYXRhLXN0YXRlPVwib3ZlcmZsb3dcIl0pIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tc2Vjb25kYXJ5LWJhY2tncm91bmQtLWhvdmVyKTtcbn1cblxuLyogQ2xvc2UgYnV0dG9uIOKAlCBpbmhlcml0cyBjb2xvciBmcm9tIC5zYy10YWcuIFNpemVkIHRvIG1hdGNoIHRoZVxuICAgMTJweCBpY29uIGdseXBoIGZvciBjYXAtbGluZSBhbGlnbm1lbnQuICovXG4uc2MtdGFnLWNsb3NlIHtcbiAgZGlzcGxheTogaW5saW5lLWZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICB3aWR0aDogMTJweDtcbiAgaGVpZ2h0OiAxMnB4O1xuICBtYXJnaW46IDA7XG4gIHBhZGRpbmc6IDA7XG4gIGJhY2tncm91bmQ6IHRyYW5zcGFyZW50O1xuICBib3JkZXI6IDA7XG4gIGNvbG9yOiBpbmhlcml0O1xuICBjdXJzb3I6IHBvaW50ZXI7XG59XG5cbi8qIENsb3NlIGJ1dHRvbiBpY29uIOKAlCBzdWItZWxlbWVudCBvZiAuc2MtdGFnLWNsb3NlLiAqL1xuLnNjLXRhZy1jbG9zZV9faWNvbiB7XG4gIGZvbnQtc2l6ZTogdmFyKC0tc2MtdHlwb2dyYXBoeS1mb250LXNpemUtMTIpO1xuICBvcGFjaXR5OiAwLjU7XG59XG5cbi5zYy10YWctY2xvc2U6Zm9jdXMtdmlzaWJsZSB7XG4gIG91dGxpbmU6IDFweCBzb2xpZCBjdXJyZW50Q29sb3I7XG4gIG91dGxpbmUtb2Zmc2V0OiAxcHg7XG59XG5cbi8qIE92ZXJmbG93IGluZGljYXRvciDigJQgcmVwbGFjZXMgdGhlIGxhc3QgY2hpcCB3aGVuIHRoZSByb3cgdHJ1bmNhdGVzLlxuICAgVGVydGlhcnktYnV0dG9uIHN1cmZhY2UgKyB0ZXh0LCBtYXRjaGluZyBGaWdtYSdzIFN0YXRlPU92ZXJmbG93LiBUaGVcbiAgIG92ZXJmbG93IHZhcmlhbnQgcmVuZGVycyBubyBjbG9zZSBidXR0b24gKGNvbnN1bWVyIG1hcmt1cCBvbWl0cyBpdCkuICovXG4uc2MtdGFnW2RhdGEtc3RhdGU9XCJvdmVyZmxvd1wiXSB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LWJhY2tncm91bmQpO1xuICBjb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tdGVydGlhcnktdGV4dCk7XG59XG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQbHVnaW4gb3ZlcnJpZGVzIOKAlCBjb25mbGljdHMgYW5kIGZpeGVzIGZvciBUSElTIHBsdWdpblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiJdfQ== */

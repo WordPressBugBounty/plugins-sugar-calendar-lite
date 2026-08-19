@@ -1,7 +1,12 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial: these are file-local view variables, not real globals; prefixing them (e.g. sugar_calendar_*) would hurt readability with no benefit.
 
 use Sugar_Calendar\Block\Calendar\CalendarView\Month;
 use Sugar_Calendar\Event;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 /**
  * @var Month\Week $context

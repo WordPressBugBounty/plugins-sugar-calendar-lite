@@ -189,6 +189,7 @@ class Importers {
 	 * For now, this is only used for migrations.
 	 *
 	 * @since 3.3.0
+	 * @since 3.13.0 Added a `manage_options` capability check.
 	 *
 	 * @return void
 	 */
@@ -200,6 +201,12 @@ class Importers {
 		) {
 			wp_send_json_error(
 				esc_html__( 'Invalid request.', 'sugar-calendar-lite' )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				esc_html__( 'You are not allowed to run imports.', 'sugar-calendar-lite' )
 			);
 		}
 

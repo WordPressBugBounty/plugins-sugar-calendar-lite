@@ -162,7 +162,7 @@ class SettingsGeneralTab extends Settings {
 		 * @param array $styles Color styles.
 		 */
 		$color_styles = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-			'sc_day_color_styles',
+			'sc_day_color_styles', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 			[
 				'none'  => esc_html__( 'None', 'sugar-calendar-lite' ),
 				'each'  => esc_html__( 'Each', 'sugar-calendar-lite' ),

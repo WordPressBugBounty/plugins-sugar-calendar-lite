@@ -7,33 +7,6 @@
 
 namespace Sugar_Calendar\Admin\Editor\Meta;
 
-use Sugar_Calendar\Common\Editor as Editor;
-
-
-/**
- * Filters the user option for Event meta-box ordering, and overrides it when
- * editing with Blocks.
- *
- * This ensures that users who have customized their meta-box layouts will still
- * be able to see meta-boxes no matter the Editing Type (block, classic).
- *
- * @since 2.0.20
- *
- * @param array $original
- *
- * @return mixed
- */
-function noop_user_option( $original = array() ) {
-
-	// Bail if using Classic Editor
-	if ( 'classic' === Editor\current() ) {
-		return $original;
-	}
-
-	// Return false
-	return false;
-}
-
 /**
  * Does the event that is trying to be saved have an end date & time?
  *
@@ -69,6 +42,27 @@ function add_location_to_save( $event = array() ) {
 
 	// Return the event
 	return $event;
+}
+
+/**
+ * Add the event location to the event preview payload.
+ *
+ * Mirrors add_location_to_save() for the non-destructive "Preview Changes" render.
+ * The capture caller (EventPreview::maybe_stash_preview) has already verified the
+ * update-post nonce and the edit_post capability before this fires.
+ *
+ * @since 3.13.0
+ *
+ * @param array $payload The event preview payload (buckets: post, event, terms, meta).
+ *
+ * @return array
+ */
+function add_to_event_preview_payload( $payload ) {
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified by the capture caller.
+	$payload['event']['location'] = isset( $_POST['location'] ) ? sanitize_textarea_field( wp_unslash( $_POST['location'] ) ) : '';
+
+	return $payload;
 }
 
 /**

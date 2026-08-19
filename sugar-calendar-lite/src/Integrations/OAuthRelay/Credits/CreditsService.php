@@ -193,7 +193,7 @@ class CreditsService {
 			 *
 			 * @param mixed $body Default null; return the raw relay body array.
 			 */
-			$stub = apply_filters( 'sc_credits_test_response', null );
+			$stub = apply_filters( 'sc_credits_test_response', null ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 
 			return is_array( $stub ) ? $stub : null;
 		}

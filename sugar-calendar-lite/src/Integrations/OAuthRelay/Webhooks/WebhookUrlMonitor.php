@@ -219,15 +219,12 @@ class WebhookUrlMonitor {
 				continue;
 			}
 
-			$result = $relay->register_webhook(
+			// Best-effort re-register; drift-sync retries on the next page load.
+			$relay->register_webhook(
 				$slug,
 				(string) $row['account_id'],
 				IncomingWebhookHandler::get_webhook_url( $slug )
 			);
-
-			if ( is_wp_error( $result ) ) {
-				error_log( '[SC Webhooks] re-register failed for ' . $slug . ': ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
 		}
 	}
 

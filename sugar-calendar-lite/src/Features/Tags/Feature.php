@@ -6,6 +6,7 @@ namespace Sugar_Calendar\Features\Tags;
 use Sugar_Calendar\Common\Features\FeatureAbstract;
 
 // Tags taxonomy.
+use Sugar_Calendar\Features\Tags\Common\Helpers;
 use Sugar_Calendar\Features\Tags\Common\Taxonomy;
 
 // Admin area.
@@ -82,11 +83,18 @@ class Feature extends FeatureAbstract {
 	 * Initialize admin pages.
 	 *
 	 * @since 3.7.0
+	 * @since 3.13.0 Register the event preview capture and overlay.
 	 */
 	public function hooks() {
 
 		// Taxonomy hooks.
 		$this->taxonomy->hooks();
+
+		// Event preview — capture the selected event tags into the preview payload.
+		add_filter( 'sugar_calendar_event_preview_payload', [ Helpers::class, 'add_to_event_preview_payload' ] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+		// Event preview — overlay the edited event tags on the front-end render.
+		add_filter( 'get_the_terms', [ Helpers::class, 'overlay_preview_tags' ], 10, 3 );
 
 		// Only register admin hooks if in admin area.
 		if ( is_admin() ) {

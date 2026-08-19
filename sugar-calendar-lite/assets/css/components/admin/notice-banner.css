@@ -1,0 +1,81 @@
+@charset "UTF-8";
+/* Ported from DS: notice-banner */
+/* Source mtime: 2026-07-21T15:21:44.715Z */
+.sc-notice-banner {
+  /* component-scoped hook — cascades to the status icon; type modifiers retint */
+  --sc-notice-banner-icon-color: var(--sc-text-link);
+  /* one message line-box (font-size-14 × line-height-normal) — the band the
+     icon and embedded button align their content to, so a single line reads
+     centered and a wrapped message keeps them on the first line */
+  --sc-notice-banner-line: calc(var(--sc-typography-font-size-14) * var(--sc-typography-line-height-normal));
+  display: flex;
+  /* top-align so the icon + button stay on the first line when the message
+     wraps; on a single line the offsets below keep them centered */
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+  padding: var(--sc-padding-8) var(--sc-padding-12);
+  background: var(--sc-surface-background-light);
+  border-radius: var(--sc-radius-4);
+  color: var(--sc-text-primary);
+}
+
+/* status icon — natural-ratio FA glyph sized by font-size (never box-resized,
+   which would stretch the 100%-mask); nudged down to sit centered on the
+   first text line: half the leading between the 1em glyph and the line-box */
+.sc-notice-banner__icon {
+  flex: none;
+  margin-top: calc((var(--sc-notice-banner-line) - 1em) / 2);
+  font-size: 16px;
+  color: var(--sc-notice-banner-icon-color);
+}
+
+/* message row — grows, pushing the attached button to the far edge */
+.sc-notice-banner__meta {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+}
+
+/* message — typography rides on .sc-field-description in markup.
+   Wraps to multiple lines; the banner grows to fit. */
+.sc-notice-banner__text {
+  margin: 0;
+}
+
+/* attached-button slot — one line-box tall so the embedded button's centered
+   label sits on the first text line (and stays there when the message wraps).
+   The banner owns this box; the button itself is left untouched. */
+.sc-notice-banner__action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sc-notice-banner-line);
+}
+
+/* pro upgrade link — typography rides on .sc-field-description-bold */
+.sc-notice-banner__link {
+  color: var(--sc-text-primary);
+  text-decoration: underline;
+}
+
+/* types — base = Default (light surface, link-blue icon).
+   Error/Warning also retint an embedded text button via its
+   --sc-button-text-color hook (see button.css). */
+.sc-notice-banner--notice {
+  background: var(--sc-components-badge-blue-background);
+}
+
+.sc-notice-banner--warning {
+  --sc-notice-banner-icon-color: var(--sc-text-warning);
+  --sc-button-text-color: var(--sc-text-warning);
+  background: var(--sc-color-utility-yellow-0);
+}
+
+.sc-notice-banner--error {
+  --sc-notice-banner-icon-color: var(--sc-text-error);
+  --sc-button-text-color: var(--sc-text-error);
+  background: var(--sc-components-badge-red-background);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vbm90aWNlLWJhbm5lci5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTtBQUNBO0FBS0E7QUFDRTtFQUNBO0FBQ0E7QUFBQTtBQUFBO0VBR0E7RUFFQTtBQUNBO0FBQUE7RUFFQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQUE7QUFBQTtBQUdBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQ0E7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUFBO0FBRUE7RUFDRTs7O0FBR0Y7QUFBQTtBQUFBO0FBR0E7RUFDRTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7OztBQUdGO0FBQUE7QUFBQTtBQUdBO0VBQ0U7OztBQUVGO0VBQ0U7RUFDQTtFQUNBOzs7QUFFRjtFQUNFO0VBQ0E7RUFDQSIsImZpbGUiOiJhc3NldHMvY3NzL2NvbXBvbmVudHMvYWRtaW4vbm90aWNlLWJhbm5lci5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogbm90aWNlLWJhbm5lciAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA3LTIxVDE1OjIxOjQ0LjcxNVogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4uc2Mtbm90aWNlLWJhbm5lciB7XG4gIC8qIGNvbXBvbmVudC1zY29wZWQgaG9vayDigJQgY2FzY2FkZXMgdG8gdGhlIHN0YXR1cyBpY29uOyB0eXBlIG1vZGlmaWVycyByZXRpbnQgKi9cbiAgLS1zYy1ub3RpY2UtYmFubmVyLWljb24tY29sb3I6IHZhcigtLXNjLXRleHQtbGluayk7XG4gIC8qIG9uZSBtZXNzYWdlIGxpbmUtYm94IChmb250LXNpemUtMTQgw5cgbGluZS1oZWlnaHQtbm9ybWFsKSDigJQgdGhlIGJhbmQgdGhlXG4gICAgIGljb24gYW5kIGVtYmVkZGVkIGJ1dHRvbiBhbGlnbiB0aGVpciBjb250ZW50IHRvLCBzbyBhIHNpbmdsZSBsaW5lIHJlYWRzXG4gICAgIGNlbnRlcmVkIGFuZCBhIHdyYXBwZWQgbWVzc2FnZSBrZWVwcyB0aGVtIG9uIHRoZSBmaXJzdCBsaW5lICovXG4gIC0tc2Mtbm90aWNlLWJhbm5lci1saW5lOiBjYWxjKHZhcigtLXNjLXR5cG9ncmFwaHktZm9udC1zaXplLTE0KSAqIHZhcigtLXNjLXR5cG9ncmFwaHktbGluZS1oZWlnaHQtbm9ybWFsKSk7XG5cbiAgZGlzcGxheTogZmxleDtcbiAgLyogdG9wLWFsaWduIHNvIHRoZSBpY29uICsgYnV0dG9uIHN0YXkgb24gdGhlIGZpcnN0IGxpbmUgd2hlbiB0aGUgbWVzc2FnZVxuICAgICB3cmFwczsgb24gYSBzaW5nbGUgbGluZSB0aGUgb2Zmc2V0cyBiZWxvdyBrZWVwIHRoZW0gY2VudGVyZWQgKi9cbiAgYWxpZ24taXRlbXM6IGZsZXgtc3RhcnQ7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy0xMCk7XG4gIHBhZGRpbmc6IHZhcigtLXNjLXBhZGRpbmctOCkgdmFyKC0tc2MtcGFkZGluZy0xMik7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC1saWdodCk7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy00KTtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtcHJpbWFyeSk7XG59XG5cbi8qIHN0YXR1cyBpY29uIOKAlCBuYXR1cmFsLXJhdGlvIEZBIGdseXBoIHNpemVkIGJ5IGZvbnQtc2l6ZSAobmV2ZXIgYm94LXJlc2l6ZWQsXG4gICB3aGljaCB3b3VsZCBzdHJldGNoIHRoZSAxMDAlLW1hc2spOyBudWRnZWQgZG93biB0byBzaXQgY2VudGVyZWQgb24gdGhlXG4gICBmaXJzdCB0ZXh0IGxpbmU6IGhhbGYgdGhlIGxlYWRpbmcgYmV0d2VlbiB0aGUgMWVtIGdseXBoIGFuZCB0aGUgbGluZS1ib3ggKi9cbi5zYy1ub3RpY2UtYmFubmVyX19pY29uIHtcbiAgZmxleDogbm9uZTtcbiAgbWFyZ2luLXRvcDogY2FsYygodmFyKC0tc2Mtbm90aWNlLWJhbm5lci1saW5lKSAtIDFlbSkgLyAyKTtcbiAgZm9udC1zaXplOiAxNnB4O1xuICBjb2xvcjogdmFyKC0tc2Mtbm90aWNlLWJhbm5lci1pY29uLWNvbG9yKTtcbn1cblxuLyogbWVzc2FnZSByb3cg4oCUIGdyb3dzLCBwdXNoaW5nIHRoZSBhdHRhY2hlZCBidXR0b24gdG8gdGhlIGZhciBlZGdlICovXG4uc2Mtbm90aWNlLWJhbm5lcl9fbWV0YSB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsZXg6IDEgMSBhdXRvO1xuICBtaW4td2lkdGg6IDA7XG4gIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0O1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xufVxuXG4vKiBtZXNzYWdlIOKAlCB0eXBvZ3JhcGh5IHJpZGVzIG9uIC5zYy1maWVsZC1kZXNjcmlwdGlvbiBpbiBtYXJrdXAuXG4gICBXcmFwcyB0byBtdWx0aXBsZSBsaW5lczsgdGhlIGJhbm5lciBncm93cyB0byBmaXQuICovXG4uc2Mtbm90aWNlLWJhbm5lcl9fdGV4dCB7XG4gIG1hcmdpbjogMDtcbn1cblxuLyogYXR0YWNoZWQtYnV0dG9uIHNsb3Qg4oCUIG9uZSBsaW5lLWJveCB0YWxsIHNvIHRoZSBlbWJlZGRlZCBidXR0b24ncyBjZW50ZXJlZFxuICAgbGFiZWwgc2l0cyBvbiB0aGUgZmlyc3QgdGV4dCBsaW5lIChhbmQgc3RheXMgdGhlcmUgd2hlbiB0aGUgbWVzc2FnZSB3cmFwcykuXG4gICBUaGUgYmFubmVyIG93bnMgdGhpcyBib3g7IHRoZSBidXR0b24gaXRzZWxmIGlzIGxlZnQgdW50b3VjaGVkLiAqL1xuLnNjLW5vdGljZS1iYW5uZXJfX2FjdGlvbiB7XG4gIGZsZXg6IG5vbmU7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBtaW4taGVpZ2h0OiB2YXIoLS1zYy1ub3RpY2UtYmFubmVyLWxpbmUpO1xufVxuXG4vKiBwcm8gdXBncmFkZSBsaW5rIOKAlCB0eXBvZ3JhcGh5IHJpZGVzIG9uIC5zYy1maWVsZC1kZXNjcmlwdGlvbi1ib2xkICovXG4uc2Mtbm90aWNlLWJhbm5lcl9fbGluayB7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LXByaW1hcnkpO1xuICB0ZXh0LWRlY29yYXRpb246IHVuZGVybGluZTtcbn1cblxuLyogdHlwZXMg4oCUIGJhc2UgPSBEZWZhdWx0IChsaWdodCBzdXJmYWNlLCBsaW5rLWJsdWUgaWNvbikuXG4gICBFcnJvci9XYXJuaW5nIGFsc28gcmV0aW50IGFuIGVtYmVkZGVkIHRleHQgYnV0dG9uIHZpYSBpdHNcbiAgIC0tc2MtYnV0dG9uLXRleHQtY29sb3IgaG9vayAoc2VlIGJ1dHRvbi5jc3MpLiAqL1xuLnNjLW5vdGljZS1iYW5uZXItLW5vdGljZSB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYmFkZ2UtYmx1ZS1iYWNrZ3JvdW5kKTtcbn1cbi5zYy1ub3RpY2UtYmFubmVyLS13YXJuaW5nIHtcbiAgLS1zYy1ub3RpY2UtYmFubmVyLWljb24tY29sb3I6IHZhcigtLXNjLXRleHQtd2FybmluZyk7XG4gIC0tc2MtYnV0dG9uLXRleHQtY29sb3I6IHZhcigtLXNjLXRleHQtd2FybmluZyk7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbG9yLXV0aWxpdHkteWVsbG93LTApO1xufVxuLnNjLW5vdGljZS1iYW5uZXItLWVycm9yIHtcbiAgLS1zYy1ub3RpY2UtYmFubmVyLWljb24tY29sb3I6IHZhcigtLXNjLXRleHQtZXJyb3IpO1xuICAtLXNjLWJ1dHRvbi10ZXh0LWNvbG9yOiB2YXIoLS1zYy10ZXh0LWVycm9yKTtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1iYWRnZS1yZWQtYmFja2dyb3VuZCk7XG59XG4iXX0= */

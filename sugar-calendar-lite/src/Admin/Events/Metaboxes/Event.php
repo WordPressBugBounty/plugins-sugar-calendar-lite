@@ -64,7 +64,7 @@ class Event implements MetaboxInterface {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'Event', 'sugar-calendar-lite' );
+		return esc_html__( 'Sugar Calendar Event Settings', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -477,7 +477,7 @@ class Event implements MetaboxInterface {
 			 *
 			 * @param MetaboxInterface $metabox Metabox instance.
 			 */
-			do_action( $hook, $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			do_action( $hook, $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Dynamic hook name resolved at runtime.
 		}
 	}
 
@@ -703,7 +703,7 @@ class Event implements MetaboxInterface {
 		}
 
 		$hidden = ( $all_day === true )
-			? ' style="display: none;"'
+			? 'display: none;'
 			: '';
 
 		// Start an output buffer.
@@ -741,7 +741,7 @@ class Event implements MetaboxInterface {
                            autocomplete="off"
                            data-datepicker/>
                 </div>
-                <div class="event-time"<?php echo $hidden; ?>>
+                <div class="event-time" style="<?php echo esc_attr( $hidden ); ?>">
                     <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar-lite' ); ?></span>
 
 					<?php
@@ -818,7 +818,7 @@ class Event implements MetaboxInterface {
 						   autocomplete="off"
                            data-datepicker/>
                 </div>
-                <div class="event-time"<?php echo $hidden; ?>>
+                <div class="event-time" style="<?php echo esc_attr( $hidden ); ?>">
                     <span class="sc-time-separator"><?php esc_html_e( 'at', 'sugar-calendar-lite' ); ?></span>
 
 					<?php
@@ -889,7 +889,7 @@ class Event implements MetaboxInterface {
 		if ( $show_single_tz === true ) :
 			?>
 
-            <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--time-zone"<?php echo $hidden; ?>>
+            <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--time-zone" style="<?php echo esc_attr( $hidden ); ?>">
                 <label for="start_tz"><?php esc_html_e( 'Time Zone', 'sugar-calendar-lite' ); ?></label>
                 <div class="sugar-calendar-metabox__field">
 					<?php
@@ -1001,14 +1001,14 @@ class Event implements MetaboxInterface {
 			 *
 			 * @since 3.0.0
 			 */
-			do_action( 'sc_event_meta_box_before' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			do_action( 'sc_event_meta_box_before' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 
 			/**
 			 * Fires after a legacy metabox content.
 			 *
 			 * @since 3.0.0
 			 */
-			do_action( 'sc_event_meta_box_after' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			do_action( 'sc_event_meta_box_after' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
 			?>
 
             </tbody>

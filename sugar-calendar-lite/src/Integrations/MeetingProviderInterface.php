@@ -26,6 +26,23 @@ interface MeetingProviderInterface extends IntegrationCapabilityInterface {
 	public function create_meeting( $event );
 
 	/**
+	 * The current sync signature for an event: which meeting variant the provider
+	 * would create now, plus a hash of the fields that variant actually sends.
+	 *
+	 * The manager compares the returned `kind` against the stored `meeting_kind`
+	 * (kind change → delete + recreate) and the `fingerprint` against the stored
+	 * hash (change → PATCH). Provider-agnostic: the manager never learns a
+	 * provider's kind vocabulary.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param object $event SCE Event object.
+	 *
+	 * @return array{kind:string,fingerprint:string}
+	 */
+	public function get_sync_signature( $event ): array;
+
+	/**
 	 * Update an existing provider-side meeting.
 	 *
 	 * @since 3.12.0

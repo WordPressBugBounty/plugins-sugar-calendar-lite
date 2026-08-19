@@ -30,6 +30,18 @@ class Tickets_Export extends CSV_Export {
 	public $export_type = 'tickets';
 
 	/**
+	 * Ticket query built by get_data().
+	 *
+	 * Declared because assigning it without a declaration creates a dynamic
+	 * property, which PHP 8.2 deprecates and PHP 9 rejects outright.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var Database\Ticket_Query
+	 */
+	public $query;
+
+	/**
 	 * Set the CSV columns
 	 *
 	 * @since 1.0

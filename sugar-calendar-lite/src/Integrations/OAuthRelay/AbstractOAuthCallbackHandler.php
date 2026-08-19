@@ -162,7 +162,6 @@ abstract class AbstractOAuthCallbackHandler {
 		} else {
 			// Production: require the documented nested shape.
 			if ( empty( $result['tokens'] ) || empty( $result['user'] ) || empty( $result['app_id'] ) ) {
-				error_log( '[SC OAuth ' . $this->get_provider() . '] Unexpected relay response shape on exchange.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				$this->redirect_with_error( 'local:callback:invalid_response' );
 
 				return;
@@ -295,8 +294,6 @@ abstract class AbstractOAuthCallbackHandler {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			error_log( '[SC OAuth ' . $this->get_provider() . '] webhook registration failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
 			// Leave the monitor baseline untouched: a stale/empty baseline
 			// makes WebhookUrlMonitor's drift-sync re-attempt registration on
 			// the next Integrations-page load.
@@ -337,11 +334,11 @@ abstract class AbstractOAuthCallbackHandler {
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param string $error_code Error code (currently only used for logging).
+	 * @param string $error_code Error code for the failure (reserved for callers; not surfaced to the user).
 	 */
 	protected function redirect_with_error( string $error_code ): void {
 
-		error_log( '[SC OAuth ' . $this->get_provider() . '] callback error: ' . $error_code ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		unset( $error_code );
 
 		$url = add_query_arg(
 			'sc_notice',

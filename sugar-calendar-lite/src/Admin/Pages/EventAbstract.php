@@ -19,6 +19,25 @@ use WP_Post;
 abstract class EventAbstract extends PageAbstract {
 
 	/**
+	 * Default height, in pixels, of the block editor's meta box pane.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var int
+	 */
+	const META_BOXES_PANE_DEFAULT_HEIGHT = 600;
+
+	/**
+	 * Pixels reserved above the meta box pane for the editor top bar and the
+	 * event title, so the pane never consumes the whole screen.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var int
+	 */
+	const META_BOXES_PANE_RESERVED_HEIGHT = 184;
+
+	/**
 	 * Whether to display the hand holding.
 	 *
 	 * @since 3.7.0
@@ -142,7 +161,7 @@ abstract class EventAbstract extends PageAbstract {
 		if ( empty( $hand_holding_status ) ) {
 			global $wpdb;
 
-			$events_count = absint( $wpdb->get_var( "SELECT COUNT(id) FROM " . $wpdb->prefix . "sc_events" ) );
+			$events_count = absint( $wpdb->get_var( "SELECT COUNT(id) FROM " . $wpdb->prefix . "sc_events" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct count against the custom wp_sc_events table.
 
 			// We will not show if there are existing events.
 			$this->should_display_hand_holding = empty( $events_count );
@@ -155,6 +174,55 @@ abstract class EventAbstract extends PageAbstract {
 		}
 
 		return $this->should_display_hand_holding;
+	}
+
+	/**
+	 * Enqueue the event editor's block editor script.
+	 *
+	 * Loads in the head rather than the footer, so it runs before the block
+	 * editor mounts. That makes it the place for anything that has to be in
+	 * place beforehand — editor preference defaults today, and whatever else
+	 * needs the same timing later. Anything that needs the DOM belongs in the
+	 * footer scripts instead.
+	 *
+	 * Currently applies the meta box pane defaults: the pane's open state and
+	 * height are per-user Gutenberg preferences exposed only in JS, with no PHP
+	 * filter, and an unset open state resolves to collapsed — which hides every
+	 * event field on a user's first visit. Registering *defaults* rather than
+	 * setting values leaves a user who has resized or collapsed the pane
+	 * themselves untouched, because the store's `get` returns a persisted value
+	 * ahead of a default.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @return void
+	 */
+	private function enqueue_block_editor_script() {
+
+		if ( Editor\current() !== 'block' ) {
+			return;
+		}
+
+		// Not in the footer: this has to run before the block editor mounts.
+		wp_enqueue_script(
+			'sugar-calendar-admin-event-block-editor',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-event-block-editor' . WP::asset_min() . '.js',
+			[ 'wp-data', 'wp-preferences' ],
+			Helpers::get_asset_version(),
+			false
+		);
+
+		// Keyed per concern, so later additions slot in beside meta_boxes_pane.
+		wp_localize_script(
+			'sugar-calendar-admin-event-block-editor',
+			'sugar_calendar_admin_event_block_editor',
+			[
+				'meta_boxes_pane' => [
+					'default_height'  => self::META_BOXES_PANE_DEFAULT_HEIGHT,
+					'reserved_height' => self::META_BOXES_PANE_RESERVED_HEIGHT,
+				],
+			]
+		);
 	}
 
 	/**
@@ -205,14 +273,16 @@ abstract class EventAbstract extends PageAbstract {
 	 * Localized data to be used in admin-event.js.
 	 *
 	 * @since 3.3.0
+	 * @since 3.13.0 Added notice_preview_requires_save.
 	 *
 	 * @return array
 	 */
 	public function get_localized_scripts() {
 
 		return [
-			'notice_title_required' => esc_html__( 'Event name is required', 'sugar-calendar-lite' ),
-			'supports_editor_pre_save' => version_compare( get_bloginfo( 'version' ), '6.7', '>=' ),
+			'notice_title_required'        => esc_html__( 'Event name is required', 'sugar-calendar-lite' ),
+			'notice_preview_requires_save' => esc_html__( 'Save a draft to enable preview.', 'sugar-calendar-lite' ),
+			'supports_editor_pre_save'     => version_compare( get_bloginfo( 'version' ), '6.7', '>=' ),
 		];
 	}
 
@@ -224,6 +294,8 @@ abstract class EventAbstract extends PageAbstract {
 	 * @return void
 	 */
 	public function enqueue_assets() {
+
+		$this->enqueue_block_editor_script();
 
 		wp_register_script(
 			'floating-ui-core',
@@ -569,19 +641,18 @@ abstract class EventAbstract extends PageAbstract {
 				Helpers::get_asset_version()
 			);
 
-			wp_enqueue_script(
-				'sugar-calendar-admin-event-lite',
-				SC_PLUGIN_ASSETS_URL . 'js/admin-event-lite' . WP::asset_min() . '.js',
-				[ 'jquery', 'sugar-calendar-admin-education', 'sugar-calendar-vendor-jquery-confirm' ],
-				Helpers::get_asset_version(),
-				true
-			);
+			// The generic `.sce-lite-education-modal-link` click handler
+			// (event metabox venue/speaker fields on this page) lives in
+			// `sugar-calendar-admin-education` itself as of #729/#737 --
+			// there is no more separate `sugar-calendar-admin-event-lite`
+			// bundle to enqueue here.
+			wp_enqueue_script( 'sugar-calendar-admin-education' );
 
 			wp_localize_script(
 				'sugar-calendar-admin-education',
 				'sugar_calendar_admin_education',
 				[
-					'sce_admin_upgrade_modal_title_default' => esc_html__( 'Uprade to Pro', 'sugar-calendar-lite' ),
+					'sce_admin_upgrade_modal_title_default' => esc_html__( 'Upgrade to Pro', 'sugar-calendar-lite' ),
 					'sce_admin_upgrade_modal_content'       => Helpers::get_education_upgrade_modal_content(),
 					'sce_admin_upgrade_thank_you_modal'     => Helpers::get_education_upgrade_thank_you_modal_content(),
 					'sce_admin_upgrade_modal_feature_name'  => esc_html__( 'feature', 'sugar-calendar-lite' ),

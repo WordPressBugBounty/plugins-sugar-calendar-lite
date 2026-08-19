@@ -1,0 +1,82 @@
+@charset "UTF-8";
+/* Ported from DS: settings-field */
+/* Source mtime: 2026-07-21T15:21:44.717280Z */
+.sc-settings-field {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+  color: var(--sc-text-primary);
+}
+
+/* Label column — fixed 200px, text-styled via .sc-field-label in
+   markup. Top padding aligns the label with the 36px control's text. */
+.sc-settings-field__label {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+  width: 200px;
+  min-height: 34px;
+  padding-top: var(--sc-padding-8);
+}
+
+/* Field column — control row above, optional helper text below. */
+.sc-settings-field__field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+}
+
+/* Control + optional add-on button, on one line. */
+.sc-settings-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-10);
+}
+
+/* Field-type controls render at the design's fixed 400px width; embedded
+   input/dropdown/multiselect fill it. Radio, toggle, and button stay natural width. */
+.sc-settings-field[data-type=text-input] .sc-settings-field__control,
+.sc-settings-field[data-type=dropdown] .sc-settings-field__control,
+.sc-settings-field[data-type=multi-select] .sc-settings-field__control {
+  width: 400px;
+}
+
+/* Radio and Toggle controls are short; nudge the row down by the label's top
+   padding so the option/switch lines up with the label text. */
+.sc-settings-field[data-type=radio] .sc-settings-field__row,
+.sc-settings-field[data-type=toggle] .sc-settings-field__row {
+  padding-top: var(--sc-padding-8);
+}
+
+/* Radio group — horizontal options row. */
+.sc-settings-field__radio-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-30);
+}
+
+/* Helper-text row — description + optional doc link / Learn More.
+   Typography comes from .sc-field-description in markup. */
+.sc-settings-field__description {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-5);
+  color: var(--sc-text-tertiary);
+}
+
+.sc-settings-field__link,
+.sc-settings-field__learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sc-spacing-5);
+  color: var(--sc-text-link);
+  text-decoration: underline;
+}
+
+.sc-settings-field__learn-more-icon {
+  font-size: var(--sc-typography-font-size-12);
+  text-decoration: none;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vc2V0dGluZ3MtZmllbGQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQUE7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUNBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQ0E7RUFDRTtFQUNBO0VBQ0E7OztBQUdGO0FBQUE7QUFFQTtBQUFBO0FBQUE7RUFHRTs7O0FBR0Y7QUFBQTtBQUVBO0FBQUE7RUFFRTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFBQTtBQUVBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQUE7RUFFRTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0EiLCJmaWxlIjoiYXNzZXRzL2Nzcy9jb21wb25lbnRzL2FkbWluL3NldHRpbmdzLWZpZWxkLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBzZXR0aW5ncy1maWVsZCAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA3LTIxVDE1OjIxOjQ0LjcxNzI4MFogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4uc2Mtc2V0dGluZ3MtZmllbGQge1xuICBkaXNwbGF5OiBmbGV4O1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtcHJpbWFyeSk7XG59XG5cbi8qIExhYmVsIGNvbHVtbiDigJQgZml4ZWQgMjAwcHgsIHRleHQtc3R5bGVkIHZpYSAuc2MtZmllbGQtbGFiZWwgaW5cbiAgIG1hcmt1cC4gVG9wIHBhZGRpbmcgYWxpZ25zIHRoZSBsYWJlbCB3aXRoIHRoZSAzNnB4IGNvbnRyb2wncyB0ZXh0LiAqL1xuLnNjLXNldHRpbmdzLWZpZWxkX19sYWJlbCB7XG4gIGZsZXg6IG5vbmU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0O1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xuICB3aWR0aDogMjAwcHg7XG4gIG1pbi1oZWlnaHQ6IDM0cHg7XG4gIHBhZGRpbmctdG9wOiB2YXIoLS1zYy1wYWRkaW5nLTgpO1xufVxuXG4vKiBGaWVsZCBjb2x1bW4g4oCUIGNvbnRyb2wgcm93IGFib3ZlLCBvcHRpb25hbCBoZWxwZXIgdGV4dCBiZWxvdy4gKi9cbi5zYy1zZXR0aW5ncy1maWVsZF9fZmllbGQge1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbn1cblxuLyogQ29udHJvbCArIG9wdGlvbmFsIGFkZC1vbiBidXR0b24sIG9uIG9uZSBsaW5lLiAqL1xuLnNjLXNldHRpbmdzLWZpZWxkX19yb3cge1xuICBkaXNwbGF5OiBmbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xufVxuXG4vKiBGaWVsZC10eXBlIGNvbnRyb2xzIHJlbmRlciBhdCB0aGUgZGVzaWduJ3MgZml4ZWQgNDAwcHggd2lkdGg7IGVtYmVkZGVkXG4gICBpbnB1dC9kcm9wZG93bi9tdWx0aXNlbGVjdCBmaWxsIGl0LiBSYWRpbywgdG9nZ2xlLCBhbmQgYnV0dG9uIHN0YXkgbmF0dXJhbCB3aWR0aC4gKi9cbi5zYy1zZXR0aW5ncy1maWVsZFtkYXRhLXR5cGU9XCJ0ZXh0LWlucHV0XCJdIC5zYy1zZXR0aW5ncy1maWVsZF9fY29udHJvbCxcbi5zYy1zZXR0aW5ncy1maWVsZFtkYXRhLXR5cGU9XCJkcm9wZG93blwiXSAuc2Mtc2V0dGluZ3MtZmllbGRfX2NvbnRyb2wsXG4uc2Mtc2V0dGluZ3MtZmllbGRbZGF0YS10eXBlPVwibXVsdGktc2VsZWN0XCJdIC5zYy1zZXR0aW5ncy1maWVsZF9fY29udHJvbCB7XG4gIHdpZHRoOiA0MDBweDtcbn1cblxuLyogUmFkaW8gYW5kIFRvZ2dsZSBjb250cm9scyBhcmUgc2hvcnQ7IG51ZGdlIHRoZSByb3cgZG93biBieSB0aGUgbGFiZWwncyB0b3BcbiAgIHBhZGRpbmcgc28gdGhlIG9wdGlvbi9zd2l0Y2ggbGluZXMgdXAgd2l0aCB0aGUgbGFiZWwgdGV4dC4gKi9cbi5zYy1zZXR0aW5ncy1maWVsZFtkYXRhLXR5cGU9XCJyYWRpb1wiXSAuc2Mtc2V0dGluZ3MtZmllbGRfX3Jvdyxcbi5zYy1zZXR0aW5ncy1maWVsZFtkYXRhLXR5cGU9XCJ0b2dnbGVcIl0gLnNjLXNldHRpbmdzLWZpZWxkX19yb3cge1xuICBwYWRkaW5nLXRvcDogdmFyKC0tc2MtcGFkZGluZy04KTtcbn1cblxuLyogUmFkaW8gZ3JvdXAg4oCUIGhvcml6b250YWwgb3B0aW9ucyByb3cuICovXG4uc2Mtc2V0dGluZ3MtZmllbGRfX3JhZGlvLWdyb3VwIHtcbiAgZGlzcGxheTogZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTMwKTtcbn1cblxuLyogSGVscGVyLXRleHQgcm93IOKAlCBkZXNjcmlwdGlvbiArIG9wdGlvbmFsIGRvYyBsaW5rIC8gTGVhcm4gTW9yZS5cbiAgIFR5cG9ncmFwaHkgY29tZXMgZnJvbSAuc2MtZmllbGQtZGVzY3JpcHRpb24gaW4gbWFya3VwLiAqL1xuLnNjLXNldHRpbmdzLWZpZWxkX19kZXNjcmlwdGlvbiB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy01KTtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtdGVydGlhcnkpO1xufVxuXG4uc2Mtc2V0dGluZ3MtZmllbGRfX2xpbmssXG4uc2Mtc2V0dGluZ3MtZmllbGRfX2xlYXJuLW1vcmUge1xuICBkaXNwbGF5OiBpbmxpbmUtZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTUpO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1saW5rKTtcbiAgdGV4dC1kZWNvcmF0aW9uOiB1bmRlcmxpbmU7XG59XG5cbi5zYy1zZXR0aW5ncy1maWVsZF9fbGVhcm4tbW9yZS1pY29uIHtcbiAgZm9udC1zaXplOiB2YXIoLS1zYy10eXBvZ3JhcGh5LWZvbnQtc2l6ZS0xMik7XG4gIHRleHQtZGVjb3JhdGlvbjogbm9uZTtcbn1cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBsdWdpbiBvdmVycmlkZXMg4oCUIGNvbmZsaWN0cyBhbmQgZml4ZXMgZm9yIFRISVMgcGx1Z2luXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuIl19 */

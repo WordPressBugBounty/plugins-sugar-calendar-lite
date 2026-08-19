@@ -677,7 +677,7 @@ class Elementor {
 	 */
 	public function add_sugar_calendar_post_type( $post_types ) {
 
-		$post_types[ sugar_calendar_get_event_post_type_id() ] = esc_html__( 'Events', 'sugar-calendar' );
+		$post_types[ sugar_calendar_get_event_post_type_id() ] = esc_html__( 'Events', 'sugar-calendar-lite' );
 
 		return $post_types;
 	}

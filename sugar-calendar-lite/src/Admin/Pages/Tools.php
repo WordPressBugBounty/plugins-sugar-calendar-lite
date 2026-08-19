@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin\Pages;
 use Sugar_Calendar\Admin\PageTabAbstract;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Integrations\Abilities\Abilities;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers as BaseHelpers;
 
@@ -169,6 +170,10 @@ class Tools extends PageTabAbstract {
 
 			if ( ToolsMigrateTab::is_migration_possible() ) {
 				$tabs[] = 'tools_migrate';
+			}
+
+			if ( Abilities::is_available() ) {
+				$tabs[] = 'tools_ai';
 			}
 
 			/**

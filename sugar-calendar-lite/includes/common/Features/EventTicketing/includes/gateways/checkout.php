@@ -7,6 +7,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\AddOn\Ticketing\Common\CapacityLock;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
 use Sugar_Calendar\Event;
@@ -119,7 +120,7 @@ class Checkout {
 		$price = $price * max( 1, absint( $quantity ) );
 
 		return [
-			'price'     => Functions\currency_filter( $price ),
+			'price'     => Functions\display_price( $price ),
 			'price_raw' => $price,
 		];
 	}
@@ -216,7 +217,26 @@ class Checkout {
 		$success = $this->validate();
 
 		if ( $success !== true ) {
-			wp_send_json_error( [ 'errors' => $this->errors ] );
+
+			/**
+			 * Filter the AJAX validation failure payload.
+			 *
+			 * Lets a feature attach structured, per-field error data under its own
+			 * key alongside the flat `errors` list the modal renders. The existing
+			 * front-end controllers iterate `errors` and ignore other keys.
+			 *
+			 * @since 3.13.0
+			 *
+			 * @param array    $response The wp_send_json_error payload.
+			 * @param Checkout $checkout Checkout object.
+			 */
+			$response = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+				'sc_et_checkout_ajax_validation_response',
+				[ 'errors' => $this->errors ],
+				$this
+			);
+
+			wp_send_json_error( $response );
 		}
 
 		wp_send_json_success();
@@ -514,21 +534,6 @@ class Checkout {
 
 		$is_multiple_tickets = $this->is_multiple_tickets_event( $event_id );
 
-		// Defense in depth: validate_data() rejects oversold and mismatched
-		// payloads, but a code path reaching complete() without running
-		// validate_data() (e.g., a third-party gateway hooked via sc_et_gateways)
-		// must not be allowed to mint tickets that exceed capacity or the paid
-		// quantity. Fail loud rather than silently clamp — silent truncation
-		// would charge the buyer for tickets they don't receive.
-		$available = Functions\get_available_tickets( $event_id );
-
-		if ( $available !== -1 && $quantity > $available ) {
-			wp_die(
-				esc_html__( 'Insufficient tickets available.', 'sugar-calendar-lite' ),
-				400
-			);
-		}
-
 		// Single-ticket only: attendees[] spans all types in multi-ticket mode,
 		// where the add-on's cart/attendee parity gate enforces composition.
 		if ( ! $is_multiple_tickets && count( $attendees ) > $quantity ) {
@@ -556,78 +561,126 @@ class Checkout {
 			$event
 		);
 
-		if ( ! empty( $attendees ) ) {
+		// A named lock serializes the capacity re-check and the ticket inserts, so
+		// concurrent buyers for the last seat(s) cannot all pass the check before any
+		// of them inserts. The lock is skipped for events that cannot oversell: an
+		// unlimited single-ticket event ( get_available_tickets() === -1 ). Multi-ticket
+		// events always lock — a capped ticket type can oversell even when the
+		// event-wide total reads "unlimited" because another type is uncapped.
+		$needs_lock = $is_multiple_tickets || ( Functions\get_available_tickets( $event_id ) !== -1 );
 
-			foreach ( $attendees as $attendee ) {
+		if ( $needs_lock && ! CapacityLock::acquire( $event_id ) ) {
+			// Fail safe: never run the capacity check unlocked. A terminal wp_die keeps
+			// the paid path identical to today (a charged race-loser hits a dead-end,
+			// exactly as today's over-capacity wp_die) rather than a retry-friendly
+			// redirect that could invite a double charge — the money path is a
+			// separate, later PR.
+			wp_die(
+				esc_html__( 'This event is currently busy. Please try again in a moment.', 'sugar-calendar-lite' ),
+				503
+			);
+		}
 
-				$attendee = (object) $attendee;
+		// FOOTGUN: any early wp_die() / exit / wp_safe_redirect()+exit added inside
+		// this try MUST call CapacityLock::release( $event_id ) first — PHP does not
+		// run the finally block on wp_die()/exit, so the lock would otherwise be held
+		// until connection close and time out a concurrent buyer into a false "busy".
+		try {
 
-				$maybe_new = $this->maybe_create_attendee( $attendee );
+			if ( $needs_lock ) {
 
-				if ( empty( $maybe_new->id ) ) {
-					$anonymous_attendees[] = $attendee;
-				} else {
-					$stored_attendees[] = $maybe_new;
+				// Force a database-fresh count under the lock. BerlinDB caches the
+				// per-request ticket count, so without this the re-check would read
+				// its own pre-lock (stale) count and the lock would not stop the
+				// oversell.
+				CapacityLock::flush_ticket_cache();
+
+				/**
+				 * Re-check per-ticket-type / per-occurrence capacity against fresh counts.
+				 *
+				 * Fired inside the capacity lock, immediately before minting. Handlers
+				 * return a WP_Error when a ticket type or occurrence would be oversold,
+				 * or the incoming value (default null) otherwise. Because it runs under
+				 * a per-event lock, handlers must do only fast, local work.
+				 *
+				 * @since 3.13.0
+				 *
+				 * @param WP_Error|null $capacity_error Error when capacity is exceeded, else null.
+				 * @param int           $event_id       Event ID.
+				 * @param int           $quantity       Quantity being purchased.
+				 * @param array         $order_data     Order data.
+				 */
+				$capacity_error = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+					'sc_et_checkout_capacity_recheck',
+					null,
+					$event_id,
+					$quantity,
+					$order_data
+				);
+
+				if ( is_wp_error( $capacity_error ) ) {
+					// Release before terminating: wp_die() does not run the finally block.
+					CapacityLock::release( $event_id );
+					wp_die( esc_html( $capacity_error->get_error_message() ), 400 );
+				}
+
+				// Event-wide re-check (defense in depth, now serialized and fresh). A
+				// code path reaching complete() without validate_data() (e.g. a
+				// third-party gateway) still cannot mint beyond capacity. Fail loud
+				// rather than silently clamp — silent truncation would charge the buyer
+				// for tickets they don't receive.
+				$available = Functions\get_available_tickets( $event_id );
+
+				if ( $available !== -1 && $quantity > $available ) {
+					CapacityLock::release( $event_id );
+					wp_die(
+						esc_html__( 'Insufficient tickets available.', 'sugar-calendar-lite' ),
+						400
+					);
 				}
 			}
-		}
 
-		// Record the processing gateway on the order (its key in the
-		// sc_et_gateways map). Refunds dispatch back to this gateway.
-		$order_data['gateway'] = ! empty( $this->gateway )
-			? $this->gateway
-			: 'stripe';
+			// Test-only: widen the check -> insert window so the concurrency E2E can
+			// reliably observe the race. Inert in production (constant undefined).
+			if ( defined( 'SC_ET_TEST_CAP_DELAY' ) && SC_ET_TEST_CAP_DELAY ) {
+				usleep( (int) SC_ET_TEST_CAP_DELAY );
+			}
 
-		$order_id = Functions\add_order( $order_data );
+			if ( ! empty( $attendees ) ) {
+				$prepared            = $this->prepare_attendees( $attendees );
+				$stored_attendees    = $prepared['stored'];
+				$anonymous_attendees = $prepared['anonymous'];
+			}
 
-		// The UNIQUE constraint on transaction_id rejects a second order
-		// that reuses a paid PaymentIntent — the losing side of a replay race.
-		// Bail before minting any tickets so we never create tickets bound to a
-		// non-existent order. The app-level replay SELECT catches the common
-		// case earlier; this guard covers the concurrent race.
-		if ( empty( $order_id ) ) {
-			wp_safe_redirect(
-				add_query_arg(
-					[ 'error_code' => 'sc_et_order_not_created' ],
-					Helper::get_event_frontend_url( $event )
-				)
-			);
-			exit;
-		}
+			// Record the processing gateway on the order (its key in the
+			// sc_et_gateways map). Refunds dispatch back to this gateway.
+			$order_data['gateway'] = ! empty( $this->gateway )
+				? $this->gateway
+				: 'stripe';
 
-		// Create tickets.
-		foreach ( $stored_attendees as $attendee ) {
+			$order_id = Functions\add_order( $order_data );
 
-			/**
-			 * Filter the ticket data before saving.
-			 *
-			 * @since 3.6.0
-			 * @since 3.8.0 Add attendee object to filter.
-			 *
-			 * @param array  $ticket_data Ticket data.
-			 * @param array  $order_data  Order data.
-			 * @param object $attendee    Attendee object.
-			 */
-			$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-				'sc_et_checkout_complete_ticket_data_before_save_ticket',
-				[
-					'event_id'    => $event_id,
-					'event_date'  => $event_date,
-					'attendee_id' => $attendee->id,
-					'order_id'    => $order_id,
-				],
-				$order_data,
-				$attendee
-			);
+			// The UNIQUE constraint on transaction_id rejects a second order
+			// that reuses a paid PaymentIntent — the losing side of a replay race.
+			// Bail before minting any tickets so we never create tickets bound to a
+			// non-existent order. The app-level replay SELECT catches the common
+			// case earlier; this guard covers the concurrent race.
+			if ( empty( $order_id ) ) {
+				// Release before terminating: exit does not run the finally block.
+				if ( $needs_lock ) {
+					CapacityLock::release( $event_id );
+				}
+				wp_safe_redirect(
+					add_query_arg(
+						[ 'error_code' => 'sc_et_order_not_created' ],
+						Helper::get_event_frontend_url( $event )
+					)
+				);
+				exit;
+			}
 
-			Functions\add_ticket( $ticket_data );
-		}
-
-		if ( ! empty( $anonymous_attendees ) ) {
-
-			// Create tickets for unnamed attendees.
-
-			foreach ( $anonymous_attendees as $attendee ) {
+			// Create tickets.
+			foreach ( $stored_attendees as $attendee ) {
 
 				/**
 				 * Filter the ticket data before saving.
@@ -642,15 +695,54 @@ class Checkout {
 				$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 					'sc_et_checkout_complete_ticket_data_before_save_ticket',
 					[
-						'event_id'   => $event_id,
-						'event_date' => $event_date,
-						'order_id'   => $order_id,
+						'event_id'    => $event_id,
+						'event_date'  => $event_date,
+						'attendee_id' => $attendee->id,
+						'order_id'    => $order_id,
 					],
 					$order_data,
 					$attendee
 				);
 
 				Functions\add_ticket( $ticket_data );
+			}
+
+			if ( ! empty( $anonymous_attendees ) ) {
+
+				// Create tickets for unnamed attendees.
+
+				foreach ( $anonymous_attendees as $attendee ) {
+
+					/**
+					 * Filter the ticket data before saving.
+					 *
+					 * @since 3.6.0
+					 * @since 3.8.0 Add attendee object to filter.
+					 *
+					 * @param array  $ticket_data Ticket data.
+					 * @param array  $order_data  Order data.
+					 * @param object $attendee    Attendee object.
+					 */
+					$ticket_data = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+						'sc_et_checkout_complete_ticket_data_before_save_ticket',
+						[
+							'event_id'   => $event_id,
+							'event_date' => $event_date,
+							'order_id'   => $order_id,
+						],
+						$order_data,
+						$attendee
+					);
+
+					Functions\add_ticket( $ticket_data );
+				}
+			}
+		} finally {
+			// Backstop for the normal fall-through and any thrown exception. The
+			// wp_die / exit branches above already released explicitly (they do not
+			// run finally); a double release is harmless.
+			if ( $needs_lock ) {
+				CapacityLock::release( $event_id );
 			}
 		}
 
@@ -679,6 +771,44 @@ class Checkout {
 
 		wp_safe_redirect( $success_url );
 		exit;
+	}
+
+	/**
+	 * Prepare submitted attendees: create/resolve each attendee record, then split
+	 * them into stored (has a persisted attendee id) and anonymous (no email / not
+	 * persisted) buckets. "Prepare" — not "sort" — because it performs the
+	 * maybe_create_attendee() writes, it does not reorder.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $attendees Sanitized attendee records.
+	 *
+	 * @return array {
+	 *     @type object[] $stored    Attendees with a persisted id.
+	 *     @type object[] $anonymous Attendees without a persisted id.
+	 * }
+	 */
+	private function prepare_attendees( $attendees ) {
+
+		$stored    = [];
+		$anonymous = [];
+
+		foreach ( $attendees as $attendee ) {
+
+			$attendee  = (object) $attendee;
+			$maybe_new = $this->maybe_create_attendee( $attendee );
+
+			if ( empty( $maybe_new->id ) ) {
+				$anonymous[] = $attendee;
+			} else {
+				$stored[] = $maybe_new;
+			}
+		}
+
+		return [
+			'stored'    => $stored,
+			'anonymous' => $anonymous,
+		];
 	}
 
 	/**

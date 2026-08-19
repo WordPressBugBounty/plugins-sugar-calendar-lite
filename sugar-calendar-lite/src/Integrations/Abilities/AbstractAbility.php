@@ -2,8 +2,6 @@
 /**
  * Base contract for a single sc-events ability.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities
  * @since 3.12.0
  */
 
@@ -55,11 +53,13 @@ abstract class AbstractAbility {
 	protected $events;
 
 	/**
-	 * Output-shaping collaborator.
+	 * Output-shaping collaborator. Only the core event/calendar abilities use
+	 * this — Venue/Speaker/Ticket/RSVP abilities have their own formatters
+	 * (or none) and never read it, so it's optional here.
 	 *
 	 * @since 3.12.0
 	 *
-	 * @var Formatter
+	 * @var Formatter|null
 	 */
 	protected $formatter;
 
@@ -69,9 +69,10 @@ abstract class AbstractAbility {
 	 * @since 3.12.0
 	 *
 	 * @param EventRepository $events    Data-access collaborator.
-	 * @param Formatter       $formatter Output-shaping collaborator.
+	 * @param Formatter|null  $formatter Output-shaping collaborator. Only needed by abilities
+	 *                                   that call `format_collection()`.
 	 */
-	public function __construct( EventRepository $events, Formatter $formatter ) {
+	public function __construct( EventRepository $events, ?Formatter $formatter = null ) {
 
 		$this->events    = $events;
 		$this->formatter = $formatter;
@@ -152,6 +153,13 @@ abstract class AbstractAbility {
 	 * @return void
 	 */
 	public function register(): void {
+
+		// The Abilities API ships with WordPress 6.9+. Guard the call so the
+		// static Plugin Check (and older WP) never hits an undefined function;
+		// the hook that invokes this only fires when the API is present.
+		if ( ! function_exists( 'wp_register_ability' ) ) {
+			return;
+		}
 
 		wp_register_ability(
 			static::NAMESPACE_PREFIX . '/' . $this->get_slug(),
@@ -239,6 +247,43 @@ abstract class AbstractAbility {
 	protected function require_cap( string $cap, string $message ) {
 
 		return current_user_can( $cap ) ? true : $this->forbidden( $message );
+	}
+
+	/**
+	 * Per-event permission gate for abilities that expose non-public,
+	 * per-event data (attendee identities, revenue, etc.) rather than an
+	 * event's already-public front-end details. Requires the same
+	 * capability needed to edit the event itself, NOT `read_event`
+	 * (see `GetEvent::check_permission()`) — `read_event` resolves to
+	 * bare `read` for any published event, which any logged-in user
+	 * (including a Subscriber) holds, and would leak attendee/revenue
+	 * data to anyone who can view the event's public page.
+	 *
+	 * Deliberately NOT named `resolve_event_permission()` — RSVP's and
+	 * Ticketing's `Abstract*Ability` subclasses each already declare their
+	 * own single-argument `resolve_event_permission( $event_id )` (the
+	 * method their concrete abilities call); giving this shared helper the
+	 * same name would make PHP treat it as an override and fatal on the
+	 * incompatible signature.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int    $event_id Sugar Calendar event ID.
+	 * @param string $message  Forbidden message when the check fails.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function check_per_event_permission( int $event_id, string $message ) {
+
+		$query     = $event_id > 0 ? $this->events->get_event_query( [ 'id' => $event_id, 'number' => 1 ] ) : null;
+		$event     = ( $query && ! empty( $query->items ) ) ? $query->items[0] : null;
+		$object_id = $event ? absint( $event->object_id ) : 0;
+
+		if ( ! $object_id || ! current_user_can( 'edit_post', $object_id ) ) {
+			return $this->forbidden( $message );
+		}
+
+		return true;
 	}
 
 	/**

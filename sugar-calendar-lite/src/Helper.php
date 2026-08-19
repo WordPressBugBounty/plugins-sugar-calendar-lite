@@ -65,6 +65,7 @@ class Helper {
 	 * Get the calendar ID of an event.
 	 *
 	 * @since 3.0.0
+	 * @since 3.13.0 Applies the sugar_calendar_helper_get_calendars_of_event filter.
 	 *
 	 * @param Event $event Event object.
 	 *
@@ -82,10 +83,20 @@ class Helper {
 			empty( $calendars ) ||
 			! is_array( $calendars )
 		) {
-			return [];
+			$calendars = [];
 		}
 
-		return $calendars;
+		/**
+		 * Filters the calendars (terms) of an event.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param WP_Term[] $calendars The calendars of the event.
+		 * @param Event     $event     The event object.
+		 */
+		$calendars = apply_filters( 'sugar_calendar_helper_get_calendars_of_event', $calendars, $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+		return is_array( $calendars ) ? $calendars : [];
 	}
 
 	/**
@@ -368,7 +379,14 @@ class Helper {
 
 		$text = strip_shortcodes( $event->content );
 		$text = excerpt_remove_blocks( $text );
-		$text = excerpt_remove_footnotes( $text );
+
+		// excerpt_remove_footnotes() was introduced in WordPress 6.3; guard it
+		// so the plugin keeps working (and passes the static compat check) on
+		// the supported minimum WordPress version.
+		if ( function_exists( 'excerpt_remove_footnotes' ) ) {
+			$text = excerpt_remove_footnotes( $text );
+		}
+
 		$text = str_replace( ']]>', ']]&gt;', $text );
 
 		return wp_trim_words( $text, $num_words, $excerpt_more );

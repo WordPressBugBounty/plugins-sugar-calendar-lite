@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\AddOn\Ticketing\Helpers;
 
 use Sugar_Calendar\Helpers as BaseHelpers;
+use Sugar_Calendar\Helpers\UI as CoreUI;
 
 /**
  * Admin interface helpers.
@@ -909,5 +910,124 @@ class UI {
 
 		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Open a WordPress core metabox panel.
+	 *
+	 * Thin delegation to Sugar_Calendar\Helpers\UI so existing call sites on the
+	 * order page keep working; new code should call the core helper directly.
+	 * Pair every call with postbox_close().
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string       $id      DOM id for the panel; also the key postboxes.js
+	 *                              stores the collapsed state under.
+	 * @param string       $title   Raw panel title; escaped by the core helper.
+	 * @param string|array $classes Extra classes for the .postbox element.
+	 */
+	public static function postbox_open( $id, $title, $classes = '' ) {
+
+		CoreUI::postbox_open( $id, $title, $classes );
+	}
+
+	/**
+	 * Close a metabox panel opened by postbox_open().
+	 *
+	 * @since 3.13.0
+	 */
+	public static function postbox_close() {
+
+		CoreUI::postbox_close();
+	}
+
+	/**
+	 * Open a core .form-table inside a metabox panel.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_open() {
+
+		CoreUI::form_table_open();
+	}
+
+	/**
+	 * Close a form table.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_close() {
+
+		CoreUI::form_table_close();
+	}
+
+	/**
+	 * Open one label + control row of a form table.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $label      Raw label text; escaped by the core helper.
+	 * @param string $control_id Id of the control this labels, when it has one.
+	 * @param bool   $required   Whether to append the required marker.
+	 */
+	public static function form_table_row_open( $label, $control_id = '', $required = false ) {
+
+		CoreUI::form_table_row_open( $label, $control_id, $required );
+	}
+
+	/**
+	 * Close a form-table row.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_row_close() {
+
+		CoreUI::form_table_row_close();
+	}
+
+	/**
+	 * Open one line of a metabox's read-only fact list.
+	 *
+	 * Core's Publish-box `.misc-pub-section` pattern: "Label: value" on one line,
+	 * with an optional dashicon. Use for read-only facts, not a form row: a
+	 * .form-table's cell padding stacks label above value in a narrow sidebar.
+	 * Pair every call with misc_pub_row_close().
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $label     Raw label text; escaped here.
+	 * @param string $icon      Dashicon suffix, e.g. 'calendar-alt'.
+	 * @param bool   $emphasize Whether the value uses the design's medium weight.
+	 */
+	public static function misc_pub_row_open( $label, $icon = '', $emphasize = false ) {
+
+		printf(
+			'<div class="misc-pub-section%1$s">',
+			$emphasize ? ' misc-pub-section--emphasis' : ''
+		);
+
+		if ( $icon !== '' ) {
+			printf(
+				'<span class="dashicons dashicons-%1$s" aria-hidden="true"></span>',
+				esc_attr( sanitize_html_class( $icon ) )
+			);
+		}
+
+		// One wrapper so icon + label + value form a flex pair; the value gets
+		// its own span so CSS can weight it separately from the label.
+		printf(
+			'<span class="sc-et-pub-fact"><span class="sc-et-pub-label">%1$s:</span> <span class="sc-et-pub-value">',
+			esc_html( $label )
+		);
+	}
+
+	/**
+	 * Close a fact-list line.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function misc_pub_row_close() {
+
+		echo '</span></span></div>';
 	}
 }

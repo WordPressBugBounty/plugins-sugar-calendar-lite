@@ -76,7 +76,7 @@ class EventLocation extends AbstractEventWidget {
 		$this->start_controls_section(
 			'section_style',
 			[
-				'label' => esc_html__( 'SC Event Location', 'sugar-calendar' ),
+				'label' => esc_html__( 'SC Event Location', 'sugar-calendar-lite' ),
 				'tab'   => Controls_Manager::TAB_STYLE,
 			]
 		);
@@ -84,23 +84,23 @@ class EventLocation extends AbstractEventWidget {
 		$this->add_responsive_control(
 			'align',
 			[
-				'label'     => esc_html__( 'Alignment', 'sugar-calendar' ),
+				'label'     => esc_html__( 'Alignment', 'sugar-calendar-lite' ),
 				'type'      => Controls_Manager::CHOOSE,
 				'options'   => [
 					'left'    => [
-						'title' => esc_html__( 'Left', 'sugar-calendar' ),
+						'title' => esc_html__( 'Left', 'sugar-calendar-lite' ),
 						'icon' => 'eicon-text-align-left',
 					],
 					'center'  => [
-						'title' => esc_html__( 'Center', 'sugar-calendar' ),
+						'title' => esc_html__( 'Center', 'sugar-calendar-lite' ),
 						'icon' => 'eicon-text-align-center',
 					],
 					'right'   => [
-						'title' => esc_html__( 'Right', 'sugar-calendar' ),
+						'title' => esc_html__( 'Right', 'sugar-calendar-lite' ),
 						'icon' => 'eicon-text-align-right',
 					],
 					'justify' => [
-						'title' => esc_html__( 'Justified', 'sugar-calendar' ),
+						'title' => esc_html__( 'Justified', 'sugar-calendar-lite' ),
 						'icon' => 'eicon-text-align-justify',
 					],
 				],
@@ -132,7 +132,7 @@ class EventLocation extends AbstractEventWidget {
 		$this->add_control(
 			'text_color',
 			[
-				'label'     => esc_html__( 'Color', 'sugar-calendar' ),
+				'label'     => esc_html__( 'Color', 'sugar-calendar-lite' ),
 				'type'      => Controls_Manager::COLOR,
 				'default'   => '',
 				'selectors' => [
@@ -170,7 +170,7 @@ class EventLocation extends AbstractEventWidget {
 	 */
 	public function get_title() {
 
-		return esc_html__( 'SC Event Location', 'sugar-calendar' );
+		return esc_html__( 'SC Event Location', 'sugar-calendar-lite' );
 	}
 
 	/**

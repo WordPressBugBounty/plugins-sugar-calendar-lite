@@ -43,9 +43,8 @@ class OnlineMeetingPresenter {
 
 		if ( $details['password'] !== '' ) {
 			/* translators: %s - meeting password. */
-			$out .= ' <span class="sc-frontend-single-event__details__online-password">'
-				. sprintf( esc_html__( '(Password: %s)', 'sugar-calendar-lite' ), esc_html( $details['password'] ) )
-				. '</span>';
+			$password_label = sprintf( esc_html__( '(Password: %s)', 'sugar-calendar-lite' ), esc_html( $details['password'] ) );
+			$out           .= ' <span class="sc-frontend-single-event__details__online-password">' . $password_label . '</span>';
 		}
 
 		$out .= '</div></div>';
@@ -79,9 +78,8 @@ class OnlineMeetingPresenter {
 
 		if ( $details['password'] !== '' ) {
 			/* translators: %s - meeting password. */
-			$out .= '<p style="margin:8px 0 0;">'
-				. sprintf( esc_html__( 'Password: %s', 'sugar-calendar-lite' ), esc_html( $details['password'] ) )
-				. '</p>';
+			$password_label = sprintf( esc_html__( 'Password: %s', 'sugar-calendar-lite' ), esc_html( $details['password'] ) );
+			$out           .= '<p style="margin:8px 0 0;">' . $password_label . '</p>';
 		}
 
 		$out .= '</div>';

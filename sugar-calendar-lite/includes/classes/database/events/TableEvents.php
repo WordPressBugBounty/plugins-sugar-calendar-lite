@@ -26,7 +26,7 @@ final class Events_Table extends Table {
 	/**
 	 * @var string Database version
 	 */
-	protected $version = 202506040001;
+	protected $version = 202508050001;
 
 	/**
 	 * @var string Table schema
@@ -47,6 +47,7 @@ final class Events_Table extends Table {
 		'201902040005' => 201902040005,
 		'201902040006' => 201902040006,
 		'202506040001' => 202506040001,
+		'202508050001' => 202508050001,
 	];
 
 	/**
@@ -86,7 +87,8 @@ final class Events_Table extends Table {
 			KEY `event_times` (start,end,start_tz(50),end_tz(50)),
 			KEY `event_recur` (recurrence),
 			KEY `event_recur_times` (recurrence_end,recurrence_end_tz),
-			KEY `event_venue` (venue_id)";
+			KEY `event_venue` (venue_id),
+			KEY event_uuid (uuid(32))";
 	}
 
 	/**
@@ -237,6 +239,27 @@ final class Events_Table extends Table {
 		$this->get_db()->query( "ALTER TABLE {$this->table_name} MODIFY COLUMN `end_tz` varchar(155) NOT NULL default '';" );
 
 		// Return success/fail
+		return $this->is_success( true );
+	}
+
+	/**
+	 * Upgrade to version 202508050001
+	 * - Add index on the `uuid` column (UID-matched ICS sync lookups).
+	 *
+	 * @since 3.13.0
+	 *
+	 * @return bool True if upgrade was successful, false otherwise.
+	 */
+	protected function __202508050001() {
+
+		// Look for index.
+		$result = $this->index_exists( 'event_uuid' );
+
+		// Maybe add index.
+		if ( false === $result ) {
+			$this->get_db()->query( "ALTER TABLE {$this->table_name} ADD INDEX event_uuid (uuid(32));" );
+		}
+
 		return $this->is_success( true );
 	}
 }

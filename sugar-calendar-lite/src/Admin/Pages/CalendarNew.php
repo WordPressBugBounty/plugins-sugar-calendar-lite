@@ -160,7 +160,7 @@ class CalendarNew extends CalendarAbstract {
 
 		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
 
-		do_action( "{$taxonomy}_add_form_fields", $this->term, $taxonomy ); // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+		do_action( "{$taxonomy}_add_form_fields", $this->term, $taxonomy ); // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Core taxonomy hook name.
 	}
 
 	/**

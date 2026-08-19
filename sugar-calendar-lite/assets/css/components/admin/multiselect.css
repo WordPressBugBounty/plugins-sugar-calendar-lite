@@ -1,0 +1,87 @@
+@charset "UTF-8";
+/* Ported from DS: multiselect */
+/* Source mtime: 2026-07-21T15:21:44.714Z */
+/* ===== Chip row inside the trigger ====================================== */
+.sc-multiselect-tags {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: var(--sc-padding-8);
+  overflow: hidden;
+}
+
+.sc-multiselect-tags[data-wrap=true] {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+/* Multiselect's text input — extends the dropdown's .sc-select-input
+   with multi-trigger-specific sizing. Apply both classes on the element:
+   <input class="sc-select-input sc-multiselect-input"> */
+.sc-multiselect-input {
+  flex: 1 1 auto;
+  width: 100%;
+  display: var(--sc-multiselect-input-display, inline-block);
+}
+
+/* Visible only when the multi-trigger is open. Cascades from the parent. */
+.sc-select[data-type=multi] {
+  --sc-multiselect-input-display: none;
+}
+
+.sc-select[data-type=multi][aria-expanded=true] {
+  --sc-multiselect-input-display: inline-block;
+}
+
+/* ===== Trigger extension =================================================
+   Extends Dropdown's .sc-select: grows past 36px as chips wrap, reads as a
+   text input. One chip row = 36px, so height doesn't jolt on open. */
+.sc-select[data-type=multi] {
+  height: auto;
+  min-height: 36px;
+  padding-block: 5px;
+  cursor: text;
+}
+
+.sc-select[data-type=multi][aria-expanded=true] {
+  /* Pin the chevron to the first row instead of the vertical centre once chips
+     wrap; the 5px top nudge re-centres the glyph on that row. */
+  --sc-select-chevron-align: flex-start;
+  --sc-select-chevron-top: 5px;
+  border-bottom-color: transparent;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: inset 1px 0 0 var(--sc-components-field-border--focus), inset -1px 0 0 var(--sc-components-field-border--focus), inset 0 1px 0 var(--sc-components-field-border--focus);
+}
+
+/* ===== Attached popover ==================================================
+   Applies alongside .sc-dropdown-menu. The compound selector is required:
+   a bare .sc-multiselect-menu ties on specificity with .sc-dropdown-menu, so
+   import order would decide which wins otherwise. */
+.sc-dropdown-menu.sc-multiselect-menu {
+  margin-top: -1px;
+  border: 2px solid var(--sc-components-field-border--focus);
+  border-top: 0;
+  border-radius: 0 0 var(--sc-radius-field) var(--sc-radius-field);
+  box-shadow: none;
+}
+
+/* 1px divider between the chip row and the options (Figma draws it as the chip
+   row's border-bottom). The .sc-dropdown-list needs no top border. */
+.sc-dropdown-menu.sc-multiselect-menu::before {
+  content: "";
+  flex-shrink: 0;
+  height: 1px;
+  background: var(--sc-components-field-border);
+}
+
+/* ===== Hint row (type-to-add pattern) =================================== */
+/* Typography comes from the .sc-field-text class in markup —
+   this rule keeps only box + color. */
+.sc-multiselect-hint {
+  margin: 0;
+  padding: var(--sc-padding-12) var(--sc-padding-8);
+  color: var(--sc-text-primary);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vbXVsdGlzZWxlY3Quc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBRUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTs7O0FBR0Y7QUFBQTtBQUFBO0FBR0E7RUFDRTtFQUNBO0VBQ0E7OztBQUdGO0FBQ0E7RUFDRTs7O0FBRUY7RUFDRTs7O0FBR0Y7QUFBQTtBQUFBO0FBSUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDRTtBQUFBO0VBRUE7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBLFlBQ0U7OztBQUtKO0FBQUE7QUFBQTtBQUFBO0FBS0E7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUFBO0FBRUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFFQTtBQUFBO0FBRUE7RUFDRTtFQUNBO0VBQ0EiLCJmaWxlIjoiYXNzZXRzL2Nzcy9jb21wb25lbnRzL2FkbWluL211bHRpc2VsZWN0LmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBtdWx0aXNlbGVjdCAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA3LTIxVDE1OjIxOjQ0LjcxNFogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vKiA9PT09PSBDaGlwIHJvdyBpbnNpZGUgdGhlIHRyaWdnZXIgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi9cblxuLnNjLW11bHRpc2VsZWN0LXRhZ3Mge1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4OiAxIDEgYXV0bztcbiAgbWluLXdpZHRoOiAwO1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBnYXA6IHZhcigtLXNjLXBhZGRpbmctOCk7XG4gIG92ZXJmbG93OiBoaWRkZW47XG59XG5cbi5zYy1tdWx0aXNlbGVjdC10YWdzW2RhdGEtd3JhcD1cInRydWVcIl0ge1xuICBmbGV4LXdyYXA6IHdyYXA7XG4gIG92ZXJmbG93OiB2aXNpYmxlO1xufVxuXG4vKiBNdWx0aXNlbGVjdCdzIHRleHQgaW5wdXQg4oCUIGV4dGVuZHMgdGhlIGRyb3Bkb3duJ3MgLnNjLXNlbGVjdC1pbnB1dFxuICAgd2l0aCBtdWx0aS10cmlnZ2VyLXNwZWNpZmljIHNpemluZy4gQXBwbHkgYm90aCBjbGFzc2VzIG9uIHRoZSBlbGVtZW50OlxuICAgPGlucHV0IGNsYXNzPVwic2Mtc2VsZWN0LWlucHV0IHNjLW11bHRpc2VsZWN0LWlucHV0XCI+ICovXG4uc2MtbXVsdGlzZWxlY3QtaW5wdXQge1xuICBmbGV4OiAxIDEgYXV0bztcbiAgd2lkdGg6IDEwMCU7XG4gIGRpc3BsYXk6IHZhcigtLXNjLW11bHRpc2VsZWN0LWlucHV0LWRpc3BsYXksIGlubGluZS1ibG9jayk7XG59XG5cbi8qIFZpc2libGUgb25seSB3aGVuIHRoZSBtdWx0aS10cmlnZ2VyIGlzIG9wZW4uIENhc2NhZGVzIGZyb20gdGhlIHBhcmVudC4gKi9cbi5zYy1zZWxlY3RbZGF0YS10eXBlPVwibXVsdGlcIl0ge1xuICAtLXNjLW11bHRpc2VsZWN0LWlucHV0LWRpc3BsYXk6IG5vbmU7XG59XG4uc2Mtc2VsZWN0W2RhdGEtdHlwZT1cIm11bHRpXCJdW2FyaWEtZXhwYW5kZWQ9XCJ0cnVlXCJdIHtcbiAgLS1zYy1tdWx0aXNlbGVjdC1pbnB1dC1kaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG59XG5cbi8qID09PT09IFRyaWdnZXIgZXh0ZW5zaW9uID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgIEV4dGVuZHMgRHJvcGRvd24ncyAuc2Mtc2VsZWN0OiBncm93cyBwYXN0IDM2cHggYXMgY2hpcHMgd3JhcCwgcmVhZHMgYXMgYVxuICAgdGV4dCBpbnB1dC4gT25lIGNoaXAgcm93ID0gMzZweCwgc28gaGVpZ2h0IGRvZXNuJ3Qgam9sdCBvbiBvcGVuLiAqL1xuXG4uc2Mtc2VsZWN0W2RhdGEtdHlwZT1cIm11bHRpXCJdIHtcbiAgaGVpZ2h0OiBhdXRvO1xuICBtaW4taGVpZ2h0OiAzNnB4O1xuICBwYWRkaW5nLWJsb2NrOiA1cHg7XG4gIGN1cnNvcjogdGV4dDtcbn1cblxuLnNjLXNlbGVjdFtkYXRhLXR5cGU9XCJtdWx0aVwiXVthcmlhLWV4cGFuZGVkPVwidHJ1ZVwiXSB7XG4gIC8qIFBpbiB0aGUgY2hldnJvbiB0byB0aGUgZmlyc3Qgcm93IGluc3RlYWQgb2YgdGhlIHZlcnRpY2FsIGNlbnRyZSBvbmNlIGNoaXBzXG4gICAgIHdyYXA7IHRoZSA1cHggdG9wIG51ZGdlIHJlLWNlbnRyZXMgdGhlIGdseXBoIG9uIHRoYXQgcm93LiAqL1xuICAtLXNjLXNlbGVjdC1jaGV2cm9uLWFsaWduOiBmbGV4LXN0YXJ0O1xuICAtLXNjLXNlbGVjdC1jaGV2cm9uLXRvcDogNXB4O1xuICBib3JkZXItYm90dG9tLWNvbG9yOiB0cmFuc3BhcmVudDtcbiAgYm9yZGVyLWJvdHRvbS1sZWZ0LXJhZGl1czogMDtcbiAgYm9yZGVyLWJvdHRvbS1yaWdodC1yYWRpdXM6IDA7XG4gIGJveC1zaGFkb3c6XG4gICAgaW5zZXQgIDFweCAwIDAgdmFyKC0tc2MtY29tcG9uZW50cy1maWVsZC1ib3JkZXItLWZvY3VzKSxcbiAgICBpbnNldCAtMXB4IDAgMCB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWJvcmRlci0tZm9jdXMpLFxuICAgIGluc2V0ICAwIDFweCAwIHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtYm9yZGVyLS1mb2N1cyk7XG59XG5cbi8qID09PT09IEF0dGFjaGVkIHBvcG92ZXIgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgIEFwcGxpZXMgYWxvbmdzaWRlIC5zYy1kcm9wZG93bi1tZW51LiBUaGUgY29tcG91bmQgc2VsZWN0b3IgaXMgcmVxdWlyZWQ6XG4gICBhIGJhcmUgLnNjLW11bHRpc2VsZWN0LW1lbnUgdGllcyBvbiBzcGVjaWZpY2l0eSB3aXRoIC5zYy1kcm9wZG93bi1tZW51LCBzb1xuICAgaW1wb3J0IG9yZGVyIHdvdWxkIGRlY2lkZSB3aGljaCB3aW5zIG90aGVyd2lzZS4gKi9cblxuLnNjLWRyb3Bkb3duLW1lbnUuc2MtbXVsdGlzZWxlY3QtbWVudSB7XG4gIG1hcmdpbi10b3A6IC0xcHg7XG4gIGJvcmRlcjogMnB4IHNvbGlkIHZhcigtLXNjLWNvbXBvbmVudHMtZmllbGQtYm9yZGVyLS1mb2N1cyk7XG4gIGJvcmRlci10b3A6IDA7XG4gIGJvcmRlci1yYWRpdXM6IDAgMCB2YXIoLS1zYy1yYWRpdXMtZmllbGQpIHZhcigtLXNjLXJhZGl1cy1maWVsZCk7XG4gIGJveC1zaGFkb3c6IG5vbmU7XG59XG5cbi8qIDFweCBkaXZpZGVyIGJldHdlZW4gdGhlIGNoaXAgcm93IGFuZCB0aGUgb3B0aW9ucyAoRmlnbWEgZHJhd3MgaXQgYXMgdGhlIGNoaXBcbiAgIHJvdydzIGJvcmRlci1ib3R0b20pLiBUaGUgLnNjLWRyb3Bkb3duLWxpc3QgbmVlZHMgbm8gdG9wIGJvcmRlci4gKi9cbi5zYy1kcm9wZG93bi1tZW51LnNjLW11bHRpc2VsZWN0LW1lbnU6OmJlZm9yZSB7XG4gIGNvbnRlbnQ6IFwiXCI7XG4gIGZsZXgtc2hyaW5rOiAwO1xuICBoZWlnaHQ6IDFweDtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1maWVsZC1ib3JkZXIpO1xufVxuXG4vKiA9PT09PSBIaW50IHJvdyAodHlwZS10by1hZGQgcGF0dGVybikgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi9cblxuLyogVHlwb2dyYXBoeSBjb21lcyBmcm9tIHRoZSAuc2MtZmllbGQtdGV4dCBjbGFzcyBpbiBtYXJrdXAg4oCUXG4gICB0aGlzIHJ1bGUga2VlcHMgb25seSBib3ggKyBjb2xvci4gKi9cbi5zYy1tdWx0aXNlbGVjdC1oaW50IHtcbiAgbWFyZ2luOiAwO1xuICBwYWRkaW5nOiB2YXIoLS1zYy1wYWRkaW5nLTEyKSB2YXIoLS1zYy1wYWRkaW5nLTgpO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1wcmltYXJ5KTtcbn1cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBsdWdpbiBvdmVycmlkZXMg4oCUIGNvbmZsaWN0cyBhbmQgZml4ZXMgZm9yIFRISVMgcGx1Z2luXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuIl19 */

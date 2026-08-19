@@ -93,6 +93,29 @@ class EventMeetingManager {
 	}
 
 	/**
+	 * Resolve the SC event for a WP post, subtype-aware.
+	 *
+	 * `sugar_calendar_get_event_by_object()` defaults object_subtype to 'sc_event',
+	 * so a recurring parent post (sc_recurring_event) would otherwise resolve to an
+	 * empty event. Deriving the subtype from the post type fixes both post types
+	 * through one call site.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int $post_id WP post id.
+	 *
+	 * @return object SCE Event object (may be empty if no row exists).
+	 */
+	public static function resolve_event_for_post( $post_id ) {
+
+		return sugar_calendar_get_event_by_object(
+			$post_id,
+			'post',
+			[ 'object_subtype' => get_post_type( $post_id ) ]
+		);
+	}
+
+	/**
 	 * Reconcile the event's meeting against the selected provider on save.
 	 *
 	 * @since 3.12.0
@@ -115,14 +138,9 @@ class EventMeetingManager {
 		}
 
 		try {
-			$event = sugar_calendar_get_event_by_object( $post_id );
+			$event = self::resolve_event_for_post( $post_id );
 
 			if ( empty( $event->id ) ) {
-				return;
-			}
-
-			// Recurring events do not carry a single-meeting lifecycle yet (deferred).
-			if ( ! empty( $event->recurrence ) ) {
 				return;
 			}
 
@@ -147,13 +165,55 @@ class EventMeetingManager {
 				return;
 			}
 
-			// update: same provider, meeting exists — fingerprint-gated PATCH.
+			// same provider, meeting exists.
 			if ( $existing && $existing === $current ) {
-				$this->update( $current, $event );
+				$this->sync_same_provider( $current, $event );
 			}
 		} catch ( \Throwable $e ) {
-			error_log( '[SC Zoom] EventMeetingManager::sync failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			// Swallow: a provider failure must never block the post save.
+			unset( $e );
 		}
+	}
+
+	/**
+	 * The "same provider, meeting exists" branch of sync(): either a kind
+	 * change (delete+recreate) or a fingerprint-gated PATCH. Split out of
+	 * sync() to keep its cyclomatic complexity/nesting in bounds.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param MeetingProviderInterface $provider Resolved provider (same as the
+	 *                                           currently-provisioned one).
+	 * @param object                   $event    SCE Event object.
+	 *
+	 * @return void
+	 */
+	private function sync_same_provider( MeetingProviderInterface $provider, $event ) {
+
+		$signature   = $provider->get_sync_signature( $event );
+		$stored_kind = (string) get_event_meta( $event->id, 'meeting_kind', true );
+
+		// Kind change (2<->8, 2<->3, 8<->3, either direction): Zoom cannot change a
+		// meeting's type via PATCH, so delete + recreate. CREATE-FIRST — provision
+		// the new meeting before deleting the old one, so a failed create leaves the
+		// old meeting/meta intact and sync() genuinely retries on the next save.
+		if ( $signature['kind'] !== $stored_kind ) {
+			$old_meeting_id = (string) get_event_meta( $event->id, 'meeting_id', true );
+			$result         = $this->provision_meeting( $provider, $event );
+
+			if ( is_wp_error( $result ) ) {
+				return;
+			}
+
+			if ( $old_meeting_id !== '' ) {
+				$this->delete_old_meeting( $provider, $event, $old_meeting_id );
+			}
+
+			return;
+		}
+
+		// Same kind — fingerprint-gated PATCH.
+		$this->update( $provider, $event, $signature['fingerprint'] );
 	}
 
 	/**
@@ -171,12 +231,12 @@ class EventMeetingManager {
 			return;
 		}
 
-		if ( get_post_type( $post_id ) !== sugar_calendar_get_event_post_type_id() ) {
+		if ( ! post_type_supports( get_post_type( $post_id ), 'events' ) ) {
 			return;
 		}
 
 		try {
-			$event = sugar_calendar_get_event_by_object( $post_id );
+			$event = self::resolve_event_for_post( $post_id );
 
 			if ( empty( $event->id ) ) {
 				return;
@@ -188,7 +248,8 @@ class EventMeetingManager {
 				$this->remove( $provider, $event );
 			}
 		} catch ( \Throwable $e ) {
-			error_log( '[SC Zoom] EventMeetingManager::cleanup failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			// Swallow: a provider failure must never block the trash/delete.
+			unset( $e );
 		}
 	}
 
@@ -247,7 +308,13 @@ class EventMeetingManager {
 		}
 
 		$this->write_meeting_meta( $event->id, $result );
-		update_event_meta( $event->id, 'meeting_sync_hash', $this->fingerprint( $event ) );
+
+		// One signature call drives both the fingerprint gate and the kind
+		// discriminator (2/3/8). meeting_kind lets a later kind change be detected
+		// and routed to delete+recreate instead of an (impossible) type-flip PATCH.
+		$signature = $provider->get_sync_signature( $event );
+		update_event_meta( $event->id, 'meeting_sync_hash', $signature['fingerprint'] );
+		update_event_meta( $event->id, 'meeting_kind', $signature['kind'] );
 
 		// A successful (re)provision clears any "meeting deleted externally"
 		// breadcrumb so a stale editor notice does not linger.
@@ -285,7 +352,7 @@ class EventMeetingManager {
 		} else {
 			// Orphaned meeting (provider deregistered): still honor the intent by
 			// clearing the raw meeting meta so no stale card renders.
-			foreach ( [ 'meeting_provider', 'meeting_id', 'join_url', 'meeting_password', 'meeting_settings', 'meeting_sync_hash' ] as $key ) {
+			foreach ( [ 'meeting_provider', 'meeting_id', 'join_url', 'meeting_password', 'meeting_settings', 'meeting_sync_hash', 'meeting_kind' ] as $key ) {
 				delete_event_meta( $event->id, $key );
 			}
 		}
@@ -305,27 +372,25 @@ class EventMeetingManager {
 	 */
 	private function create( MeetingProviderInterface $provider, $event ) {
 
-		$result = $this->provision_meeting( $provider, $event );
-
-		if ( is_wp_error( $result ) ) {
-			error_log( '[SC Zoom] create_meeting skipped/failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		}
+		// Failure is intentionally silent: online_provider stays set, so the next
+		// save retries provisioning (credits/transient-error recovery).
+		$this->provision_meeting( $provider, $event );
 	}
 
 	/**
-	 * Fingerprint-gated update: PATCH only when meeting-relevant fields changed.
+	 * Fingerprint-gated update: PATCH only when the provider's signature changed.
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param MeetingProviderInterface $provider Resolved provider.
-	 * @param object                   $event    SCE Event object.
+	 * @param MeetingProviderInterface $provider     Resolved provider.
+	 * @param object                   $event        SCE Event object.
+	 * @param string                   $current_hash Current fingerprint from the provider signature.
 	 *
 	 * @return void
 	 */
-	private function update( MeetingProviderInterface $provider, $event ) {
+	private function update( MeetingProviderInterface $provider, $event, string $current_hash ) {
 
-		$current_hash = $this->fingerprint( $event );
-		$stored_hash  = (string) get_event_meta( $event->id, 'meeting_sync_hash', true );
+		$stored_hash = (string) get_event_meta( $event->id, 'meeting_sync_hash', true );
 
 		// No meeting-relevant change — skip the relay call entirely.
 		if ( $current_hash === $stored_hash ) {
@@ -335,8 +400,6 @@ class EventMeetingManager {
 		$result = $provider->update_meeting( $event );
 
 		if ( is_wp_error( $result ) ) {
-			error_log( '[SC Zoom] update_meeting failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
 			// Leave the stored hash untouched so the next save retries.
 			return;
 		}
@@ -357,11 +420,8 @@ class EventMeetingManager {
 	 */
 	private function remove( MeetingProviderInterface $provider, $event ) {
 
-		$result = $provider->delete_meeting( $event );
-
-		if ( is_wp_error( $result ) ) {
-			error_log( '[SC Zoom] delete_meeting failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		}
+		// Delete failure is tolerated (orphaned remote meeting is acceptable).
+		$provider->delete_meeting( $event );
 
 		// Clear local meta regardless of the delete result: the user's intent is
 		// "no meeting here"; an orphaned remote meeting is harmless (matches the
@@ -371,6 +431,43 @@ class EventMeetingManager {
 		}
 
 		delete_event_meta( $event->id, 'meeting_sync_hash' );
+		delete_event_meta( $event->id, 'meeting_kind' );
+	}
+
+	/**
+	 * Best-effort delete of a superseded meeting id, after a create-first
+	 * recurrence-ness toggle has already provisioned the new meeting.
+	 *
+	 * MeetingProviderInterface::delete_meeting() reads `meeting_id` from the
+	 * event's meta rather than taking an id argument, but by this point that
+	 * meta already holds the NEW meeting's id (written by provision_meeting()).
+	 * Temporarily point it at the old id for the delete call, then restore the
+	 * new id — the local meta the user actually wants is never at risk, since
+	 * it's restored in a finally block even if the delete call throws.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param MeetingProviderInterface $provider       Resolved provider.
+	 * @param object                   $event          SCE Event object.
+	 * @param string                   $old_meeting_id The superseded meeting id.
+	 *
+	 * @return void
+	 */
+	private function delete_old_meeting( MeetingProviderInterface $provider, $event, string $old_meeting_id ) {
+
+		$new_meeting_id = (string) get_event_meta( $event->id, 'meeting_id', true );
+
+		try {
+			update_event_meta( $event->id, 'meeting_id', $old_meeting_id );
+
+			// Best-effort: an orphaned old meeting is acceptable on failure.
+			$provider->delete_meeting( $event );
+		} catch ( \Throwable $e ) {
+			// Swallow: the finally block still restores the new meeting id.
+			unset( $e );
+		} finally {
+			update_event_meta( $event->id, 'meeting_id', $new_meeting_id );
+		}
 	}
 
 	/**
@@ -392,33 +489,6 @@ class EventMeetingManager {
 		update_event_meta( $event_id, 'join_url', $result['join_url'] ?? '' );
 		update_event_meta( $event_id, 'meeting_password', $result['password'] ?? '' );
 		update_event_meta( $event_id, 'meeting_settings', $result['meeting_settings'] ?? '' );
-	}
-
-	/**
-	 * Provider-agnostic fingerprint of the meeting-relevant event fields.
-	 *
-	 * Mirrors the inputs build_meeting_data() consumes (minus the static
-	 * settings). A change here is what gates the update PATCH.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param object $event SCE Event object.
-	 *
-	 * @return string
-	 */
-	private function fingerprint( $event ): string {
-
-		return md5(
-			implode(
-				'|',
-				[
-					(string) $event->title,
-					(string) $event->start,
-					(string) $event->end,
-					(string) $event->start_tz,
-				]
-			)
-		);
 	}
 
 	/**

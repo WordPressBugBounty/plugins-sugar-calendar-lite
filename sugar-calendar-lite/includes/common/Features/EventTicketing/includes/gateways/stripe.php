@@ -296,7 +296,11 @@ class Stripe extends Checkout implements GatewayInterface {
 
 		$is_sandbox = Functions\is_sandbox();
 
-		if ( empty( Functions\get_stripe_secret_key() ) && ! $is_sandbox ) {
+		// Check the full connection state, not just the secret key against
+		// live mode — a secret-key-only check never bails in sandbox mode,
+		// so a sandbox disconnect (empty test key) sails through into the
+		// Stripe SDK call below with no key set.
+		if ( ! Functions\stripe_is_connected() ) {
 			return new WP_Error(
 				'sc_et_create_payment_intent_no_secret_key',
 				__( 'No Stripe API key found.', 'sugar-calendar-lite' )

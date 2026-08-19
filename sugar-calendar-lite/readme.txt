@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 6.2
 Tested up to:      7.0
-Stable tag:        3.12.1
+Stable tag:        3.13.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -256,6 +256,21 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.13.0 - 2026-08-19 =
+- Added: **NEW** Registration Form: collect extra details from attendees during ticket checkout or RSVP registration, like meal choice, t-shirt size, or a company name.
+- Added: Export your events as a CSV file, ready to open in Excel or Google Sheets.
+- Added: Free events with tickets: turn on ticketing and let visitors claim free tickets without setting up a payment provider.
+- Added: Zoom meetings can now be added to recurring events, with one join link that works for every occurrence.
+- Added: New AI tab under Tools: install the WPVibe.ai plugin in one click and see what AI assistants can do with your events.
+- Added: Pick a date range when exporting, so you only export the events you need.
+- Changed: Setup Wizard improvements, including a new welcome screen in your WordPress admin.
+- Fixed: The Notify Attendees panel did not open when using the Block editor.
+- Fixed: Notify Attendees emailed only the person who paid instead of every ticket holder.
+- Fixed: Ticket and order emails showed the event start time in place of the end time.
+- Fixed: Dropdowns in the event editor did not work when using the Block editor.
+- Fixed: The Event List block could hide all events from visitors who were not logged in when filtering by tag.
+- Fixed: Security improvements.
+
 = 3.12.1 - 2026-07-17 =
 - Fixed: The First Event Creation Guide no longer blocks the event editor when using the Block editor.
 

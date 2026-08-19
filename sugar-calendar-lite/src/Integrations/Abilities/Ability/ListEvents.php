@@ -2,8 +2,6 @@
 /**
  * The sc-events/list-events ability.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities\Ability
  * @since 3.12.0
  */
 
@@ -153,11 +151,19 @@ class ListEvents extends AbstractAbility {
 		if ( ! empty( $args['calendar_id'] ) ) {
 			$post_ids = $this->events->resolve_calendar_post_ids( absint( $args['calendar_id'] ) );
 
+			if ( ! empty( $query_args['object_id__in'] ) ) {
+				// build_query_args() already restricted object_id__in to the
+				// caller's own events (a non-privileged requester asked for a
+				// non-public status) — intersect rather than overwrite, or
+				// combining calendar_id with status would bypass that gate.
+				$post_ids = array_intersect( $post_ids, $query_args['object_id__in'] );
+			}
+
 			if ( empty( $post_ids ) ) {
 				return [ 'events' => [], 'total' => 0 ];
 			}
 
-			$query_args['object_id__in'] = $post_ids;
+			$query_args['object_id__in'] = array_values( $post_ids );
 		}
 
 		$query_args['number']  = absint( $args['number'] ?? 20 );

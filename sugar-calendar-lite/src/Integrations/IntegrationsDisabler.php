@@ -52,14 +52,11 @@ class IntegrationsDisabler {
 			// Best-effort relay-side teardown. Log-only on failure — disabling
 			// must never be blocked by relay availability (no revoke endpoint
 			// exists; relay tokens are simply orphaned).
-			$unregistered = ( new OAuthRelayClient() )->unregister_webhook(
+			// Best-effort unregister; a failure must not block the disable/delete.
+			( new OAuthRelayClient() )->unregister_webhook(
 				(string) $connection['provider'],
 				(string) $connection['account_id']
 			);
-
-			if ( is_wp_error( $unregistered ) ) {
-				error_log( '[SC Integrations] webhook unregister on disable failed: ' . $unregistered->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
 
 			OAuthConnectionModel::delete( (int) $connection['id'] );
 		}

@@ -4,6 +4,10 @@ namespace Sugar_Calendar\Admin\Events\Metaboxes;
 
 use Walker_Category_Checklist;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 // Walker_Category_Checklist class.
 require_once ABSPATH . 'wp-admin/includes/class-walker-category-checklist.php';
 
@@ -53,7 +57,7 @@ class WalkerCategoryCheckbox extends Walker_Category_Checklist {
 		$item_id  = sanitize_key( "{$taxonomy}-{$category->term_id}" );
 		$checked  = in_array( $category->term_id, $args['selected_cats'], true );
 		$disabled = empty( $args['disabled'] );
-		$text     = apply_filters( 'the_category', $category->name, '', '' ); // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName
+		$text     = apply_filters( 'the_category', $category->name, '', '' ); // phpcs:ignore WPForms.Comments.PHPDocHooks.RequiredHookDocumentation,WPForms.PHP.ValidateHooks.InvalidHookName,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WordPress hook, intentionally invoked.
 
 		// Calendar color.
 		$bg_color = sugar_calendar_get_calendar_color( $category->term_id );

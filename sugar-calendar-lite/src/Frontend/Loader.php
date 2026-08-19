@@ -247,6 +247,13 @@ class Loader {
 			'6.5.0'
 		);
 
+		wp_register_style(
+			'sugar-calendar-frontend-tailwind',
+			SC_PLUGIN_ASSETS_URL . 'css/frontend-tailwind' . Helpers\WP::asset_min() . '.css',
+			[],
+			Helpers::get_asset_version()
+		);
+
 		if ( ! sc_doing_events() ) {
 			return;
 		}

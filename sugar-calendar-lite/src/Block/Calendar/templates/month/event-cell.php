@@ -2,6 +2,10 @@
 
 use Sugar_Calendar\Helper;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * @var \Sugar_Calendar\Block\Calendar\CalendarView\Month\EventCell $context
  */

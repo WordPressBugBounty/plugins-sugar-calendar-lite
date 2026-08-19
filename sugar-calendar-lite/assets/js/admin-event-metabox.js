@@ -39,16 +39,7 @@
 			this.$onlineDescription = $( '.sugar-calendar-metabox__online-description', this.$el );
 			this.onlineDescriptionDefault = this.$onlineDescription.text();
 			this.$onlineCreditsError = $( '.sugar-calendar-metabox__online-credits-error', this.$el );
-			this.$recurrence = $( '#recurrence', this.$el );
 			this.$tagsSelect = $( '.sugar-calendar-column-tags-form select' );
-
-			// Remember each Online Platform option's server-rendered disabled state,
-			// so the recurrence lock can restore it (rather than blanket-enabling
-			// options the server intentionally disabled, e.g. out-of-credits) when
-			// the event stops being recurring.
-			this.$onlineProvider.find( 'option' ).each( function () {
-				$( this ).data( 'scBaseDisabled', $( this ).prop( 'disabled' ) );
-			} );
 			this.$helpUrl = $( '#sugar-calendar-header-help' );
 			this.helpUrl = false;
 
@@ -87,7 +78,6 @@
 
 			this.$el.on( 'click', '.sugar-calendar-metabox__copy', this.onCopyClick.bind( this ) );
 			this.$onlineProvider.on( 'change', this.syncOnlineMeetingUI.bind( this ) );
-			this.$recurrence.on( 'change', this.syncOnlineMeetingUI.bind( this ) );
 			this.$createMeetingBtn.on( 'click', this.onCreateMeetingClick.bind( this ) );
 
 			// Delegated: the meeting card (with its Remove button) is re-inserted
@@ -214,65 +204,6 @@
 		},
 
 		/**
-		 * Lock the Online Platform picker while the event is recurring.
-		 *
-		 * Online meetings (Zoom) are not supported for recurring events yet — the
-		 * save path (EventMeetingManager::sync / CreateMeetingAjax) rejects them.
-		 * So when the Recurrence type is anything other than "Never" we reset the
-		 * provider to None (a recurring save then never submits a provider),
-		 * disable the provider options, and surface the notice. Lite renders a
-		 * DISABLED "Repeat" teaser (recurrence is Pro); we treat a disabled
-		 * control as not-recurring so the picker is never locked there.
-		 *
-		 * Unlike the provider-change hide in syncOnlineMeetingUI, this lock is NOT a
-		 * reversible "no data loss" affordance when the event already has a
-		 * provisioned meeting: the options are disabled so the user cannot re-select
-		 * the provider, and EventMeetingManager::sync skips recurring events, so an
-		 * existing meeting is left in place at the provider rather than torn down.
-		 *
-		 * @since 3.12.0
-		 */
-		applyRecurrenceLock: function () {
-
-			const recurring = !! (
-				this.$recurrence
-				&& this.$recurrence.length
-				&& ! this.$recurrence.prop( 'disabled' )
-				&& this.$recurrence.val()
-				&& this.$recurrence.val() !== '0'
-			);
-
-			// Only external integration providers (e.g. Zoom) are locked for recurring
-			// events — they don't support recurrence yet. "None" (value="") and
-			// "Custom Link" (a plain URL with no API call) are always allowed.
-			const $providerOptions = this.$onlineProvider.find( 'option' ).filter( function () {
-				const val = $( this ).val();
-
-				return val !== '' && val !== 'custom';
-			} );
-
-			if ( recurring ) {
-
-				// Reset an integration-provider selection to None so a recurring save
-				// never carries it, then lock those options. None / Custom Link stay.
-				const current = this.$onlineProvider.val();
-
-				if ( current !== '' && current !== 'custom' ) {
-					this.$onlineProvider.val( '' );
-				}
-
-				$providerOptions.prop( 'disabled', true );
-
-				return;
-			}
-
-			// Not recurring: restore each option's server-rendered disabled state.
-			$providerOptions.each( function () {
-				$( this ).prop( 'disabled', !! $( this ).data( 'scBaseDisabled' ) );
-			} );
-		},
-
-		/**
 		 * Sync the Online Platform UI to the selected provider:
 		 *  - show the existing meeting block only when its provider matches the
 		 *    current selection (hide it for None or any other provider);
@@ -291,9 +222,6 @@
 			if ( ! this.$onlineProvider || ! this.$onlineProvider.length ) {
 				return;
 			}
-
-			// Recurring events lock the picker to None before anything else runs.
-			this.applyRecurrenceLock();
 
 			const $opt = this.$onlineProvider.find( 'option:selected' );
 			const slug = this.$onlineProvider.val();
@@ -625,14 +553,29 @@
 
 		initChoicesJS: function () {
 
+			const position = this.isBlockEditor() ? 'bottom' : 'auto';
+
 			$( '.choicesjs-select', this.$el ).each( ( i, el ) => {
 				new Choices( el, {
 					itemSelectText: '',
 					allowHTML: true,
+					position: position,
 				} );
 			} );
 
 			this.initChoicesJSForTags();
+		},
+
+		/**
+		 * Whether the block editor is rendering this screen.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @return {boolean} True in the block editor.
+		 */
+		isBlockEditor: function () {
+
+			return document.body.classList.contains( 'block-editor-page' );
 		},
 
 		/**
@@ -790,7 +733,10 @@
 			} );
 
 			// Validate dates for block editor. Disable the submit button if the dates are invalid.
-			if ( typeof( wp.blockEditor ) === 'object' ) {
+			// The `wp.blockEditor` global is not a reliable signal here: `wp-core-data`
+			// depends on it, so it is present on classic screens too. The `core/editor`
+			// store this uses comes from `wp-editor`, which classic screens do not load.
+			if ( this.settings.editor && this.settings.editor.type === 'block' ) {
 
 				$.each( [
 					this.startDate,

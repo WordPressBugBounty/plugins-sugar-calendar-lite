@@ -341,6 +341,7 @@ class List_Table extends \WP_List_Table {
 	 *
 	 * @since 1.0.0
 	 * @since 3.8.0 Update date and time display.
+	 * @since 3.13.0 Show the order's own date instead of the event's start date.
 	 *
 	 * @param Order $item Order object.
 	 *
@@ -348,23 +349,15 @@ class List_Table extends \WP_List_Table {
 	 */
 	public function column_date( $item = null ) {
 
-		// Get Event.
-		$event = sugar_calendar_get_event( $item->event_id );
-
-		// Bail if no Event.
-		if ( empty( $event ) ) {
-			return '&mdash;';
-		}
-
-		$start_date = $event->format_date( sc_get_date_format(), $event->start );
-		$start_time = $event->format_date( sc_get_time_format(), $event->start );
+		$order_date = sugar_calendar_format_date_i18n( sc_get_date_format(), $item->date_created );
+		$order_time = sugar_calendar_format_date_i18n( sc_get_time_format(), $item->date_created );
 
 		return wp_kses_post(
 			wp_sprintf(
 				'%1$s %2$s %3$s',
-				esc_html( $start_date ),
+				esc_html( $order_date ),
 				esc_html__( 'at', 'sugar-calendar-lite' ),
-				esc_html( $start_time )
+				esc_html( $order_time )
 			)
 		);
 	}
@@ -468,7 +461,7 @@ class List_Table extends \WP_List_Table {
 	 */
 	public function column_total( $item = null ) {
 
-		$retval = '<strong>' . Functions\currency_filter( $item->total ) . '</strong>';
+		$retval = '<strong>' . Functions\display_price( $item->total ) . '</strong>';
 
 		// Setup URL.
 		$url = add_query_arg(

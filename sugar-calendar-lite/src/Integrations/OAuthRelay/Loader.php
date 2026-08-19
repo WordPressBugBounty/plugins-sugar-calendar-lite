@@ -170,7 +170,8 @@ class Loader {
 				->with_events()
 				->boot();
 		} catch ( \Throwable $e ) {
-			error_log( '[SC OAuth] Lite relay configure skipped: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			// Lite has no ProductApi; configuring the relay is a no-op here.
+			unset( $e );
 		}
 	}
 

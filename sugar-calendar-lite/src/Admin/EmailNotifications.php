@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Admin;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\TicketsTab;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
 use Sugar_Calendar\Admin\EmailNotifications\EventRecentTicketsTable;
+use Sugar_Calendar\Admin\EmailNotifications\TicketNotificationRecipients;
 use Sugar_Calendar\Event_Query;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
@@ -13,9 +14,10 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Tasks\Tasks;
+use Sugar_Calendar_Rsvp\Model\RsvpQuery;
 use WP_Post;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\currency_filter;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_orders;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\count_tickets;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_ticket_data;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\ticketing_provider_available_for_admin;
@@ -56,6 +58,20 @@ class EmailNotifications {
 	const JOB_OPTION_PREFIX = 'sc_email_notification_job_';
 
 	/**
+	 * The option name prefix for email notification input batches.
+	 *
+	 * @since 3.13.0
+	 */
+	const JOB_BATCH_OPTION_PREFIX = 'sc_email_notification_batch_';
+
+	/**
+	 * The option name prefix for email notification batch failures.
+	 *
+	 * @since 3.13.0
+	 */
+	const JOB_FAILURE_OPTION_PREFIX = 'sc_email_notification_failures_';
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 3.11.0
@@ -68,8 +84,7 @@ class EmailNotifications {
 		add_action( 'admin_init', [ $this, 'render_preview' ] );
 
 		// Output sidebar markup.
-		add_action( 'sugar_calendar_admin_page_after', [ $this, 'admin_page_after' ] );
-		add_action( 'in_admin_footer', [ $this, 'admin_page_after' ] );
+		add_action( 'admin_footer', [ $this, 'admin_page_after' ] );
 
 		// Add event list table row actions.
 		add_filter( 'post_row_actions', [ $this, 'post_row_actions' ], 10, 2 );
@@ -251,6 +266,35 @@ class EmailNotifications {
 	}
 
 	/**
+	 * Check whether an event has RSVP attendees.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int $event_id Event ID.
+	 *
+	 * @return bool
+	 */
+	private function event_has_rsvp_attendees( $event_id ) {
+
+		if ( ! class_exists( RsvpQuery::class ) ) {
+			return false;
+		}
+
+		if ( method_exists( RsvpQuery::class, 'event_has_attendees' ) ) {
+			return RsvpQuery::event_has_attendees( (int) $event_id );
+		}
+
+		$items = ( new RsvpQuery(
+			[
+				'event_id' => $event_id,
+				'number'   => 1,
+			]
+		) )->get_items();
+
+		return ! empty( $items );
+	}
+
+	/**
 	 * Check whether an event has tickets.
 	 *
 	 * @since 3.11.0
@@ -265,6 +309,51 @@ class EmailNotifications {
 			ticketing_provider_available_for_admin() &&
 			get_event_meta( $event_id, 'tickets', true )
 		);
+	}
+
+	/**
+	 * Check whether an event has notification recipients.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int             $event_id            Event ID.
+	 * @param array<int,bool> $ticket_availability Ticket recipient availability keyed by event ID.
+	 *
+	 * @return bool
+	 */
+	private function event_has_attendees( $event_id, array $ticket_availability ) {
+
+		if ( $this->event_has_ticketing( $event_id ) ) {
+			return $ticket_availability[ (int) $event_id ] ?? false;
+		}
+
+		if ( $this->event_has_rsvp( $event_id ) ) {
+			return $this->event_has_rsvp_attendees( $event_id );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Resolve ticket recipient availability for the final event result set.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param object[] $events Events in the final result set.
+	 *
+	 * @return array<int,bool>
+	 */
+	private function get_ticket_availability( array $events ) {
+
+		$event_ids = [];
+
+		foreach ( $events as $event ) {
+			if ( $this->event_has_ticketing( $event->id ) ) {
+				$event_ids[] = (int) $event->id;
+			}
+		}
+
+		return ( new TicketNotificationRecipients() )->has_recipients_for_events( $event_ids );
 	}
 
 	/**
@@ -581,22 +670,13 @@ class EmailNotifications {
 		return wp_kses_post( $text );
 	}
 
-	private function get_event_tickets( $event_id, $count_only = false ) {
-
-		return get_orders( [
-			'event_id' => $event_id,
-			'number'   => 0,
-			'count'    => $count_only,
-		] );
-	}
-
 	private function get_event_rsvps( $event_id, $going_only = false, $count_only = false ) {
 
-		if ( ! class_exists( 'Sugar_Calendar_Rsvp\Model\RsvpQuery' ) ) {
+		if ( ! class_exists( RsvpQuery::class ) ) {
 			return $count_only ? 0 : [];
 		}
 
-		$items = ( new \Sugar_Calendar_Rsvp\Model\RsvpQuery( [ 'event_id' => $event_id, 'number' => -1 ] ) )->get_items();
+		$items = ( new RsvpQuery( [ 'event_id' => $event_id, 'number' => -1 ] ) )->get_items();
 
 		if ( $going_only ) {
 			$items = array_filter(
@@ -665,7 +745,14 @@ class EmailNotifications {
 		}
 
 		$search    = isset( $_REQUEST['search'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) : '';
-		$event_ids = isset( $_REQUEST['event_ids'] ) ? array_map( 'intval', wp_unslash( $_REQUEST['event_ids'] ) ) : [];
+		$event_ids = isset( $_REQUEST['event_ids'] )
+			? (array) wp_unslash( $_REQUEST['event_ids'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized to positive integers below.
+			: [];
+		$event_ids = array_values(
+			array_unique(
+				array_filter( array_map( 'absint', $event_ids ) )
+			)
+		);
 
 		// Fetch more than 10 so post-filter for notification capability still yields ~10 results.
 		$query_args = [
@@ -693,25 +780,32 @@ class EmailNotifications {
 
 		// Also fetch specific event IDs (for pre-selected chips).
 		if ( ! empty( $event_ids ) ) {
-			$existing_ids = array_map( fn( $e ) => intval( $e->id ), $events );
+			$existing_ids = array_fill_keys(
+				array_map( fn( $event ) => intval( $event->id ), $events ),
+				true
+			);
 
 			foreach ( $event_ids as $event_id ) {
-				if ( in_array( $event_id, $existing_ids, true ) ) {
+				if ( isset( $existing_ids[ $event_id ] ) ) {
 					continue;
 				}
 
 				$event = sugar_calendar_get_event( $event_id );
 
 				if ( ! empty( $event ) && $this->event_supports_notifications( $event->id ) ) {
-					$events[] = $event;
+					$events[]                  = $event;
+					$existing_ids[ $event_id ] = true;
 				}
 			}
 		}
 
+		$ticket_availability = $this->get_ticket_availability( $events );
+
 		$result = array_map(
 			fn( $event ) => [
-				'id'    => intval( $event->id ),
-				'title' => $event->title,
+				'id'            => intval( $event->id ),
+				'title'         => $event->title,
+				'has_attendees' => $this->event_has_attendees( $event->id, $ticket_availability ),
 			],
 			$events
 		);
@@ -735,13 +829,21 @@ class EmailNotifications {
 			wp_send_json_error();
 		}
 
-		$event_ids = isset( $_REQUEST['event_ids'] ) ? array_map( 'intval', wp_unslash( $_REQUEST['event_ids'] ) ) : [];
+		$event_ids = isset( $_REQUEST['event_ids'] )
+			? (array) wp_unslash( $_REQUEST['event_ids'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized to positive integers below.
+			: [];
+		$event_ids = array_values(
+			array_unique(
+				array_filter( array_map( 'absint', $event_ids ) )
+			)
+		);
 
 		if ( empty( $event_ids ) ) {
 			wp_send_json_success( [ 'events' => [] ] );
 		}
 
-		$result = [];
+		$result            = [];
+		$ticket_recipients = new TicketNotificationRecipients();
 
 		foreach ( $event_ids as $event_id ) {
 			$ticket_count      = 0;
@@ -749,7 +851,7 @@ class EmailNotifications {
 			$rsvps_going_count = 0;
 
 			if ( $this->event_has_ticketing( $event_id ) ) {
-				$ticket_count = count_tickets( [ 'event_id' => $event_id ] );
+				$ticket_count = $ticket_recipients->count( $event_id );
 			} elseif ( $this->event_has_rsvp( $event_id ) ) {
 				$rsvps_count       = $this->get_event_rsvps( $event_id, false, true );
 				$rsvps_going_count = $this->get_event_rsvps( $event_id, true, true );
@@ -805,7 +907,12 @@ class EmailNotifications {
 			wp_send_json_error();
 		}
 
-		$event_ids             = array_map( 'intval', $data['events'] );
+		$event_ids = array_values(
+			array_unique(
+				array_filter( array_map( 'absint', (array) $data['events'] ) )
+			)
+		);
+
 		$add_custom_recipients = (bool) $data['add_custom_recipients'];
 		$custom_recipients     = $add_custom_recipients ?
 			array_map( 'sanitize_email', $data['custom_recipients'] ) :
@@ -817,7 +924,8 @@ class EmailNotifications {
 		$email_body    = wp_kses_post( $data['email_body'] );
 		$filter_rsvp   = sanitize_key( $data['filter_rsvp'] );
 
-		$attendees = [];
+		$attendees         = [];
+		$ticket_recipients = new TicketNotificationRecipients();
 
 		foreach ( $event_ids as $event_id ) {
 			if ( empty( sugar_calendar_get_event( $event_id ) ) ) {
@@ -825,19 +933,7 @@ class EmailNotifications {
 			}
 
 			if ( $this->event_has_ticketing( $event_id ) ) {
-				$use_occurrence_dates = (bool) get_event_meta( $event_id, 'tickets_sell_per_occurrence', true );
-				$orders               = $this->get_event_tickets( $event_id );
-
-				foreach ( $orders as $order ) {
-					$attendees[] = [
-						'name'          => trim( $order->first_name . ' ' . $order->last_name ),
-						'email'         => $order->email,
-						'event_id'      => $event_id,
-						'occurrence_id' => ! empty( $order->occurrence_id ) && $use_occurrence_dates
-							? intval( $order->occurrence_id )
-							: 0,
-					];
-				}
+				$attendees = array_merge( $attendees, $ticket_recipients->resolve( $event_id ) );
 			} elseif ( $this->event_has_rsvp( $event_id ) ) {
 				$use_occurrence_dates = (bool) get_event_meta( $event_id, 'rsvp_unique_per_occurrence', true );
 				$going_only           = $filter_rsvp === 'going';
@@ -957,55 +1053,79 @@ class EmailNotifications {
 		 *
 		 * @param int $batch_size Number of emails per batch. Default 25.
 		 */
-		$batch_size = apply_filters( 'sugar_calendar_email_notification_batch_size', 25 );
+		$batch_size  = max( 1, absint( apply_filters( 'sugar_calendar_email_notification_batch_size', 25 ) ) );
+		$batches     = array_chunk( $attendees, $batch_size );
+		$batch_count = count( $batches );
 
 		$job = [
-			'job_id'            => $job_id,
-			'status'            => 'processing',
-			'attendees'         => $attendees,
-			'email_subject'     => $email_subject,
-			'email_body'        => $email_body,
-			'headers'           => $headers,
-			'batch_size'        => $batch_size,
-			'total'             => $total,
-			'sent'              => 0,
-			'failed'            => 0,
-			'failed_recipients' => [],
-			'created_at'        => time(),
-			'completed_at'      => null,
+			'job_id'        => $job_id,
+			'status'        => 'processing',
+			'email_subject' => $email_subject,
+			'email_body'    => $email_body,
+			'headers'       => $headers,
+			'batch_size'    => $batch_size,
+			'batch_count'   => $batch_count,
+			'total'         => $total,
+			'sent'          => 0,
+			'failed'        => 0,
+			'created_at'    => time(),
+			'completed_at'  => null,
 		];
 
-		update_option( self::JOB_OPTION_PREFIX . $job_id, $job, false );
+		foreach ( $batches as $batch_index => $batch ) {
+			$batch_stored = add_option(
+				self::JOB_BATCH_OPTION_PREFIX . $job_id . '_' . $batch_index,
+				$batch,
+				'',
+				false
+			);
+
+			if ( ! $batch_stored ) {
+				$this->delete_job_options( $job_id, $batch_count );
+				wp_send_json_error();
+			}
+		}
+
+		$job_stored = add_option( self::JOB_OPTION_PREFIX . $job_id, $job, '', false );
+
+		if ( ! $job_stored ) {
+			$this->delete_job_options( $job_id, $batch_count );
+			wp_send_json_error();
+		}
 
 		// Schedule one AS action per batch.
-		$num_batches = (int) ceil( $total / $batch_size );
-
-		for ( $i = 0; $i < $num_batches; $i++ ) {
+		for ( $i = 0; $i < $batch_count; $i++ ) {
 
 			/**
 			 * Filters the schedule time.
 			 *
+			 * @since 3.11.0
+			 *
 			 * @param int $time        The time when the action is scheduled.
 			 * @param int $i           Current batch number.
 			 * @param int $num_batches Total number of batches.
-			 * @since 3.11.0
 			 */
 			$schedule_time = apply_filters(
-				'sce_admin_email_notfications_notify_attendees_queue_time',
-				time() + ($i * 2),
+				'sce_admin_email_notfications_notify_attendees_queue_time', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Established public hook; renaming would break backward compatibility.
+				time() + ( $i * 2 ),
 				$i,
-				$num_batches
+				$batch_count
 			);
 
-			as_schedule_single_action(
+			$action_id = as_schedule_single_action(
 				$schedule_time,
 				self::AS_HOOK_SEND_BATCH,
 				[
 					'job_id'      => $job_id,
 					'batch_index' => $i,
 				],
-				\Sugar_Calendar\Tasks\Tasks::GROUP
+				Tasks::GROUP
 			);
+
+			if ( empty( $action_id ) ) {
+				$this->delete_job_options( $job_id, $batch_count );
+				wp_send_json_error();
+			}
 		}
 
 		wp_send_json_success(
@@ -1034,20 +1154,69 @@ class EmailNotifications {
 	 */
 	public function process_email_batch( $job_id, $batch_index ) {
 
-		$option_key = self::JOB_OPTION_PREFIX . $job_id;
-		$job        = get_option( $option_key );
+		$batch_index = absint( $batch_index );
+		$option_key  = self::JOB_OPTION_PREFIX . $job_id;
+		$job         = get_option( $option_key );
 
-		if ( empty( $job ) || $job['status'] !== 'processing' ) {
+		if ( ! is_array( $job ) || ( $job['status'] ?? '' ) !== 'processing' ) {
 			return;
 		}
 
-		$batch_size = $job['batch_size'];
-		$offset     = $batch_index * $batch_size;
-		$batch      = array_slice( $job['attendees'], $offset, $batch_size );
+		$legacy_job = array_key_exists( 'attendees', $job );
+		$batch      = $this->get_email_batch( $job_id, $batch_index, $job, $legacy_job );
 
 		if ( empty( $batch ) ) {
 			return;
 		}
+
+		$result = $this->send_email_batch( $batch, $job );
+
+		$this->update_email_job( $job_id, $batch_index, $legacy_job, $result );
+	}
+
+	/**
+	 * Load one legacy inline slice or one new-format input batch.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $job_id      The unique job identifier.
+	 * @param int    $batch_index The zero-based batch index.
+	 * @param array  $job         The notification job summary.
+	 * @param bool   $legacy_job  Whether recipients are stored in the summary.
+	 *
+	 * @return array
+	 */
+	private function get_email_batch( $job_id, $batch_index, $job, $legacy_job ) {
+
+		if ( $legacy_job ) {
+			$batch_size = $job['batch_size'];
+			$offset     = $batch_index * $batch_size;
+
+			return array_slice( $job['attendees'], $offset, $batch_size );
+		}
+
+		$batch_count = absint( $job['batch_count'] ?? 0 );
+
+		if ( $batch_index >= $batch_count ) {
+			return [];
+		}
+
+		$batch = get_option( self::JOB_BATCH_OPTION_PREFIX . $job_id . '_' . $batch_index );
+
+		return is_array( $batch ) ? $batch : [];
+	}
+
+	/**
+	 * Send one frozen recipient batch.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $batch Recipient batch.
+	 * @param array $job   The notification job summary.
+	 *
+	 * @return array{sent:int,failed:int,failed_recipients:array}
+	 */
+	private function send_email_batch( $batch, $job ) {
 
 		$sent              = 0;
 		$failed            = 0;
@@ -1088,16 +1257,49 @@ class EmailNotifications {
 			}
 		}
 
+		return [
+			'sent'              => $sent,
+			'failed'            => $failed,
+			'failed_recipients' => $failed_recipients,
+		];
+	}
+
+	/**
+	 * Persist one processed batch's counters and failure details.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $job_id      The unique job identifier.
+	 * @param int    $batch_index The zero-based batch index.
+	 * @param bool   $legacy_job  Whether recipients are stored in the summary.
+	 * @param array  $result      Sent, failed, and failed-recipient values.
+	 *
+	 * @return void
+	 */
+	private function update_email_job( $job_id, $batch_index, $legacy_job, $result ) {
+
+		$option_key = self::JOB_OPTION_PREFIX . $job_id;
+
 		// Update job progress. Re-read to reduce race conditions between batches.
 		$job = get_option( $option_key );
 
-		if ( empty( $job ) ) {
+		if ( ! is_array( $job ) || ( $job['status'] ?? '' ) !== 'processing' ) {
 			return;
 		}
 
-		$job['sent']              += $sent;
-		$job['failed']            += $failed;
-		$job['failed_recipients']  = array_merge( $job['failed_recipients'], $failed_recipients );
+		$job['sent']   += $result['sent'];
+		$job['failed'] += $result['failed'];
+
+		if ( $legacy_job ) {
+			$job['failed_recipients'] = array_merge( $job['failed_recipients'], $result['failed_recipients'] );
+		} elseif ( ! empty( $result['failed_recipients'] ) ) {
+			$failure_key    = self::JOB_FAILURE_OPTION_PREFIX . $job_id . '_' . $batch_index;
+			$failure_stored = update_option( $failure_key, $result['failed_recipients'], false );
+
+			if ( ! $failure_stored && get_option( $failure_key ) !== $result['failed_recipients'] ) {
+				$job['failure_details_incomplete'] = true;
+			}
+		}
 
 		// Mark complete when all batches have finished.
 		if ( ( $job['sent'] + $job['failed'] ) >= $job['total'] ) {
@@ -1105,7 +1307,37 @@ class EmailNotifications {
 			$job['completed_at'] = time();
 		}
 
-		update_option( $option_key, $job, false );
+		$summary_stored = update_option( $option_key, $job, false );
+
+		if ( ! $summary_stored ) {
+			$summary_stored = get_option( $option_key ) === $job;
+		}
+
+		if ( ! $legacy_job && $summary_stored ) {
+			delete_option( self::JOB_BATCH_OPTION_PREFIX . $job_id . '_' . $batch_index );
+		}
+	}
+
+	/**
+	 * Delete a notification job and its bounded batch options.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $job_id      The unique job identifier.
+	 * @param int    $batch_count Number of batch options to delete.
+	 *
+	 * @return void
+	 */
+	private function delete_job_options( $job_id, $batch_count ) {
+
+		delete_option( self::JOB_OPTION_PREFIX . $job_id );
+
+		$batch_count = absint( $batch_count );
+
+		for ( $i = 0; $i < $batch_count; $i++ ) {
+			delete_option( self::JOB_BATCH_OPTION_PREFIX . $job_id . '_' . $i );
+			delete_option( self::JOB_FAILURE_OPTION_PREFIX . $job_id . '_' . $i );
+		}
 	}
 
 	/**
@@ -1141,9 +1373,10 @@ class EmailNotifications {
 
 		if ( $job['status'] === 'processing' ) {
 			$job['notice_dismissed'] = true;
+
 			update_option( $option_key, $job );
 		} else {
-			delete_option( $option_key );
+			$this->delete_job_options( $job_id, $job['batch_count'] ?? 0 );
 		}
 
 		wp_send_json_success();
@@ -1201,7 +1434,9 @@ class EmailNotifications {
 				! empty( $job['completed_at'] ) &&
 				( time() - $job['completed_at'] ) > 7 * DAY_IN_SECONDS
 			) {
-				delete_option( $option_name );
+				$job_id = substr( $option_name, strlen( self::JOB_OPTION_PREFIX ) );
+
+				$this->delete_job_options( $job_id, $job['batch_count'] ?? 0 );
 				continue;
 			}
 
@@ -1303,7 +1538,7 @@ class EmailNotifications {
 
 		echo '<p>' . esc_html( $message );
 
-		if ( $job['failed'] > 0 && ! empty( $job['failed_recipients'] ) ) {
+		if ( $job['failed'] > 0 ) {
 			printf(
 				' <a href="#" class="sc-toggle-failed-details" data-job-id="%s">%s</a>',
 				esc_attr( $job_id ),
@@ -1314,25 +1549,74 @@ class EmailNotifications {
 		echo '</p>';
 
 		// Render hidden failed recipients details.
-		if ( $job['failed'] > 0 && ! empty( $job['failed_recipients'] ) ) {
+		if ( $job['failed'] > 0 ) {
 			printf(
 				'<div id="sc-failed-details-%s" style="display:none;"><ul>',
 				esc_attr( $job_id )
 			);
 
-			foreach ( $job['failed_recipients'] as $recipient ) {
-				printf(
-					'<li>%s (%s) — %s</li>',
-					esc_html( $recipient['name'] ?: __( 'No name', 'sugar-calendar-lite' ) ),
-					esc_html( $recipient['email'] ),
-					esc_html( $recipient['event_title'] ?: __( 'Custom recipient', 'sugar-calendar-lite' ) )
-				);
-			}
+			$this->render_failed_recipients( $job );
 
 			echo '</ul></div>';
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * Render a completed job's legacy or per-batch failure details.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $job The notification job summary.
+	 *
+	 * @return void
+	 */
+	private function render_failed_recipients( $job ) {
+
+		foreach ( $job['failed_recipients'] ?? [] as $recipient ) {
+			$this->render_failed_recipient( $recipient );
+		}
+
+		$batch_count = absint( $job['batch_count'] ?? 0 );
+
+		for ( $i = 0; $i < $batch_count; $i++ ) {
+			$failed_recipients = get_option( self::JOB_FAILURE_OPTION_PREFIX . $job['job_id'] . '_' . $i );
+
+			if ( ! is_array( $failed_recipients ) ) {
+				continue;
+			}
+
+			foreach ( $failed_recipients as $recipient ) {
+				$this->render_failed_recipient( $recipient );
+			}
+		}
+
+		if ( ! empty( $job['failure_details_incomplete'] ) ) {
+			echo '<li>' . esc_html__( 'Some failure details could not be saved.', 'sugar-calendar-lite' ) . '</li>';
+		}
+	}
+
+	/**
+	 * Render one failed recipient in a completed job notice.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $recipient Failed recipient data.
+	 *
+	 * @return void
+	 */
+	private function render_failed_recipient( $recipient ) {
+
+		$name        = ! empty( $recipient['name'] ) ? $recipient['name'] : __( 'No name', 'sugar-calendar-lite' );
+		$event_title = ! empty( $recipient['event_title'] ) ? $recipient['event_title'] : __( 'Custom recipient', 'sugar-calendar-lite' );
+
+		printf(
+			'<li>%s (%s): %s</li>',
+			esc_html( $name ),
+			esc_html( $recipient['email'] ),
+			esc_html( $event_title )
+		);
 	}
 
 	/**
@@ -1462,7 +1746,9 @@ class EmailNotifications {
 			$output = preg_replace( '/(<body[^>]*>)/i', '$1' . $banner, $output, 1 );
 		}
 
-		echo $output;
+		// Rendered HTML email preview assembled from escaped template
+		// parts; emitted as-is (admin-only, nonce-gated preview).
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		exit;
 	}
@@ -1749,27 +2035,7 @@ class EmailNotifications {
 				return;
 			}
 
-			// The 'react-jsx-runtime' script handle was added in WP 6.6.
-			// On WP 6.2–6.5, React 18 is available but the handle isn't registered.
-			// Register a shim that provides the ReactJSXRuntime global via React.createElement.
-			if ( ! wp_script_is( 'react-jsx-runtime', 'registered' ) ) {
-				wp_register_script( 'react-jsx-runtime', false, [ 'react' ] );
-				wp_add_inline_script(
-					'react-jsx-runtime',
-					'(function(R){' .
-						'function jsx(t,c,k){' .
-							'var p={},ch,i;' .
-							'for(i in c){i==="children"?ch=c[i]:p[i]=c[i]}' .
-							'if(k!==void 0)p.key=k;' .
-							'var a=[t,p];' .
-							'if(Array.isArray(ch))for(i=0;i<ch.length;i++)a.push(ch[i]);' .
-							'else if(ch!==void 0)a.push(ch);' .
-							'return R.createElement.apply(null,a)' .
-						'}' .
-						'window.ReactJSXRuntime={jsx:jsx,jsxs:jsx,Fragment:R.Fragment}' .
-					'})(window.React);'
-				);
-			}
+			ReactJsxRuntime::ensure_registered();
 
 			// Required for WYSIWYG editor.
 			wp_enqueue_editor();

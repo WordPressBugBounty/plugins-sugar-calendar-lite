@@ -1,0 +1,45 @@
+/*
+ * Tailwind v4 @theme for the frontend bundle — the single home for every Tailwind directive.
+ * The build prepends this to the compiled SCSS bundle and runs @tailwindcss/postcss.
+ */
+@import "tailwindcss/theme.css" layer(theme) prefix(scf);
+@import "tailwindcss/utilities.css" layer(sc-utils) source(none) prefix(scf);
+
+@source "../../src/**/*.php";
+@source "../../includes/**/*.php";
+@source "../../src/Block/**/*.js";
+@source "../../assets/js/**/*.js";
+@source "../../assets/jsx/src/**/*.js";
+@source "../../assets/jsx/src/**/*.jsx";
+
+@plugin "@iconify/tailwind4" {
+	prefixes: fa6-solid, fa6-regular, fa6-brands, fa7-solid, fa7-regular, fa7-brands;
+	icon-sets: from-json(custom, "./.design/custom-icons.json");
+}
+
+/* Second Iconify instance for icons painted from CSS (pseudo-elements, masks). `icon-src-[set--name]`
+   emits only the glyph var (`--svg: url(...)`); component CSS paints via `mask-image: var(--svg)`. */
+@plugin "@iconify/tailwind4" {
+	prefix: icon-src;
+	overrideOnly: true;
+}
+
+@layer sc-components {
+	/* Icon glyphs don't shrink in flex rows. In sc-components so utilities can override. */
+	[class*="icon-["] {
+		flex: 0 0 auto;
+	}
+}
+
+@theme inline {
+	/* px base unit (not a token remap) — exact px, no root-font-size drift. */
+	--spacing: 4px;
+
+	/* Breakpoints — literal, desktop-first; default sm/md/lg cleared so only these exist. */
+	--breakpoint-*: initial;
+	--breakpoint-xs-phone: 320px;
+	--breakpoint-phone: 600px;
+	--breakpoint-ipad: 768px;
+	--breakpoint-tablet: 782px;
+	--breakpoint-desktop: 960px;
+}

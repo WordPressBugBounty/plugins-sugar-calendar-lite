@@ -341,7 +341,7 @@ class WpmlQuery {
 		// Check if WPML translations table exists.
 		$table_name = $wpdb->prefix . 'icl_translations';
 
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against WPML tables.
 			return [];
 		}
 
@@ -364,7 +364,7 @@ class WpmlQuery {
 			array_merge( $ids, [ $wpdb->esc_like( $element_type_prefix ) . '%' ] )
 		);
 
-		$results = $wpdb->get_results( $query );
+		$results = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against WPML tables.
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return array_map( 'intval', wp_list_pluck( $results, 'original_id' ) );

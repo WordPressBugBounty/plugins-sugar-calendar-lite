@@ -15,7 +15,7 @@ add_action( 'init', __NAMESPACE__ . '\\Common\\email_ticket' );
 
 // Meta data
 add_filter( 'sugar_calendar_meta_data', __NAMESPACE__ . '\\Metadata\\register_meta_data' );
-add_action( 'sugar_calendar_event_to_save', __NAMESPACE__ . '\\Metadata\\save_meta_data' );
+add_action( 'sugar_calendar_event_to_save', __NAMESPACE__ . '\\Metadata\\save_meta_data', 10, 2 );
 
 // Email
 add_action( 'sc_et_checkout_pre_redirect', __NAMESPACE__ . '\\Common\\Functions\\send_order_receipt_email' );

@@ -2,8 +2,6 @@
 /**
  * The sc-events/list-calendars ability.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities\Ability
  * @since 3.12.0
  */
 

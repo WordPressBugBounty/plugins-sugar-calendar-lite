@@ -238,7 +238,8 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_description_text() {
-		return esc_html__( 'Requires %s (%s), but (%s) is installed.', 'sugar-calendar-lite' );
+		/* translators: 1: required component name, 2: minimum version, 3: installed version. */
+		return esc_html__( 'Requires %1$s (%2$s), but (%3$s) is installed.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -248,7 +249,8 @@ final class Requirements_Check {
 	 * @return string
 	 */
 	private function unmet_requirements_missing_text() {
-		return esc_html__( 'Requires %s (%s), but it appears to be missing.', 'sugar-calendar-lite' );
+		/* translators: 1: required component name, 2: minimum version. */
+		return esc_html__( 'Requires %1$s (%2$s), but it appears to be missing.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -423,8 +425,10 @@ final class Requirements_Check {
 			);
 		}
 
-		// Output the description (unescaped, contains HTML)
-		echo wpautop( $text );
+		// Output the description. $text is a translated string with each
+		// interpolated value individually esc_html()'d; wp_kses_post keeps
+		// the <p>/<strong> markup while satisfying output escaping.
+		echo wp_kses_post( wpautop( $text ) );
 	}
 
 	/**

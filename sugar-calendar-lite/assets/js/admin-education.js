@@ -18,6 +18,7 @@
 			this.settings = settings;
 			this.$notices = $( '.sugar-calendar-education-notice' );
 			this.$dismissButtons = $( '.sugar-calendar-dismiss-notice' );
+			this.$educationModalLinks = $( '.sce-lite-education-modal-link' );
 
 			this.bindEvents();
 		},
@@ -49,7 +50,7 @@
 				boxWidth: '550px',
 				buttons: {
 					confirm: {
-						text: 'Upgrade to Pro',
+						text: sugar_calendar_admin_education.sce_admin_settings_feeds_education.upgrade_button,
 						btnClass: 'btn-confirm sce-jquery-confirm-button sugar-calendar-btn-primary sugar-calendar-btn-lg',
 						keys: [ 'enter' ],
 						action: function() {
@@ -76,7 +77,7 @@
 					alreadyPurchasedURL.searchParams.set( 'utm_campaign', 'liteplugin' );
 					alreadyPurchasedURL.searchParams.set( 'utm_locale', sugar_calendar_admin_education.sce_admin_settings_feeds_education.utm_locale );
 
-					const alreadyPurchased = '<a href="' + alreadyPurchasedURL.toString() + '" target="_blank" rel="noopener noreferrer" class="already-purchased">Already purchased?</a>';
+					const alreadyPurchased = '<a href="' + alreadyPurchasedURL.toString() + '" target="_blank" rel="noopener noreferrer" class="already-purchased">' + sugar_calendar_admin_education.sce_admin_settings_feeds_education.already_purchased + '</a>';
 					$btnc.after( discountNote + alreadyPurchased );
 				},
 				icon: 'sce-icon sce-icon__lock',
@@ -85,6 +86,105 @@
 				useBootstrap: false,
 				closeIcon: true,
 			});
+		},
+
+		/**
+		 * Open the "this is a Pro feature" upgrade modal.
+		 *
+		 * The shared opener behind every Pro-feature prompt. All copy and UTM
+		 * values arrive through `options`, so it reads no screen-specific global
+		 * and can be called from any admin page that has jquery-confirm loaded.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param {Object} options                  Modal options.
+		 * @param {string} options.title            Modal title.
+		 * @param {string} options.content          Modal body.
+		 * @param {string} options.bonus            Discount note under the buttons.
+		 * @param {string} options.upgradeButton    Confirm-button label.
+		 * @param {string} options.alreadyPurchased "Already purchased?" link label.
+		 * @param {string} options.utmLocale        utm_locale value.
+		 * @param {string} options.utmMedium        Medium base, e.g. 'event-metabox-event-venues'.
+		 * @param {Object} [options.thankYou]       Thank-you modal copy. Falls back to
+		 *                                          the global when omitted.
+		 */
+		openUpgradeModal: function( options ) {
+
+			const opts = $.extend(
+				{
+					title: '',
+					content: '',
+					bonus: '',
+					upgradeButton: '',
+					alreadyPurchased: '',
+					utmLocale: '',
+					utmMedium: '',
+					thankYou: null,
+				},
+				options || {}
+			);
+
+			$.alert( {
+				theme: 'light,sce-admin-education',
+				title: opts.title,
+				bootstrapClasses: { container: 'container sce-jquery-confirm-container', containerFluid: 'container-fluid', row: 'row' },
+				backgroundDismiss: true,
+				boxWidth: '550px',
+				buttons: {
+					confirm: {
+						text: opts.upgradeButton,
+						btnClass: 'btn-confirm sce-jquery-confirm-button sugar-calendar-btn-primary sugar-calendar-btn-lg',
+						keys: [ 'enter' ],
+						action: function() { // eslint-disable-line object-shorthand
+							window.open(
+								SugarCalendar.Admin.Education.campaignURL( 'https://sugarcalendar.com/lite-upgrade/', 'Upgrade to Pro', opts ),
+								'_blank'
+							);
+							SugarCalendar.Admin.Education.openUpradeThankYouModal( opts.utmMedium, opts.thankYou );
+						},
+					},
+				},
+				onOpenBefore: function() { // eslint-disable-line object-shorthand
+					const discountNote = '<div class="discount-note"><p>' + opts.bonus + '</p></div>';
+					const alreadyPurchasedURL = SugarCalendar.Admin.Education.campaignURL(
+						'https://sugarcalendar.com/docs/events/upgrading-from-sugar-calendar-lite-to-a-paid-license/',
+						'Already%20purchased',
+						opts
+					);
+					const alreadyPurchased = '<a href="' + alreadyPurchasedURL + '" target="_blank" rel="noopener noreferrer" class="already-purchased">' + opts.alreadyPurchased + '</a>';
+
+					$( '.jconfirm-buttons' ).after( discountNote + alreadyPurchased );
+				},
+				icon: 'sce-icon sce-icon__lock',
+				escapeKey: true,
+				content: opts.content,
+				useBootstrap: false,
+				closeIcon: true,
+			} );
+		},
+
+		/**
+		 * Build a campaign-tagged sugarcalendar.com URL for the upgrade modal.
+		 *
+		 * @since 3.13.0
+		 *
+		 * @param {string} base       Destination URL.
+		 * @param {string} utmContent utm_content value, passed through as given.
+		 * @param {Object} opts       Modal options carrying utmMedium / utmLocale.
+		 *
+		 * @return {string} The tagged URL.
+		 */
+		campaignURL: function( base, utmContent, opts ) {
+
+			const url = new URL( base );
+
+			url.searchParams.set( 'utm_source', 'WordPress' );
+			url.searchParams.set( 'utm_medium', 'upgrade-modal-' + opts.utmMedium );
+			url.searchParams.set( 'utm_content', utmContent );
+			url.searchParams.set( 'utm_campaign', 'liteplugin' );
+			url.searchParams.set( 'utm_locale', opts.utmLocale );
+
+			return url.toString();
 		},
 
 		/**
@@ -101,26 +201,79 @@
 			if ( $feedsList.length ) {
 				$feedsList.on( 'click', 'li', this.openFeedsUpgradeModal );
 			}
+
+			if ( this.$educationModalLinks.length ) {
+				this.$educationModalLinks.on( 'click', this.onEducationModalLinkClick );
+			}
+		},
+
+		/**
+		 * Display the Pro Upgrade modal for any generic
+		 * `.sce-lite-education-modal-link` trigger (event metabox fields,
+		 * Tools page Pro-feature previews, ...). Moved here from
+		 * admin-event-lite.js (#729/#737) -- this bundle is already shared
+		 * by every page that needs the modal, so the handler now lives
+		 * alongside the rest of the education modal code instead of in a
+		 * bundle scoped to the event editor.
+		 *
+		 * `this` is the clicked DOM element (jQuery's default handler
+		 * binding), not the `SugarCalendar.Admin.Education` object -- same
+		 * pattern as `openFeedsUpgradeModal` above.
+		 *
+		 * @since 3.11.0
+		 */
+		onEducationModalLinkClick: function () {
+
+			const $this = $( this );
+
+			let featTitle = sugar_calendar_admin_education.sce_admin_upgrade_modal_title_default;
+			let featName  = $this.data( 'feat-name' ) ? $this.data( 'feat-name' ) : sugar_calendar_admin_education.sce_admin_upgrade_modal_feature_name;
+			const featId = $this.data( 'feat-id' ) ? $this.data( 'feat-id' ) : sugar_calendar_admin_education.sce_admin_upgrade_modal_feature_name;
+
+			if ( featName ) {
+				featTitle = featName + ' ' + sugar_calendar_admin_education.sce_admin_upgrade_modal_content.upgrade_title;
+				featName = featName + ' ' + sugar_calendar_admin_education.sce_admin_upgrade_modal_feature_name;
+			}
+
+			const featContent = sugar_calendar_admin_education.sce_admin_upgrade_modal_content.upgrade_content.replace( '[feat-name]', featName );
+			const modalCopy   = sugar_calendar_admin_education.sce_admin_upgrade_modal_content;
+
+			SugarCalendar.Admin.Education.openUpgradeModal( {
+				title: featTitle,
+				content: featContent,
+				bonus: modalCopy.upgrade_bonus,
+				upgradeButton: modalCopy.upgrade_button,
+				alreadyPurchased: modalCopy.already_purchased,
+				utmLocale: modalCopy.utm_locale,
+				utmMedium: 'event-metabox-' + featId,
+			} );
 		},
 
 		/**
 		 * Open the upgrade thank you modal.
 		 *
 		 * @since 3.11.0
+		 * @since 3.13.0 Accept the copy directly, for screens that localize their
+		 *                  own object instead of the shared education global.
 		 *
 		 * @param {string} utm_medium The UTM medium.
+		 * @param {Object} [copy]     Modal copy ( title / content / ok ). Falls back
+		 *                            to the shared education global when omitted.
 		 */
-		openUpradeThankYouModal: function( utm_medium ) {
+		openUpradeThankYouModal: function( utm_medium, copy ) {
+
+			const text = copy || sugar_calendar_admin_education.sce_admin_upgrade_thank_you_modal;
+
 			$.alert( {
 				theme: 'light,sce-admin-education',
-				title: sugar_calendar_admin_education.sce_admin_upgrade_thank_you_modal.title,
-				content: sugar_calendar_admin_education.sce_admin_upgrade_thank_you_modal.content,
+				title: text.title,
+				content: text.content,
 				icon: 'fa fa-info-circle',
 				type: 'blue',
 				boxWidth: '565px',
 				buttons: {
 					confirm: {
-						text: sugar_calendar_admin_education.sce_admin_upgrade_thank_you_modal.ok,
+						text: text.ok,
 						btnClass: 'btn-confirm sce-jquery-confirm-upgrade-thank-you-btn sce-jquery-confirm-button sugar-calendar-btn-secondary sugar-calendar-btn-lg',
 						keys: [ 'enter' ],
 					},

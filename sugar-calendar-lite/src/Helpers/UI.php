@@ -149,7 +149,10 @@ class UI {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param array  $args    Wrapper arguments.
+	 * @param array  $args    Wrapper arguments. `required_marker` appends the visible
+	 *                        asterisk to the label; it is deliberately separate from
+	 *                        `required`, which is the input's HTML attribute, so the
+	 *                        rows already passing that one keep their current label.
 	 * @param string $content Wrapper contents.
 	 */
 	public static function field_wrapper( $args, $content = '' ) {
@@ -157,9 +160,10 @@ class UI {
 		$args = wp_parse_args(
 			$args,
 			[
-				'type'  => '',
-				'id'    => '',
-				'class' => [],
+				'type'            => '',
+				'id'              => '',
+				'class'           => [],
+				'required_marker' => false,
 			]
 		);
 
@@ -197,7 +201,20 @@ class UI {
 			<?php if ( ! empty( $args['label'] ) ) : ?>
 
 				<span class="sugar-calendar-setting-label">
-					<label for="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $args['label'] ); ?></label>
+					<?php
+					// The marker sits inside the label, one space after the text, the
+					// same shape form_table_row_open() emits — indentation around it
+					// would render as extra gap, and a block-level label (wp-admin
+					// makes several) would drop it onto its own line. span.required is
+					// core's own; aria-hidden because assistive tech reads the input's
+					// state, not the glyph.
+					printf(
+						'<label for="%1$s">%2$s%3$s</label>',
+						esc_attr( $id ),
+						esc_html( $args['label'] ),
+						empty( $args['required_marker'] ) ? '' : ' <span class="required" aria-hidden="true">*</span>'
+					);
+					?>
 				</span>
 
 			<?php endif; ?>
@@ -480,6 +497,163 @@ class UI {
 	}
 
 	/**
+	 * Output a radio-group control.
+	 *
+	 * Recognized $args keys: `id` (base id; each option gets `{id}_{index}`),
+	 * `name` (POST key), `value` (selected option value), `options` (map of option
+	 * value => label), `layout` ('horizontal' default, or 'vertical'), `label`
+	 * (row label, wrapper mode only) and `description` (help text).
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $args Control arguments.
+	 * @param bool  $bare Whether to output the control without the row wrapper.
+	 *
+	 * @return void
+	 */
+	public static function radio_input( $args, $bare = false ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'        => 'radio',
+				'id'          => '',
+				'name'        => '',
+				'value'       => '',
+				'options'     => [],
+				'layout'      => 'horizontal',
+				'description' => '',
+			]
+		);
+
+		$id = sanitize_key( $args['id'] );
+
+		if ( ! empty( $id ) && ! $bare ) {
+			$id = "sugar-calendar-setting-{$id}";
+		}
+
+		$name = sanitize_key( $args['name'] );
+
+		if ( ! empty( $name ) && ! $bare ) {
+			$name = "sugar-calendar[$name]";
+		}
+
+		$layout  = $args['layout'] === 'vertical' ? 'vertical' : 'horizontal';
+		$value   = $args['value'];
+		$options = (array) $args['options'];
+		$i       = 0;
+
+		ob_start();
+		?>
+
+		<span class="sugar-calendar-radio-group sugar-calendar-radio-group--<?php echo esc_attr( $layout ); ?>">
+
+			<?php foreach ( $options as $option_value => $option_label ) : ?>
+
+				<?php $option_id = $id !== '' ? $id . '_' . $i : ''; ?>
+
+				<span class="sugar-calendar-settings-field-radio-wrapper">
+					<input type="radio"
+						   name="<?php echo esc_attr( $name ); ?>"
+						   id="<?php echo esc_attr( $option_id ); ?>"
+						   value="<?php echo esc_attr( $option_value ); ?>"
+						<?php checked( (string) $option_value, (string) $value ); ?>>
+					<label for="<?php echo esc_attr( $option_id ); ?>"><?php echo esc_html( $option_label ); ?></label>
+				</span>
+
+				<?php ++$i; ?>
+
+			<?php endforeach; ?>
+
+		</span>
+
+		<?php
+
+		self::field_description( $args );
+
+		if ( $bare ) {
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			return;
+		}
+
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Output a date-range control: a flatpickr-powered display field backed by
+	 * two hidden inputs for the start / end bounds.
+	 *
+	 * The JS initializer binds by the `sugar-calendar-date-range` class and reads
+	 * its hidden-field targets from the `data-start-field` / `data-end-field`
+	 * attributes, so the control is reusable wherever it is rendered.
+	 *
+	 * Recognized $args keys: `id` (display field id; bounds derive `{id}-start` /
+	 * `{id}-end`), `name_start` / `name_end` (POST names for the bounds),
+	 * `value_start` / `value_end` (preselected Y-m-d values), `placeholder`,
+	 * `aria_label`, `label` (row label, wrapper mode only) and `description`.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $args Control arguments.
+	 * @param bool  $bare Whether to output the control without the row wrapper.
+	 *
+	 * @return void
+	 */
+	public static function date_range_control( $args, $bare = false ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'        => 'date_range',
+				'id'          => '',
+				'name_start'  => '',
+				'name_end'    => '',
+				'value_start' => '',
+				'value_end'   => '',
+				'placeholder' => '',
+				'aria_label'  => '',
+				'description' => '',
+			]
+		);
+
+		$id = sanitize_key( $args['id'] );
+
+		if ( ! empty( $id ) && ! $bare ) {
+			$id = "sugar-calendar-setting-{$id}";
+		}
+
+		$start_id = $id !== '' ? $id . '-start' : '';
+		$end_id   = $id !== '' ? $id . '-end' : '';
+
+		ob_start();
+		?>
+
+		<input type="text"
+			   id="<?php echo esc_attr( $id ); ?>"
+			   class="sugar-calendar-date-range"
+			   placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>"
+			   aria-label="<?php echo esc_attr( $args['aria_label'] ); ?>"
+			   data-start-field="<?php echo esc_attr( $start_id ); ?>"
+			   data-end-field="<?php echo esc_attr( $end_id ); ?>"
+			   readonly />
+		<input type="hidden" name="<?php echo esc_attr( $args['name_start'] ); ?>" id="<?php echo esc_attr( $start_id ); ?>" value="<?php echo esc_attr( $args['value_start'] ); ?>" />
+		<input type="hidden" name="<?php echo esc_attr( $args['name_end'] ); ?>" id="<?php echo esc_attr( $end_id ); ?>" value="<?php echo esc_attr( $args['value_end'] ); ?>" />
+
+		<?php
+
+		self::field_description( $args );
+
+		if ( $bare ) {
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			return;
+		}
+
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
 	 * Output a toggle setting control.
 	 *
 	 * @since 3.0.0
@@ -743,6 +917,8 @@ class UI {
 			   id="<?php echo esc_attr( $id ); ?>"
 			   placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			<?php echo( $args['required'] ? esc_attr( 'required' ) : '' ); ?>
+			<?php // The asterisk is decorative; without the HTML attribute this is what carries "required" to assistive tech. ?>
+			<?php echo( ! empty( $args['required_marker'] ) ? ' aria-required="true"' : '' ); ?>
 		/>
 
 		<?php
@@ -1279,5 +1455,123 @@ class UI {
 			</fieldset>
 			<?php
 		endforeach;
+	}
+
+	/**
+	 * Open a WordPress core metabox panel.
+	 *
+	 * Core's own .postbox markup: styled by the admin bundle on every screen
+	 * with no plugin CSS. Lives here (not in a host add-on) so any surface
+	 * needing a panel can share it. Pair every call with postbox_close().
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string       $id      DOM id for the panel; also the key postboxes.js
+	 *                              stores the collapsed state under.
+	 * @param string       $title   Raw panel title; escaped here.
+	 * @param string|array $classes Extra classes for the .postbox element; a
+	 *                              space-separated string is split into tokens.
+	 */
+	public static function postbox_open( $id, $title, $classes = '' ) {
+
+		$classes = is_array( $classes )
+			? $classes
+			: preg_split( '/\s+/', trim( (string) $classes ), -1, PREG_SPLIT_NO_EMPTY );
+
+		?>
+		<div id="<?php echo esc_attr( $id ); ?>" class="postbox <?php echo esc_attr( self::sanitize_class( (array) $classes ) ); ?>">
+			<div class="postbox-header">
+				<h2 class="hndle"><span><?php echo esc_html( $title ); ?></span></h2>
+				<div class="handle-actions hide-if-no-js">
+					<button type="button" class="handlediv" aria-expanded="true">
+						<span class="screen-reader-text">
+							<?php
+							printf(
+								/* translators: %s - panel title. */
+								esc_html__( 'Toggle panel: %s', 'sugar-calendar-lite' ),
+								esc_html( $title )
+							);
+							?>
+						</span>
+						<span class="toggle-indicator" aria-hidden="true"></span>
+					</button>
+				</div>
+			</div>
+			<div class="inside">
+		<?php
+	}
+
+	/**
+	 * Close a metabox panel opened by postbox_open().
+	 *
+	 * @since 3.13.0
+	 */
+	public static function postbox_close() {
+
+		echo '</div></div>';
+	}
+
+	/**
+	 * Open a core .form-table inside a metabox panel.
+	 *
+	 * role="presentation" because this table is a layout device, not data; core
+	 * uses the same attribute so a screen reader doesn't read row/column coordinates.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_open() {
+
+		echo '<table class="form-table" role="presentation"><tbody>';
+	}
+
+	/**
+	 * Close a form table.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_close() {
+
+		echo '</tbody></table>';
+	}
+
+	/**
+	 * Open one label + control row of a form table.
+	 *
+	 * The caller prints the control between this call and form_table_row_close().
+	 * Pass $control_id for a real <label for>; omit it for a read-only row.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param string $label      Raw label text; escaped here.
+	 * @param string $control_id Id of the control this labels, when it has one.
+	 * @param bool   $required   Whether to append the required marker.
+	 */
+	public static function form_table_row_open( $label, $control_id = '', $required = false ) {
+
+		echo '<tr><th scope="row">';
+
+		if ( $control_id === '' ) {
+			echo esc_html( $label );
+		} else {
+			printf( '<label for="%1$s">%2$s</label>', esc_attr( $control_id ), esc_html( $label ) );
+		}
+
+		if ( $required ) {
+			// span.required is core's own; aria-hidden since the required attribute
+			// (not the asterisk) is what assistive tech relies on.
+			echo ' <span class="required" aria-hidden="true">*</span>';
+		}
+
+		echo '</th><td>';
+	}
+
+	/**
+	 * Close a form-table row.
+	 *
+	 * @since 3.13.0
+	 */
+	public static function form_table_row_close() {
+
+		echo '</td></tr>';
 	}
 }

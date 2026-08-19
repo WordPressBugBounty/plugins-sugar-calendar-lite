@@ -1,3 +1,8 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+?>
 <div class="sugar-calendar-block__popover__event sugar-calendar-block__popover" role="popover">
 	<div class="sugar-calendar-block__popover__event__container">
 		<div class="sugar-calendar-block__popover__event__container__image"></div>

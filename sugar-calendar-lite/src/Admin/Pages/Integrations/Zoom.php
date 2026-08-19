@@ -208,8 +208,8 @@ class Zoom extends AbstractIntegrationPage {
 		<p class="sugar-calendar-zoom__description">
 			<?php
 			printf(
-				/* translators: %s - Documentation link URL. */
 				wp_kses(
+					/* translators: %s - Documentation link URL. */
 					__( 'Connect your Zoom account to automatically generate meeting links for your online events. If you need help, please refer to <a href="%s" target="_blank" rel="noopener">our documentation</a>.', 'sugar-calendar-lite' ),
 					[
 						'a' => [

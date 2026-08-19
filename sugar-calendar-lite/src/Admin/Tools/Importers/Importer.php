@@ -109,6 +109,18 @@ abstract class Importer implements ImporterInterface {
 	const AJAX_RETURN_STATUS_IN_PROGRESS = 'in_progress';
 
 	/**
+	 * Recurrence meta keys kept in sync with the incoming feed data.
+	 *
+	 * Stored as event meta rather than columns, so they are written and cleared
+	 * separately from the recurrence columns on the event row.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @var string[]
+	 */
+	const RECURRENCE_META_KEYS = [ 'recurrence_byday', 'recurrence_bymonthday', 'recurrence_bypos', 'recurrence_bymonth' ];
+
+	/**
 	 * Get the page title of the importer.
 	 *
 	 * @since 3.3.0
@@ -298,6 +310,10 @@ abstract class Importer implements ImporterInterface {
 	 * Update the event.
 	 *
 	 * @since 3.6.0
+	 * @since 3.13.0 Sync recurrence (columns + the four recurrence meta keys) from
+	 *               the incoming data when Pro is active — applies an RRULE change
+	 *               in the feed, and clears recurrence entirely when the feed no
+	 *               longer has one but the old event did.
 	 *
 	 * @param int   $event_id  The event ID.
 	 * @param array $event     The event data.
@@ -330,6 +346,11 @@ abstract class Importer implements ImporterInterface {
 			'all_day'  => Helpers::sanitize_all_day( $all_day, $event['start_date'], $event['end_date'] ),
 		];
 
+		// Sync recurrence from the incoming data (Pro only).
+		if ( sugar_calendar()->is_pro() ) {
+			$event_data = $this->sync_recurrence( $event_id, $event, $old_event, $event_data );
+		}
+
 		// Update the event.
 		$updated_event = sugar_calendar_update_event( $event_id, $event_data, $old_event );
 
@@ -348,6 +369,86 @@ abstract class Importer implements ImporterInterface {
 		}
 
 		return $retval;
+	}
+
+	/**
+	 * Apply the incoming feed's recurrence to the event data being saved.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int   $event_id   The event ID.
+	 * @param array $event      The incoming event data.
+	 * @param Event $old_event  The old event instance.
+	 * @param array $event_data Event data prepared for the update.
+	 *
+	 * @return array Event data with the recurrence columns applied.
+	 */
+	protected function sync_recurrence( $event_id, $event, $old_event, $event_data ) {
+
+		// The source dropped the RRULE: clear recurrence entirely.
+		if ( empty( $event['recurrence'] ) ) {
+			return empty( $old_event->recurrence )
+				? $event_data
+				: $this->clear_recurrence( $event_id, $event_data );
+		}
+
+		$sanitized_recurrence = $this->sanitize_recurrence_data( $event );
+
+		if ( empty( $sanitized_recurrence ) ) {
+			return $event_data;
+		}
+
+		$this->update_recurrence_meta( $event_id, $sanitized_recurrence );
+
+		return array_merge( $event_data, $sanitized_recurrence );
+	}
+
+	/**
+	 * Write the recurrence meta the sanitized data carries, clearing the rest.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int   $event_id             The event ID.
+	 * @param array $sanitized_recurrence Sanitized recurrence data.
+	 *
+	 * @return void
+	 */
+	protected function update_recurrence_meta( $event_id, $sanitized_recurrence ) {
+
+		foreach ( self::RECURRENCE_META_KEYS as $meta_key ) {
+
+			if ( empty( $sanitized_recurrence[ $meta_key ] ) ) {
+				delete_event_meta( $event_id, $meta_key );
+
+				continue;
+			}
+
+			update_event_meta( $event_id, $meta_key, $sanitized_recurrence[ $meta_key ] );
+		}
+	}
+
+	/**
+	 * Clear the event's recurrence columns and meta.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param int   $event_id   The event ID.
+	 * @param array $event_data Event data prepared for the update.
+	 *
+	 * @return array Event data with the recurrence columns reset.
+	 */
+	protected function clear_recurrence( $event_id, $event_data ) {
+
+		$event_data['recurrence']          = '';
+		$event_data['recurrence_interval'] = 0;
+		$event_data['recurrence_count']    = 0;
+		$event_data['recurrence_end']      = '0000-00-00 00:00:00';
+
+		foreach ( self::RECURRENCE_META_KEYS as $meta_key ) {
+			delete_event_meta( $event_id, $meta_key );
+		}
+
+		return $event_data;
 	}
 
 	/**
@@ -425,12 +526,13 @@ abstract class Importer implements ImporterInterface {
 	 * Sanitize the recurrence data.
 	 *
 	 * @since 3.3.0
+	 * @since 3.13.0 Changed from `private` to `protected` so `update_event()` can reuse it.
 	 *
 	 * @param array $data An array containing the recurrence data.
 	 *
 	 * @return array|false Returns an array of sanitized recurrence data. Otherwise returns `false`.
 	 */
-	private function sanitize_recurrence_data( $data ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	protected function sanitize_recurrence_data( $data ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$recurrence = $this->sanitize_recurrence( $data['recurrence'] );
 
@@ -516,7 +618,7 @@ abstract class Importer implements ImporterInterface {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_results(
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool.
 			$wpdb->prepare(
 				'SHOW TABLES LIKE %s',
 				esc_sql( $wpdb->prefix . $db_table_name )
@@ -970,7 +1072,7 @@ abstract class Importer implements ImporterInterface {
 							<?php
 							printf(
 								/* translators: 1: Context ID, 2: Label, 3: Name. */
-								esc_html__( 'ID: %1$d, %2$s: %3$s' ),
+								esc_html__( 'ID: %1$d, %2$s: %3$s', 'sugar-calendar-lite' ),
 								absint( $error['id'] ),
 								esc_html( $label ),
 								esc_html( $error['context_name'] )
@@ -992,7 +1094,7 @@ abstract class Importer implements ImporterInterface {
 		}
 
 		return '<div id="sc-admin-tools-import-errors-wrapper" class="sc-admin-tools-import-notice sc-admin-tools-import-notice__warning"><p><strong>'
-			. esc_html__( 'Some items could not be imported...' ) . '</strong></p>'
+			. esc_html__( 'Some items could not be imported...', 'sugar-calendar-lite' ) . '</strong></p>'
 			. $html .
 			'</div>';
 	}

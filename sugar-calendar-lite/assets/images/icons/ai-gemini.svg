@@ -1,0 +1,10 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="sc_ai_gemini_grad" x1="0" y1="16" x2="16" y2="0" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#4285F4"/>
+<stop offset="0.5" stop-color="#9B72CB"/>
+<stop offset="1" stop-color="#F9AB00"/>
+</linearGradient>
+</defs>
+<path d="M8 0C8.4 4.1 11.9 7.6 16 8C11.9 8.4 8.4 11.9 8 16C7.6 11.9 4.1 8.4 0 8C4.1 7.6 7.6 4.1 8 0Z" fill="url(#sc_ai_gemini_grad)"/>
+</svg>

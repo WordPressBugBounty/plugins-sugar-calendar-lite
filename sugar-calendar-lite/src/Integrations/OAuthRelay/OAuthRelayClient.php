@@ -77,7 +77,7 @@ class OAuthRelayClient {
 			 * @param string $provider   Provider slug.
 			 * @param string $return_url Return URL.
 			 */
-			return (string) apply_filters( 'sc_oauth_relay_test_authorization_url', '', $provider, $return_url );
+			return (string) apply_filters( 'sc_oauth_relay_test_authorization_url', '', $provider, $return_url ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		$context = ProductApi::get( Context::class );
@@ -127,7 +127,7 @@ class OAuthRelayClient {
 			 * @param mixed  $response Default null; return an array to short-circuit, WP_Error to fail.
 			 * @param string $code     Exchange code.
 			 */
-			$stub = apply_filters( 'sc_oauth_relay_test_exchange_response', null, $code );
+			$stub = apply_filters( 'sc_oauth_relay_test_exchange_response', null, $code ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 
 			if ( $stub !== null ) {
 				return $stub;
@@ -201,7 +201,7 @@ class OAuthRelayClient {
 			 * @param string $provider_user_id Provider account id the production code passed.
 			 * @param string $webhook_url      Webhook URL the production code built.
 			 */
-			return apply_filters( 'sc_oauth_relay_test_register_webhook_response', null, $provider, $provider_user_id, $webhook_url );
+			return apply_filters( 'sc_oauth_relay_test_register_webhook_response', null, $provider, $provider_user_id, $webhook_url ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		// The relay is configured on both editions (Pro in includes/pro/Pro.php,
@@ -252,7 +252,7 @@ class OAuthRelayClient {
 			 * @param string $provider         Provider slug the production code passed.
 			 * @param string $provider_user_id Provider account id the production code passed.
 			 */
-			return apply_filters( 'sc_oauth_relay_test_unregister_webhook_response', null, $provider, $provider_user_id );
+			return apply_filters( 'sc_oauth_relay_test_unregister_webhook_response', null, $provider, $provider_user_id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Internal test-mode hook seam (E2E only).
 		}
 
 		// The relay is configured on both editions (Pro in includes/pro/Pro.php,

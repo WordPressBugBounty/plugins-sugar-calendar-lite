@@ -92,7 +92,7 @@ class MeetingRemovedNotice {
 			return;
 		}
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		if ( empty( $event->id ) ) {
 			return;
@@ -150,7 +150,7 @@ class MeetingRemovedNotice {
 			wp_send_json_error( [ 'message' => 'forbidden' ], 403 );
 		}
 
-		$event = sugar_calendar_get_event_by_object( $post_id );
+		$event = EventMeetingManager::resolve_event_for_post( $post_id );
 
 		if ( ! empty( $event->id ) ) {
 			delete_event_meta( $event->id, self::META_KEY );

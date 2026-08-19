@@ -2,8 +2,6 @@
 /**
  * Output shaping for the WordPress Abilities API integration.
  *
- * @package Sugar_Calendar
- * @subpackage Integrations\Abilities
  * @since 3.12.0
  */
 
@@ -76,8 +74,17 @@ class Formatter {
 	/**
 	 * Render a Sugar_Calendar\Event into the canonical event shape.
 	 *
-	 * The caller supplies the resolved calendar map (post_id => WP_Term[]); this
-	 * method performs no database lookups. When the map has no entry for the
+	 * The caller supplies the resolved calendar map (post_id => WP_Term[]).
+	 * Also checks `post_password_required()` for the underlying post — the
+	 * `read_event`/`edit_posts` gates these abilities use only confirm the
+	 * event itself is visible (matching front-end visibility), the same way
+	 * `Admin\Events\Tables\Base::user_can_view()` does for the admin list
+	 * table; neither one is a stand-in for "no password is set." Mirrors
+	 * WP_REST_Posts_Controller's handling of this same post type (which is
+	 * already REST-exposed — `register_post_type()`'s `show_in_rest`): blank
+	 * `content` for anyone who can't edit the post, and flag it via
+	 * `content_protected` so a caller can tell "no description" apart from
+	 * "hidden because password-protected." When the map has no entry for the
 	 * event's object_id, `calendars` is an empty array.
 	 *
 	 * @since 3.12.0
@@ -105,11 +112,17 @@ class Formatter {
 			: '';
 		$recurrence_end_tz = '' !== $recurrence_end ? $event->recurrence_end_tz : null;
 
+		$content_protected = $object_id > 0 && post_password_required( $object_id );
+		$content            = ( $content_protected && ! current_user_can( 'edit_post', $object_id ) )
+			? ''
+			: $event->content;
+
 		return [
 			'id'                  => (int) $event->id,
 			'object_id'           => $object_id,
 			'title'               => $event->title,
-			'content'             => $event->content,
+			'content'             => $content,
+			'content_protected'   => $content_protected,
 			'status'              => $event->status,
 			'url'                 => $object_id > 0 ? (string) get_permalink( $object_id ) : '',
 			'start'               => $this->iso8601( $event->start, $event->start_tz ),

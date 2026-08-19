@@ -90,7 +90,7 @@ class OAuthConnectionModel {
 			$data
 		);
 
-		$ok = $wpdb->insert( self::table_name(), $row );
+		$ok = $wpdb->insert( self::table_name(), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 
 		if ( $ok === false ) {
 			return new WP_Error( 'oauth_connection_insert_failed', $wpdb->last_error );
@@ -118,7 +118,7 @@ class OAuthConnectionModel {
 
 		global $wpdb;
 
-		$ok = $wpdb->update( self::table_name(), $data, [ 'id' => (int) $id ] );
+		$ok = $wpdb->update( self::table_name(), $data, [ 'id' => (int) $id ] ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 
 		if ( $ok === false ) {
 			return new WP_Error( 'oauth_connection_update_failed', $wpdb->last_error );
@@ -142,7 +142,7 @@ class OAuthConnectionModel {
 
 		global $wpdb;
 
-		$ok = (bool) $wpdb->delete( self::table_name(), [ 'id' => (int) $id ] );
+		$ok = (bool) $wpdb->delete( self::table_name(), [ 'id' => (int) $id ] ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 
 		self::flush_cache();
 
@@ -167,7 +167,7 @@ class OAuthConnectionModel {
 
 		global $wpdb;
 
-		$deleted = $wpdb->delete( self::table_name(), [ 'provider' => $provider ] );
+		$deleted = $wpdb->delete( self::table_name(), [ 'provider' => $provider ] ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 
 		self::flush_cache();
 
@@ -249,7 +249,7 @@ class OAuthConnectionModel {
 
 		$table = self::table_name();
 
-		$row = $wpdb->get_row(
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 			$wpdb->prepare(
 				"SELECT * FROM {$table} WHERE {$where} ORDER BY id DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$params
@@ -277,7 +277,7 @@ class OAuthConnectionModel {
 
 		$table = self::table_name();
 
-		$rows = $wpdb->get_results(
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against the custom wp_sc_oauth_connections table.
 			$wpdb->prepare(
 				"SELECT * FROM {$table} WHERE status = %s",
 				'auth_error'
@@ -306,7 +306,7 @@ class OAuthConnectionModel {
 
 		$table = self::table_name();
 
-		$rows = $wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return is_array( $rows ) ? $rows : [];
 	}

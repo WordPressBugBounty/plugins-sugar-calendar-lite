@@ -24,8 +24,8 @@ add_action( 'admin_notices', __NAMESPACE__ . '\\Upgrades\\notices' );
 add_filter( 'sugar_calendar_event_to_save', __NAMESPACE__ . '\\Editor\\Meta\\add_location_to_save' );
 add_filter( 'sugar_calendar_event_to_save', __NAMESPACE__ . '\\Editor\\Meta\\add_color_to_save' );
 
-// Admin meta box filter
-add_filter( 'get_user_option_meta-box-order_sc_event', __NAMESPACE__ . '\\Editor\\Meta\\noop_user_option' );
+// Event preview — capture the location into the preview payload (mirrors add_location_to_save).
+add_filter( 'sugar_calendar_event_preview_payload', __NAMESPACE__ . '\\Editor\\Meta\\add_to_event_preview_payload' );
 
 // Admin New/Edit
 add_action( 'edit_form_after_title', __NAMESPACE__ . '\\Editor\\above' );

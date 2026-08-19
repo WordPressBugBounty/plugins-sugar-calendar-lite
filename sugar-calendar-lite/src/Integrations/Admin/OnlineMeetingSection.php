@@ -26,6 +26,7 @@ class OnlineMeetingSection {
 	 * Register hooks.
 	 *
 	 * @since 3.12.0
+	 * @since 3.13.0 Register the event preview payload capture.
 	 */
 	public function hooks() {
 
@@ -42,6 +43,34 @@ class OnlineMeetingSection {
 		add_action( 'sugar_calendar_admin_meta_box_location_section', [ $this, 'display' ], 20 );
 
 		add_filter( 'sugar_calendar_event_to_save', [ $this, 'save' ] );
+
+		// Event preview — capture the Online fields into the preview meta bucket.
+		add_filter( 'sugar_calendar_event_preview_payload', [ $this, 'add_to_event_preview_payload' ] );
+	}
+
+	/**
+	 * Add the Online meeting fields to the event preview `meta` bucket.
+	 *
+	 * Mirrors save() so the preview reflects the unsaved Online dropdown, custom
+	 * link, and "Show to" visibility. Keys are the STORED meta keys the base
+	 * overlay_meta() matches on, not the $_POST names. The preview capture caller
+	 * has already verified the update-post nonce and the edit_post capability.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param array $payload The event preview payload.
+	 *
+	 * @return array
+	 */
+	public function add_to_event_preview_payload( $payload ) {
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by the capture caller.
+		$payload['meta']['online_provider']   = isset( $_POST['online_provider'] ) ? sanitize_key( wp_unslash( $_POST['online_provider'] ) ) : '';
+		$payload['meta']['custom_link_url']   = isset( $_POST['custom_link_url'] ) && is_string( $_POST['custom_link_url'] ) ? esc_url_raw( wp_unslash( $_POST['custom_link_url'] ) ) : '';
+		$payload['meta']['online_visibility'] = isset( $_POST['online_visibility'] ) ? sanitize_key( wp_unslash( $_POST['online_visibility'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		return $payload;
 	}
 
 	/**
@@ -345,9 +374,47 @@ class OnlineMeetingSection {
 			if ( $password !== '' ) {
 				$this->render_copy_row( 'online_password', __( 'Password', 'sugar-calendar-lite' ), $password );
 			}
+
+			$this->render_shared_link_notice( $event );
 			?>
 
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the "one shared link for the whole series" notice.
+	 *
+	 * A recurring Zoom meeting is always one link/passcode for every occurrence
+	 * (true for kind 8 AND kind 3). Surface this only when the organizer sells or
+	 * gates RSVPs per occurrence — the case where they might wrongly expect a
+	 * separate room per occurrence. Reads the two Pro-owned toggles defensively
+	 * (absent on Lite / add-ons off → no notice). Informational only.
+	 *
+	 * @since 3.13.0
+	 *
+	 * @param object $event SCE Event object.
+	 *
+	 * @return void
+	 */
+	private function render_shared_link_notice( $event ) {
+
+		$event_id = ! empty( $event->id ) ? $event->id : 0;
+
+		if ( empty( $event_id ) || empty( $event->recurrence ) ) {
+			return;
+		}
+
+		$per_occurrence = ! empty( get_event_meta( $event_id, 'tickets_sell_per_occurrence', true ) )
+			|| ! empty( get_event_meta( $event_id, 'rsvp_unique_per_occurrence', true ) );
+
+		if ( ! $per_occurrence ) {
+			return;
+		}
+		?>
+		<p class="desc sugar-calendar-metabox__online-shared-link-notice">
+			<?php esc_html_e( 'This online meeting link is shared across all occurrences of this event.', 'sugar-calendar-lite' ); ?>
+		</p>
 		<?php
 	}
 
