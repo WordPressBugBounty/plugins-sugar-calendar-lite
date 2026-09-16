@@ -26,7 +26,7 @@ final class Attendees_Table extends Table {
 	/**
 	 * @var string Database version
 	 */
-	protected $version = 202010270003;
+	protected $version = 202609010001;
 
 	/**
 	 * @var string Table schema
@@ -40,6 +40,7 @@ final class Attendees_Table extends Table {
 		'202010270001' => 202010270001,
 		'202010270002' => 202010270002,
 		'202010270003' => 202010270003,
+		'202609010001' => 202609010001,
 	);
 
 	/**
@@ -49,9 +50,9 @@ final class Attendees_Table extends Table {
 	 */
 	protected function set_schema() {
 		$this->schema = "id bigint(20) unsigned NOT NULL auto_increment,
-			email varchar(100) NOT NULL default '',
-			first_name varchar(20) NOT NULL default '',
-			last_name varchar(20) NOT NULL default '',
+			email varchar(254) NOT NULL default '',
+			first_name varchar(100) NOT NULL default '',
+			last_name varchar(100) NOT NULL default '',
 			date_created datetime NOT NULL default '0000-00-00 00:00:00',
 			date_modified datetime NOT NULL default '0000-00-00 00:00:00',
 			uuid varchar(100) NOT NULL default '',
@@ -121,6 +122,49 @@ final class Attendees_Table extends Table {
 		}
 
 		// Return success/fail
+		return $this->is_success( $result );
+	}
+
+	/**
+	 * Upgrade to version 202609010001
+	 * - Widen `first_name` and `last_name` to 100, `email` to 254.
+	 *
+	 * A name longer than the old 20-character columns failed the insert, which
+	 * surfaced as a fatal mid-checkout. 254 is the RFC 5321 maximum address length.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return boolean
+	 */
+	protected function __202609010001() { // phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.MethodDoubleUnderscore
+
+		$db    = $this->get_db();
+		$table = $this->table_name;
+
+		// Idempotency: already widened?
+		$width = $db->get_var( $db->prepare(
+			"SELECT CHARACTER_MAXIMUM_LENGTH
+			   FROM INFORMATION_SCHEMA.COLUMNS
+			  WHERE TABLE_SCHEMA = %s
+			    AND TABLE_NAME   = %s
+			    AND COLUMN_NAME  = 'first_name'",
+			DB_NAME,
+			$table
+		) );
+
+		if ( (int) $width >= 100 ) {
+			return $this->is_success( true );
+		}
+
+		// Collation is named explicitly: a bare MODIFY inherits the TABLE default,
+		// which silently rewrites a column whose collation differs.
+		$result = $db->query(
+			"ALTER TABLE {$table}
+			 MODIFY COLUMN `first_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT '',
+			 MODIFY COLUMN `last_name`  varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT '',
+			 MODIFY COLUMN `email`      varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT ''"
+		);
+
 		return $this->is_success( $result );
 	}
 }

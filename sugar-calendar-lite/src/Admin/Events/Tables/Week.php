@@ -254,6 +254,120 @@ class Week extends Grid {
 	}
 
 	/**
+	 * Give each span the topmost lane its columns are free in.
+	 *
+	 * Without an explicit `grid-row` the browser auto-places, and auto-placement
+	 * never goes back to fill a gap it has passed: with several days populated
+	 * each day's spans land below the previous day's instead of beside them,
+	 * and the row descends like a staircase. Packing here keeps a span on the
+	 * highest lane no earlier span overlaps, so days sit side by side.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $items Spans keyed by event id, each with `start` and `end`
+	 *                     grid-column lines.
+	 *
+	 * @return array The same spans, each with a 1-based `lane`.
+	 */
+	protected function assign_span_lanes( $items ) {
+
+		// lane => [ column => true ]. Columns, not ranges: the grid has at most
+		// day_count + 2 lines, so a lookup stays O(1) however many spans there are.
+		$lanes = [];
+
+		foreach ( $items as $id => $item ) {
+
+			$start = (int) $item['start'];
+			$end   = (int) $item['end'];
+			$lane  = 0;
+
+			while ( $this->lane_is_taken( $lanes[ $lane ] ?? [], $start, $end ) ) {
+				++$lane;
+			}
+
+			for ( $column = $start; $column < $end; $column++ ) {
+				$lanes[ $lane ][ $column ] = true;
+			}
+
+			$items[ $id ]['lane'] = $lane + 1;
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Whether a lane already has a span in any of the given columns.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $taken Columns already occupied on the lane, as keys.
+	 * @param int   $start First grid-column line of the span.
+	 * @param int   $end   Grid-column line the span stops before.
+	 *
+	 * @return bool
+	 */
+	protected function lane_is_taken( $taken, $start, $end ) {
+
+		for ( $column = $start; $column < $end; $column++ ) {
+			if ( isset( $taken[ $column ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Build the all-day strip's "+N More" rows.
+	 *
+	 * The strip renders its spans directly rather than through
+	 * get_events_for_cell(), so it emits its own overflow rows, on the lane
+	 * below the spans they hid.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $items Spans already through assign_span_lanes().
+	 * @param array $cells The strip's day cells.
+	 *
+	 * @return string
+	 */
+	protected function get_all_day_more_rows( $items, $cells ) {
+
+		$lane = 1;
+
+		foreach ( $items as $item ) {
+			$lane = max( $lane, (int) $item['lane'] );
+		}
+
+		++$lane;
+
+		$retval = '';
+
+		foreach ( $cells as $cell ) {
+
+			$this->set_current_cell( $cell );
+
+			$more = $this->get_more_link( $this->get_all_day_overflow(), $cell['start'] );
+
+			if ( $more === '' ) {
+				continue;
+			}
+
+			$column = (int) $cell['index'] + 2;
+
+			$retval .= sprintf(
+				'<div class="event-span event-span--more" style="grid-column: %1$d / %2$d; grid-row: %3$d;">%4$s</div>',
+				$column,
+				$column + 1,
+				$lane,
+				$more
+			);
+		}
+
+		return $retval;
+	}
+
+	/**
 	 * Start the week with a table row, and a th to show the time.
 	 *
 	 * @since 2.0.0
@@ -318,7 +432,7 @@ class Week extends Grid {
 		}
 
 		// Multi-day events take the top lanes of the row; per-day all-day
-		// events stack below them. Grid auto-placement follows DOM order, so
+		// events stack below them. Lanes are handed out in this order, so
 		// emit the multi-day spans first. ( `+` preserves keys and order. )
 		$multi_day  = [];
 		$single_day = [];
@@ -331,7 +445,7 @@ class Week extends Grid {
 			}
 		}
 
-		$items = $multi_day + $single_day;
+		$items = $this->assign_span_lanes( $multi_day + $single_day );
 
 		// Start an output buffer.
 		ob_start();
@@ -386,7 +500,8 @@ class Week extends Grid {
 
 					$start     = (int) $start;
 					$end       = (int) $end;
-					$style     = "grid-column: {$start} / {$end};";
+					$lane      = isset( $item['lane'] ) ? (int) $item['lane'] : 1;
+					$style     = "grid-column: {$start} / {$end}; grid-row: {$lane};";
 					$data_days = array_map( 'sanitize_key', $days );
 					$data_days = implode( ',', $data_days );
 					$classes   = [ 'event-span' ];
@@ -415,6 +530,8 @@ class Week extends Grid {
                     </div>
 
 				<?php endforeach; ?>
+
+				<?php echo $this->get_all_day_more_rows( $items, $cells ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
             </div>
         </div>
@@ -514,6 +631,12 @@ class Week extends Grid {
 
 	/**
 	 * Set the items for all of the cells.
+	 *
+	 * A cell here is one hour, not one day: this builds day_count all-day cells
+	 * plus day_count * 24 hourly ones, and the all-day ones first. That order
+	 * is load-bearing — Base::limit_cell_items_to_day() budgets per day, so the
+	 * all-day row would spend the whole day's allowance before any hour cell
+	 * was considered if the two shared one bucket. They do not; see that method.
 	 *
 	 * @since 2.1.3
 	 */

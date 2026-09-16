@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Events\Tables;
 
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Admin\Pages\Calendars;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
@@ -89,7 +90,11 @@ class Basic extends Base {
 	/**
 	 * Set default hidden columns.
 	 *
+	 * Only applies to users with no saved column preferences — WordPress skips
+	 * `default_hidden_columns` entirely once `manage{$screen}columnshidden` exists.
+	 *
 	 * @since 3.10.0
+	 * @since 3.14.0 Hide the Calendars column by default.
 	 *
 	 * @param array $hidden Hidden columns.
 	 *
@@ -97,7 +102,7 @@ class Basic extends Base {
 	 */
 	public function set_default_hidden_columns( $hidden ) {
 
-		array_push( $hidden, 'tags', 'duration' );
+		array_push( $hidden, 'calendars', 'tags', 'duration' );
 
 		return $hidden;
 	}
@@ -373,19 +378,21 @@ class Basic extends Base {
 	 *
 	 * @since 2.0.0
 	 * @since 3.10.0 Made the output columns array filterable.
+	 * @since 3.14.0 Added the Calendars column.
 	 *
 	 * @return array
 	 */
 	public function get_columns() {
 
-		// Default columns.
+		// Default columns. Order here also drives the cog menu's Columns checkboxes.
 		$columns = [
-			'cb'       => '<input type="checkbox">',
-			'title'    => esc_html_x( 'Title', 'Noun', 'sugar-calendar-lite' ),
-			'start'    => esc_html_x( 'Start', 'Noun', 'sugar-calendar-lite' ),
-			'end'      => esc_html_x( 'End', 'Noun', 'sugar-calendar-lite' ),
-			'tags'     => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
-			'duration' => esc_html_x( 'Duration', 'Noun', 'sugar-calendar-lite' ),
+			'cb'        => '<input type="checkbox">',
+			'title'     => esc_html_x( 'Title', 'Noun', 'sugar-calendar-lite' ),
+			'start'     => esc_html_x( 'Start', 'Noun', 'sugar-calendar-lite' ),
+			'end'       => esc_html_x( 'End', 'Noun', 'sugar-calendar-lite' ),
+			'calendars' => esc_html_x( 'Calendars', 'Noun', 'sugar-calendar-lite' ),
+			'tags'      => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
+			'duration'  => esc_html_x( 'Duration', 'Noun', 'sugar-calendar-lite' ),
 		];
 
 		// Repeat column.
@@ -415,16 +422,21 @@ class Basic extends Base {
 	/**
 	 * Allow columns to be sortable.
 	 *
+	 * Ascending-first: the list already renders `start` descending, so a
+	 * descending-first column offers the direction the user is already in and
+	 * its first click does nothing visible.
+	 *
 	 * @since 2.0.0
+	 * @since 3.14.0 Register ascending-first so the first click always changes the order.
 	 *
 	 * @return array An associative array containing the sortable columns.
 	 */
 	protected function get_sortable_columns() {
 
 		return [
-			'title' => [ 'title', true ],
-			'start' => [ 'start', true ],
-			'end'   => [ 'end', true ],
+			'title' => [ 'title', false ],
+			'start' => [ 'start', false ],
+			'end'   => [ 'end', false ],
 		];
 	}
 
@@ -730,15 +742,16 @@ class Basic extends Base {
 			<?php
 		}
 
-		// Output the row actions.
-		echo $this->row_actions(
+		$title_html = ob_get_clean();
+
+		// The row actions follow the title.
+		$title_html .= $this->row_actions(
 			$this->get_pointer_links( $item )
 		);
 
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 
-		// Return the buffer.
-		return ob_get_clean();
+		return $title_html;
 	}
 
 	/**
@@ -887,6 +900,48 @@ class Basic extends Base {
 
 		// Return the <time> tag.
 		return $retval;
+	}
+
+	/**
+	 * Return the contents for the "Calendars" column.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param object $item Current item.
+	 *
+	 * @return string
+	 */
+	public function column_calendars( $item = null ) {
+
+		if ( empty( $item ) ) {
+			return '';
+		}
+
+		$taxonomy  = sugar_calendar_get_calendar_taxonomy_id();
+		$calendars = get_the_terms( (int) $item->object_id, $taxonomy );
+
+		if ( empty( $calendars ) || is_wp_error( $calendars ) ) {
+			return '&mdash;';
+		}
+
+		$links = [];
+
+		foreach ( $calendars as $calendar ) {
+
+			// Slug, not term_id — the calendar dropdown is built with value_field => slug.
+			$links[] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $this->get_persistent_url( [ $taxonomy => $calendar->slug ] ) ),
+				esc_html( $calendar->name )
+			);
+		}
+
+		return sprintf(
+			'<div class="sugar-calendar-column-calendars"><div class="sugar-calendar-column-calendars-list">%1$s</div><a href="%2$s" class="sugar-calendar-column-calendars-edit-link">%3$s</a></div>',
+			implode( ', ', $links ),
+			esc_url( admin_url( Calendars::get_slug() ) ),
+			esc_html__( 'Edit Calendars', 'sugar-calendar-lite' )
+		);
 	}
 
 	/**
@@ -1089,6 +1144,18 @@ class Basic extends Base {
 		} else {
 			$this->no_items();
 		}
+	}
+
+	/**
+	 * This view's limit is a total, so the cog offers Maximum Events.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	protected function limits_per_day() {
+
+		return false;
 	}
 
 	/**

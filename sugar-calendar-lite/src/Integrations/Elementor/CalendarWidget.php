@@ -107,6 +107,7 @@ class CalendarWidget extends Widget_Base {
 	 * Register widget controls.
 	 *
 	 * @since 3.2.0
+	 * @since 3.14.0 Added the "Show only Featured Events" control.
 	 */
 	protected function register_controls() {
 
@@ -251,6 +252,17 @@ class CalendarWidget extends Widget_Base {
 			]
 		);
 
+		// Filters the query, so it applies in every display mode and with the header hidden.
+		$this->add_control(
+			'featured_only',
+			[
+				'default'      => '',
+				'label'        => esc_html__( 'Show only Featured Events', 'sugar-calendar-lite' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+			]
+		);
+
 		$this->add_control(
 			'section_title_styles',
 			[
@@ -291,6 +303,7 @@ class CalendarWidget extends Widget_Base {
 	 * Render widget output.
 	 *
 	 * @since 3.2.0
+	 * @since 3.14.0 Added support for featured events.
 	 */
 	protected function render() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
@@ -299,6 +312,7 @@ class CalendarWidget extends Widget_Base {
 		$allow_users_to_change_display = $show_block_header === 'yes' ? $this->get_settings_for_display( 'allow_users_to_change_display' ) : '';
 		$show_filters                  = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_filters' ) : '';
 		$show_search                   = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_search' ) : '';
+		$featured_only                 = $this->get_settings_for_display( 'featured_only' );
 		$accent_color                  = $this->get_settings_for_display( 'accent_color' );
 		$calendars                     = $this->get_settings_for_display( 'calendars' );
 		$tags                          = $this->get_settings_for_display( 'tags' );
@@ -315,6 +329,7 @@ class CalendarWidget extends Widget_Base {
 			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
 			'showFilters'            => ! empty( $show_filters ) && $show_filters === 'yes',
 			'showSearch'             => ! empty( $show_search ) && $show_search === 'yes',
+			'featuredOnly'           => ! empty( $featured_only ) && $featured_only === 'yes',
 			'appearance'             => ! empty( $appearance ) ? $appearance : 'light',
 			'should_not_load_events' => false,
 		];

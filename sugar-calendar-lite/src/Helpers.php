@@ -9,6 +9,7 @@ use Sugar_Calendar\Options;
 use Sugar_Calendar\Plugin;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\Features\FeaturedEvents\Common\Featured;
 use Sugar_Calendar\Helpers\Helpers as CommonHelpers;
 
 /**
@@ -138,6 +139,10 @@ class Helpers {
 			'speakersFilter'     => [
 				'default' => [],
 				'type'    => 'array',
+			],
+			'featuredOnly'       => [
+				'default' => false,
+				'type'    => 'bool',
 			],
 			'id'                 => [
 				'default' => '',
@@ -339,6 +344,10 @@ class Helpers {
 			],
 			[
 				'name' => 'showDateCards',
+				'type' => 'boolean',
+			],
+			[
+				'name' => 'featuredOnly',
 				'type' => 'boolean',
 			],
 			[
@@ -939,6 +948,24 @@ class Helpers {
 	}
 
 	/**
+	 * Get the event-related post types: the core `sc_event` post type plus
+	 * the Pro `sc_recurring_event` post type (used by AdvancedRecurring after
+	 * migrating an event with a recurrence pattern).
+	 *
+	 * `'sc_recurring_event'` is a literal string, not a Pro class reference —
+	 * this keeps the method Lite-safe; the post type simply never exists on a
+	 * Lite install, so it's a harmless no-op there.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return string[] Event post type slugs.
+	 */
+	public static function get_event_post_types() {
+
+		return [ sugar_calendar_get_event_post_type_id(), 'sc_recurring_event' ];
+	}
+
+	/**
 	 * Get the wp_posts IDs of every published, password-protected event post.
 	 *
 	 * Covers both the core `sc_event` post type and the Pro `sc_recurring_event`
@@ -961,12 +988,14 @@ class Helpers {
 
 		global $wpdb;
 
+		$post_types   = self::get_event_post_types();
+		$placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
 		$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query against a custom Sugar Calendar table.
 			$wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( %s, %s ) AND post_status = %s AND post_password != ''",
-				'sc_event',
-				'sc_recurring_event',
-				'publish'
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a fixed string of '%s' tokens, not user input.
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( {$placeholders} ) AND post_status = %s AND post_password != ''",
+				...array_merge( $post_types, [ 'publish' ] )
 			)
 		);
 
@@ -988,11 +1017,13 @@ class Helpers {
 	 * @since 3.7.2 Fixed issue with non-array calendar args.
 	 * @since 3.11.0 Added support to `show_past_only` args.
 	 * @since 3.11.1 Added optional `has_password` arg.
+	 * @since 3.14.0 Added optional `featured` arg.
 	 *
 	 * @param array $args       The arguments to get the events.
 	 *                          Pass `'has_password' => false` to exclude password-protected
 	 *                          events when the current user lacks the `edit_posts` capability.
 	 *                          Omit (default) to preserve current behavior for non-block callers.
+	 *                          Pass `'featured' => true` to return only featured events.
 	 * @param array $attributes The block attributes.
 	 *
 	 * @return Event[]
@@ -1006,6 +1037,7 @@ class Helpers {
 			'offset'         => 0,
 			'show_past_only' => false,
 			'event_order'    => 'asc',
+			'featured'       => false,
 		];
 
 		$args = wp_parse_args(
@@ -1143,6 +1175,11 @@ class Helpers {
 			$where_query .= ' AND ' . $wpdb->posts . '.post_password = \'\'';
 		}
 
+		// Restrict to featured events when the caller opted in.
+		if ( ! empty( $args['featured'] ) ) {
+			$where_query .= Featured::get_exists_sql( $wpdb->prefix . 'sc_events' );
+		}
+
 		if ( ! empty( $where_calendars ) ) {
 			$where_query .= ' ' . $where_calendars;
 		}
@@ -1235,6 +1272,8 @@ class Helpers {
 
 		$sugar_calendar_events_args = [
 			'id__in'  => wp_list_pluck( $event_ids, 'id' ),
+			// Without this the query defaults to 30 and drops rows already selected.
+			'number'  => count( $event_ids ),
 			'orderby' => ! empty( $args['show_past_only'] ) ? 'end' : 'start',
 			'order'   => $args['event_order'],
 		];
@@ -1733,6 +1772,37 @@ class Helpers {
 		);
 
 		return $excerpt;
+	}
+
+	/**
+	 * The event's full content, un-truncated.
+	 *
+	 * The sibling of `get_event_excerpt()`, and here for the same reason: Lite
+	 * publishes the filter, Pro merely consumes it. Applied from Pro instead, the
+	 * WPBakery content filter would be unreachable in a Lite build.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int    $event_object_id The Event Object ID / Post ID.
+	 * @param string $content         The content to filter.
+	 *
+	 * @return string
+	 */
+	public static function get_event_content( $event_object_id, $content ) {
+
+		/**
+		 * Filters the event content — the whole description, un-truncated.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param string $content         The event content.
+		 * @param int    $event_object_id The Event Object ID / Post ID.
+		 */
+		return (string) apply_filters(
+			'sugar_calendar_helpers_get_event_content',
+			$content,
+			$event_object_id
+		);
 	}
 
 	/**

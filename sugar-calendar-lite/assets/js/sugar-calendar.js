@@ -108,6 +108,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * Show the event popover.
 	 *
 	 * @since 3.0.0
+	 * @since 3.14.0 Carry the featured star into the popover title.
 	 *
 	 * @param {Event} e The event object.
 	 */
@@ -175,6 +176,14 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 		let eventLink = this.$popover.find( '.sugar-calendar-block__popover__event__container__content__title__link' );
 		eventLink.attr( 'href', $eventDataContainer.data( 'eventurl' ) );
 		eventLink.text( title );
+
+		// Reuse the cell's own star so it keeps its calendar color. text() above
+		// clears the previous event's, so this needs no separate reset.
+		let $featuredStar = $eventDataContainer.find( '.sugar-calendar-block__featured-star' ).first();
+
+		if ( $featuredStar.length ) {
+			eventLink.prepend( $featuredStar.clone() );
+		}
 
 		// Set target attribute if event should open in new tab
 		if ( $eventDataContainer.data( 'openinnewtab' ) === 1 ) {
@@ -274,6 +283,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			popoverCalendarSelectorApply: '.sc-filters-apply',
 			popoverCalendarSelectorClear: '.sc-filters-clear',
 			popoverSelectedIndicator: '.sc-filter-applied-indicator',
+			popoverFeaturedOnly: '.sc-filters-featured-only',
 		};
 
 		let settingPopovers = [
@@ -556,7 +566,8 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			return jQuery( this ).find( that.selector.popoverCalendarSelectorHeading ).length > 0;
 		} );
 
-		let anyChecked = false;
+		// The Featured Only toggle sits outside the sections, so count it on its own.
+		let anyChecked = $popover.find( this.selector.popoverFeaturedOnly ).is( ':checked' );
 
 		$sections.each( function() {
 
@@ -1179,6 +1190,28 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	}
 
 	/**
+	 * Whether only featured events should be shown.
+	 *
+	 * Falls back to the block setting when the filter popover is hidden, so paging
+	 * or searching can't silently drop the filter.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return {boolean}
+	 */
+	CalendarBlock.prototype.getFeaturedOnly = function() {
+		const $toggle = this.$mainContainer.find( '.sc-filters-featured-only' );
+
+		if ( $toggle.length <= 0 ) {
+			const attributes = this.$mainContainer.data( 'attributes' );
+
+			return !! ( attributes && attributes.featuredOnly );
+		}
+
+		return $toggle.is( ':checked' );
+	}
+
+	/**
 	 * Get the display mode.
 	 *
 	 * @since 3.0.0
@@ -1196,6 +1229,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 	 * @since 3.5.0 Add accessibility label for previous and next left control buttons.
 	 * @since 3.5.0 Add `venues` and `venuesFilter` parameters.
 	 * @since 3.7.0 Add `tags` and `tagsFilter` parameters.
+	 * @since 3.14.0 Add the `featuredOnly` parameter.
 	 *
 	 * @param {boolean} updateDisplay Whether the request is updating the display mode.
 	 * @param {string} action         The action to perform, e.g., next_day, previous_day, etc.
@@ -1222,6 +1256,7 @@ var sugar_calendar = window.sugar_calendar || ( function ( document, window, $ )
 			speakersFilter: this.getSpeakersFilter(),
 			tags: this.getTagIds(),
 			tagsFilter: this.getTagsFilter(),
+			featuredOnly: this.getFeaturedOnly(),
 			day: parseInt( this.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.$formContainer.find( 'input[name="sc_year"]' ).val() ),

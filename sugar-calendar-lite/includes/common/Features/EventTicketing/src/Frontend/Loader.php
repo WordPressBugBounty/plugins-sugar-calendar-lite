@@ -29,11 +29,15 @@ class Loader {
 	 * Front-end related hooks.
 	 *
 	 * @since 3.1.0
+	 * @since 3.14.0 Hook the standalone ticket-page template.
 	 */
 	private function hooks() {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_scripts' ] );
 		add_action( 'sugar_calendar_frontend_event_details_before', [ $this, 'render_single_event_ticket_button' ], 5 );
+
+		TicketPageTemplate::hooks();
+		EditorPreview::hooks();
 	}
 
 	/**

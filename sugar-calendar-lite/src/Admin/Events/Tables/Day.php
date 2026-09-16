@@ -48,6 +48,43 @@ class Day extends Grid {
 	}
 
 	/**
+	 * How many events this view renders in its one day cell.
+	 *
+	 * A total is the meaningful unit for a single-day view, so this returns the
+	 * Maximum Events preference rather than the per-day cap. Arriving from a
+	 * "+N More" row raises it to the row ceiling, so that row can show
+	 * everything it counted. `sc_show_all` is read-only: never written into the view
+	 * switcher or pagination, or it would shadow the saved preference the way
+	 * the old `max` argument did.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return int Zero for no limit.
+	 */
+	protected function get_cell_item_limit() {
+
+		// Clamped, not lifted: the query already stops at the ceiling in Lite,
+		// and on Pro the occurrence merge is otherwise unbounded here.
+		if ( ! empty( $this->get_request_var( 'sc_show_all', 'absint' ) ) ) {
+			return self::QUERY_ROW_CEILING;
+		}
+
+		return $this->get_max();
+	}
+
+	/**
+	 * This view's limit is a total, so the cog offers Maximum Events.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	protected function limits_per_day() {
+
+		return false;
+	}
+
+	/**
 	 * Setup the list-table columns.
 	 *
 	 * Overrides base class to add the "week" column.
@@ -309,6 +346,26 @@ class Day extends Grid {
                         </div>
 
 					<?php endforeach; ?>
+
+					<?php
+					// This row renders its spans directly rather than through
+					// get_events_for_cell(), so it has to emit its own overflow
+					// link. Both span types share the all-day bucket, so only
+					// one of them may render it.
+					$more = $type === 'all_day'
+						? $this->get_more_link( $this->get_all_day_overflow(), $start )
+						: '';
+
+					if ( $more !== '' ) :
+						?>
+
+                        <div class="event-span event-span--more">
+							<?php echo $more; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        </div>
+
+						<?php
+					endif;
+					?>
 
                 </div>
             </div>

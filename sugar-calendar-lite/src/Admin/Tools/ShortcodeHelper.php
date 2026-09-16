@@ -106,6 +106,10 @@ class ShortcodeHelper {
 						'label'    => __( 'Show Search', 'sugar-calendar-lite' ),
 						'input_id' => 'sc-sh-sc_events_calendar-show-search',
 					],
+					'featured_only'             => [
+						'label'    => __( 'Featured Events Only', 'sugar-calendar-lite' ),
+						'input_id' => 'sc-sh-sc_events_calendar-featured-only',
+					],
 				],
 			],
 			'sc_events_list'     => [
@@ -153,6 +157,10 @@ class ShortcodeHelper {
 					'show_search'               => [
 						'label'    => __( 'Show Search', 'sugar-calendar-lite' ),
 						'input_id' => 'sc-sh-sc_events_list-show-search',
+					],
+					'featured_only'             => [
+						'label'    => __( 'Featured Events Only', 'sugar-calendar-lite' ),
+						'input_id' => 'sc-sh-sc_events_list-featured-only',
 					],
 					'show_date_cards'           => [
 						'label'    => __( 'Show Date Cards', 'sugar-calendar-lite' ),
@@ -346,6 +354,7 @@ class ShortcodeHelper {
 						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['allow_user_change_display'] );
 						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['show_filters'] );
 						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['show_search'] );
+						$this->render_field( 'boolean', $config['sc_events_calendar']['attributes']['featured_only'] );
 						?>
 					</div>
 
@@ -357,6 +366,7 @@ class ShortcodeHelper {
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['allow_user_change_display'] );
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_filters'] );
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_search'] );
+						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['featured_only'] );
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_date_cards'] );
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_descriptions'] );
 						$this->render_field( 'boolean', $config['sc_events_list']['attributes']['show_featured_images'] );

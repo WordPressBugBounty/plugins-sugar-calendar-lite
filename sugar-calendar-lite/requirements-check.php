@@ -6,6 +6,8 @@
  */
 namespace Sugar_Calendar;
 
+use Sugar_Calendar\Emails\Installation;
+
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
@@ -31,6 +33,18 @@ final class Requirements_Check {
 	 * @var string
 	 */
 	private $base = '';
+
+	/**
+	 * Email installation lifecycle service.
+	 *
+	 * Created once and retained so every lifecycle callback is registered on
+	 * the same object.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var Installation|null
+	 */
+	private $installation = null;
 
 	/**
 	 * Requirements array
@@ -139,6 +153,17 @@ final class Requirements_Check {
 			// Autoload
 			require_once SC_PLUGIN_DIR . 'vendor/autoload.php';
 
+			// Email installation lifecycle. Registered here, while loading,
+			// so an ordinary request already carries the recovery callback
+			// before Action Scheduler fires on init.
+			$installation = $this->get_installation();
+
+			// phpcs:disable WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks -- The requirements checker registers lifecycle hooks while loading, alongside the existing bootstrap hooks.
+			add_action( 'wp_initialize_site', [ $installation, 'install_new_site_defaults' ], 200, 2 );
+			add_action( Installation::NETWORK_BATCH_HOOK, [ $installation, 'process_network_defaults_batch' ], 10, 3 );
+			add_action( 'action_scheduler_init', [ $installation, 'recover_network_defaults' ] );
+			// phpcs:enable WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+
 			// Bootstrap to plugins_loaded before priority 10 to make sure
 			// add-ons are loaded after us.
 			add_action( 'plugins_loaded', array( $this, 'bootstrap' ), 8 );
@@ -155,11 +180,19 @@ final class Requirements_Check {
 	 * Install, usually on an activation hook.
 	 *
 	 * @since 2.0.0
+	 * @since 3.14.0 Added the network-wide activation argument.
+	 *
+	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 */
-	public function install() {
+	public function install( $network_wide = false ) {
 
 		// Bootstrap to include all of the necessary files
 		$this->bootstrap();
+
+		// Classify before the activation writes its own option rows, because
+		// those rows are themselves evidence of an installation.
+		$installation        = $this->get_installation();
+		$is_new_installation = $installation->is_new_installation();
 
 		// Store the timestamp of first plugin activation.
 		add_option( 'sugar_calendar_activated_time', time(), '', false );
@@ -177,7 +210,7 @@ final class Requirements_Check {
 		add_option( 'sugar_calendar_is_first_activation', true );
 
 		// Add the cron jobs
-		sugar_calendar_cron_hook( $this->is_network_wide() );
+		sugar_calendar_cron_hook( $network_wide );
 
 		set_transient( 'sugar_calendar_just_activated', true, 60 );
 
@@ -186,20 +219,32 @@ final class Requirements_Check {
 
 		// Add transient to signal Setup Wizard first run.
 		set_transient( 'sugar_calendar_setup_wizard_first_run', true, 30 );
+
+		$installation->install_current_site_defaults( $is_new_installation );
+
+		// Every other site of this network is classified in the background. A
+		// failed seed above leaves this site safely on Plain Text and must not
+		// stop that work.
+		if ( $network_wide && is_multisite() ) {
+			$installation->start_network_defaults( get_current_blog_id(), get_current_network_id() );
+		}
 	}
 
 	/**
 	 * Uninstall, usually on a deactivation hook.
 	 *
 	 * @since 2.0.0
+	 * @since 3.14.0 Added the network-wide deactivation argument.
+	 *
+	 * @param bool $network_wide Whether the plugin is being deactivated network-wide.
 	 */
-	public function uninstall() {
+	public function uninstall( $network_wide = false ) {
 
 		// Bootstrap to include all of the necessary files
 		$this->bootstrap();
 
 		// Remove the cron hooks
-		sugar_calendar_cron_unhook( $this->is_network_wide() );
+		sugar_calendar_cron_unhook( $network_wide );
 	}
 
 	/**
@@ -209,6 +254,29 @@ final class Requirements_Check {
 	 */
 	public function bootstrap() {
 		Plugin::instance( $this->file );
+	}
+
+	/**
+	 * The retained email installation lifecycle service.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return Installation
+	 */
+	private function get_installation() {
+
+		if ( $this->installation === null ) {
+			$base = $this->base;
+
+			// Direct construction in tests leaves the basename empty.
+			if ( empty( $base ) && defined( 'SC_PLUGIN_BASE' ) ) {
+				$base = SC_PLUGIN_BASE;
+			}
+
+			$this->installation = new Installation( $base );
+		}
+
+		return $this->installation;
 	}
 
 	/**
@@ -281,18 +349,6 @@ final class Requirements_Check {
 	 */
 	private function unmet_requirements_name() {
 		return 'sc-requirements';
-	}
-
-	/**
-	 * Is plugin activation network wide?
-	 *
-	 * @since 2.0.0
-	 * @return bool
-	 */
-	private function is_network_wide() {
-		return ! empty( $_GET['networkwide'] )
-			? (bool) $_GET['networkwide']
-			: false;
 	}
 
 	/** Helpers ***************************************************************/

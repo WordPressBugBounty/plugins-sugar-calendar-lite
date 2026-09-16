@@ -2,7 +2,9 @@
 
 namespace Sugar_Calendar\Features\RegistrationForm\Frontend;
 
+use Sugar_Calendar\EmailStatus;
 use Sugar_Calendar\Features\RegistrationForm\Abandonment\RecipientResolver;
+use Sugar_Calendar\Features\RegistrationForm\Admin\AnswersConfirmationEmailConfig;
 use Sugar_Calendar\Features\RegistrationForm\Email\AnswersConfirmationEmail;
 use Sugar_Calendar\Features\RegistrationForm\RateLimiter;
 use Sugar_Calendar\Features\RegistrationForm\ResponseRepository;
@@ -460,6 +462,10 @@ class SubmitEndpoint {
 	 * @param array   $schema The event's validated schema.
 	 */
 	private function confirm( array $rows, array $schema ) {
+
+		if ( ! EmailStatus::is_enabled( AnswersConfirmationEmailConfig::EMAIL_ID ) ) {
+			return;
+		}
 
 		$row       = (array) $rows[0];
 		$recipient = RecipientResolver::for_context( (string) $row['context'], (int) $row['context_id'] );

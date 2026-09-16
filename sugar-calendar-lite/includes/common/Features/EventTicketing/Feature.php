@@ -7,6 +7,7 @@ use Sugar_Calendar\Common\Features\FeatureAbstract;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Area;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
 use Sugar_Calendar\AddOn\Ticketing\Database;
+use Sugar_Calendar\AddOn\Ticketing\Integrations\Abilities\TicketingSignupMode;
 use Sugar_Calendar\Helpers;
 
 class Feature extends FeatureAbstract {
@@ -334,6 +335,8 @@ class Feature extends FeatureAbstract {
 
 		add_action( 'admin_init', [ $this, 'install' ] );
 		add_action( 'sugar_calendar_updater', [ $this, 'updater' ] );
+
+		TicketingSignupMode::hooks();
 	}
 
 	/**
@@ -448,15 +451,16 @@ class Feature extends FeatureAbstract {
 	 */
 	public function install() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
-		$settings = get_option( 'sc_et_settings' );
-
-		if ( ! empty( $settings ) ) {
-			return; // Install already completed.
+		// admin_init also runs for anonymous admin-ajax.php requests.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
 		}
 
 		$author_id = current_user_can( 'edit_others_pages' ) ? get_current_user_id() : 1;
+		$settings  = get_option( 'sc_et_settings', [] );
+		$settings  = is_array( $settings ) ? $settings : [];
 
-		if ( ! Settings\get_setting( 'receipt_page' ) ) {
+		if ( empty( $settings['receipt_page'] ) ) {
 
 			// Receipt Page.
 			$receipt_page = wp_insert_post(
@@ -471,9 +475,10 @@ class Feature extends FeatureAbstract {
 			);
 
 			Settings\update_setting( 'receipt_page', $receipt_page );
+			$settings['receipt_page'] = $receipt_page;
 		}
 
-		if ( ! Settings\get_setting( 'ticket_page' ) ) {
+		if ( empty( $settings['ticket_page'] ) ) {
 
 			// Tickets Page.
 			$ticket_page = wp_insert_post(
@@ -488,52 +493,6 @@ class Feature extends FeatureAbstract {
 			);
 
 			Settings\update_setting( 'ticket_page', $ticket_page );
-
-		}
-
-		if ( ! Settings\get_setting( 'receipt_message' ) ) {
-
-			$subject = 'Your event ticket purchase!';
-			$message = "Hello {name},
-
-Your event ticket purchase to <strong>{event_title}</strong> was successful! See below for the specifics of when and where the event is taking place!
-
-<strong>Event date and time</strong>: {event_date} at {event_start_time}
-
-See event location and further details <a href=\"{event_url}\">here</a>.
-
-Your tickets:
-
-{tickets}
-
-<a href=\"{receipt_url}\">View this receipt and event details in your browser</a>.";
-
-			Settings\update_setting( 'receipt_subject', $subject );
-			Settings\update_setting( 'receipt_message', $message );
-
-		}
-
-		if ( ! Settings\get_setting( 'ticket_message' ) ) {
-
-			$subject = 'Your event ticket!';
-			$message = "Hello {attendee_name},
-
-Your event ticket to <strong>{event_title}</strong> is below! See the following details for specifics of when and where the event is taking place!
-
-<strong>Event date and time</strong>: {event_date} at {event_start_time}
-
-See event location and further details <a href=\"{event_url}\">here</a>.
-
-Your ticket:
-<ul>
- 	<li>ID: {ticket_id}</li>
- 	<li>Code: {ticket_code}</li>
-</ul>
-<a href=\"{ticket_url}\">View this ticket in your browser</a>.";
-
-			Settings\update_setting( 'ticket_subject', $subject );
-			Settings\update_setting( 'ticket_message', $message );
-
 		}
 	}
 

@@ -9,6 +9,14 @@ namespace Sugar_Calendar\AddOn\Ticketing;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Emails\AdminOrderTagResolver;
+use Sugar_Calendar\Emails\CalendarAttachmentPool;
+use Sugar_Calendar\Emails\LegacyRoute;
+use Sugar_Calendar\Emails\ModernRoute;
+use Sugar_Calendar\Emails\RenderedEmail;
+use Sugar_Calendar\Emails\RenderRequest;
+use Sugar_Calendar\Emails\Styling;
+use Sugar_Calendar\Emails\TicketingSmartTags;
 
 /**
  * Emails class
@@ -39,6 +47,15 @@ class Emails {
 	private $content_type;
 
 	/**
+	 * Effective filtered content type from the latest successful render.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var string|null
+	 */
+	private $rendered_content_type;
+
+	/**
 	 * Holds the email headers
 	 *
 	 * @since 1.0.0
@@ -46,11 +63,47 @@ class Emails {
 	private $headers;
 
 	/**
+	 * Whether headers were explicitly assigned through the public setter.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var bool
+	 */
+	private $custom_headers = false;
+
+	/**
 	 * Whether to send email in HTML
 	 *
 	 * @since 1.0.0
 	 */
 	private $html = true;
+
+	/**
+	 * Whether a failed Modern render must use the legacy plain-text pipeline.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var bool
+	 */
+	private $legacy_plain_text = false;
+
+	/**
+	 * First-party content prepared for one render.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var \Sugar_Calendar\Emails\ContentEnrichment|null
+	 */
+	private $content_enrichment;
+
+	/**
+	 * One-shot administrator order source for the next send.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var bool|array|null
+	 */
+	private $admin_order_record;
 
 	/**
 	 * The email template to use
@@ -67,11 +120,35 @@ class Emails {
 	private $heading = '';
 
 	/**
-	 * Container for storing all tags
+	 * Tag registry for the current render frame, or the last top-level render.
 	 *
 	 * @since 1.0.0
+	 * @since 3.14.0 Holds a TicketingSmartTags registry instead of a keyed array.
+	 *
+	 * @var TicketingSmartTags|null
 	 */
 	private $tags;
+
+	/**
+	 * Admin tag resolver for callbacks handed out by get_tags() outside a render.
+	 *
+	 * Kept per instance so those callbacks share one bounded order-record cache
+	 * and a fresh sender inherits nothing. Render frames build their own.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var AdminOrderTagResolver|null
+	 */
+	private $admin_tags;
+
+	/**
+	 * The render request currently executing on this sender, or null.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var RenderRequest|null
+	 */
+	private $active_request;
 
 	/**
 	 * Object ID
@@ -88,11 +165,27 @@ class Emails {
 	private $object_type = 'order';
 
 	/**
-	 * Get things going
+	 * Registry identity for the notification being sent.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var string
+	 */
+	private $email_id = '';
+
+	/**
+	 * Get things going.
 	 *
 	 * @since 1.0.0
+	 * @since 3.14.0 Accept a preselected template without resolving stored styling.
+	 *
+	 * @param string|null $template Optional preselected template slug.
 	 */
-	public function __construct() {
+	public function __construct( $template = null ) {
+
+		if ( is_string( $template ) && $template !== '' ) {
+			$this->template = $template;
+		}
 
 		if ( 'none' === $this->get_template() ) {
 			$this->html = false;
@@ -109,7 +202,27 @@ class Emails {
 	 */
 	public function __set( $key, $value ) {
 
+		if ( $key === 'headers' ) {
+			$this->custom_headers = ! empty( $value );
+		}
+
 		$this->$key = $value;
+	}
+
+	/**
+	 * Whether a token identifies this sender's current render frame.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @internal
+	 *
+	 * @param object $frame_token Render-frame token.
+	 *
+	 * @return bool
+	 */
+	public function is_render_frame( object $frame_token ): bool {
+
+		return $this->active_request === $frame_token;
 	}
 
 	/**
@@ -122,6 +235,13 @@ class Emails {
 
 		if ( empty( $this->from_name ) ) {
 			$this->from_name = Settings\get_setting( 'receipt_from_name', get_bloginfo( 'name' ) );
+		}
+
+		// A field the admin saved BLANK must fall back too. get_setting()
+		// resolves its default on `! isset()` alone, so a cleared field returns
+		// '' and the default above never applies.
+		if ( empty( $this->from_name ) ) {
+			$this->from_name = get_bloginfo( 'name' );
 		}
 
 		/**
@@ -146,6 +266,15 @@ class Emails {
 
 		if ( empty( $this->from_address ) ) {
 			$this->from_address = Settings\get_setting( 'receipt_from_email', get_option( 'admin_email' ) );
+		}
+
+		// Same blank-field gap as get_from_name(), but this one stops mail
+		// outright: get_headers() builds `From: {name} <{address}>`, so an empty
+		// address yields `From:  <>`, wp_mail() fails validation, and EVERY
+		// ticketing email silently stops — no receipt, no ticket, no admin
+		// notification, and no error anywhere for the site owner to see.
+		if ( empty( $this->from_address ) ) {
+			$this->from_address = get_option( 'admin_email' );
 		}
 
 		/**
@@ -187,9 +316,10 @@ class Emails {
 	public function get_headers() {
 
 		if ( empty( $this->headers ) ) {
-			$this->headers = "From: {$this->get_from_name()} <{$this->get_from_address()}>\r\n";
+			$content_type   = $this->rendered_content_type !== null ? $this->rendered_content_type : $this->get_content_type();
+			$this->headers  = "From: {$this->get_from_name()} <{$this->get_from_address()}>\r\n";
 			$this->headers .= "Reply-To: {$this->get_from_address()}\r\n";
-			$this->headers .= "Content-Type: {$this->get_content_type()}; charset=utf-8\r\n";
+			$this->headers .= "Content-Type: {$content_type}; charset=utf-8\r\n";
 		}
 
 		/**
@@ -213,6 +343,7 @@ class Emails {
 	public function get_templates() {
 
 		$templates = [
+			'modern'  => esc_html__( 'Modern', 'sugar-calendar-lite' ),
 			'default' => esc_html__( 'Default Template', 'sugar-calendar-lite' ),
 			'none'    => esc_html__( 'No template, plain text only', 'sugar-calendar-lite' ),
 		];
@@ -238,7 +369,12 @@ class Emails {
 	public function get_template() {
 
 		if ( empty( $this->template ) ) {
-			$this->template = 'default';
+
+			// `Styling` resolves the stored Email Styling choice to a slug this
+			// class understands: `modern`, or `default` for Plain Text and for
+			// anything unrecognised. The `sc_email_template` filter below still
+			// has the final say.
+			$this->template = Styling::email_template();
 		}
 
 		/**
@@ -281,40 +417,159 @@ class Emails {
 	 */
 	public function build_email( $message ) {
 
-		if ( false === $this->html ) {
-			/**
-			 * Filters the message contents of the current email.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param string  $message Email message contents.
-			 * @param \Emails $this    Email class instance.
-			 */
-			return apply_filters( 'sc_email_message', wp_strip_all_tags( $message ), $this );
-		}
-
-		ob_start();
-
-		include SC_CORE_ET_PLUGIN_DIR . 'includes/templates/email.php';
-
-		$body = ob_get_clean();
-
-		$message = str_replace( '{email}', $message, $body );
-		$message = str_replace( '{heading}', $this->heading, $message );
-
-		/** This filter is documented in includes/emails/class-emails.php */
-		return apply_filters( 'sc_email_message', $message, $this );
+		return LegacyRoute::wrap_document( $message, (string) $this->heading, $this->html, $this );
 	}
 
 	/**
-	 * Send the email
+	 * Render an email without running the delivery lifecycle.
+	 *
+	 * Smart Tag overrides are fully resolved strings inserted verbatim. An
+	 * override is used only when the normal tag registry registered the same
+	 * slug, and its production callback is not invoked.
+	 * Accepted config keys are `modern_context`, `modern_styling`,
+	 * `calendar_action`, `calendar_url`, `smart_tag_overrides`,
+	 * `content_enrichment`, `admin_order_record`, and `admin_order_preview`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string       $subject The subject line of the email.
+	 * @param string|array $message The body of the email, or the first-party
+	 *                              internal copy resolution.
+	 * @param array        $config  Optional render configuration.
+	 *
+	 *                              `modern_context` accepts an array or null to force fallback.
+	 *                              `modern_styling` accepts non-empty effective styling values.
+	 *                              `calendar_action` accepts an array or null and
+	 *                              suppresses automatic resolution when present.
+	 *                              `calendar_url` accepts an explicit string when present.
+	 *                              `smart_tag_overrides` maps registered tag slugs to resolved strings.
+	 *                              `content_enrichment` accepts a render-scoped ContentEnrichment instance.
+	 *                              `admin_order_record` accepts true for the saved current order or an administrator fictional context.
+	 *                              `admin_order_preview` uses a preview receipt only when the filtered body uses the native receipt tag.
+	 *
+	 * @return array {
+	 *     Rendered email values.
+	 *
+	 *     @type string $subject      Final single-line subject.
+	 *     @type string $message      Final message body.
+	 *     @type string $content_type Effective filtered content type.
+	 *     @type array|null $calendar_action Calendar action for the sender.
+	 * }
+	 */
+	public function render( $subject, $message, array $config = [] ) {
+
+		return $this->render_email( $subject, $message, $config )->to_array();
+	}
+
+	/**
+	 * Run one render frame: build the request and registry, resolve the subject,
+	 * try the Modern route, fall back to Legacy.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string       $subject The subject line of the email.
+	 * @param string|array $message The body, or the first-party copy resolution.
+	 * @param array        $config  Render configuration.
+	 *
+	 * @return RenderedEmail
+	 */
+	private function render_email( $subject, $message, array $config ): RenderedEmail { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh -- The render frame's branching mirrors the released transform order.
+
+		$request  = RenderRequest::from_sender(
+			$this,
+			[
+				'email_id'          => $this->email_id,
+				'object_id'         => $this->object_id,
+				'heading'           => $this->heading,
+				'html'              => $this->html,
+				'legacy_plain_text' => $this->legacy_plain_text,
+			],
+			$subject,
+			$message,
+			$config
+		);
+		$previous = $this->active_request;
+		$admin    = $this->email_id === AdminOrderTagResolver::EMAIL_ID
+			? new AdminOrderTagResolver( $this->object_id, $this->object_type )
+			: null;
+		$tags     = $this->build_registry( $request->smart_tag_overrides(), $admin );
+		$owns     = false;
+
+		$this->active_request = $request;
+
+		// email_tag_exists() after a top-level render reads that render's tags, as it always has.
+		if ( $previous === null ) {
+			$this->tags = $tags;
+		}
+
+		try {
+			if ( $request->content_enrichment() !== null ) {
+				$owns = $request->content_enrichment()->activate( $this, $request );
+			}
+
+			$tags->setup();
+
+			if ( $admin !== null ) {
+				$admin->attach( $tags )->initialize( $request->admin_order_record(), $request->admin_order_preview() );
+			}
+
+			$subject = $this->render_subject( $request, $tags, $admin );
+
+			return ( new ModernRoute() )->render( $request, $tags, $subject )
+				?? ( new LegacyRoute() )->render( $request, $tags, $admin, $subject );
+		} finally {
+			if ( $owns ) {
+				$request->content_enrichment()->remove();
+			}
+
+			$this->active_request = $previous;
+		}
+	}
+
+	/**
+	 * The subject pipeline shared by both routes.
+	 *
+	 * Subjects are always single-line, plain-text mail headers. Block-only
+	 * tags stay untouched, entities are decoded, and newlines are collapsed.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param RenderRequest              $request The render's inputs.
+	 * @param TicketingSmartTags         $tags    The render's tag registry.
+	 * @param AdminOrderTagResolver|null $admin   The admin resolver, when active.
+	 *
+	 * @return string
+	 */
+	private function render_subject( RenderRequest $request, TicketingSmartTags $tags, ?AdminOrderTagResolver $admin ): string {
+
+		$subject = wp_unslash( $request->subject() );
+
+		if ( $admin !== null && $admin->is_active() ) {
+			$subject = $admin->prepare_subject( $subject );
+		}
+
+		$subject = $tags->parse( $subject, [ 'tickets', 'admin_tickets_info', 'receipt_url' ] );
+		$subject = html_entity_decode( $subject, ENT_QUOTES, 'UTF-8' );
+
+		return trim( preg_replace( '/[\r\n]+/', ' ', $subject ) );
+	}
+
+	// The legacy class owns these per-send wp_mail hooks instead of a hooks() method.
+	// phpcs:disable WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+	/**
+	 * Send the email.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string       $to          The To address
-	 * @param string       $subject     The subject line of the email
-	 * @param string       $message     The body of the email
-	 * @param string|array $attachments Attachments to the email
+	 * @param string       $to          The To address.
+	 * @param string       $subject     The subject line of the email.
+	 * @param string|array $message     The body of the email. An array is the
+	 *                                  first-party internal copy resolution from
+	 *                                  `Settings\get_email_copy_resolution()`,
+	 *                                  which lets the fallback follow the final
+	 *                                  delivery route. Third-party callers pass a
+	 *                                  string and keep the released behavior.
+	 * @param string|array $attachments Attachments to the email.
 	 */
 	public function send( $to, $subject, $message, $attachments = '' ) {
 
@@ -324,42 +579,103 @@ class Emails {
 			return false;
 		}
 
-		$this->setup_email_tags();
+		$original_html                  = $this->html;
+		$original_content_type          = $this->content_type;
+		$original_rendered_content_type = $this->rendered_content_type;
+		$original_headers               = $this->headers;
+		$original_custom_headers        = $this->custom_headers;
+		$original_template              = $this->template;
+		$content_enrichment             = $this->content_enrichment;
+		$admin_order_record             = $this->admin_order_record;
+		$this->content_enrichment       = null;
+		$this->admin_order_record       = null;
 
-		/**
-		 * Hooks before email is sent
-		 *
-		 * @since 1.0
-		 */
-		do_action( 'sc_email_send_before', $this );
+		try {
+			/**
+			 * Hooks before email is sent.
+			 *
+			 * @since 1.0
+			 *
+			 * @param Emails $emails Email sender instance.
+			 */
+			do_action( 'sc_email_send_before', $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
-		$subject = wp_unslash( $subject );
-		$message = wp_unslash( $message );
-		$message = $this->build_email( $message );
-		$message = $this->parse_tags( $message );
-		$message = $this->text_to_html( $message );
+			$rendered = $this->render_email(
+				$subject,
+				$message,
+				[
+					'content_enrichment' => $content_enrichment,
+					'admin_order_record' => $admin_order_record,
+				]
+			);
 
-		/**
-		 * Filters the attachments for the current email (if any).
-		 *
-		 * @since 1.0
-		 *
-		 * @param array   $attachments Attachments for the email (if any).
-		 * @param \Emails $this        Email class instance.
-		 */
-		$attachments = apply_filters( 'sc_email_attachments', $attachments, $this );
+			// Route-final content type for the wp_mail window: get_headers() reads
+			// rendered_content_type, and the wp_mail_content_type callback recomputes
+			// from html with the cache cleared.
+			$this->html                  = $rendered->html();
+			$this->content_type          = null;
+			$this->rendered_content_type = $rendered->content_type();
 
-		$sent = wp_mail( $to, $subject, $message, $this->get_headers(), $attachments );
+			if ( ! $this->custom_headers ) {
+				$this->headers = null;
+			}
 
-		/**
-		 * Hooks after the email is sent
-		 *
-		 * @since 1.0
-		 */
-		do_action( 'sc_email_send_after', $this );
+			if ( ! empty( $rendered->calendar_action() ) ) {
+				$calendar_attachment = CalendarAttachmentPool::acquire( $rendered->calendar_action() );
 
-		return $sent;
+				if ( $calendar_attachment !== '' ) {
+					if ( is_array( $attachments ) && ! in_array( $calendar_attachment, $attachments, true ) ) {
+						$attachments[] = $calendar_attachment;
+					} elseif ( is_string( $attachments ) ) {
+						$existing = explode( "\n", str_replace( "\r\n", "\n", $attachments ) );
+
+						if ( ! in_array( $calendar_attachment, $existing, true ) ) {
+							$separator    = $attachments === '' || substr( $attachments, -1 ) === "\n" ? '' : "\n";
+							$attachments .= $separator . $calendar_attachment;
+						}
+					}
+				}
+			}
+
+			/**
+			 * Filters the attachments for the current email (if any).
+			 *
+			 * @since 1.0
+			 *
+			 * @param array  $attachments Attachments for the email (if any).
+			 * @param Emails $emails      Email class instance.
+			 */
+			$attachments = apply_filters( 'sc_email_attachments', $attachments, $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			$sent = wp_mail( $to, $rendered->subject(), $rendered->message(), $this->get_headers(), $attachments );
+
+			/**
+			 * Hooks after the email is sent.
+			 *
+			 * @since 1.0
+			 *
+			 * @param Emails $emails Email sender instance.
+			 */
+			do_action( 'sc_email_send_after', $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+			return $sent;
+		} finally {
+			remove_filter( 'wp_mail_from', [ $this, 'get_from_address' ] );
+			remove_filter( 'wp_mail_from_name', [ $this, 'get_from_name' ] );
+			remove_filter( 'wp_mail_content_type', [ $this, 'get_content_type' ] );
+
+			$this->html                  = $original_html;
+			$this->content_type          = $original_content_type;
+			$this->rendered_content_type = $original_rendered_content_type;
+			$this->headers               = $original_headers;
+			$this->custom_headers        = $original_custom_headers;
+			$this->template              = $original_template;
+			$this->content_enrichment    = $content_enrichment;
+			$this->admin_order_record    = null;
+			$this->heading               = '';
+		}
 	}
+	// phpcs:enable WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
 	/**
 	 * Add filters/actions before the email is sent
@@ -395,53 +711,7 @@ class Emails {
 	 */
 	public function text_to_html( $message ) {
 
-		if ( 'text/html' === $this->content_type || true === $this->html ) {
-			$message = wpautop( make_clickable( $message ), false );
-			$message = str_replace( '&#038;', '&amp;', $message );
-		}
-
-		return $message;
-	}
-
-	/**
-	 * Search content for email tags and filter email tags through their hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $content Content to search for email tags
-	 *
-	 * @return string $content Filtered content
-	 */
-	private function parse_tags( $content ) {
-
-		// Make sure there's at least one tag
-		if ( empty( $this->tags ) || ! is_array( $this->tags ) ) {
-			return $content;
-		}
-
-		$new_content = preg_replace_callback( "/{([A-z0-9\-\_]+)}/s", [ $this, 'do_tag' ], $content );
-
-		return $new_content;
-	}
-
-	/**
-	 * Setup all registered email tags
-	 *
-	 * @since 1.0.0
-	 */
-	private function setup_email_tags() {
-
-		$tags = $this->get_tags( 'all' );
-
-		if ( empty( $tags ) ) {
-			return;
-		}
-
-		foreach ( $tags as $tag ) {
-			if ( isset( $tag['function'] ) && is_callable( $tag['function'] ) ) {
-				$this->tags[ $tag['tag'] ] = $tag;
-			}
-		}
+		return LegacyRoute::text_to_html( $message, 'text/html' === $this->content_type || true === $this->html );
 	}
 
 	/**
@@ -455,160 +725,60 @@ class Emails {
 	 */
 	public function get_tags( $object_type = 'order' ) {
 
-		// Setup default tags array
-		$email_tags = [
-			[
-				'tag'         => 'name',
-				'description' => esc_html__( 'The display name of the customer', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_name',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'email',
-				'description' => esc_html__( 'The email address of the customer', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_email',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'order_id',
-				'description' => esc_html__( 'The ID number of the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_id',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'order_amount',
-				'description' => esc_html__( 'The total purchase amount of the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_amount',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'order_date',
-				'description' => esc_html__( 'The purchase date of the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_order_date',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'receipt_url',
-				'description' => esc_html__( 'URL to view the receipt in the browser', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_receipt_url',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'tickets',
-				'description' => esc_html__( 'Outputs a list of tickets in the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_tickets',
-				'type'        => 'order',
-			],
-			[
-				'tag'         => 'event_id',
-				'description' => esc_html__( 'The ID number of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_id',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'event_title',
-				'description' => esc_html__( 'The title of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_title',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'event_url',
-				'description' => esc_html__( 'The URL of the event details page', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_url',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'event_date',
-				'description' => esc_html__( 'The date of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_date',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'event_start_time',
-				'description' => esc_html__( 'The start time of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_start_time',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'event_end_time',
-				'description' => esc_html__( 'The end time of the event associated with the order', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_event_end_time',
-				'type'        => 'event',
-			],
-			[
-				'tag'         => 'ticket_id',
-				'description' => esc_html__( 'The ticket ID number', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_id',
-				'type'        => 'ticket',
-			],
-			[
-				'tag'         => 'ticket_code',
-				'description' => esc_html__( 'The ticket code', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_code',
-				'type'        => 'ticket',
-			],
-			[
-				'tag'         => 'ticket_url',
-				'description' => esc_html__( 'The URL to the ticket details', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_url',
-				'type'        => 'ticket',
-			],
-			[
-				'tag'         => 'attendee_name',
-				'description' => esc_html__( 'The name of the attendee assigned to a ticket, if provided', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_name',
-				'type'        => 'attendee',
-			],
-			[
-				'tag'         => 'attendee_email',
-				'description' => esc_html__( 'The email of the attendee assigned to a ticket, if provided', 'sugar-calendar-lite' ),
-				'function'    => '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_email',
-				'type'        => 'attendee',
-			],
-		];
-
-		if ( 'all' !== $object_type ) {
-			// Filter the default list by
-			$email_tags = wp_list_filter( $email_tags, [ 'type' => $object_type ] );
-		}
-
-		/**
-		 * Filters the supported email tags and their attributes.
-		 *
-		 * @since 1.0
-		 *
-		 * @param array   $email_tags  {
-		 *                             Email tags and their attributes
-		 *
-		 * @type string   $tag         Email tag slug.
-		 * @type string   $description Translatable description for what the email tag represents.
-		 * @type callable $function    Callback function for rendering the email tag.
-		 * @type string   $type        The object type this tag is for.
-		 *                             }
-		 *
-		 * @param \Emails $this        Email class instance.
-		 */
-		return apply_filters( 'sc_email_tags', $email_tags, $object_type, $this );
+		return $this->registry()->get_tags( $object_type );
 	}
 
 	/**
-	 * Parse a specific tag.
+	 * Build a registry for this sender's current inputs, outside a render frame.
 	 *
-	 * @since 1.0.0
+	 * @since 3.14.0
 	 *
-	 * @param $m Message
+	 * @return TicketingSmartTags
 	 */
-	private function do_tag( $m ) {
+	private function registry(): TicketingSmartTags {
 
-		// Get tag
-		$tag = $m[1];
+		return $this->build_registry( [], $this->admin_resolver() );
+	}
 
-		// Return tag if not set
-		if ( ! $this->email_tag_exists( $tag ) ) {
-			return $m[0];
+	/**
+	 * Build a tag registry for this sender.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array                      $overrides Slug => resolved string for one render, or empty.
+	 * @param AdminOrderTagResolver|null $admin     Resolver whose admin tag definitions join the defaults, or null.
+	 *
+	 * @return TicketingSmartTags
+	 */
+	private function build_registry( array $overrides, ?AdminOrderTagResolver $admin ): TicketingSmartTags {
+
+		return new TicketingSmartTags(
+			$this,
+			$this->object_id,
+			$this->object_type,
+			$overrides,
+			$admin !== null ? $admin->tag_definitions() : []
+		);
+	}
+
+	/**
+	 * The per-instance admin resolver, or null when this sender is not the admin email.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return AdminOrderTagResolver|null
+	 */
+	private function admin_resolver(): ?AdminOrderTagResolver {
+
+		if ( $this->email_id !== AdminOrderTagResolver::EMAIL_ID ) {
+			return null;
 		}
 
-		return call_user_func( $this->tags[ $tag ]['function'], $this->object_id, $this->object_type, $tag );
+		if ( $this->admin_tags === null ) {
+			$this->admin_tags = new AdminOrderTagResolver( $this->object_id, $this->object_type );
+		}
+
+		return $this->admin_tags;
 	}
 
 	/**
@@ -622,6 +792,10 @@ class Emails {
 	 */
 	public function email_tag_exists( $tag ) {
 
-		return array_key_exists( $tag, $this->tags );
+		if ( $this->tags === null ) {
+			$this->tags = $this->registry();
+		}
+
+		return $this->tags->exists( $tag );
 	}
 }

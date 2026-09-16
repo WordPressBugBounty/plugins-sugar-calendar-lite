@@ -198,19 +198,6 @@ var SCHandHolding = window.SCHandHolding || ( function( document, window, $ ) {
 				+ '</div>',
 				draggable: false,
 				escapeKey: false,
-				onContentReady: function() {
-					let jc = this;
-
-					this.$content.find( '#sc-hand-holding__end__jquery-confirm-content__buttons__finish' ).on( 'click', function( e ) {
-						e.preventDefault();
-
-						app.shouldCountAsExitBrowser = false;
-
-						app.updateHandHoldingStatus( 'complete', function() {
-							window.location.href = sugar_calendar_hand_holding.urls.admin_calendar;
-						} );
-					} );
-				},
 				theme: 'sc-hand-holding',
 				title: '',
 				useBootstrap: false,
@@ -228,10 +215,38 @@ var SCHandHolding = window.SCHandHolding || ( function( document, window, $ ) {
 				'pagehide',
 				app.tabExit
 			);
+			// Delegated: the end modal's onContentReady does not reliably run with
+			// the button already in this.$content, so binding there left "Finish
+			// Setup" dead on some page loads (no status POST, no redirect).
+			$( document ).on(
+				'click',
+				'#sc-hand-holding__end__jquery-confirm-content__buttons__finish',
+				app.finishBtnClick
+			);
 			$el.$tooltipClose.on( 'click', app.closeTooltip );
 			$el.$nextBtn.on( 'click', app.nextBtnClick );
 			$el.$saveDraftBtn.one( 'click', app.saveDraftBtnClick );
 			$( '#publish' ).one( 'click', app.publishBtnClick );
+		},
+
+		/**
+		 * Finish the guide from the end modal: persist 'complete', then leave for
+		 * the calendar page. Redirecting from the success callback keeps the user
+		 * put if the status never saved, rather than restarting the guide there.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param {Event} e The Event object.
+		 */
+		finishBtnClick: function( e ) {
+
+			e.preventDefault();
+
+			app.shouldCountAsExitBrowser = false;
+
+			app.updateHandHoldingStatus( 'complete', function() {
+				window.location.href = sugar_calendar_hand_holding.urls.admin_calendar;
+			} );
 		},
 
 		/**

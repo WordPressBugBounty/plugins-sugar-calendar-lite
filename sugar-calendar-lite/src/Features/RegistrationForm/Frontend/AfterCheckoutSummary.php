@@ -3,7 +3,6 @@
 namespace Sugar_Calendar\Features\RegistrationForm\Frontend;
 
 use Sugar_Calendar\Features\RegistrationForm\RespondentNaming;
-use Sugar_Calendar_Event_Ticketing\Features\TicketType;
 
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\display_price;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_order_tickets;
@@ -313,7 +312,7 @@ class AfterCheckoutSummary {
 
 		foreach ( $quantities as $type_id => $quantity ) {
 
-			$type = self::ticket_type( $event_id, $type_id );
+			$type = RespondentNaming::ticket_type( $event_id, $type_id );
 
 			$rows[] = [
 				'label' => $type['name'],
@@ -350,66 +349,5 @@ class AfterCheckoutSummary {
 			display_price( $price ),
 			$quantity
 		);
-	}
-
-	/**
-	 * A ticket type's display name and unit price.
-	 *
-	 * Type 0 is general admission, which lives in event meta rather than the
-	 * ticket-types table. Named types are read behind class_exists(), since they
-	 * are an add-on feature; without it the row still renders, priceless.
-	 *
-	 * @since 3.13.0
-	 *
-	 * @param int $event_id Sugar Calendar event id.
-	 * @param int $type_id  Ticket type id.
-	 *
-	 * @return array [ 'name' => string, 'price' => float|null ].
-	 */
-	private static function ticket_type( $event_id, $type_id ) {
-
-		$general = self::general_admission( $event_id );
-
-		if ( $type_id <= 0 ) {
-			return $general;
-		}
-
-		if ( ! class_exists( TicketType::class ) ) {
-			return $general;
-		}
-
-		$ticket_types = new TicketType();
-		$ticket_type  = $ticket_types->get( $type_id );
-
-		if ( empty( $ticket_type ) ) {
-			return $general;
-		}
-
-		$name = isset( $ticket_type->ticket_name ) ? trim( (string) $ticket_type->ticket_name ) : '';
-
-		return [
-			'name'  => $name === '' ? $general['name'] : $name,
-			'price' => isset( $ticket_type->ticket_price ) ? (float) $ticket_type->ticket_price : null,
-		];
-	}
-
-	/**
-	 * General admission's name and price, which live in event meta.
-	 *
-	 * Also the name fallback for a named type that no longer resolves, so the row
-	 * reads as a ticket rather than as a blank.
-	 *
-	 * @since 3.13.0
-	 *
-	 * @param int $event_id Sugar Calendar event id.
-	 *
-	 * @return array [ 'name' => string, 'price' => float|null ].
-	 */
-	private static function general_admission( $event_id ) {
-
-		return [
-			'name'  => RespondentNaming::general_admission( $event_id ),
-			'price' => $event_id > 0 ? (float) get_event_meta( $event_id, 'ticket_price', true ) : null,
-		];
 	}
 }

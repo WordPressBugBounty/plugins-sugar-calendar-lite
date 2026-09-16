@@ -102,7 +102,44 @@ class GetEventStats extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [ 'type' => 'object' ];
+		return [
+			'type'       => 'object',
+			'required'   => [ 'total', 'scanned', 'truncated', 'by_calendar', 'by_month', 'range' ],
+			'properties' => [
+				'total'       => [ 'type' => 'integer' ],
+				'scanned'     => [ 'type' => 'integer' ],
+				'truncated'   => [ 'type' => 'boolean' ],
+				'by_calendar' => [
+					'type'  => 'array',
+					'items' => [
+						'type'       => 'object',
+						'properties' => [
+							'calendar_id'   => [ 'type' => 'integer' ],
+							'calendar_slug' => [ 'type' => 'string' ],
+							'calendar_name' => [ 'type' => 'string' ],
+							'count'         => [ 'type' => 'integer' ],
+						],
+					],
+				],
+				'by_month'    => [
+					'type'  => 'array',
+					'items' => [
+						'type'       => 'object',
+						'properties' => [
+							'year_month' => [ 'type' => 'string' ],
+							'count'      => [ 'type' => 'integer' ],
+						],
+					],
+				],
+				'range'       => [
+					'type'       => 'object',
+					'properties' => [
+						'start_after'  => [ 'type' => 'string' ],
+						'start_before' => [ 'type' => 'string' ],
+					],
+				],
+			],
+		];
 	}
 
 	/**

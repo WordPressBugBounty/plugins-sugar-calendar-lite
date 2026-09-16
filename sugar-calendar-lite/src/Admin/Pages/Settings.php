@@ -90,6 +90,20 @@ class Settings extends PageTabAbstract {
 		add_action( 'admin_init', [ $this, 'init' ] );
 		add_action( 'sugar_calendar_admin_area_enqueue_assets', [ $this, 'enqueue_assets' ] );
 		add_action( 'sc_et_settings_emails_section_top', [ $this, 'maybe_display_email_wp_mail_smtp_notice' ] );
+
+		// This method runs from Area::init() on `admin_init` priority 0, but
+		// init() is itself scheduled on `admin_init` priority 10 — the same
+		// priority as Area::handle_post(), which was registered earlier (at boot)
+		// and therefore runs FIRST. Anything the tab hooks from init() is
+		// registered after `sugar_calendar_admin_area_handle_post` has already
+		// fired, so its save handler silently never runs.
+		//
+		// sc-rsvp avoids this by registering its own emails save handler at plugin
+		// boot (Plugin::load()), which is why the RSVP subject/message fields do
+		// persist. Keep this registration at priority 0 for the same reason.
+		if ( static::get_tab_slug() === 'emails' ) {
+			( new EmailsConfigTab() )->hooks();
+		}
 	}
 
 	/**
@@ -198,10 +212,6 @@ class Settings extends PageTabAbstract {
 			wp_safe_redirect( Plugin::instance()->get_admin()->get_page_url( 'settings_license_usage' ) );
 			exit;
 		}
-
-		if ( $section_id === 'emails' ) {
-			( new EmailsConfigTab() )->hooks();
-		}
 	}
 
 	/**
@@ -241,6 +251,15 @@ class Settings extends PageTabAbstract {
 								),
 							]
 						);
+
+						/**
+						 * Fires after the Settings save button is rendered.
+						 *
+						 * @since 3.14.0
+						 *
+						 * @param string|null $tab_slug Current Settings tab slug.
+						 */
+						do_action( 'sugar_calendar_admin_settings_submit_buttons', static::get_tab_slug() ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 						?>
 					</p>
 

@@ -44,6 +44,8 @@ add_action( 'sugar_calendar_admin_nav_after_items', __NAMESPACE__ . '\\Nav\\stri
 
 // Admin ajax
 add_action( 'wp_ajax_sugar_calendar_admin_area_handle_post', __NAMESPACE__ . '\\Settings\\handle_post_ajax' );
+add_action( 'wp_ajax_sc_et_check_page_shortcode', __NAMESPACE__ . '\\Settings\\handle_check_page_shortcode_ajax' );
+add_action( 'wp_ajax_sc_et_embed_page_shortcode', __NAMESPACE__ . '\\Settings\\handle_embed_page_shortcode_ajax' );
 
 // Stripe connection validation.
 add_action( 'sc_et_metabox_bottom', __NAMESPACE__ . '\\Metabox\\render_stripe_connection_notice', 10, 1 );

@@ -109,6 +109,7 @@ function sugar_calendar_get_event_recurrence( $post = false ) {
  * Return the duration of an event
  *
  * @since 2.0.0
+ * @since 3.14.0 Compare whole dates instead of the day of the month, and fix the multi-day duration.
  *
  * @param mixed $post
  *
@@ -126,22 +127,13 @@ function sugar_calendar_get_event_duration( $post = false ) {
 	// Default return value
 	$retval = '';
 
-	// All day event
-	if ( true === $all_day ) {
+	// An all day event on a single date has no duration to state.
+	if ( $all_day && ! $event->is_multi( 'Y-m-d' ) ) {
+		$retval .= esc_html__( 'All Day', 'sugar-calendar-lite' );
 
-		// 1 day
-		if ( $event->start_date( 'd' ) === $event->end_date( 'd' ) ) {
-			$retval .= esc_html__( 'All Day', 'sugar-calendar-lite' );
-
-			// More than 1 day
-		} else {
-			$retval .= sugar_calendar_human_diff_time(
-				strtotime( 'midnight', $start_date ),
-				strtotime( 'midnight', $end_date )
-			);
-		}
-
-		// Specific times
+		// Everything else spans real time. The stored strings are passed through
+		// as-is because the helper adds the second that makes an all day event's
+		// 23:59:59 end inclusive.
 	} else {
 		$retval .= sugar_calendar_human_diff_time( $start_date, $end_date );
 	}

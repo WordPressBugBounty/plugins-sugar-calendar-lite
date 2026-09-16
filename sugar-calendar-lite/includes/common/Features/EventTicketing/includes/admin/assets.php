@@ -29,6 +29,16 @@ function register() {
 		BaseHelpers::get_asset_version()
 	);
 
+	// Registered only. Enqueued by the settings section that renders the two
+	// ticket page fields; localized from that render, which holds the page data.
+	wp_register_script(
+		'sc-et-admin-page-shortcode',
+		Assets\get_url( 'js' ) . '/admin-page-shortcode' . WP::asset_min() . '.js',
+		[ 'jquery' ],
+		BaseHelpers::get_asset_version(),
+		true
+	);
+
 	wp_register_style(
 		'sc-event-ticketing',
 		Assets\get_url( 'css' ) . "/{$path}general.css",
@@ -41,6 +51,7 @@ function register() {
  * Enqueue assets.
  *
  * @since 3.1.0
+ * @since 3.14.0 Enqueue the color-scheme control assets.
  */
 function enqueue() {
 
@@ -65,6 +76,15 @@ function enqueue() {
 			[],
 			BaseHelpers::get_asset_version()
 		);
+
+		// Only Payments renders the Color Scheme control.
+		if ( sugar_calendar()->get_admin()->is_page( 'settings_payments' ) ) {
+
+			// MiniColors ships its JS via the script dependency but its CSS separately.
+			wp_enqueue_style( 'sugar-calendar-vendor-minicolors' );
+			wp_enqueue_script( 'sugar-calendar-admin-color-scheme' );
+			wp_enqueue_script( 'sc-et-admin-page-shortcode' );
+		}
 	}
 
 	if (

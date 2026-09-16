@@ -1,11 +1,661 @@
 /*! tailwindcss v4.3.0 | MIT License | https://tailwindcss.com */
-@layer sc-utils;
+@layer sc-properties;
+@layer sc-theme {
+  :root, :host {
+    --scf-color-red-600: oklch(57.7% 0.245 27.325);
+    --scf-color-green-600: oklch(62.7% 0.194 149.214);
+    --scf-color-white: #fff;
+    --scf-text-xs: 0.75rem;
+    --scf-text-xs--line-height: calc(1 / 0.75);
+    --scf-text-sm: 0.875rem;
+    --scf-text-sm--line-height: calc(1.25 / 0.875);
+    --scf-text-lg: 1.125rem;
+    --scf-text-lg--line-height: calc(1.75 / 1.125);
+    --scf-text-2xl: 1.5rem;
+    --scf-text-2xl--line-height: calc(2 / 1.5);
+    --scf-font-weight-normal: 400;
+    --scf-font-weight-medium: 500;
+    --scf-font-weight-semibold: 600;
+    --scf-font-weight-bold: 700;
+    --scf-tracking-normal: 0em;
+    --scf-radius-lg: 0.5rem;
+    --scf-radius-xl: 0.75rem;
+    --scf-radius-2xl: 1rem;
+  }
+}
+@layer sc-utils {
+  .sugar-calendar-scope .scf\:relative {
+    position: relative !important;
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--check\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M530.8 134.1c14.3 10.4 17.5 30.4 7.1 44.7l-256 352c-5.5 7.6-14 12.3-23.4 13.1s-18.5-2.7-25.1-9.3l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l101.5 101.5l234-321.7c10.4-14.3 30.4-17.5 44.7-7.1z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--envelope\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M112 128c-26.5 0-48 21.5-48 48c0 15.1 7.1 29.3 19.2 38.4l208 156a48 48 0 0 0 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48zM64 260v188c0 35.3 28.7 64 64 64h384c35.3 0 64-28.7 64-64V260L377.6 408.8c-34.1 25.6-81.1 25.6-115.2 0z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--money-bill\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M128 128c-35.3 0-64 28.7-64 64v256c0 35.3 28.7 64 64 64h384c35.3 0 64-28.7 64-64V192c0-35.3-28.7-64-64-64zm192 96c53 0 96 43 96 96s-43 96-96 96s-96-43-96-96s43-96 96-96m192 24c0 4.4-3.6 8.1-8 7.5c-29-3.6-51.9-26.6-55.5-55.5c-.5-4.4 3.1-8 7.5-8h48c4.4 0 8 3.6 8 8zM128 392c0-4.4 3.6-8.1 8-7.5c29 3.6 51.9 26.6 55.5 55.5c.5 4.4-3.1 8-7.5 8h-48c-4.4 0-8-3.6-8-8zm8-136.5c-4.4.5-8-3.1-8-7.5v-48c0-4.4 3.6-8 8-8h48c4.4 0 8.1 3.6 7.5 8c-3.6 29-26.6 51.9-55.5 55.5m368 129c4.4-.5 8 3.1 8 7.5v48c0 4.4-3.6 8-8 8h-48c-4.4 0-8.1-3.6-7.5-8c3.6-29 26.6-51.9 55.5-55.5'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--qrcode\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M160 224h64v-64h-64zm-64-80c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-96c-26.5 0-48-21.5-48-48zm64 336h64v-64h-64zm-64-80c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-96c-26.5 0-48-21.5-48-48zm320-240v64h64v-64zm-16-64h96c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-96c-26.5 0-48-21.5-48-48v-96c0-26.5 21.5-48 48-48m-16 320c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32m0 64c17.7 0 32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32m96 32c0-17.7 14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32m32-96c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32m-32 32c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--rotate-left\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M88 256h144c9.7 0 18.5-5.8 22.2-14.8s1.7-19.3-5.2-26.2l-46.7-46.7c75.3-58.6 184.3-53.3 253.5 15.9c75 75 75 196.5 0 271.5s-196.5 75-271.5 0c-10.2-10.2-19-21.3-26.4-33c-9.5-14.9-29.3-19.3-44.2-9.8s-19.3 29.3-9.8 44.2c9.8 15.6 21.5 30.4 35.1 43.9c100 100 262 100 362 0s100-262 0-362c-94.2-94.3-243.7-99.7-344.3-16.2L105 71c-6.9-6.8-17.2-8.9-26.2-5.2S64 78.3 64 88v144c0 13.3 10.7 24 24 24'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--ticket\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M96 128c-35.3 0-64 28.7-64 64v64c0 8.8 7.4 15.7 15.7 18.6C66.5 281.1 80 299 80 320s-13.5 38.9-32.3 45.4C39.4 368.3 32 375.2 32 384v64c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64v-64c0-8.8-7.4-15.7-15.7-18.6C573.5 358.9 560 341 560 320s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6v-64c0-35.3-28.7-64-64-64zm352 272V240H192v160zM144 224c0-17.7 14.3-32 32-32h288c17.7 0 32 14.3 32 32v192c0 17.7-14.3 32-32 32H176c-17.7 0-32-14.3-32-32z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--triangle-exclamation\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M320 64c14.7 0 28.2 8.1 35.2 21l216 400c6.7 12.4 6.4 27.4-.8 39.5S550.1 544 536 544H104c-14.1 0-27.2-7.4-34.4-19.5s-7.5-27.1-.8-39.5l216-400c7-12.9 20.5-21 35.2-21m0 352c-17.7 0-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32s-14.3-32-32-32m0-192c-18.2 0-32.7 15.5-31.4 33.7l7.4 104c.9 12.5 11.4 22.3 23.9 22.3c12.6 0 23-9.7 23.9-22.3l7.4-104c1.3-18.2-13.1-33.7-31.4-33.7z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:icon-\[fa7-solid--user\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640' width='640' height='640'%3E%3Cpath fill='black' d='M320 312c66.3 0 120-53.7 120-120S386.3 72 320 72s-120 53.7-120 120s53.7 120 120 120m-29.7 56C191.8 368 112 447.8 112 546.3c0 16.4 13.3 29.7 29.7 29.7h356.6c16.4 0 29.7-13.3 29.7-29.7c0-98.5-79.8-178.3-178.3-178.3z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .scf\:block {
+    display: block !important;
+  }
+  .sugar-calendar-scope .scf\:flex {
+    display: flex !important;
+  }
+  .sugar-calendar-scope .scf\:grid {
+    display: grid !important;
+  }
+  .sugar-calendar-scope .scf\:size-16 {
+    width: calc(4px * 16) !important;
+    height: calc(4px * 16) !important;
+  }
+  .sugar-calendar-scope .scf\:h-\[260px\] {
+    height: 260px !important;
+  }
+  .sugar-calendar-scope .scf\:min-h-screen {
+    min-height: 100vh !important;
+  }
+  .sugar-calendar-scope .scf\:w-16 {
+    width: calc(4px * 16) !important;
+  }
+  .sugar-calendar-scope .scf\:w-\[245px\] {
+    width: 245px !important;
+  }
+  .sugar-calendar-scope .scf\:w-full {
+    width: 100% !important;
+  }
+  .sugar-calendar-scope .scf\:max-w-\[38ch\] {
+    max-width: 38ch !important;
+  }
+  .sugar-calendar-scope .scf\:max-w-\[550px\] {
+    max-width: 550px !important;
+  }
+  .sugar-calendar-scope .scf\:min-w-0 {
+    min-width: calc(4px * 0) !important;
+  }
+  .sugar-calendar-scope .scf\:min-w-\[200px\] {
+    min-width: 200px !important;
+  }
+  .sugar-calendar-scope .scf\:flex-1 {
+    flex: 1 !important;
+  }
+  .sugar-calendar-scope .scf\:shrink-0 {
+    flex-shrink: 0 !important;
+  }
+  .sugar-calendar-scope .scf\:cursor-pointer {
+    cursor: pointer !important;
+  }
+  .sugar-calendar-scope .scf\:grid-cols-\[repeat\(auto-fit\,minmax\(180px\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(180px,1fr)) !important;
+  }
+  .sugar-calendar-scope .scf\:flex-col {
+    flex-direction: column !important;
+  }
+  .sugar-calendar-scope .scf\:flex-nowrap {
+    flex-wrap: nowrap !important;
+  }
+  .sugar-calendar-scope .scf\:flex-wrap {
+    flex-wrap: wrap !important;
+  }
+  .sugar-calendar-scope .scf\:items-center {
+    align-items: center !important;
+  }
+  .sugar-calendar-scope .scf\:items-start {
+    align-items: flex-start !important;
+  }
+  .sugar-calendar-scope .scf\:justify-center {
+    justify-content: center !important;
+  }
+  .sugar-calendar-scope .scf\:gap-1 {
+    gap: calc(4px * 1) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-2 {
+    gap: calc(4px * 2) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-3 {
+    gap: calc(4px * 3) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-4 {
+    gap: calc(4px * 4) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-6 {
+    gap: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-\[3px\] {
+    gap: 3px !important;
+  }
+  .sugar-calendar-scope .scf\:gap-x-3 {
+    column-gap: calc(4px * 3) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-x-4 {
+    column-gap: calc(4px * 4) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-y-2 {
+    row-gap: calc(4px * 2) !important;
+  }
+  .sugar-calendar-scope .scf\:gap-y-6 {
+    row-gap: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:self-stretch {
+    align-self: stretch !important;
+  }
+  .sugar-calendar-scope .scf\:truncate {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .sugar-calendar-scope .scf\:overflow-hidden {
+    overflow: hidden !important;
+  }
+  .sugar-calendar-scope .scf\:rounded-2xl {
+    border-radius: var(--scf-radius-2xl) !important;
+  }
+  .sugar-calendar-scope .scf\:rounded-\[10px\] {
+    border-radius: 10px !important;
+  }
+  .sugar-calendar-scope .scf\:rounded-full {
+    border-radius: calc(infinity * 1px) !important;
+  }
+  .sugar-calendar-scope .scf\:rounded-lg {
+    border-radius: var(--scf-radius-lg) !important;
+  }
+  .sugar-calendar-scope .scf\:rounded-xl {
+    border-radius: var(--scf-radius-xl) !important;
+  }
+  .sugar-calendar-scope .scf\:border {
+    border-style: var(--tw-border-style) !important;
+    border-width: 1px !important;
+  }
+  .sugar-calendar-scope .scf\:border-\[1\.5px\] {
+    border-style: var(--tw-border-style) !important;
+    border-width: 1.5px !important;
+  }
+  .sugar-calendar-scope .scf\:border-b {
+    border-bottom-style: var(--tw-border-style) !important;
+    border-bottom-width: 1px !important;
+  }
+  .sugar-calendar-scope .scf\:border-\[var\(--sc-ticket-accent\,\#fa6400\)\] {
+    border-color: var(--sc-ticket-accent,#fa6400) !important;
+  }
+  .sugar-calendar-scope .scf\:border-\[var\(--sc-ticket-border\,rgba\(141\,141\,141\,0\.15\)\)\] {
+    border-color: var(--sc-ticket-border,rgba(141,141,141,0.15)) !important;
+  }
+  .sugar-calendar-scope .scf\:bg-\[\#fafafa\] {
+    background-color: #fafafa !important;
+  }
+  .sugar-calendar-scope .scf\:bg-\[var\(--sc-ticket-accent\,\#fa6400\)\] {
+    background-color: var(--sc-ticket-accent,#fa6400) !important;
+  }
+  .sugar-calendar-scope .scf\:bg-\[var\(--sc-ticket-bg\,\#e9eaec\)\] {
+    background-color: var(--sc-ticket-bg,#e9eaec) !important;
+  }
+  .sugar-calendar-scope .scf\:bg-\[var\(--sc-ticket-body\,\#ffffff\)\] {
+    background-color: var(--sc-ticket-body,#ffffff) !important;
+  }
+  .sugar-calendar-scope .scf\:object-cover {
+    object-fit: cover !important;
+  }
+  .sugar-calendar-scope .scf\:p-6 {
+    padding: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:px-4 {
+    padding-inline: calc(4px * 4) !important;
+  }
+  .sugar-calendar-scope .scf\:px-6 {
+    padding-inline: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:py-1 {
+    padding-block: calc(4px * 1) !important;
+  }
+  .sugar-calendar-scope .scf\:py-2 {
+    padding-block: calc(4px * 2) !important;
+  }
+  .sugar-calendar-scope .scf\:py-2\.5 {
+    padding-block: calc(4px * 2.5) !important;
+  }
+  .sugar-calendar-scope .scf\:py-3 {
+    padding-block: calc(4px * 3) !important;
+  }
+  .sugar-calendar-scope .scf\:py-8 {
+    padding-block: calc(4px * 8) !important;
+  }
+  .sugar-calendar-scope .scf\:py-20 {
+    padding-block: calc(4px * 20) !important;
+  }
+  .sugar-calendar-scope .scf\:pt-6 {
+    padding-top: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:pt-\[10px\] {
+    padding-top: 10px !important;
+  }
+  .sugar-calendar-scope .scf\:text-center {
+    text-align: center !important;
+  }
+  .sugar-calendar-scope .scf\:text-2xl {
+    font-size: var(--scf-text-2xl) !important;
+    line-height: var(--tw-leading, var(--scf-text-2xl--line-height)) !important;
+  }
+  .sugar-calendar-scope .scf\:text-lg {
+    font-size: var(--scf-text-lg) !important;
+    line-height: var(--tw-leading, var(--scf-text-lg--line-height)) !important;
+  }
+  .sugar-calendar-scope .scf\:text-sm {
+    font-size: var(--scf-text-sm) !important;
+    line-height: var(--tw-leading, var(--scf-text-sm--line-height)) !important;
+  }
+  .sugar-calendar-scope .scf\:text-xs {
+    font-size: var(--scf-text-xs) !important;
+    line-height: var(--tw-leading, var(--scf-text-xs--line-height)) !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[32px\] {
+    font-size: 32px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-6 {
+    --tw-leading: calc(4px * 6);
+    line-height: calc(4px * 6) !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[14\.52px\] {
+    --tw-leading: 14.52px;
+    line-height: 14.52px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[16\.94px\] {
+    --tw-leading: 16.94px;
+    line-height: 16.94px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[19\.2px\] {
+    --tw-leading: 19.2px;
+    line-height: 19.2px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[19\.6px\] {
+    --tw-leading: 19.6px;
+    line-height: 19.6px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[21\.78px\] {
+    --tw-leading: 21.78px;
+    line-height: 21.78px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[22\.4px\] {
+    --tw-leading: 22.4px;
+    line-height: 22.4px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[26\.4px\] {
+    --tw-leading: 26.4px;
+    line-height: 26.4px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[28\.8px\] {
+    --tw-leading: 28.8px;
+    line-height: 28.8px !important;
+  }
+  .sugar-calendar-scope .scf\:leading-\[33\.6px\] {
+    --tw-leading: 33.6px;
+    line-height: 33.6px !important;
+  }
+  .sugar-calendar-scope .scf\:font-bold {
+    --tw-font-weight: var(--scf-font-weight-bold);
+    font-weight: var(--scf-font-weight-bold) !important;
+  }
+  .sugar-calendar-scope .scf\:font-medium {
+    --tw-font-weight: var(--scf-font-weight-medium);
+    font-weight: var(--scf-font-weight-medium) !important;
+  }
+  .sugar-calendar-scope .scf\:font-normal {
+    --tw-font-weight: var(--scf-font-weight-normal);
+    font-weight: var(--scf-font-weight-normal) !important;
+  }
+  .sugar-calendar-scope .scf\:font-semibold {
+    --tw-font-weight: var(--scf-font-weight-semibold);
+    font-weight: var(--scf-font-weight-semibold) !important;
+  }
+  .sugar-calendar-scope .scf\:tracking-\[-0\.48px\] {
+    --tw-tracking: -0.48px;
+    letter-spacing: -0.48px !important;
+  }
+  .sugar-calendar-scope .scf\:tracking-\[0\.8px\] {
+    --tw-tracking: 0.8px;
+    letter-spacing: 0.8px !important;
+  }
+  .sugar-calendar-scope .scf\:tracking-\[2\.16px\] {
+    --tw-tracking: 2.16px;
+    letter-spacing: 2.16px !important;
+  }
+  .sugar-calendar-scope .scf\:tracking-normal {
+    --tw-tracking: var(--scf-tracking-normal);
+    letter-spacing: var(--scf-tracking-normal) !important;
+  }
+  .sugar-calendar-scope .scf\:break-words {
+    overflow-wrap: break-word !important;
+  }
+  .sugar-calendar-scope .scf\:break-all {
+    word-break: break-all !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[\#7a7a7a\] {
+    color: #7a7a7a !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[\#888888\] {
+    color: #888888 !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[\#aaaaaa\] {
+    color: #aaaaaa !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[var\(--sc-color-neutral-20\,\#a7aaad\)\] {
+    color: var(--sc-color-neutral-20,#a7aaad) !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[var\(--sc-ticket-accent\,\#fa6400\)\] {
+    color: var(--sc-ticket-accent,#fa6400) !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[var\(--sc-ticket-text\,\#000000\)\] {
+    color: var(--sc-ticket-text,#000000) !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[var\(--sc-ticket-text\,\#1a1a1a\)\] {
+    color: var(--sc-ticket-text,#1a1a1a) !important;
+  }
+  .sugar-calendar-scope .scf\:text-\[var\(--sc-ticket-text\,\#1e1e1e\)\] {
+    color: var(--sc-ticket-text,#1e1e1e) !important;
+  }
+  .sugar-calendar-scope .scf\:text-green-600 {
+    color: var(--scf-color-green-600) !important;
+  }
+  .sugar-calendar-scope .scf\:text-red-600 {
+    color: var(--scf-color-red-600) !important;
+  }
+  .sugar-calendar-scope .scf\:text-white {
+    color: var(--scf-color-white) !important;
+  }
+  .sugar-calendar-scope .scf\:uppercase {
+    text-transform: uppercase !important;
+  }
+  .sugar-calendar-scope .scf\:italic {
+    font-style: italic !important;
+  }
+  .sugar-calendar-scope .scf\:no-underline {
+    text-decoration-line: none !important;
+  }
+  .sugar-calendar-scope .scf\:underline {
+    text-decoration-line: underline !important;
+  }
+  .sugar-calendar-scope .scf\:underline-offset-2 {
+    text-underline-offset: 2px !important;
+  }
+  .sugar-calendar-scope .scf\:shadow-\[0px_2px_12px_0px_rgba\(0\,0\,0\,0\.06\)\] {
+    --tw-shadow: 0px 2px 12px 0px var(--tw-shadow-color, rgba(0,0,0,0.06));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow) !important;
+  }
+  .sugar-calendar-scope .scf\:outline {
+    outline-style: var(--tw-outline-style) !important;
+    outline-width: 1px !important;
+  }
+  .sugar-calendar-scope .scf\:outline-1 {
+    outline-style: var(--tw-outline-style) !important;
+    outline-width: 1px !important;
+  }
+  .sugar-calendar-scope .scf\:outline-\[3px\] {
+    outline-style: var(--tw-outline-style) !important;
+    outline-width: 3px !important;
+  }
+  .sugar-calendar-scope .scf\:outline-offset-\[-1px\] {
+    outline-offset: -1px !important;
+  }
+  .sugar-calendar-scope .scf\:outline-offset-\[-3px\] {
+    outline-offset: -3px !important;
+  }
+  .sugar-calendar-scope .scf\:outline-\[var\(--sc-color-neutral-5\,\#dcdcde\)\] {
+    outline-color: var(--sc-color-neutral-5,#dcdcde) !important;
+  }
+  .sugar-calendar-scope .scf\:outline-\[var\(--sc-ticket-accent\,\#fa6400\)\] {
+    outline-color: var(--sc-ticket-accent,#fa6400) !important;
+  }
+  .sugar-calendar-scope .scf\:outline-green-600 {
+    outline-color: var(--scf-color-green-600) !important;
+  }
+  .sugar-calendar-scope .scf\:outline-red-600 {
+    outline-color: var(--scf-color-red-600) !important;
+  }
+  .sugar-calendar-scope .scf\:last\:border-b-0 {
+    &:last-child {
+      border-bottom-style: var(--tw-border-style) !important;
+      border-bottom-width: 0px !important;
+    }
+  }
+}
 @layer sc-components {
   [class*="icon-["] {
     flex: 0 0 auto;
   }
 }
 @charset "UTF-8";
+@layer sc-overrides, sc-utils, sc-components, sc-reset, sc-theme, sc-properties;
+@layer sc-reset {
+  .sugar-calendar-scope :where(.sc-reset, .sc-reset-deep, .sc-reset-deep *),
+  .sugar-calendar-scope .sc-reset::before, .sugar-calendar-scope .sc-reset::after,
+  .sugar-calendar-scope .sc-reset-deep::before, .sugar-calendar-scope .sc-reset-deep::after,
+  .sugar-calendar-scope .sc-reset-deep *::before, .sugar-calendar-scope .sc-reset-deep *::after {
+    all: revert !important;
+  }
+  .sugar-calendar-scope :where(.sc-reset, .sc-reset-deep, .sc-reset-deep *),
+  .sugar-calendar-scope .sc-reset::before, .sugar-calendar-scope .sc-reset::after,
+  .sugar-calendar-scope .sc-reset-deep::before, .sugar-calendar-scope .sc-reset-deep::after,
+  .sugar-calendar-scope .sc-reset-deep *::before, .sugar-calendar-scope .sc-reset-deep *::after {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 solid !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(hr) {
+    height: 0 !important;
+    color: inherit !important;
+    border-top-width: 1px !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(abbr:where([title])) {
+    -webkit-text-decoration: underline dotted !important;
+    text-decoration: underline dotted !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(a) {
+    color: inherit !important;
+    -webkit-text-decoration: inherit !important;
+    text-decoration: inherit !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(b, strong) {
+    font-weight: bolder !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(code, kbd, samp, pre) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    font-feature-settings: normal !important;
+    font-variation-settings: normal !important;
+    font-size: 1em !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(small) {
+    font-size: 80% !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(sub, sup) {
+    font-size: 75% !important;
+    line-height: 0 !important;
+    position: relative !important;
+    vertical-align: baseline !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(sub) {
+    bottom: -0.25em !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(sup) {
+    top: -0.5em !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(table) {
+    text-indent: 0 !important;
+    border-color: inherit !important;
+    border-collapse: collapse !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(:-moz-focusring:where(:not(iframe))) {
+    outline: auto !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(progress) {
+    vertical-align: baseline !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(summary) {
+    display: list-item !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(ol, ul, menu) {
+    list-style: none !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(img, svg, video, canvas, audio, iframe, embed, object) {
+    display: block !important;
+    vertical-align: middle !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(img, video) {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(button, input, select, optgroup, textarea) {
+    font: inherit !important;
+    font-feature-settings: inherit !important;
+    font-variation-settings: inherit !important;
+    letter-spacing: inherit !important;
+    color: inherit !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    opacity: 1 !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(select:where([multiple], [size]) optgroup) {
+    font-weight: bolder !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(select:where([multiple], [size]) optgroup option) {
+    padding-inline-start: 20px !important;
+  }
+  .sugar-calendar-scope .sc-reset::placeholder,
+  .sugar-calendar-scope .sc-reset-deep::placeholder, .sugar-calendar-scope .sc-reset-deep *::placeholder {
+    opacity: 1 !important;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px) {
+    .sugar-calendar-scope .sc-reset::placeholder,
+    .sugar-calendar-scope .sc-reset-deep::placeholder, .sugar-calendar-scope .sc-reset-deep *::placeholder {
+      color: currentcolor !important;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent) !important;
+      }
+    }
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(textarea) {
+    resize: vertical !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(button, input:where([type=button], [type=reset], [type=submit])) {
+    appearance: button !important;
+  }
+  .sugar-calendar-scope .sc-reset::-webkit-search-decoration,
+  .sugar-calendar-scope .sc-reset-deep::-webkit-search-decoration, .sugar-calendar-scope .sc-reset-deep *::-webkit-search-decoration {
+    -webkit-appearance: none !important;
+  }
+  .sugar-calendar-scope .sc-reset::-webkit-inner-spin-button,
+  .sugar-calendar-scope .sc-reset-deep::-webkit-inner-spin-button, .sugar-calendar-scope .sc-reset-deep *::-webkit-inner-spin-button {
+    height: auto !important;
+  }
+  .sugar-calendar-scope .sc-reset::-webkit-outer-spin-button,
+  .sugar-calendar-scope .sc-reset-deep::-webkit-outer-spin-button, .sugar-calendar-scope .sc-reset-deep *::-webkit-outer-spin-button {
+    height: auto !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is(:-moz-ui-invalid) {
+    box-shadow: none !important;
+  }
+  .sugar-calendar-scope :is(.sc-reset, .sc-reset-deep, .sc-reset-deep *):is([hidden]:where(:not([hidden=until-found]))) {
+    display: none !important;
+  }
+}
 :root {
   --sc-color-brand-orange-0: #FFF3EC;
   --sc-color-brand-orange-30: #FFA06A;
@@ -183,4 +833,204 @@
   --sc-calendar-accent-teal-0: #142E2A;
   --sc-calendar-accent-green-0: #16351A;
   --sc-calendar-accent-yellow-0: #40311A;
+}
+@layer sc-components {
+  .sugar-calendar-scope.sc-ticket-card {
+    width: 100% !important;
+    max-width: 550px !important;
+    margin-inline: auto !important;
+    --sc-ticket-border: rgba(141, 141, 141, 0.15);
+  }
+  .sugar-calendar-scope .sc-ticket-divider {
+    background-image: repeating-linear-gradient(to right, var(--sc-ticket-border, rgba(141, 141, 141, 0.15)) 0 4px, transparent 4px 8px) !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 2px !important;
+    background-position: top !important;
+  }
+  .sugar-calendar-scope .sc-ticket-sep {
+    display: inline-block !important;
+    width: 0 !important;
+    height: 1em !important;
+    margin: 0 0.2em !important;
+    border-left: 1.5px solid currentColor !important;
+    vertical-align: -0.15em !important;
+  }
+  .sugar-calendar-scope .sc-ticket-qa:not(:last-child) {
+    border-bottom: 1px solid var(--sc-ticket-border, rgba(141, 141, 141, 0.15)) !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email {
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email.is-waiting, .sugar-calendar-scope .sc-ticket-email.is-sending {
+    cursor: default !important;
+    text-decoration: none !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email.is-waiting {
+    font-variant-numeric: tabular-nums !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email.is-sent {
+    color: var(--sc-color-utility-green-50, #008a20) !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email.is-failed {
+    color: var(--sc-color-utility-red-50, #d63638) !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email__check {
+    margin-left: 0.35em !important;
+    vertical-align: -0.1em !important;
+  }
+  .sugar-calendar-scope .sc-ticket-email__dots span:nth-child(2) {
+    animation: sc-ticket-email-dot-2 1.2s infinite;
+  }
+  .sugar-calendar-scope .sc-ticket-email__dots span:nth-child(3) {
+    animation: sc-ticket-email-dot-3 1.2s infinite;
+  }
+  @keyframes sc-ticket-email-dot-2 {
+    0%, 33% {
+      opacity: 0;
+    }
+    34%, 100% {
+      opacity: 1;
+    }
+  }
+  @keyframes sc-ticket-email-dot-3 {
+    0%, 66% {
+      opacity: 0;
+    }
+    67%, 100% {
+      opacity: 1;
+    }
+  }
+}
+@layer sc-overrides {
+  @media print {
+    .sugar-calendar-scope .sc-ticket-card__actions,
+    .sugar-calendar-scope .sc-ticket-card__calendar {
+      display: none !important;
+    }
+    .sugar-calendar-scope .sc-ticket-card > div > div {
+      box-shadow: none !important;
+      outline: 1px solid #dcdcde !important;
+    }
+    .sugar-calendar-scope .sc-ticket-card {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .sugar-calendar-scope .sc-ticket-card .sc-ticket-qa,
+    .sugar-calendar-scope .sc-ticket-card img {
+      break-inside: avoid !important;
+    }
+  }
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-inset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-offset-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tw-ring-offset-color {
+  syntax: "*";
+  inherits: false;
+  initial-value: #fff;
+}
+@property --tw-ring-offset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@layer sc-properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-border-style: solid;
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
+      --tw-shadow: 0 0 #0000;
+      --tw-shadow-color: initial;
+      --tw-shadow-alpha: 100%;
+      --tw-inset-shadow: 0 0 #0000;
+      --tw-inset-shadow-color: initial;
+      --tw-inset-shadow-alpha: 100%;
+      --tw-ring-color: initial;
+      --tw-ring-shadow: 0 0 #0000;
+      --tw-inset-ring-color: initial;
+      --tw-inset-ring-shadow: 0 0 #0000;
+      --tw-ring-inset: initial;
+      --tw-ring-offset-width: 0px;
+      --tw-ring-offset-color: #fff;
+      --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
+    }
+  }
 }

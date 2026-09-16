@@ -500,6 +500,93 @@ class ResponseRepository {
 	}
 
 	/**
+	 * Rows for the Tools → Export tool.
+	 *
+	 * `$event_ids === null` means unrestricted; `[]` means "scoped to no
+	 * event" and returns nothing without querying, so a caller that resolved an
+	 * empty event set cannot accidentally export the whole table.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int[]|null $event_ids Restrict to these event ids, or null.
+	 * @param string     $from_utc  Inclusive lower bound on created_at (UTC), '' to skip.
+	 * @param string     $to_utc    Inclusive upper bound on created_at (UTC), '' to skip.
+	 *
+	 * @return array[] Hydrated rows ordered by event_id, then id.
+	 */
+	public static function find_for_export( $event_ids, $from_utc = '', $to_utc = '' ) {
+
+		global $wpdb;
+
+		if ( is_array( $event_ids ) && empty( $event_ids ) ) {
+			return [];
+		}
+
+		if ( ! self::table_is_installed() ) {
+			return [];
+		}
+
+		list( $where, $values ) = self::build_export_where( $event_ids, (string) $from_utc, (string) $to_utc );
+
+		$table = self::table_name();
+		// token and reminder_sent_at are deliberately not selected here: the
+		// export never needs the after-checkout write credential or the
+		// reminder dedupe flag, so don't add them back to this list.
+		$sql = 'SELECT id, event_id, context, context_id, attendee_key, attendee_id, answers, status, created_at, updated_at' .
+			" FROM {$table}"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+
+		if ( ! empty( $where ) ) {
+			$sql .= ' WHERE ' . implode( ' AND ', $where );
+		}
+
+		$sql .= ' ORDER BY event_id ASC, id ASC';
+
+		// prepare() warns when handed a statement with no placeholders.
+		if ( ! empty( $values ) ) {
+			$sql = $wpdb->prepare( $sql, $values ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are generated; the table name is not user input.
+		}
+
+		$rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Custom table; prepared above when it carries values.
+
+		return array_map( [ self::class, 'hydrate' ], (array) $rows );
+	}
+
+	/**
+	 * WHERE clauses and bound values for find_for_export().
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int[]|null $event_ids Restrict to these event ids, or null.
+	 * @param string     $from_utc  Inclusive lower bound on created_at (UTC), '' to skip.
+	 * @param string     $to_utc    Inclusive upper bound on created_at (UTC), '' to skip.
+	 *
+	 * @return array{0: string[], 1: array} [ $where_clauses, $values ].
+	 */
+	private static function build_export_where( $event_ids, $from_utc, $to_utc ) {
+
+		$where  = [];
+		$values = [];
+
+		if ( is_array( $event_ids ) ) {
+			$ids     = array_values( array_unique( array_map( 'intval', $event_ids ) ) );
+			$where[] = 'event_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+			$values  = array_merge( $values, $ids );
+		}
+
+		if ( $from_utc !== '' ) {
+			$where[]  = 'created_at >= %s';
+			$values[] = $from_utc;
+		}
+
+		if ( $to_utc !== '' ) {
+			$where[]  = 'created_at <= %s';
+			$values[] = $to_utc;
+		}
+
+		return [ $where, $values ];
+	}
+
+	/**
 	 * Stamp reminder_sent_at on every row of one context.
 	 *
 	 * Every row, not only the stale pending ones — leaving a completed row NULL

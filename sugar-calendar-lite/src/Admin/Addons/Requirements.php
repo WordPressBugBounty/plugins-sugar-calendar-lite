@@ -761,7 +761,7 @@ class Requirements {
 
 		if (
 			$version[ self::VERSION ] &&
-			! $this->version_compare( SC_PLUGIN_VERSION, $version )
+			! $this->version_compare( $this->strip_prerelease( SC_PLUGIN_VERSION ), $version )
 		) {
 			$this->not_validated[ $this->basename ][] = self::SUGAR_CALENDAR;
 
@@ -769,6 +769,23 @@ class Requirements {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Drop a prerelease suffix so an RC of X.Y.Z satisfies a ">= X.Y.Z" requirement.
+	 *
+	 * PHP sorts "3.14.0-rc.1" BELOW "3.14.0", so without this every add-on
+	 * requiring the version currently in RC is gated off for that whole cycle.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $version Version to normalize.
+	 *
+	 * @return string
+	 */
+	private function strip_prerelease( string $version ): string {
+
+		return (string) preg_replace( '/-(?:rc|beta|alpha)[.\d]*$/i', '', $version );
 	}
 
 	/**

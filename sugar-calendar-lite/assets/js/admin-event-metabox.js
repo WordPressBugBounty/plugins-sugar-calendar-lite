@@ -32,8 +32,8 @@
 			this.$endTz = $( '#sugar-calendar_end_tz', this.$el );
 			this.$allDay = $( '#all_day', this.$el );
 			this.$timezones = $( '.sugar-calendar-metabox__field-row--time-zone, .event-time-zone, .event-time', this.$el );
-			this.$submitButton = $( '#publish' );
 			this.$onlineProvider = $( '#online_provider', this.$el );
+			this.$customLinkUrl = $( '#custom_link_url', this.$el );
 			this.$createMeetingBtn = $( '.sugar-calendar-metabox__create-meeting', this.$el );
 			this.$createMeetingError = $( '.sugar-calendar-metabox__create-meeting-error', this.$el );
 			this.$onlineDescription = $( '.sugar-calendar-metabox__online-description', this.$el );
@@ -67,14 +67,19 @@
 
 			// Set the initial Online-section UI state (meeting block + Create button).
 			this.syncOnlineMeetingUI();
+
+			// Guards claim the focus in the order they register, so register them in
+			// tab order: when two fields fail on one save, the user lands on the one
+			// they reach first. Duration sits above Location.
+			this.guardStartDate();
+			this.guardEndDate();
+			this.guardCustomLink();
 		},
 
 		bindEvents: function () {
 
 			this.$sectionButtons.on( 'click', this.onSectionButtonClick.bind( this ) );
 			this.$allDay.on( 'change', this.toggleTimezones.bind( this ) );
-
-			this.$submitButton.on( 'click', this.validateDates.bind( this ) );
 
 			this.$el.on( 'click', '.sugar-calendar-metabox__copy', this.onCopyClick.bind( this ) );
 			this.$onlineProvider.on( 'change', this.syncOnlineMeetingUI.bind( this ) );
@@ -238,6 +243,15 @@
 
 			// Custom Link shows the editable Event Link field instead of a card.
 			$custom.toggle( isCustom );
+
+			// Disable it while another provider is selected, not just hide it.
+			// Constraint validation ignores CSS, so a stale malformed value in this
+			// type=url field blocks the whole form, and the browser cannot focus a
+			// hidden control to say why: the save dies with no message and no field
+			// marked. Disabled bars it from validation and from submission, which
+			// matches the server, where the value is ignored unless the provider is
+			// custom. The value stays in the DOM, so switching back restores it.
+			this.$customLinkUrl.prop( 'disabled', ! isCustom );
 
 			// "Show to" is shared: visible when a provider meeting is shown OR
 			// Custom Link is selected.
@@ -623,7 +637,25 @@
 			$( '[data-datepicker]', this.$el ).datepicker( {
 				dateFormat: 'yy-mm-dd',
 				firstDay: this.settings.start_of_week,
-				beforeShow: () => {
+				beforeShow: ( input ) => {
+
+					// FieldError sets this while it focuses a field to report an error.
+					// The panel would open directly on top of the message it just wrote.
+					if ( $( input ).data( 'scFieldErrorRevealing' ) ) {
+
+						// The field keeps the focus afterwards, and the picker only
+						// binds to `focus`, so clicking it fires nothing and the panel
+						// stays shut until the user blurs and comes back. Open it on
+						// that click instead.
+						$( input )
+							.off( '.scDatepickerReopen' )
+							.one( 'click.scDatepickerReopen', function () {
+								$( this ).datepicker( 'show' );
+							} );
+
+						return false;
+					}
+
 					$( '#ui-datepicker-div' )
 						.removeClass( 'ui-datepicker' )
 						.addClass( 'sugar-calendar-datepicker' );
@@ -732,27 +764,6 @@
 				this.$startTimeAmPm.val( this.$endTimeAmPm.val() );
 			} );
 
-			// Validate dates for block editor. Disable the submit button if the dates are invalid.
-			// The `wp.blockEditor` global is not a reliable signal here: `wp-core-data`
-			// depends on it, so it is present on classic screens too. The `core/editor`
-			// store this uses comes from `wp-editor`, which classic screens do not load.
-			if ( this.settings.editor && this.settings.editor.type === 'block' ) {
-
-				$.each( [
-					this.startDate,
-					this.$startTimeHour,
-					this.$startTimeMinute,
-					this.$startTimeAmPm,
-					this.$endDate,
-					this.$endTimeHour,
-					this.$endTimeMinute,
-					this.$endTimeAmPm
-
-				], function ( i, e ) {
-
-					$( e ).on( 'change', this.blockEditorDateValidation.bind( this ) );
-				}.bind( this ) );
-			}
 		},
 
 		getDate: function ( date ) {
@@ -848,38 +859,169 @@
 		},
 
 		/**
-		 * Validate the start and end date time.
-		 * If end date time is before start date time,
-		 * highlight the fields and prevent submission.
+		 * Require a usable link when Online is set to Custom Link.
 		 *
-		 * @since 3.3.0
+		 * `native: true` because the field is type=url: the browser rejects a
+		 * malformed value before the submit event fires, so the guard needs the
+		 * `invalid` hook as well as the submit hook.
 		 *
-		 * @param {Event} e
+		 * @since 3.14.0
 		 *
 		 * @return {void}
 		 */
-		validateDates: function ( e ) {
+		guardCustomLink: function () {
 
-			// If end date time is before start date time, show error.
-			// If end date time is the same as start date time, show error.
-			// Works only if all day is not checked.
-			if (
-				this.$allDay.prop( 'checked' ) === false
-				&&
-				this.isStartEndInvalid()
-			) {
+			SugarCalendar.Admin.FieldError.guard( {
+				field: this.$customLinkUrl,
+				watch: {
+					provider: this.$onlineProvider,
+				},
+				native: true,
+				validate: ( $field, watched ) => {
 
-				e.preventDefault();
+					if ( watched.provider.val() !== 'custom' ) {
+						return '';
+					}
 
-				// Open the duration section.
-				this.$sectionButtons.filter( '[data-id=duration]' ).click();
+					if ( $.trim( $field.val() || '' ) === '' ) {
+						return 'empty';
+					}
 
-				// Add error class to the date time fields.
-				this.$sections.filter( '[data-id=duration]' ).addClass( 'sugar-calendar-field-dates-invalid' );
+					// Reading .validity is side-effect free. checkValidity() would fire
+					// the invalid event, re-entering the guard's own handler.
+					return $field[0].validity.valid ? '' : 'invalid';
+				},
+				message: {
+					empty: wp.i18n.__( 'Please add an event link', 'sugar-calendar-lite' ),
+					invalid: wp.i18n.__( 'Please enter a valid URL, for example https://example.com', 'sugar-calendar-lite' ),
+				},
+				notice: wp.i18n.__( 'The event link is incomplete. Please review the Location tab before saving.', 'sugar-calendar-lite' ),
+			} );
+		},
 
-				// Stop submission.
-				return;
-			}
+		/**
+		 * Require a start date, and a start time unless the event runs all day.
+		 *
+		 * Its own guard rather than a branch of the end-date one, so an unfilled
+		 * start marks the start field instead of reddening a perfectly good end.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @return {void}
+		 */
+		guardStartDate: function () {
+
+			SugarCalendar.Admin.FieldError.guard( {
+				field: this.$startDate
+					.add( this.$startTimeHour )
+					.add( this.$startTimeMinute )
+					.add( this.$startTimeAmPm ),
+				watch: {
+					allDay: this.$allDay,
+				},
+				validate: ( $field, watched ) => {
+
+					const allDay = watched.allDay.prop( 'checked' );
+
+					if ( ! this.hasIncompleteDate( this.$startDate, this.$startTimeHour, allDay ) ) {
+						return '';
+					}
+
+					return allDay ? 'incompleteDate' : 'incomplete';
+				},
+				message: {
+					incomplete: wp.i18n.__( 'Please add a start date and time', 'sugar-calendar-lite' ),
+					incompleteDate: wp.i18n.__( 'Please add a start date', 'sugar-calendar-lite' ),
+				},
+				notice: wp.i18n.__( 'The start of this event is incomplete. Please review the Duration tab before saving.', 'sugar-calendar-lite' ),
+			} );
+		},
+
+		/**
+		 * Require an end that completes a real span of time.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @return {void}
+		 */
+		guardEndDate: function () {
+
+			// One banner covers both ways the end can be unfinished; only the
+			// out-of-order case needs its own.
+			const incompleteNotice = wp.i18n.__( 'The end of this event is incomplete. Please review the Duration tab before saving.', 'sugar-calendar-lite' );
+
+			SugarCalendar.Admin.FieldError.guard( {
+				field: this.$endDate
+					.add( this.$endTimeHour )
+					.add( this.$endTimeMinute )
+					.add( this.$endTimeAmPm ),
+				watch: {
+					startDate: this.$startDate,
+					startHour: this.$startTimeHour,
+					startMinute: this.$startTimeMinute,
+					startAmPm: this.$startTimeAmPm,
+					allDay: this.$allDay,
+					// isStartEndInvalid() reads both zones, and in multi-timezone mode
+					// changing one flips the result on its own.
+					startTz: this.$startTz,
+					endTz: this.$endTz,
+				},
+				validate: ( $field, watched ) => {
+
+					const allDay = watched.allDay.prop( 'checked' );
+
+					if ( this.hasIncompleteDate( this.$endDate, this.$endTimeHour, allDay ) ) {
+						return allDay ? 'incompleteDate' : 'incomplete';
+					}
+
+					// An all-day pair carries no times to order, and getEventDateTime()
+					// would default both to 01:00 and read as zero-length.
+					if ( allDay ) {
+						return '';
+					}
+
+					// Comparing against a start that isn't filled in yet says nothing,
+					// and the start guard already has that field marked.
+					if ( this.hasIncompleteDate( this.$startDate, this.$startTimeHour, allDay ) ) {
+						return '';
+					}
+
+					return this.isStartEndInvalid() ? 'range' : '';
+				},
+				message: {
+					incomplete: wp.i18n.__( 'Please add an end date and time', 'sugar-calendar-lite' ),
+					incompleteDate: wp.i18n.__( 'Please add an end date', 'sugar-calendar-lite' ),
+					range: wp.i18n.__( 'End date and time cannot be before the start date and time.', 'sugar-calendar-lite' ),
+				},
+				notice: {
+					incomplete: incompleteNotice,
+					incompleteDate: incompleteNotice,
+					range: wp.i18n.__( 'End date and time cannot be before the start date and time.', 'sugar-calendar-lite' ),
+				},
+				// An impossible span is worth flagging as it happens; an unfinished one is not.
+				immediate: [ 'range' ],
+			} );
+		},
+
+		/**
+		 * Whether one end of the event is still missing a field the user has to fill.
+		 *
+		 * getEventDateTime() fills a blank with today at 01:00, so an unfinished pair
+		 * compares as a zero-length event. Ask about the fields instead. Minutes and
+		 * AM/PM are excluded: the hour handlers fill them in.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param {jQuery}  $date  That end's date input.
+		 * @param {jQuery}  $hour  That end's hour dropdown.
+		 * @param {boolean} allDay Whether All Day is on, which hides the time fields.
+		 *
+		 * @return {boolean} True while the date, or an hour the event needs, is blank.
+		 */
+		hasIncompleteDate: function ( $date, $hour, allDay ) {
+
+			return ! $date.val()
+				|| ( ! allDay && ! $hour.val() );
 		},
 
 		/**
@@ -961,66 +1103,6 @@
 			return moment.tz( timeString, "YYYY-MM-DD HH:mm", timezone );
 		},
 
-		/**
-		 * Block editor date validation.
-		 *
-		 * @since 3.3.0
-		 *
-		 * @return {void}
-		 */
-		blockEditorDateValidation: function () {
-
-			// Only work if start and end time fields are not empty.
-			if (
-				this.$startDate.val() === ''
-				||
-				this.$startTimeHour.val() === ''
-				||
-				this.$endDate.val() === ''
-				||
-				this.$endTimeHour.val() === ''
-			) {
-				return;
-			}
-
-			const // Get start and end date time for comparison.
-				startDateTime = this.getEventDateTime(
-					this.$startDate,
-					this.$startTimeHour,
-					this.$startTimeMinute,
-					this.$startTimeAmPm,
-					this.$startTz
-				),
-				endDateTime = this.getEventDateTime(
-					this.$endDate,
-					this.$endTimeHour,
-					this.$endTimeMinute,
-					this.$endTimeAmPm,
-					this.$endTz
-				),
-				errorLockName = 'invalid-date-error';
-
-			if ( this.isStartEndInvalid() ) {
-
-				// Lock the editor.
-				wp.data.dispatch( 'core/editor' ).lockPostSaving( errorLockName );
-
-				// Show error message.
-				wp.data.dispatch( 'core/notices' ).createNotice(
-					'error',
-					wp.i18n.__( 'End date and time cannot be before the start date and time.', 'sugar-calendar-lite' ),
-					{ id: errorLockName, isDismissible: true }
-				);
-
-			} else if ( endDateTime.isAfter( startDateTime ) ) {
-
-				// Unlock the editor.
-				wp.data.dispatch( 'core/editor' ).unlockPostSaving( errorLockName );
-
-				// Remove error message.
-				wp.data.dispatch( 'core/notices' ).removeNotice( errorLockName );
-			}
-		},
 
 		/**
 		 * Add custom tag on keyboard input

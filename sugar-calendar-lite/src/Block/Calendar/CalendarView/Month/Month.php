@@ -61,6 +61,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 	 * @since 3.6.0 Added filter hook `sugar_calendar_block_calendar_view_month_events`.
 	 * @since 3.7.0 Added support for filtering by tags.
 	 * @since 3.7.0 Filter the number of events to load.
+	 * @since 3.14.0 Added support for filtering by featured events.
 	 *
 	 * @return array
 	 *
@@ -126,6 +127,9 @@ class Month implements InterfaceBaseView, InterfaceView {
 			// Get the speakers.
 			$block_speakers = $this->block->get_speakers();
 
+			// Whether only featured events should be shown.
+			$featured_only = $this->block->is_featured_only();
+
 			// Get all the events on the calendar period.
 			$calendar_events = sugar_calendar_get_events_within_range(
 				[
@@ -138,6 +142,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 					'tags'         => $block_tags,
 					'speakers'     => $block_speakers,
 					'has_password' => false,
+					'featured'     => $featured_only,
 				]
 			);
 
@@ -146,6 +151,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 			 *
 			 * @since 3.6.0
 			 * @since 3.7.0 Added support for filtering by tags.
+			 * @since 3.14.0 Added support for filtering by featured.
 			 *
 			 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
 			 * @param \DateTimeImmutable      $start_period_range The start period range.
@@ -155,6 +161,7 @@ class Month implements InterfaceBaseView, InterfaceView {
 			 * @param int[]                   $venues             The venues to filter the occurrences.
 			 * @param int[]                   $block_tags         The tags to filter the occurrences.
 			 * @param int[]                   $speakers           The speakers to filter the occurrences.
+			 * @param bool                    $featured_only      Whether to only include featured events.
 			 */
 			$calendar_events = apply_filters(
 				'sugar_calendar_block_calendar_view_month_events',
@@ -165,7 +172,8 @@ class Month implements InterfaceBaseView, InterfaceView {
 				$search_term,
 				$block_venues,
 				$block_tags,
-				$block_speakers
+				$block_speakers,
+				$featured_only
 			);
 		}
 

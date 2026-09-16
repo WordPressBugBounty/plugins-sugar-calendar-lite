@@ -9,6 +9,7 @@
 
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Helper;
+use Sugar_Calendar\Features\FeaturedEvents\Common\Featured;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 3.7.0
  * @since 3.11.1 Added optional `has_password` arg.
+ * @since 3.14.0 Added optional `featured` arg.
  *
  * @param array $args Arguments.
  *        DateTimeInterface $start_range  Start date range.
@@ -32,10 +34,11 @@ defined( 'ABSPATH' ) || exit;
  *                                         sc_event posts when the current user
  *                                         lacks edit_posts. Omit (default) to
  *                                         preserve behavior for non-block callers.
+ *        bool              $featured     Pass `true` to return only featured events.
  *
  * @return array Array of event objects.
  */
-function sugar_calendar_get_events_within_range( $args = [] ) {
+function sugar_calendar_get_events_within_range( $args = [] ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
 
 	$defaults = [
 		'start_range' => null,
@@ -46,6 +49,7 @@ function sugar_calendar_get_events_within_range( $args = [] ) {
 		'venues'      => [],
 		'tags'        => [],
 		'speakers'    => [],
+		'featured'    => false,
 	];
 
 	$args = wp_parse_args( $args, $defaults );
@@ -97,6 +101,12 @@ function sugar_calendar_get_events_within_range( $args = [] ) {
 	// Maybe add speakers if non-empty.
 	if ( ! empty( $args['speakers'] ) ) {
 		$query_args['speaker_ids'] = $args['speakers'];
+	}
+
+	// Maybe restrict to featured events.
+	if ( ! empty( $args['featured'] ) ) {
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One JOIN on two indexed columns.
+		$query_args['meta_query'] = Featured::get_meta_query();
 	}
 
 	// When the caller opted in (`has_password => false`) and the current

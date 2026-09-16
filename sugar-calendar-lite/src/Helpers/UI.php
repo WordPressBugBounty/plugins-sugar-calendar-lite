@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Helpers;
 
+use Sugar_Calendar\Helpers as Sugar_Calendar_Helpers;
+
 /**
  * Admin interface helpers.
  *
@@ -27,6 +29,31 @@ class UI {
 		$class = implode( ' ', $class );
 
 		return $class;
+	}
+
+	/**
+	 * Sanitize an id and, if non-empty, apply the `sugar-calendar-setting-`
+	 * prefix shared by control ids in this class.
+	 *
+	 * Shared by controls with more than one id to guard (e.g. `image_upload()`'s
+	 * `id` and `size_id`), so guarding both doesn't duplicate the inline
+	 * `if ( ! empty( $id ) )` idiom used elsewhere in this file.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $id Raw id argument.
+	 *
+	 * @return string
+	 */
+	private static function prefixed_setting_id( $id ) {
+
+		$id = sanitize_key( $id );
+
+		if ( ! empty( $id ) ) {
+			$id = "sugar-calendar-setting-{$id}";
+		}
+
+		return $id;
 	}
 
 	/**
@@ -581,6 +608,226 @@ class UI {
 	}
 
 	/**
+	 * Output a group of image-card radio options.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments.
+	 *
+	 * @return void
+	 */
+	public static function image_radio_group( $args ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'        => 'image-radio-group',
+				'id'          => '',
+				'name'        => '',
+				'value'       => '',
+				'label'       => '',
+				'description' => '',
+				'options'     => [],
+			]
+		);
+
+		$name = sanitize_key( $args['name'] );
+
+		if ( $name !== '' ) {
+			$name = "sugar-calendar[$name]";
+		}
+
+		ob_start();
+		?>
+		<div class="sugar-calendar-image-radio-group">
+			<?php foreach ( (array) $args['options'] as $value => $option ) : ?>
+				<?php
+				$selected = (string) $value === (string) $args['value'];
+				$input_id = 'sugar-calendar-setting-' . sanitize_key( $args['id'] ) . '-' . sanitize_key( $value );
+				$classes  = [ 'sugar-calendar-image-radio-group__option' ];
+
+				if ( $selected ) {
+					$classes[] = 'sugar-calendar-image-radio-group__option--selected';
+				}
+				?>
+				<label class="<?php echo esc_attr( self::sanitize_class( $classes ) ); ?>"
+					for="<?php echo esc_attr( $input_id ); ?>">
+					<input type="radio"
+						   class="sugar-calendar-image-radio-group__input"
+						   id="<?php echo esc_attr( $input_id ); ?>"
+						   name="<?php echo esc_attr( $name ); ?>"
+						   value="<?php echo esc_attr( $value ); ?>"
+						<?php checked( $selected ); ?>>
+					<?php
+					// The stylesheet's keyboard focus ring is the adjacent-sibling
+					// selector `&__input:focus-visible + &__option-image` — the input
+					// above and this span must stay immediate siblings, or the ring
+					// silently stops appearing (no error, no warning).
+					?>
+					<span class="sugar-calendar-image-radio-group__option-image" aria-hidden="true">
+						<img src="<?php echo esc_url( $option['image'] ?? '' ); ?>" alt="">
+					</span>
+					<span class="sugar-calendar-image-radio-group__option-label">
+						<?php echo esc_html( $option['label'] ?? '' ); ?>
+					</span>
+				</label>
+			<?php endforeach; ?>
+		</div>
+		<?php
+
+		self::field_description( $args );
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Output an image setting with media selection and display size.
+	 *
+	 * `size_widths` (size key => px) is emitted as `data-width` on each option and
+	 * as the preview's initial `width`, so the preview tracks the selected size.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments.
+	 *
+	 * @return void
+	 */
+	public static function image_upload( $args ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'         => 'image-upload',
+				'id'           => '',
+				'name'         => '',
+				'value'        => '',
+				'image_url'    => '',
+				'size_name'    => '',
+				'size_label'   => '',
+				'size_value'   => '',
+				'size_options' => [],
+				'size_widths'  => [],
+				'label'        => '',
+				'description'  => '',
+				'class'        => [],
+			]
+		);
+
+		$id        = self::prefixed_setting_id( $args['id'] );
+		$name      = sanitize_key( $args['name'] );
+		$size_id   = self::prefixed_setting_id( $args['size_name'] );
+		$size_name = sanitize_key( $args['size_name'] );
+		$has_image = absint( $args['value'] ) > 0 && $args['image_url'] !== '';
+
+		$size_widths = array_map( 'absint', (array) $args['size_widths'] );
+		$thumb_width = $size_widths[ $args['size_value'] ] ?? 0;
+
+		if ( $name !== '' ) {
+			$name = "sugar-calendar[$name]";
+		}
+
+		if ( $size_name !== '' ) {
+			$size_name = "sugar-calendar[$size_name]";
+		}
+
+		ob_start();
+		?>
+		<div class="sugar-calendar-image-upload">
+			<input type="hidden"
+				   class="sugar-calendar-image-upload__input"
+				   id="<?php echo esc_attr( $id ); ?>"
+				   name="<?php echo esc_attr( $name ); ?>"
+				   value="<?php echo esc_attr( absint( $args['value'] ) ); ?>">
+
+			<span class="sugar-calendar-image-upload__preview"<?php echo $has_image ? '' : ' hidden'; ?>>
+				<img class="sugar-calendar-image-upload__thumb"
+					 alt=""
+					<?php if ( $thumb_width > 0 ) : ?>
+						width="<?php echo esc_attr( $thumb_width ); ?>"
+					<?php endif; ?>
+					<?php if ( $has_image ) : ?>
+						src="<?php echo esc_url( $args['image_url'] ); ?>"
+					<?php endif; ?>>
+			</span>
+
+			<button type="button"
+					class="button button-secondary sugar-calendar-image-upload__upload"<?php echo $has_image ? ' hidden' : ''; ?>>
+				<?php esc_html_e( 'Upload', 'sugar-calendar-lite' ); ?>
+			</button>
+
+			<span class="sugar-calendar-image-upload__size"<?php echo $has_image ? '' : ' hidden'; ?>>
+				<label class="screen-reader-text" for="<?php echo esc_attr( $size_id ); ?>">
+					<?php echo esc_html( $args['size_label'] ); ?>
+				</label>
+				<select id="<?php echo esc_attr( $size_id ); ?>" name="<?php echo esc_attr( $size_name ); ?>">
+					<?php foreach ( (array) $args['size_options'] as $value => $label ) : ?>
+						<option value="<?php echo esc_attr( $value ); ?>"<?php selected( $value, $args['size_value'] ); ?>
+							<?php if ( isset( $size_widths[ $value ] ) ) : ?>
+								data-width="<?php echo esc_attr( $size_widths[ $value ] ); ?>"
+							<?php endif; ?>>
+							<?php echo esc_html( $label ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</span>
+
+			<button type="button"
+					class="sugar-calendar-image-upload__remove"<?php echo $has_image ? '' : ' hidden'; ?>>
+				<?php esc_html_e( 'Remove Image', 'sugar-calendar-lite' ); ?>
+			</button>
+		</div>
+		<?php
+
+		self::field_description( $args );
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Output one labeled color input without a settings-row wrapper.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments. `default` is what MiniColors falls
+	 *                    back to when the field is left blank; it defaults to `value`.
+	 *
+	 * @return void
+	 */
+	public static function color_input( $args ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'id'      => '',
+				'name'    => '',
+				'value'   => '',
+				'label'   => '',
+				'default' => '',
+			]
+		);
+
+		$id      = self::prefixed_setting_id( $args['id'] );
+		$name    = sanitize_key( $args['name'] );
+		$default = $args['default'] !== '' ? $args['default'] : $args['value'];
+
+		if ( $name !== '' ) {
+			$name = "sugar-calendar[$name]";
+		}
+		?>
+		<span class="sugar-calendar-color-input">
+			<input type="text"
+				   class="sugar-calendar-color-picker"
+				   id="<?php echo esc_attr( $id ); ?>"
+				   name="<?php echo esc_attr( $name ); ?>"
+				   value="<?php echo esc_attr( $args['value'] ); ?>"
+				   data-default-color="<?php echo esc_attr( $default ); ?>"
+				   spellcheck="false">
+			<label class="sugar-calendar-color-input__label" for="<?php echo esc_attr( $id ); ?>">
+				<?php echo esc_html( $args['label'] ); ?>
+			</label>
+		</span>
+		<?php
+	}
+
+	/**
 	 * Output a date-range control: a flatpickr-powered display field backed by
 	 * two hidden inputs for the start / end bounds.
 	 *
@@ -935,6 +1182,75 @@ class UI {
 	}
 
 	/**
+	 * Output a row of color inputs, each with a caption beneath it.
+	 *
+	 * Each entry is a `color_input()`; `admin-color-scheme.js` upgrades them to
+	 * MiniColors pickers.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments. `colors` holds one
+	 *                    [ 'name', 'value', 'label', 'default' ] entry per swatch.
+	 * @param bool  $bare Whether to output the control wrapper.
+	 *
+	 * @return void
+	 */
+	public static function color_scheme_input( $args, $bare = false ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'        => 'color-scheme',
+				'id'          => '',
+				'label'       => '',
+				'description' => '',
+				'class'       => [],
+				'colors'      => [],
+			]
+		);
+
+		ob_start();
+		?>
+
+		<span class="sugar-calendar-color-scheme">
+			<?php foreach ( $args['colors'] as $color ) : ?>
+				<?php
+				$color = wp_parse_args(
+					$color,
+					[
+						'name'    => '',
+						'value'   => '',
+						'label'   => '',
+						'default' => '',
+					]
+				);
+
+				self::color_input(
+					[
+						'id'      => $color['name'],
+						'name'    => $color['name'],
+						'value'   => sanitize_hex_color( $color['value'] ),
+						'label'   => $color['label'],
+						'default' => sanitize_hex_color( $color['default'] ),
+					]
+				);
+				?>
+			<?php endforeach; ?>
+		</span>
+
+		<?php
+		self::field_description( $args );
+
+		if ( $bare ) {
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			return;
+		}
+
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
 	 * Output a textarea setting control.
 	 *
 	 * @since 3.0.0
@@ -1003,6 +1319,158 @@ class UI {
 		}
 
 		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Output a WYSIWYG editor setting control.
+	 *
+	 * When `smart_tags` is non-empty the editor's toolbar gains a Smart Tags
+	 * button backed by assets/js/admin-smart-tags.js. Ported from Sugar
+	 * Calendar Bookings' UI::wysiwyg_editor().
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments.
+	 * @param bool  $bare Whether to skip the field wrapper.
+	 */
+	public static function wysiwyg_editor( $args, $bare = false ) {
+
+		$args = wp_parse_args(
+			$args,
+			[
+				'type'          => 'wysiwyg',
+				'id'            => '',
+				'name'          => '',
+				'value'         => '',
+				'label'         => '',
+				'description'   => '',
+				'rows'          => 10,
+				'media_buttons' => false,
+				'teeny'         => false,
+				'quicktags'     => true,
+				'smart_tags'    => [],
+			]
+		);
+
+		// The editor id doubles as the TinyMCE instance id and the key the
+		// smart-tags script looks tags up by, so it is NOT prefixed the way
+		// other control ids are.
+		$editor_id = sanitize_key( $args['id'] );
+		$name      = sanitize_key( $args['name'] );
+
+		if ( ! empty( $name ) && ! $bare ) {
+			$name = "sugar-calendar[$name]";
+		}
+
+		$editor_settings = [
+			'textarea_name' => $name,
+			'textarea_rows' => absint( $args['rows'] ),
+			'media_buttons' => (bool) $args['media_buttons'],
+			'teeny'         => (bool) $args['teeny'],
+			'quicktags'     => (bool) $args['quicktags'],
+		];
+
+		if ( ! empty( $args['smart_tags'] ) && is_array( $args['smart_tags'] ) ) {
+			self::enqueue_smart_tags_assets();
+
+			wp_add_inline_script(
+				'sugar-calendar-admin-smart-tags',
+				'window.sugarCalendarSmartTags["' . esc_js( $editor_id ) . '"] = '
+					. wp_json_encode( $args['smart_tags'] ) . ';'
+			);
+		}
+
+		ob_start();
+
+		wp_editor( stripslashes( $args['value'] ), $editor_id, $editor_settings );
+
+		self::field_description( $args );
+
+		if ( $bare ) {
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			return;
+		}
+
+		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Enqueue the Smart Tags editor assets once per request.
+	 *
+	 * @since 3.14.0
+	 */
+	private static function enqueue_smart_tags_assets() {
+
+		if ( wp_script_is( 'sugar-calendar-admin-smart-tags', 'enqueued' ) ) {
+			return;
+		}
+
+		// Register the TinyMCE plugin and its toolbar button through WP's own
+		// seams, which APPEND to whatever WP computed. Putting 'plugins' or
+		// 'toolbar1' in wp_editor()'s `tinymce` array instead would REPLACE
+		// WP's lists (editor_settings() array_merges them), stripping wplink,
+		// wpeditimage, paste, wpautoresize, wpview and the kitchen sink from
+		// editors that have them today.
+		add_filter(
+			'mce_external_plugins',
+			static function ( $plugins ) {
+
+				$plugins['smarttags'] = SC_PLUGIN_ASSETS_URL . 'js/admin-smart-tags' . WP::asset_min() . '.js';
+
+				return $plugins;
+			}
+		);
+
+		add_filter(
+			'mce_buttons',
+			static function ( $buttons ) {
+
+				$buttons[] = 'smarttags';
+
+				return $buttons;
+			}
+		);
+
+		wp_enqueue_style(
+			'sugar-calendar-admin-smart-tags',
+			SC_PLUGIN_ASSETS_URL . 'css/admin-smart-tags' . WP::asset_min() . '.css',
+			[],
+			Sugar_Calendar_Helpers::get_asset_version()
+		);
+
+		// Data-only handle (src = false). TinyMCE loads the plugin FILE itself
+		// via mce_external_plugins above, so enqueueing it here as well would
+		// double-load it. This handle exists purely to carry the tag payload
+		// and the UI strings, and prints in the footer at priority 10 — before
+		// _WP_Editors::editor_js() emits tinymce.init() at priority 50, so the
+		// globals are always defined by the time the plugin runs.
+		wp_register_script(
+			'sugar-calendar-admin-smart-tags',
+			false,
+			[ 'wp-tinymce' ],
+			Sugar_Calendar_Helpers::get_asset_version(),
+			true
+		);
+		wp_enqueue_script( 'sugar-calendar-admin-smart-tags' );
+
+		wp_add_inline_script(
+			'sugar-calendar-admin-smart-tags',
+			'window.sugarCalendarSmartTags = window.sugarCalendarSmartTags || {};',
+			'before'
+		);
+
+		wp_localize_script(
+			'sugar-calendar-admin-smart-tags',
+			'sugar_calendar_smart_tags',
+			[
+				'icon_url'           => SC_PLUGIN_ASSETS_URL . 'images/icon-tags.svg',
+				'title'              => esc_html__( 'Smart Tags', 'sugar-calendar-lite' ),
+				'search_placeholder' => esc_html__( 'Search', 'sugar-calendar-lite' ),
+				'button_tooltip'     => esc_html__( 'Smart Tags', 'sugar-calendar-lite' ),
+				'no_results'         => esc_html__( 'No tags found.', 'sugar-calendar-lite' ),
+			]
+		);
 	}
 
 	/**
@@ -1243,6 +1711,52 @@ class UI {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo self::get_badge( $text, $size, $position, $color, $icon );
+	}
+
+	/**
+	 * Get label HTML.
+	 *
+	 * An unrecognised color falls back to grey, which would otherwise render unstyled.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $text  Label text.
+	 * @param string $color Label color: `blue` or `grey`.
+	 * @param string $title Tooltip text. Defaults to the label text.
+	 *
+	 * @return string Escaped markup, or an empty string when there is no text.
+	 */
+	public static function get_label( string $text, string $color = 'grey', string $title = '' ): string {
+
+		if ( $text === '' ) {
+			return '';
+		}
+
+		if ( ! in_array( $color, [ 'blue', 'grey' ], true ) ) {
+			$color = 'grey';
+		}
+
+		return sprintf(
+			'<span class="sc-label sc-label--%1$s" title="%2$s">%3$s</span>',
+			esc_attr( $color ),
+			esc_attr( $title !== '' ? $title : $text ),
+			esc_html( $text )
+		);
+	}
+
+	/**
+	 * Print label HTML.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $text  Label text.
+	 * @param string $color Label color: `blue` or `grey`.
+	 * @param string $title Tooltip text. Defaults to the label text.
+	 */
+	public static function print_label( string $text, string $color = 'grey', string $title = '' ) {
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo self::get_label( $text, $color, $title );
 	}
 
 	/**

@@ -334,6 +334,32 @@ class Base extends WP_List_Table {
 	const DEFAULT_MAX = 100;
 
 	/**
+	 * Absolute ceiling on rows fetched per view.
+	 *
+	 * Above the 999 Maximum Events accepts, so it never truncates a configured
+	 * view. It bounds this query only: Pro merges recurring occurrences in on
+	 * sugar_calendar_admin_events_tables_base_all_items afterwards, with no
+	 * limit of its own, so a recurring-heavy view is not bounded by this.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var int
+	 */
+	const QUERY_ROW_CEILING = 5000;
+
+	/**
+	 * How many events a single day cell renders before it shows "+N More".
+	 *
+	 * Per-day rather than per-view so one busy day cannot blank out the days
+	 * after it. Fallback for the events_max_per_day preference.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var int
+	 */
+	const MAX_PER_DAY = 10;
+
+	/**
 	 * Maximum number of events per iteration.
 	 *
 	 * @since 3.0.0
@@ -343,15 +369,31 @@ class Base extends WP_List_Table {
 	protected $max = 0;
 
 	/**
-	 * Event IDs allowed to display under the Maximum Events cap.
+	 * How many items each bucket has spent of its limit, keyed `Y-m-d|type`.
 	 *
-	 * Counts use the full item set; only display is limited to these IDs.
-	 *
-	 * @since 3.12.0
+	 * @since 3.14.0
 	 *
 	 * @var array
 	 */
-	protected $display_ids = [];
+	protected $day_item_counts = [];
+
+	/**
+	 * How many items each bucket could not fit, keyed `Y-m-d|type`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var array
+	 */
+	protected $day_overflow = [];
+
+	/**
+	 * Cell index that owns each bucket's "+N More" row, keyed by bucket.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var array
+	 */
+	protected $day_more_cell = [];
 
 	/**
 	 * The main constructor method.
@@ -471,8 +513,9 @@ class Base extends WP_List_Table {
 		$days_in_month = (int) gmdate( 't', gmmktime( 0, 0, 0, $this->month, 1, $this->year ) );
 		$this->day     = min( max( (int) $this->day, 1 ), $days_in_month );
 
-		// Set list-mode specific year.
-		$this->start_year = $this->get_start_year();
+		// Set list-mode specific year. Clamped like $year above: it is the lower
+		// bound of the List view's range, and the year input carries no min/max.
+		$this->start_year = min( max( (int) $this->get_start_year(), 1970 ), 9999 );
 
 		// Set "today" based on current request.
 		$this->today = strtotime( "{$this->year}/{$this->month}/{$this->day}" );
@@ -655,49 +698,6 @@ class Base extends WP_List_Table {
 			$this->get_status()
 		);
 
-		// Build the allowlist of events that may display under the Maximum Events
-		// cap. all_items itself stays full so per-status counts remain accurate;
-		// only what renders into cells is limited (see set_cell_items()).
-		$capped            = $this->limit_items_to_max( $this->all_items );
-		$this->display_ids = wp_list_pluck( $capped, 'id' );
-	}
-
-	/**
-	 * Cap a collection of event items to the Maximum Events preference.
-	 *
-	 * Sorts by start date ascending (calendar views are chronological), then
-	 * keeps the earliest N. Recurring occurrences and one-off events count
-	 * equally; a multi-day event counts once.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param array $items Event items (each exposes `start_dto`).
-	 *
-	 * @return array
-	 */
-	protected function limit_items_to_max( $items ) {
-
-		if ( ! is_array( $items ) ) {
-			return [];
-		}
-
-		if ( count( $items ) <= $this->get_max() ) {
-			return $items;
-		}
-
-		usort(
-			$items,
-			static function ( $a, $b ) {
-
-				if ( ! isset( $a->start_dto, $b->start_dto ) ) {
-					return 0;
-				}
-
-				return $a->start_dto <=> $b->start_dto;
-			}
-		);
-
-		return array_slice( $items, 0, $this->get_max() );
 	}
 
 	/**
@@ -896,6 +896,7 @@ class Base extends WP_List_Table {
 	 * Return array of filters used on queried items.
 	 *
 	 * @since 2.1.2
+	 * @since 3.14.0 Added the `sugar_calendar_admin_events_tables_base_items_filter` filter.
 	 *
 	 * @return array
 	 */
@@ -906,13 +907,27 @@ class Base extends WP_List_Table {
 
 		// Bail if viewing all.
 		if ( $status === 'all' ) {
-			return [];
+			$filter = [];
+		} else {
+
+			// Filter by status.
+			$filter = [
+				'status' => $status,
+			];
 		}
 
-		// Return filter by status.
-		return [
-			'status' => $status,
-		];
+		/**
+		 * Filter the wp_list_filter() arguments applied to the queried events.
+		 *
+		 * Return an empty array for a custom `status` value, then scope the query.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param array  $filter The filter arguments.
+		 * @param string $status The requested status.
+		 * @param Base   $table  Table being filtered.
+		 */
+		return (array) apply_filters( 'sugar_calendar_admin_events_tables_base_items_filter', $filter, $status, $this );
 	}
 
 	/**
@@ -1604,6 +1619,7 @@ class Base extends WP_List_Table {
 	 * Get the calendar views.
 	 *
 	 * @since 2.0.0
+	 * @since 3.14.0 Added the `sugar_calendar_admin_events_tables_base_views` filter.
 	 *
 	 * @return array
 	 */
@@ -1683,6 +1699,19 @@ class Base extends WP_List_Table {
 			}
 		}
 
+		/**
+		 * Filter the status links shown above the events tables.
+		 *
+		 * Keys render in order, "all" first. Build added links on $base_url.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param array  $status_links Link anchors keyed by status.
+		 * @param Base   $table        Table rendering the links.
+		 * @param string $base_url     Persistent URL the sibling links are built on.
+		 */
+		$status_links = (array) apply_filters( 'sugar_calendar_admin_events_tables_base_views', $status_links, $this, $base_url );
+
 		// Return array of HTML anchors.
 		return $status_links;
 	}
@@ -1711,10 +1740,11 @@ class Base extends WP_List_Table {
 		}
 
 		// Setup default args.
-		// Note: no `number` limit here — the Maximum Events cap is applied at
-		// display time (see limit_items_to_max()) so it counts recurring
-		// occurrences too, not just the base events this query returns.
+		// `number` must be explicit: omitted, Query::set_query_var_defaults() applies
+		// 100 and silently truncates every view. Display is capped per day in
+		// limit_cell_items_to_day().
 		$defaults = [
+			'number'         => self::QUERY_ROW_CEILING,
 			'orderby'        => $this->get_orderby(),
 			'order'          => $this->get_order(),
 			'search'         => $this->get_search(),
@@ -1844,6 +1874,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 2.0.0
 	 * @since 3.8.0 Sort the events in the cell by ascending order.
+	 * @since 3.14.0 Append the "+N More" row when the day cell overflowed.
 	 *
 	 * @return string
 	 */
@@ -1852,34 +1883,101 @@ class Base extends WP_List_Table {
 		// Default return value.
 		$retval = '';
 
-		// Default items array.
+		// Default items array. Already sorted and sliced by set_cell_items().
 		$items = $this->get_current_cell( 'items', [] );
-
-		// Bail if no items.
-		if ( empty( $items ) ) {
-			return $retval;
-		}
-
-		// Sort items by start_dto in ascending order.
-		usort(
-			$items,
-			function ( $a, $b ) {
-				if ( ! isset( $a->start_dto ) || ! isset( $b->start_dto ) ) {
-					return 0;
-				}
-
-				// Compare DateTime objects.
-				return $a->start_dto <=> $b->start_dto;
-			}
-		);
 
 		// Loop through today's events.
 		foreach ( $items as $item ) {
 			$retval .= $this->get_event( $item );
 		}
 
+		// Not gated on $items: once a day has spent its limit its later cells
+		// are empty, and in Week those are exactly the cells left to say so.
+		$retval .= $this->get_more_link_for_cell();
+
 		// Return the output buffer.
 		return $retval;
+	}
+
+	/**
+	 * Get the "+N More" row for the current cell.
+	 *
+	 * Renders once per bucket, in the cell the cut happened in — Week gives a day
+	 * 25 cells, and a link 14 rows above the events it hid helps nobody.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return string Empty when the day did not overflow, or already said so.
+	 */
+	protected function get_more_link_for_cell() {
+
+		$bucket = $this->get_current_cell_bucket();
+
+		if ( $bucket === '' ) {
+			return '';
+		}
+
+		// Only the cell the cut happened in renders the link.
+		if ( ! isset( $this->day_more_cell[ $bucket ] )
+			|| $this->day_more_cell[ $bucket ] !== $this->get_current_cell( 'index' )
+		) {
+			return '';
+		}
+
+		$start = $this->get_current_cell( 'start' );
+
+		if ( empty( $start ) ) {
+			return '';
+		}
+
+		return $this->get_more_link( (int) ( $this->day_overflow[ $bucket ] ?? 0 ), $start );
+	}
+
+	/**
+	 * Build a "+N More" row linking to a date's uncapped Day view.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int $overflow How many events the cell could not show.
+	 * @param int $start    Timestamp of the day the row belongs to.
+	 *
+	 * @return string Empty when nothing overflowed.
+	 */
+	protected function get_more_link( $overflow, $start ) {
+
+		if ( $overflow < 1 ) {
+			return '';
+		}
+
+		// Built on the persistent URL, not the bare base: the count came from
+		// the filtered set, so status, search, tags and timezone must survive
+		// or the destination shows a different set than the number promised.
+		$url = add_query_arg(
+			[ 'sc_show_all' => 1 ],
+			$this->get_persistent_url(
+				[
+					'mode' => 'day',
+					'cy'   => gmdate( 'Y', $start ),
+					'cm'   => gmdate( 'n', $start ),
+					'cd'   => gmdate( 'j', $start ),
+				]
+			)
+		);
+
+		// No `sugar-calendar-event-entry` class: admin-events.js binds the event
+		// pop-out to it and preventDefaults the click, which would leave this
+		// link dead behind an empty popover. No inner span for the same reason.
+		return sprintf(
+			'<a href="%1$s" class="sce__admin__events-table__event-entry--more">%2$s</a>',
+			esc_url( $url ),
+			esc_html(
+				sprintf(
+					/* translators: %d: number of additional events hidden in this day. */
+					_n( '+%d More', '+%d More', $overflow, 'sugar-calendar-lite' ),
+					$overflow
+				)
+			)
+		);
 	}
 
 	/**
@@ -1954,6 +2052,7 @@ class Base extends WP_List_Table {
 	 *
 	 * @since 2.0.3
 	 * @since 3.7.0 Added the `sugar_calendar_admin_events_table_event_title_url` filter.
+	 * @since 3.14.0 Added the `sugar_calendar_admin_events_tables_base_event_link_before_title` filter.
 	 *
 	 * @param object $event Event object.
 	 *
@@ -2006,9 +2105,29 @@ class Base extends WP_List_Table {
 		// Setup the pointer for this event.
 		$this->setup_pointer( $event, $cell );
 
+		/**
+		 * Filter markup rendered inside the title span, ahead of the event title.
+		 *
+		 * Inside the span so it reads inline with the title and a wrapped title runs
+		 * on from it. Return escaped markup. Fires for the Basic list table too, so
+		 * check $table.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param string $before_title Markup to render before the title. Default empty.
+		 * @param object $event        Event object.
+		 * @param Base   $table        Table rendering the link.
+		 */
+		$before_title = (string) apply_filters(
+			'sugar_calendar_admin_events_tables_base_event_link_before_title',
+			'',
+			$event,
+			$this
+		);
+
 		// Prepare the link HTML.
-		$html = '<a %s><div class="sce__admin__events-table__event-entry__cal-indicator"></div><span>%s</span></a>';
-		$link = sprintf( $html, $attr, esc_html( $event_title ) );
+		$html = '<a %1$s><div class="sce__admin__events-table__event-entry__cal-indicator"></div><span>%2$s%3$s</span></a>';
+		$link = sprintf( $html, $attr, $before_title, esc_html( $event_title ) );
 
 		// Return the event link.
 		return $link;
@@ -2068,10 +2187,43 @@ class Base extends WP_List_Table {
 	}
 
 	/**
+	 * How many events this view renders per day.
+	 *
+	 * Day overrides this to its total cap: a total is meaningful when the view
+	 * is a single day, and per-day would be the same number twice.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return int Zero for no limit.
+	 */
+	protected function get_cell_item_limit() {
+
+		$max = (int) sugar_calendar_get_user_preference( 'events_max_per_day', self::MAX_PER_DAY );
+
+		return $max > 0 ? $max : self::MAX_PER_DAY;
+	}
+
+	/**
+	 * Whether this view's limit is per day rather than a total for the view.
+	 *
+	 * Drives which field the cog offers, so the two never disagree. Views that
+	 * override get_cell_item_limit() to a total override this to false.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	protected function limits_per_day() {
+
+		return true;
+	}
+
+	/**
 	 * Set the items for the current cell.
 	 *
 	 * @since 2.1.3
 	 * @since 3.12.0 Limit displayed items to the Maximum Events allowlist; count all.
+	 * @since 3.14.0 Cap per day instead of per view, and record the overflow.
 	 */
 	protected function set_cell_items() {
 
@@ -2083,20 +2235,147 @@ class Base extends WP_List_Table {
 				continue;
 			}
 
-			// Filtered items only, and only those within the Maximum Events cap.
-			if (
-				in_array( $item->id, $this->filtered_ids, true )
-				&& in_array( $item->id, $this->display_ids, true )
-			) {
+			// Filtered items only.
+			if ( in_array( $item->id, $this->filtered_ids, true ) ) {
 				array_push( $this->current_cell['items'], $item );
 			}
 
-			// Count all items (the cap above is display-only).
+			// Count all items (the cap below is display-only).
 			array_push( $this->current_cell['countable'], $item );
 		}
 
+		// Sort before slicing, or the kept items are not the earliest ones.
+		$this->current_cell['items'] = $this->sort_items_by_start( $this->current_cell['items'] );
+
+		$this->limit_cell_items_to_day();
+
 		// Add the current cell to the cells array.
 		$this->cells[] = $this->current_cell;
+	}
+
+	/**
+	 * Trim the current cell to what its day has left of the limit.
+	 *
+	 * Budgets by date rather than by cell, because a cell is not always a day:
+	 * Month gives each day one, Week gives it an all-day cell plus 24 hourly
+	 * ones. Keying on the date means both spend one allowance per day, and the
+	 * remainder is totalled per day for get_more_link_for_cell().
+	 *
+	 * @since 3.14.0
+	 */
+	protected function limit_cell_items_to_day() {
+
+		$limit = (int) $this->get_cell_item_limit();
+
+		if ( $limit < 1 ) {
+			return;
+		}
+
+		$bucket = $this->get_current_cell_bucket();
+
+		if ( $bucket === '' ) {
+			return;
+		}
+
+		$used      = $this->day_item_counts[ $bucket ] ?? 0;
+		$remaining = max( 0, $limit - $used );
+		$total     = count( $this->current_cell['items'] );
+
+		if ( $total > $remaining ) {
+			$this->current_cell['items'] = array_slice( $this->current_cell['items'], 0, $remaining );
+
+			// Totalled across the bucket's cells, so Week reports the whole day.
+			$this->day_overflow[ $bucket ] = ( $this->day_overflow[ $bucket ] ?? 0 ) + ( $total - $remaining );
+
+			// Remember where the cut happened so the "+N More" row renders beside
+			// the events it hid, rather than in whichever cell renders first.
+			if ( ! isset( $this->day_more_cell[ $bucket ] ) ) {
+				$this->day_more_cell[ $bucket ] = $this->get_current_cell( 'index' );
+			}
+		}
+
+		$this->day_item_counts[ $bucket ] = $used + count( $this->current_cell['items'] );
+	}
+
+	/**
+	 * How many all-day items the current cell's day could not fit.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return int
+	 */
+	protected function get_all_day_overflow() {
+
+		$day = $this->get_current_cell_day();
+
+		return $day === ''
+			? 0
+			: (int) ( $this->day_overflow[ $day . '|all_day' ] ?? 0 );
+	}
+
+	/**
+	 * Get the budget bucket the current cell spends from.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return string `Y-m-d|normal` or `Y-m-d|all_day`, empty when undated.
+	 */
+	protected function get_current_cell_bucket() {
+
+		$day = $this->get_current_cell_day();
+
+		if ( $day === '' ) {
+			return '';
+		}
+
+		// The all-day strip and the hourly grid budget separately. Sharing one
+		// allowance let a day of all-day events render the hourly grid empty,
+		// because Week builds every all-day cell before the first hour cell.
+		$type = (string) $this->get_current_cell( 'type', 'normal' );
+
+		return $day . '|' . ( $type === 'normal' ? 'normal' : 'all_day' );
+	}
+
+	/**
+	 * Get the date the current cell belongs to.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return string `Y-m-d`, or empty when the cell has no start.
+	 */
+	protected function get_current_cell_day() {
+
+		$start = $this->get_current_cell( 'start' );
+
+		return empty( $start )
+			? ''
+			: gmdate( 'Y-m-d', $start );
+	}
+
+	/**
+	 * Sort event items by start date, ascending.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $items Event items.
+	 *
+	 * @return array
+	 */
+	protected function sort_items_by_start( $items ) {
+
+		usort(
+			$items,
+			static function ( $a, $b ) {
+
+				if ( ! isset( $a->start_dto, $b->start_dto ) ) {
+					return 0;
+				}
+
+				return $a->start_dto <=> $b->start_dto;
+			}
+		);
+
+		return $items;
 	}
 
 	/**
@@ -2275,6 +2554,7 @@ class Base extends WP_List_Table {
 	 * Add an event to the pointers array.
 	 *
 	 * @since 2.0.0
+	 * @since 3.14.0 Added the `sugar_calendar_admin_events_tables_base_pointer_before_title` filter.
 	 *
 	 * @param object $event Event object.
 	 * @param int    $cell  Cell index.
@@ -2296,7 +2576,22 @@ class Base extends WP_List_Table {
 
 		<div class="sugar_calendar_event_tooltip__header">
 			<h3>
-				<?php echo wp_kses( $title, $this->get_allowed_pointer_tags() ); ?>
+				<?php
+				/**
+				 * Filter markup rendered before the event pointer title.
+				 *
+				 * Passed through wp_kses() with the pointer's allowed tags.
+				 *
+				 * @since 3.14.0
+				 *
+				 * @param string $before_title Markup rendered before the title. Default empty.
+				 * @param object $event        Event object.
+				 */
+				$before_title = (string) apply_filters( 'sugar_calendar_admin_events_tables_base_pointer_before_title', '', $event );
+
+				echo wp_kses( $before_title, $this->get_allowed_pointer_tags() );
+				echo wp_kses( $title, $this->get_allowed_pointer_tags() );
+				?>
 			</h3>
 		</div>
 		<div class="sugar_calendar_event_tooltip__body">
@@ -2786,22 +3081,30 @@ class Base extends WP_List_Table {
 
 		$pointer_text = [];
 
+		// post_password is not a wp_sc_events column, so it has to come from the post.
+		$post_password = empty( $event->object_id ) ? '' : (string) get_post_field( 'post_password', $event->object_id );
+
 		// Special case for password protected events.
-		if ( ! empty( $event->post_password ) ) {
+		if ( $post_password !== '' ) {
 			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar-lite' ) . '</strong>';
 			$pointer_text['details']       = '<span>' . esc_html__( 'Password protected', 'sugar-calendar-lite' ) . '</span>';
 
-			// Post is not protected.
-		} elseif ( ! empty( $event->content ) ) {
+			// Post is not protected. Gated on object_id, not content: the delegated
+			// pipeline also resolves a manual excerpt on an event with an empty body.
+		} elseif ( ! empty( $event->object_id ) ) {
 
-			// Trim content down to 25 words or less - no HTML, to be safe.
-			$content = wp_trim_words( $event->content, 25 );
+			// Trim to 25 words via the shared excerpt pipeline (issue #721).
+			$content = Helper::get_event_excerpt( $event, 25, '&hellip;' );
 
-			// Title.
-			$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar-lite' ) . '</strong>';
+			// The delegated pipeline can independently resolve to ''.
+			if ( $content !== '' ) {
 
-			// Texturize.
-			$pointer_text['details'] = '<span>' . esc_html( $content ) . '</span>';
+				// Title.
+				$pointer_text['details_title'] = '<strong>' . esc_html__( 'Details', 'sugar-calendar-lite' ) . '</strong>';
+
+				// Texturize.
+				$pointer_text['details'] = '<span>' . esc_html( $content ) . '</span>';
+			}
 		}
 
 		/**
@@ -3077,6 +3380,14 @@ class Base extends WP_List_Table {
 			],
 			'strong' => [],
 			'span'   => [ 'class' => [] ],
+
+			// The featured star renders as an icon-only <i>.
+			'i'      => [
+				'class'      => [],
+				'role'       => [],
+				'aria-label' => [],
+				'title'      => [],
+			],
 		];
 	}
 
@@ -3329,6 +3640,22 @@ class Base extends WP_List_Table {
 		// Set all items.
 		$this->set_all_items();
 
+		// Prime once so per-row excerpt rendering doesn't N+1. Both sets: the list view renders
+		// filtered_items, and Pro merges recurring occurrences into all_items only.
+		$object_ids = array_merge(
+			wp_list_pluck( $this->filtered_items, 'object_id' ),
+			wp_list_pluck( $this->all_items, 'object_id' )
+		);
+
+		$post_ids = array_filter( array_map( 'absint', $object_ids ) );
+
+		if ( ! empty( $post_ids ) ) {
+
+			// Term cache included: the Calendars and Tags columns both call
+			// get_the_terms() per row, which is a query each without it.
+			_prime_post_caches( array_unique( $post_ids ), true, true );
+		}
+
 		// Set cells.
 		$this->set_cells();
 
@@ -3538,6 +3865,22 @@ class Base extends WP_List_Table {
 		$start_of_week  = sugar_calendar_get_user_preference( 'start_of_week', $preferences['start_of_week'] );
 		$events_max_num = sugar_calendar_get_user_preference( 'events_max_num', $preferences['events_max_num'] );
 
+		// Only the limit this view actually applies is offered, so the cog never
+		// shows a second number the current view ignores.
+		$max_is_per_day = $this->limits_per_day();
+
+		$events_max_value = $max_is_per_day
+			? sugar_calendar_get_user_preference( 'events_max_per_day', $preferences['events_max_per_day'] )
+			: $events_max_num;
+
+		$events_max_key = $max_is_per_day
+			? 'events_max_per_day'
+			: 'events_max_num';
+
+		$events_max_label = $max_is_per_day
+			? esc_html__( 'Maximum Events Per Day', 'sugar-calendar-lite' )
+			: esc_html__( 'Maximum Events', 'sugar-calendar-lite' );
+
 		?>
 		<div class="sugar-calendar-screen-options">
 			<button id="sugar-calendar-screen-options-toggle" class="sugar-calendar-screen-options-toggle button" type="button">
@@ -3606,8 +3949,8 @@ class Base extends WP_List_Table {
                         </select>
                     </fieldset>
                     <fieldset>
-                        <legend><?php esc_html_e( 'Maximum Events', 'sugar-calendar-lite' ); ?></legend>
-                        <input type="number" step="1" min="1" max="999" class="code" name="sugar-calendar[events_max_num]" maxlength="3" value="<?php echo absint( $events_max_num ); ?>">
+                        <legend><?php echo esc_html( $events_max_label ); ?></legend>
+                        <input type="number" step="1" min="1" max="999" class="code" name="sugar-calendar[<?php echo esc_attr( $events_max_key ); ?>]" maxlength="3" value="<?php echo absint( $events_max_value ); ?>">
                     </fieldset>
                     <p class="submit">
                         <button type="submit" name="sugar-calendar-submit" class="button"><?php esc_html_e( 'Save Options', 'sugar-calendar-lite' ); ?></button>

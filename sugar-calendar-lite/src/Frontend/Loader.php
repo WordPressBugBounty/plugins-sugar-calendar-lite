@@ -2,10 +2,13 @@
 
 namespace Sugar_Calendar\Frontend;
 
+use Sugar_Calendar\Emails\CalendarEndpoint;
+use Sugar_Calendar\Event;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Common\Editor;
 use Sugar_Calendar\Frontend\StructuredData\StructuredData;
+use Sugar_Calendar\Helpers\UI;
 
 /**
  * Frontend Loader.
@@ -50,6 +53,8 @@ class Loader {
 		add_filter( 'body_class', [ $this, 'sc_modify_single_event_body_classes' ] );
 
 		add_filter( 'pre_get_shortlink', [ $this, 'filter_pre_get_shortlink' ], 10, 4 );
+
+		( new CalendarEndpoint() )->hooks();
 
 		// JSON-LD structured data in the single-event <head>.
 		( new StructuredData() )->hooks();
@@ -266,6 +271,7 @@ class Loader {
 	 *
 	 * @since 3.1.0
 	 * @since 3.6.0 Added filter for the get event args and hook for the event object.
+	 * @since 3.14.0 Added the event badges row.
 	 *
 	 * @param int $post_id The post ID.
 	 */
@@ -302,6 +308,8 @@ class Loader {
 		if ( empty( $event->object_id ) ) {
 			return;
 		}
+
+		$this->render_event_badges( $event );
 		?>
 		<div class="sc-frontend-single-event">
 
@@ -330,6 +338,64 @@ class Loader {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the event badges above the event details.
+	 *
+	 * Sibling of `.sc-frontend-single-event`, output only when a badge is supplied.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param Event $event The event object.
+	 */
+	public function render_event_badges( $event ) {
+
+		/**
+		 * Filters the badges shown above the single event details.
+		 *
+		 * Each entry: `text` (required), `color` (blue|grey, default grey), `title`
+		 * (optional, defaults to text). Plain strings — this escapes them.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param array[] $badges Badge definitions.
+		 * @param Event   $event  The event object.
+		 */
+		$badges = (array) apply_filters( 'sugar_calendar_frontend_event_badges', [], $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
+		$html = '';
+
+		foreach ( $badges as $badge ) {
+			$html .= $this->get_event_badge( (array) $badge );
+		}
+
+		if ( $html === '' ) {
+			return;
+		}
+
+		printf(
+			'<div class="sc-frontend-single-event-badges">%s</div>',
+			$html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
+	}
+
+	/**
+	 * Build one event badge.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $badge Badge definition.
+	 *
+	 * @return string Escaped markup, or an empty string when there is no text.
+	 */
+	private function get_event_badge( $badge ) {
+
+		return UI::get_label(
+			! empty( $badge['text'] ) ? $badge['text'] : '',
+			! empty( $badge['color'] ) ? $badge['color'] : 'grey',
+			! empty( $badge['title'] ) ? $badge['title'] : ''
+		);
 	}
 
 	/**

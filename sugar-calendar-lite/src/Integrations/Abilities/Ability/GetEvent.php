@@ -11,6 +11,8 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\Formatter;
+use WP_Error;
 
 /**
  * Get a single event by its Sugar Calendar event ID. Per-event `read_event`
@@ -84,13 +86,17 @@ class GetEvent extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [ 'type' => 'object' ];
+		return Formatter::event_schema();
 	}
 
 	/**
 	 * Per-event permission check. Resolves the SC event ID to a WP post ID
-	 * before current_user_can( 'read_event', $post_id ). Missing IDs are
-	 * forbidden by design.
+	 * before current_user_can( 'read_event', $post_id ).
+	 *
+	 * A missing event answers 404, not 403: reporting "no permission" for an id
+	 * that does not exist sends the caller looking for an access problem that
+	 * isn't there. Existence is only disclosed to callers who already passed the
+	 * ability's coarse gate.
 	 *
 	 * @since 3.12.0
 	 *
@@ -106,13 +112,33 @@ class GetEvent extends AbstractAbility {
 		$event     = ( $query && ! empty( $query->items ) ) ? $query->items[0] : null;
 		$object_id = $event ? absint( $event->object_id ) : 0;
 
-		if ( ! $object_id || ! current_user_can( 'read_event', $object_id ) ) {
+		if ( ! $object_id ) {
+			return $this->not_found();
+		}
+
+		if ( ! current_user_can( 'read_event', $object_id ) ) {
 			return $this->forbidden(
 				esc_html__( 'You do not have permission to view this event.', 'sugar-calendar-lite' )
 			);
 		}
 
 		return true;
+	}
+
+	/**
+	 * The event does not exist.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return \WP_Error
+	 */
+	private function not_found(): WP_Error {
+
+		return new WP_Error(
+			'sc_events_not_found',
+			esc_html__( 'Event not found.', 'sugar-calendar-lite' ),
+			[ 'status' => 404 ]
+		);
 	}
 
 	/**
@@ -133,9 +159,7 @@ class GetEvent extends AbstractAbility {
 		$event = $query->items[0] ?? null;
 
 		if ( ! $event ) {
-			return $this->forbidden(
-				esc_html__( 'You do not have permission to view this event.', 'sugar-calendar-lite' )
-			);
+			return $this->not_found();
 		}
 
 		$map = $this->events->resolve_calendar_map( [ (int) $event->object_id ] );

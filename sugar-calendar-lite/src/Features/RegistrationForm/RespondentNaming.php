@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Features\RegistrationForm;
 
+use Sugar_Calendar_Event_Ticketing\Features\TicketType;
+
 /**
  * Display names for registration respondents.
  *
@@ -57,5 +59,48 @@ class RespondentNaming {
 		$name     = $event_id > 0 ? trim( (string) get_event_meta( $event_id, 'ticket_name', true ) ) : '';
 
 		return $name === '' ? __( 'General Admission', 'sugar-calendar-lite' ) : $name;
+	}
+
+	/**
+	 * A ticket type's display name and unit price.
+	 *
+	 * Type 0 is general admission, which lives in event meta rather than the
+	 * ticket-types table. Named types are read behind class_exists(), since they
+	 * are an add-on feature; without it the row still reads as a ticket. A null
+	 * price means unresolvable, which callers render differently from free.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int $event_id Sugar Calendar event id.
+	 * @param int $type_id  Ticket type id.
+	 *
+	 * @return array [ 'name' => string, 'price' => float|null ].
+	 */
+	public static function ticket_type( $event_id, $type_id ) {
+
+		$event_id = (int) $event_id;
+		$type_id  = (int) $type_id;
+
+		$general = [
+			'name'  => self::general_admission( $event_id ),
+			'price' => $event_id > 0 ? (float) get_event_meta( $event_id, 'ticket_price', true ) : null,
+		];
+
+		if ( $type_id <= 0 || ! class_exists( TicketType::class ) ) {
+			return $general;
+		}
+
+		$ticket_type = ( new TicketType() )->get( $type_id );
+
+		if ( empty( $ticket_type ) ) {
+			return $general;
+		}
+
+		$name = isset( $ticket_type->ticket_name ) ? trim( (string) $ticket_type->ticket_name ) : '';
+
+		return [
+			'name'  => $name === '' ? $general['name'] : $name,
+			'price' => isset( $ticket_type->ticket_price ) ? (float) $ticket_type->ticket_price : null,
+		];
 	}
 }

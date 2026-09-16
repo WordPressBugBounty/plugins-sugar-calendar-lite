@@ -25,7 +25,11 @@ add_filter( 'map_meta_cap', 'sugar_calendar_category_meta_caps', 10, 4 );
 
 // Post statuses
 add_action( 'transition_post_status', 'sugar_calendar_transition_post_status', 10, 3 );
-add_action( 'deleted_post',           'sugar_calendar_delete_post_events' );
+// On `before_delete_post`, not `deleted_post`: the lookup keys off the post id,
+// which only resolves while the post still exists (#636). Priority 999 so this
+// runs last -- dependent cleanup must read the event row before it is deleted,
+// so anything cleaning up event-owned data hooks below 999.
+add_action( 'before_delete_post',     'sugar_calendar_delete_post_events', 999 );
 
 // Taxonomy query
 add_filter( 'sc_events_query_clauses', 'sugar_calendar_join_by_taxonomy_term',      10, 2 );

@@ -26,6 +26,28 @@ use WP_Term;
 class Formatter {
 
 	/**
+	 * Decode stored HTML entities into plain text.
+	 *
+	 * Term names are stored entity-encoded, so a calendar named `Rock & Roll` reads
+	 * back as `Rock &amp; Roll`. These payloads are consumed by language models and
+	 * other API clients rather than rendered as HTML, and a model handed `&amp;`
+	 * repeats it back in prose.
+	 *
+	 * Terms only: event titles come out of `wp_sc_events` unencoded, so decoding one
+	 * would be a no-op nothing could prove.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $value Stored value.
+	 *
+	 * @return string
+	 */
+	private function text( string $value ): string {
+
+		return html_entity_decode( $value, ENT_QUOTES, get_bloginfo( 'charset' ) );
+	}
+
+	/**
 	 * Render a calendar (sc_event_category term) into the canonical calendar shape.
 	 *
 	 * @since 3.12.0
@@ -39,7 +61,27 @@ class Formatter {
 		return [
 			'id'    => $term->term_id,
 			'slug'  => $term->slug,
-			'name'  => $term->name,
+			'name'  => $this->text( $term->name ),
+			'count' => $term->count,
+		];
+	}
+
+	/**
+	 * Shape a tag term. Deliberately identical to calendar() so the data picker
+	 * can treat every term dataset the same way.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param WP_Term $term Tag term.
+	 *
+	 * @return array { id: int, slug: string, name: string, count: int }
+	 */
+	public function tag( WP_Term $term ): array {
+
+		return [
+			'id'    => $term->term_id,
+			'slug'  => $term->slug,
+			'name'  => $this->text( $term->name ),
 			'count' => $term->count,
 		];
 	}
@@ -160,5 +202,123 @@ class Formatter {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * JSON schema for the term shape calendar() and tag() return.
+	 *
+	 * Static so an ability can describe its output without a Formatter instance —
+	 * `AbstractAbility::$formatter` is nullable.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return array
+	 */
+	public static function term_schema(): array {
+
+		return [
+			'type'       => 'object',
+			'required'   => [ 'id', 'slug', 'name', 'count' ],
+			'properties' => [
+				'id'    => [ 'type' => 'integer' ],
+				'slug'  => [ 'type' => 'string' ],
+				'name'  => [ 'type' => 'string' ],
+				'count' => [ 'type' => 'integer' ],
+			],
+		];
+	}
+
+	/**
+	 * JSON schema for the shape event() returns.
+	 *
+	 * The five recurrence members and `recurrence_end_tz` are nullable on purpose:
+	 * event() distinguishes "not a recurring event" from a zero interval, so the
+	 * null has to be declared or a non-recurring event fails output validation.
+	 *
+	 * `additionalProperties` is deliberately left open. WP_Ability validates the
+	 * result *after* `wp_ability_execute_result` has filtered it, so closing the
+	 * shape would turn any third-party addition into `ability_invalid_output`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return array
+	 */
+	public static function event_schema(): array {
+
+		return [
+			'type'       => 'object',
+			'required'   => [
+				'id',
+				'object_id',
+				'title',
+				'content',
+				'content_protected',
+				'status',
+				'url',
+				'start',
+				'end',
+				'start_tz',
+				'end_tz',
+				'all_day',
+				'recurrence',
+				'recurrence_interval',
+				'recurrence_count',
+				'recurrence_end',
+				'recurrence_end_tz',
+				'date_created',
+				'date_modified',
+				'calendars',
+			],
+			'properties' => [
+				'id'                  => [ 'type' => 'integer' ],
+				'object_id'           => [ 'type' => 'integer' ],
+				'title'               => [ 'type' => 'string' ],
+				'content'             => [ 'type' => 'string' ],
+				'content_protected'   => [ 'type' => 'boolean' ],
+				'status'              => [ 'type' => 'string' ],
+				'url'                 => [ 'type' => 'string' ],
+				'start'               => [ 'type' => 'string' ],
+				'end'                 => [ 'type' => 'string' ],
+				'start_tz'            => [ 'type' => 'string' ],
+				'end_tz'              => [ 'type' => 'string' ],
+				'all_day'             => [ 'type' => 'boolean' ],
+				'recurrence'          => [ 'type' => [ 'string', 'null' ] ],
+				'recurrence_interval' => [ 'type' => [ 'integer', 'null' ] ],
+				'recurrence_count'    => [ 'type' => [ 'integer', 'null' ] ],
+				'recurrence_end'      => [ 'type' => [ 'string', 'null' ] ],
+				'recurrence_end_tz'   => [ 'type' => [ 'string', 'null' ] ],
+				'date_created'        => [ 'type' => 'string' ],
+				'date_modified'       => [ 'type' => 'string' ],
+				'calendars'           => [
+					'type'  => 'array',
+					'items' => self::term_schema(),
+				],
+			],
+		];
+	}
+
+	/**
+	 * JSON schema for a paged collection: one named array plus its total.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $key  Property name holding the rows.
+	 * @param array  $item JSON schema for one row.
+	 *
+	 * @return array
+	 */
+	public static function collection_schema( string $key, array $item ): array {
+
+		return [
+			'type'       => 'object',
+			'required'   => [ $key, 'total' ],
+			'properties' => [
+				$key    => [
+					'type'  => 'array',
+					'items' => $item,
+				],
+				'total' => [ 'type' => 'integer' ],
+			],
+		];
 	}
 }

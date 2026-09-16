@@ -18,7 +18,13 @@
 			this.settings = settings;
 			this.$notices = $( '.sugar-calendar-education-notice' );
 			this.$dismissButtons = $( '.sugar-calendar-dismiss-notice' );
-			this.$educationModalLinks = $( '.sce-lite-education-modal-link' );
+			// Email Settings owns its prompts through admin-settings-emails.js,
+			// which carries screen-specific copy and UTM attribution. Binding the
+			// generic opener there too gives one click two owners and makes this
+			// handler read localization keys that do not exist on that screen.
+			this.$educationModalLinks = $(
+				'.sce-lite-education-modal-link:not(.sugar-calendar-settings-emails__pro-prompt)'
+			);
 
 			this.bindEvents();
 		},
@@ -209,8 +215,9 @@
 
 		/**
 		 * Display the Pro Upgrade modal for any generic
-		 * `.sce-lite-education-modal-link` trigger (event metabox fields,
-		 * Tools page Pro-feature previews, ...). Moved here from
+		 * `.sce-lite-education-modal-link` trigger except an Email Settings prompt
+		 * owned by that screen's bundle (event metabox fields, Tools page
+		 * Pro-feature previews, ...). Moved here from
 		 * admin-event-lite.js (#729/#737) -- this bundle is already shared
 		 * by every page that needs the modal, so the handler now lives
 		 * alongside the rest of the education modal code instead of in a

@@ -35,12 +35,14 @@ class ToolsExportTab extends Tools {
 	 *
 	 * @since 3.6.0
 	 * @since 3.7.0 Add speakers.
+	 * @since 3.14.0 Add registration responses.
 	 *
 	 * @var array
 	 */
 	const NEED_PRO_KEYS = [
 		'_venues',
 		'_speakers',
+		'_registration_responses',
 	];
 
 	/**
@@ -239,19 +241,21 @@ class ToolsExportTab extends Tools {
 		 *
 		 * @since 3.6.0
 		 * @since 3.7.0 Add speakers.
+		 * @since 3.14.0 Add registration responses.
 		 *
 		 * @param array $data_checkboxes Array of data checkboxes.
 		 */
 		$data_checkboxes = apply_filters(
 			'sugar_calendar_admin_pages_tools_export_tab_checkboxes',
 			[
-				'events'        => __( 'Events', 'sugar-calendar-lite' ),
-				'custom_fields' => __( 'Custom Fields', 'sugar-calendar-lite' ),
-				'calendars'     => __( 'Calendars', 'sugar-calendar-lite' ),
-				'orders'        => __( 'Tickets, Orders and Attendees', 'sugar-calendar-lite' ),
-				'tags'          => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
-				'_venues'       => __( 'Venues', 'sugar-calendar-lite' ),
-				'_speakers'     => __( 'Speakers', 'sugar-calendar-lite' ),
+				'events'                  => __( 'Events', 'sugar-calendar-lite' ),
+				'custom_fields'           => __( 'Custom Fields', 'sugar-calendar-lite' ),
+				'calendars'               => __( 'Calendars', 'sugar-calendar-lite' ),
+				'orders'                  => __( 'Tickets, Orders and Attendees', 'sugar-calendar-lite' ),
+				'_registration_responses' => __( 'Registration Responses', 'sugar-calendar-lite' ),
+				'tags'                    => TagsHelpers::get_tags_taxonomy_labels( 'name' ),
+				'_venues'                 => __( 'Venues', 'sugar-calendar-lite' ),
+				'_speakers'               => __( 'Speakers', 'sugar-calendar-lite' ),
 			]
 		);
 		?>
@@ -323,7 +327,7 @@ class ToolsExportTab extends Tools {
 						'name_end'    => 'sc_admin_tools_export_date_end',
 						'placeholder' => __( 'Select Date Range', 'sugar-calendar-lite' ),
 						'aria_label'  => __( 'Custom date range', 'sugar-calendar-lite' ),
-						'description' => __( 'Custom Date Range only filters Events, Tickets, Orders & Attendees. Everything else exports in full.', 'sugar-calendar-lite' ),
+						'description' => __( 'Custom Date Range filters Events, Tickets, Orders & Attendees, and Registration Responses. Everything else exports in full.', 'sugar-calendar-lite' ),
 					],
 					true
 				);

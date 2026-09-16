@@ -265,6 +265,7 @@ class UI {
 				'description' => '',
 				'choicejs'    => false,
 				'multiple'    => false,
+				'after_input' => '',
 			]
 		);
 
@@ -308,6 +309,12 @@ class UI {
 
 		<?php endif; ?>
 
+		<?php if ( ! empty( $args['after_input'] ) ) : ?>
+
+			<span class="sugar-calendar-setting-field-row">
+
+		<?php endif; ?>
+
         <select
 			name="<?php echo esc_attr( $name ); ?>"
 			id="<?php echo esc_attr( $id ); ?>"
@@ -334,6 +341,17 @@ class UI {
 		<?php if ( $choicejs ) : ?>
 
             </span>
+
+		<?php endif; ?>
+
+		<?php if ( ! empty( $args['after_input'] ) ) : ?>
+
+			<?php
+			// Escaped by the caller: this carries markup, not a value.
+			echo $args['after_input']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
+
+			</span>
 
 		<?php endif; ?>
 
@@ -756,6 +774,26 @@ class UI {
 		}
 
 		self::field_wrapper( $args, ob_get_clean() );
+	}
+
+	/**
+	 * Output a row of color inputs, each with a caption beneath it.
+	 *
+	 * Thin delegation to Sugar_Calendar\Helpers\UI. The control is a core helper,
+	 * so it is not duplicated here; both field_wrapper() implementations emit the
+	 * same row markup, so the rendered DOM matches this class's other controls.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Control arguments. `colors` holds one
+	 *                    [ 'name', 'value', 'label' ] entry per swatch.
+	 * @param bool  $bare Whether to output the control wrapper.
+	 *
+	 * @return void
+	 */
+	public static function color_scheme_input( $args, $bare = false ) {
+
+		CoreUI::color_scheme_input( $args, $bare );
 	}
 
 	/**

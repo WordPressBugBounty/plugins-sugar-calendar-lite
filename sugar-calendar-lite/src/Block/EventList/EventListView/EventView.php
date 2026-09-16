@@ -82,8 +82,10 @@ class EventView {
 	 */
 	public function render_title() {
 
+		$title_html = Helper::get_event_title_html( $this->event );
+
 		if ( Helpers::is_on_admin_editor() ) {
-			echo esc_html( $this->event->title );
+			echo wp_kses_post( $title_html );
 
 			return;
 		}
@@ -91,7 +93,7 @@ class EventView {
 		printf(
 			'<a href="%1$s"%3$s>%2$s</a>',
 			esc_url( Helper::get_event_frontend_url( $this->event ) ),
-			esc_html( $this->event->title ),
+			wp_kses_post( $title_html ),
 			Helper::get_event_frontend_url_open_in_new_tab( $this->event ) ? ' target="_blank"' : ''
 		);
 	}

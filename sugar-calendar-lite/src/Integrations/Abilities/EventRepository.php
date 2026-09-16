@@ -14,6 +14,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Sugar_Calendar\Event_Query;
+use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use WP_Error;
 use WP_Term;
 
@@ -91,6 +92,76 @@ class EventRepository {
 		$args['taxonomy'] = sugar_calendar_get_calendar_taxonomy_id();
 
 		return get_terms( $args );
+	}
+
+	/**
+	 * Fetch tag terms. Mirrors get_calendars() — the taxonomy is fixed, callers
+	 * pass the rest of the standard get_terms() args.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args Arguments for get_terms(), without `taxonomy`.
+	 *
+	 * @return WP_Term[]|WP_Error
+	 */
+	public function get_tags( array $args ) {
+
+		$args['taxonomy'] = TagsHelpers::get_tags_taxonomy_id();
+
+		return get_terms( $args );
+	}
+
+	/**
+	 * Count all calendar terms matching the filters, ignoring pagination.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args get_terms() arguments (without `taxonomy`).
+	 *
+	 * @return int
+	 */
+	public function count_calendars( array $args ): int {
+
+		return $this->count_terms( $args, sugar_calendar_get_calendar_taxonomy_id() );
+	}
+
+	/**
+	 * Count all tag terms matching the filters, ignoring pagination.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array $args get_terms() arguments (without `taxonomy`).
+	 *
+	 * @return int
+	 */
+	public function count_tags( array $args ): int {
+
+		return $this->count_terms( $args, TagsHelpers::get_tags_taxonomy_id() );
+	}
+
+	/**
+	 * Count matching terms in one taxonomy.
+	 *
+	 * `number`/`offset` are dropped so the total describes the whole result set
+	 * rather than the page that was returned.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param array  $args     get_terms() arguments (without `taxonomy`).
+	 * @param string $taxonomy Taxonomy to count in.
+	 *
+	 * @return int
+	 */
+	private function count_terms( array $args, string $taxonomy ): int {
+
+		unset( $args['number'], $args['offset'], $args['orderby'], $args['order'] );
+
+		$args['taxonomy'] = $taxonomy;
+		$args['fields']   = 'count';
+
+		$count = get_terms( $args );
+
+		return is_wp_error( $count ) ? 0 : (int) $count;
 	}
 
 	/**
@@ -331,6 +402,26 @@ class EventRepository {
 	public function get_calendar( int $id, string $slug ) {
 
 		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
+		$term     = $id > 0
+			? get_term( $id, $taxonomy )
+			: get_term_by( 'slug', $slug, $taxonomy );
+
+		return $term instanceof WP_Term ? $term : null;
+	}
+
+	/**
+	 * Fetch a single tag term by id or slug.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int    $id   Term id, or 0 to look up by slug.
+	 * @param string $slug Term slug, used when $id is 0.
+	 *
+	 * @return WP_Term|null
+	 */
+	public function get_tag( int $id, string $slug ) {
+
+		$taxonomy = TagsHelpers::get_tags_taxonomy_id();
 		$term     = $id > 0
 			? get_term( $id, $taxonomy )
 			: get_term_by( 'slug', $slug, $taxonomy );

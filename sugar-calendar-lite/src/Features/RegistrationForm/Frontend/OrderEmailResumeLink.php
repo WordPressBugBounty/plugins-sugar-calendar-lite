@@ -34,26 +34,34 @@ class OrderEmailResumeLink {
 	/**
 	 * Install the injection for one order, if it has unanswered questions.
 	 *
-	 * The caller MUST call this immediately before Emails::send(): the filter
-	 * removes itself on its first fire, so installing it without a guaranteed send
-	 * would leak the block into whatever email came next.
+	 * Direct callers register immediately. ContentEnrichment may instead retain
+	 * the prepared callback until the intended Emails render frame begins.
 	 *
 	 * @since 3.13.0
+	 * @since 3.14.0 Added URL override, callback return, and deferred registration.
 	 *
-	 * @param int $order_id Order id.
+	 * @param int    $order_id           Order id.
+	 * @param string $url_override       Optional emitted URL.
+	 * @param bool   $defer_registration Whether to defer filter registration.
+	 *
+	 * @return callable|null Exact callback installed or prepared, or null when ineligible.
 	 */
-	public static function install( $order_id ) { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks -- A one-shot filter installed per send; a hooks() method would register it globally, which is the bug this shape avoids.
+	public static function install( $order_id, $url_override = '', $defer_registration = false ) { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks -- A render-scoped filter; a hooks() method would register it globally, which is the bug this shape avoids.
 
 		$link = self::link_for_order( (int) $order_id );
 
 		if ( $link === '' ) {
-			return;
+			return null;
 		}
 
-		$callback = null;
-		$callback = function ( $message ) use ( $link, &$callback ) {
+		$link = $url_override !== '' ? $url_override : $link;
 
-			remove_filter( 'sc_email_message', $callback, 20 );
+		$callback = null;
+		$callback = function ( $message ) use ( $link, $defer_registration, &$callback ) {
+
+			if ( ! $defer_registration ) {
+				remove_filter( 'sc_email_message', $callback, 20 );
+			}
 
 			if ( strpos( $message, self::HTML_MARKER ) !== false ) {
 				return str_replace( self::HTML_MARKER, self::html( $link ) . self::HTML_MARKER, $message );
@@ -62,7 +70,11 @@ class OrderEmailResumeLink {
 			return $message . self::text( $link );
 		};
 
-		add_filter( 'sc_email_message', $callback, 20 );
+		if ( ! $defer_registration ) {
+			add_filter( 'sc_email_message', $callback, 20 );
+		}
+
+		return $callback;
 	}
 
 	/**

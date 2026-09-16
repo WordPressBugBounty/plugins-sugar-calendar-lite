@@ -7,6 +7,14 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\DetailsCard;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\DetailsCardData;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\EditorPreview;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\MessageCard;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\ReceiptCard;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\ReceiptCardData;
+use Sugar_Calendar\Emails\PreviewReceipt;
+use Sugar_Calendar\Event;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
 
@@ -25,6 +33,33 @@ use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
  * @return string
  */
 function receipt_shortcode() {
+
+	// A page builder's editor has no order in the URL, so it gets a sample card.
+	if ( EditorPreview::is_active() ) {
+		return EditorPreview::receipt();
+	}
+
+	// The bearer token authorizes this public route, so a WordPress nonce is not available.
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET[ PreviewReceipt::QUERY_ARG ] ) ) {
+		if ( ! is_string( $_GET[ PreviewReceipt::QUERY_ARG ] ) ) {
+			return invalid_receipt_link_response();
+		}
+
+		$token      = sanitize_text_field( wp_unslash( $_GET[ PreviewReceipt::QUERY_ARG ] ) );
+		$block_mail = static function () {
+			return false;
+		};
+
+		add_filter( 'pre_wp_mail', $block_mail, PHP_INT_MAX );
+
+		try {
+			return PreviewReceipt::render( $token );
+		} finally {
+			remove_filter( 'pre_wp_mail', $block_mail, PHP_INT_MAX );
+		}
+	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	// Tier 1 — canonical uuid URL.
 	if ( ! empty( $_GET['order'] ) ) {
@@ -99,6 +134,15 @@ function render_full_receipt_by_uuid( $uuid, $sce = '' ) {
 				$order
 			);
 
+			if ( ! $event instanceof Event ) {
+				return event_missing_response(
+					esc_html__(
+						'The event for this order has been removed.',
+						'sugar-calendar-lite'
+					)
+				);
+			}
+
 			return render_receipt_body( $order, $event );
 		}
 	}
@@ -123,9 +167,87 @@ function render_full_receipt_by_uuid( $uuid, $sce = '' ) {
  * @return string
  */
 function invalid_receipt_link_response() {
-	return '<div class="sc-et-error alert alert-danger" role="alert">'
-		. esc_html__( 'Invalid receipt link.', 'sugar-calendar-lite' )
-		. '</div>';
+
+	if ( Settings\use_legacy_template() ) {
+		return '<div class="sc-et-error alert alert-danger" role="alert">'
+			. esc_html__( 'Invalid receipt link.', 'sugar-calendar-lite' )
+			. '</div>';
+	}
+
+	return invalid_link_card();
+}
+
+/**
+ * The shared "this link resolves to nothing" card.
+ *
+ * Every dead link on both ticket pages lands here, whatever the gate that
+ * rejected it. Keeping one body for all of them is the same reason
+ * invalid_receipt_link_response() exists: a response that varies by failure
+ * mode is an enumeration oracle.
+ *
+ * @since 3.14.0
+ *
+ * @return string
+ */
+function invalid_link_card() {
+
+	return MessageCard::render(
+		'error',
+		esc_html__( 'This link is not valid', 'sugar-calendar-lite' ),
+		[
+			esc_html__(
+				'Check the address in your confirmation email, or open the most recent receipt link we sent you.',
+				'sugar-calendar-lite'
+			),
+		]
+	);
+}
+
+/**
+ * A [sc_event_tickets_details] failure, in whichever template is active.
+ *
+ * The legacy branch keeps each gate's own wording; the card branch collapses
+ * them, because which parameter was wrong is meaningful to a developer and
+ * not to the customer holding the link.
+ *
+ * @since 3.14.0
+ *
+ * @param string $message Escaped legacy-only message for this gate.
+ *
+ * @return string
+ */
+function details_error_response( $message ) {
+
+	if ( Settings\use_legacy_template() ) {
+		return '<div class="sc-et-error alert alert-danger" role="alert">' . $message . '</div>';
+	}
+
+	return invalid_link_card();
+}
+
+/**
+ * Response for a ticket or order whose event no longer exists.
+ *
+ * Both pages resolve the event before rendering; a deleted event used to reach
+ * the card and fatal on the first `$event->` call.
+ *
+ * @since 3.14.0
+ *
+ * @param string $body Explanatory line for the card. Legacy shows the title only.
+ *
+ * @return string
+ */
+function event_missing_response( $body ) {
+
+	$title = esc_html__( 'Event not found', 'sugar-calendar-lite' );
+
+	if ( Settings\use_legacy_template() ) {
+		return '<div class="sc-et-error alert alert-danger" role="alert">'
+			. esc_html__( 'Event not found.', 'sugar-calendar-lite' )
+			. '</div>';
+	}
+
+	return MessageCard::render( 'error', $title, [ $body ] );
 }
 
 /**
@@ -216,25 +338,37 @@ function mask_email_address( $email ) {
  */
 function render_link_sent_page( $order ) {
 
-	ob_start();
-	?>
-	<div id="sc-event-ticketing-receipt-resend">
-		<div class="alert alert-success" role="alert">
-			<?php esc_html_e( 'If the order exists, a fresh receipt link has been sent.', 'sugar-calendar-lite' ); ?>
+	if ( Settings\use_legacy_template() ) {
+		ob_start();
+		?>
+		<div id="sc-event-ticketing-receipt-resend">
+			<div class="alert alert-success" role="alert">
+				<?php esc_html_e( 'If the order exists, a fresh receipt link has been sent.', 'sugar-calendar-lite' ); ?>
+			</div>
+			<p><?php esc_html_e( 'Receipt access has been updated.', 'sugar-calendar-lite' ); ?></p>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: masked email address. */
+					esc_html__( 'Please check %s for the latest receipt link.', 'sugar-calendar-lite' ),
+					'<strong>' . esc_html( mask_email_address( $order->email ) ) . '</strong>'
+				);
+				?>
+			</p>
 		</div>
-		<p><?php esc_html_e( 'Receipt access has been updated.', 'sugar-calendar-lite' ); ?></p>
-		<p>
-			<?php
-			printf(
-				/* translators: %s: masked email address. */
-				esc_html__( 'Please check %s for the latest receipt link.', 'sugar-calendar-lite' ),
-				'<strong>' . esc_html( mask_email_address( $order->email ) ) . '</strong>'
-			);
-			?>
-		</p>
-	</div>
-	<?php
-	$html = ob_get_clean();
+		<?php
+		$html = ob_get_clean();
+	} else {
+		$html = MessageCard::render(
+			'notice',
+			esc_html__( 'Receipt access has been updated', 'sugar-calendar-lite' ),
+			[
+				esc_html__( 'If the order exists, a fresh receipt link has been sent.', 'sugar-calendar-lite' ),
+				esc_html__( 'Please check your email for the latest receipt link.', 'sugar-calendar-lite' )
+			],
+			[ 'pill' => esc_html( mask_email_address( $order->email ) ) ]
+		);
+	}
 
 	/**
 	 * Filter the rendered "fresh receipt link sent" confirmation panel.
@@ -257,31 +391,226 @@ function render_link_sent_page( $order ) {
 }
 
 /**
- * Render the receipt markup for a resolved order + event.
+ * Render the receipt for a resolved order + event.
  *
  * Shared by Tier 1 (uuid lookup) and (during commit 2) the legacy
  * (order_id, email) path. After commit 3 only Tier 1 calls this.
  *
  * @since 3.11.1
+ * @since 3.14.0 Renders the card unless the legacy template is opted into.
+ * @since 3.14.0 Added the read-only rendering option.
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order     The order object.
+ * @param \Sugar_Calendar\Event                          $event     The event object.
+ * @param bool                                           $read_only Whether to omit receipt actions and extension hooks.
+ * @return string
+ */
+function render_receipt_body( $order, $event, $read_only = false ) {
+
+	if ( ! $read_only && ! empty( $_GET['sc-notice'] ) && ( 'email-sent' === $_GET['sc-notice'] ) ) {
+		echo '<div class="alert alert-success" role="alert">' . esc_html__( 'Ticket emailed successfully.', 'sugar-calendar-lite' ) . '</div>';
+	}
+
+	if ( is_legacy_receipt( $order, $event ) ) {
+		return render_legacy_receipt_body( $order, $event, $read_only );
+	}
+
+	$email_sent = $read_only ? '' : maybe_render_email_sent_page( $order );
+
+	if ( $email_sent !== '' ) {
+		return $email_sent;
+	}
+
+	return render_receipt_card( ReceiptCardData::from_order( $order, $event, $read_only ), $order, $event );
+}
+
+/**
+ * Whether the legacy table receipt renders instead of the card.
+ *
+ * @since 3.14.0
  *
  * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order object.
  * @param \Sugar_Calendar\Event                          $event The event object.
+ * @return bool
+ */
+function is_legacy_receipt( $order, $event ) {
+
+	/**
+	 * Filters whether the legacy table receipt renders instead of the card.
+	 *
+	 * Body only. The standalone-document decision runs before the order is
+	 * resolved, so it cannot consult this filter: a site returning true here
+	 * gets the legacy table inside the chrome-less card document. Pair it with
+	 * `sugar_calendar_ticketing_standalone_page` or the Use Legacy Template
+	 * setting to switch both.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param bool   $legacy Whether to use the legacy template. Defaults to the setting.
+	 * @param object $order  The order being shown.
+	 * @param object $event  The order's event.
+	 */
+	return (bool) apply_filters(
+		'sugar_calendar_ticketing_use_legacy_receipt',
+		Settings\use_legacy_template(),
+		$order,
+		$event
+	);
+}
+
+/**
+ * Render the receipt card from prepared data, with the after-hooks.
+ *
+ * Shared by the live receipt and the editor preview, which supplies sample data.
+ *
+ * @since 3.14.0
+ *
+ * @param ReceiptCardData                                $data  Prepared card data.
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order object, for the hooks.
+ * @param \Sugar_Calendar\Event                          $event The event object, for the hooks.
  * @return string
  */
-function render_receipt_body( $order, $event ) {
+function render_receipt_card( ReceiptCardData $data, $order, $event ) {
+
+	ob_start();
+
+	// Escaped by the card.
+	echo ReceiptCard::render( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+	if ( $data->read_only ) {
+		return ob_get_clean();
+	}
+
+	/** This action is documented in render_legacy_receipt_body(). */
+	do_action( 'sugar_calendar_ticketing_receipt_after', $order, $event );
+
+	/** This filter is documented in render_legacy_receipt_body(). */
+	return apply_filters( 'sc_event_tickets_ticket_shortcode_output', ob_get_clean() );
+}
+
+/**
+ * Return the "Email Sent" confirmation page, or '' when this isn't that request.
+ *
+ * email_ticket() redirects back here with the admin notice params plus the
+ * `ticket_code` it just sent. A failed send (`sc-notice-type=error`) falls
+ * through to the receipt, as it always has.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order being shown.
+ * @return string Rendered HTML, or '' to fall through to the receipt.
+ */
+function maybe_render_email_sent_page( $order ) {
+
+	$notice = isset( $_GET['sc-notice-id'] ) ? sanitize_key( wp_unslash( $_GET['sc-notice-id'] ) ) : '';
+	$type   = isset( $_GET['sc-notice-type'] ) ? sanitize_key( wp_unslash( $_GET['sc-notice-type'] ) ) : '';
+
+	if ( ( $notice !== 'email-send' ) || ( $type !== 'updated' ) || empty( $_GET['ticket_code'] ) ) {
+		return '';
+	}
+
+	$ticket = Functions\get_ticket_by_code(
+		sanitize_text_field( wp_unslash( $_GET['ticket_code'] ) )
+	);
+
+	// A code belonging to another order must not reveal that order's attendee.
+	if ( empty( $ticket ) || ( (int) $ticket->order_id !== (int) $order->id ) ) {
+		return '';
+	}
+
+	$attendee = Functions\get_attendee( $ticket->attendee_id );
+
+	if ( empty( $attendee->email ) ) {
+		return '';
+	}
+
+	return render_email_sent_page( $order, $attendee->email );
+}
+
+/**
+ * The "Email Sent" card plus the link back to the receipt.
+ *
+ * The address is shown in full rather than masked: the visitor already cleared
+ * the receipt's `sce` gate, and the receipt itself lists the same addresses.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order The order being shown.
+ * @param string                                         $email Attendee address the ticket went to.
+ * @return string
+ */
+function render_email_sent_page( $order, $email ) {
+
+	$html = MessageCard::render(
+		'success',
+		esc_html__( 'Email Sent', 'sugar-calendar-lite' ),
+		[
+			sprintf(
+				/* translators: %s: attendee email address the ticket was sent to. */
+				esc_html__( 'We have sent the ticket details to %s.', 'sugar-calendar-lite' ),
+				'<strong>' . esc_html( $email ) . '</strong>'
+			),
+		],
+		[ 'footer' => __NAMESPACE__ . '\\render_receipt_back_link' ]
+	);
+
+	/**
+	 * Filter the rendered "Email Sent" confirmation page.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $html  Rendered HTML for the confirmation page.
+	 * @param object $order Order the emailed ticket belongs to.
+	 * @param string $email Attendee address the ticket went to.
+	 */
+	return apply_filters( 'sc_et_receipt_email_sent_page', $html, $order, $email );
+}
+
+/**
+ * Echo the "Back to ticket receipt" link. A TicketCard::shell() footer callback.
+ *
+ * Dropping the notice args leaves the uuid + sce untouched, so the link lands
+ * back on the same receipt.
+ *
+ * @since 3.14.0
+ */
+function render_receipt_back_link() {
+
+	$back = remove_query_arg( [ 'sc-notice-id', 'sc-notice-type', 'ticket_code' ] );
+
+	// tracking-normal for the same reason the card sets it: the theme's body letter-spacing.
+	?>
+	<div class="scf:pt-6 scf:tracking-normal sc-reset">
+		<a class="scf:text-[var(--sc-color-neutral-20,#a7aaad)] scf:text-sm scf:font-semibold scf:leading-[19.6px] scf:underline scf:underline-offset-2 sc-reset"
+		   href="<?php echo esc_url( $back ); ?>">
+			<?php esc_html_e( 'Back to ticket receipt', 'sugar-calendar-lite' ); ?>
+		</a>
+	</div>
+	<?php
+}
+
+/**
+ * Render the legacy table receipt for a resolved order + event.
+ *
+ * Kept for the `use_legacy_template` setting. Unlike the card it also shows
+ * Location and Status, both of which the new design drops.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order $order     The order object.
+ * @param \Sugar_Calendar\Event                          $event     The event object.
+ * @param bool                                           $read_only Whether to omit receipt actions and extension hooks.
+ * @return string
+ */
+function render_legacy_receipt_body( $order, $event, $read_only = false ) {
 
 	$start_date = $event->format_date( sc_get_date_format(), $event->start );
-	$start_time = $event->format_date( sc_get_time_format(), $event->start );
-
-	if ( ! empty( $_GET['sc-notice'] ) && ( 'email-sent' === $_GET['sc-notice'] ) ) {
-		echo '<div class="alert alert-success" role="alert">' . esc_html__( 'Ticket emailed successfully.', 'sugar-calendar-lite' ) . '</div>';
-	}
+	$start_time = Functions\get_event_start_time( $event );
 
 	$page = Settings\get_setting( 'ticket_page' );
 	$link = get_permalink( $page );
 	$home = home_url();
 
-	// TODO: Replace table markup
 	ob_start(); ?>
 
 	<div id="sc-event-ticketing-ticket-details">
@@ -341,7 +670,7 @@ function render_receipt_body( $order, $event ) {
 			</tr>
 			<tr>
 				<td><?php echo esc_html( $event->title ); ?></td>
-				<td><?php printf( esc_html__( '%s at %s', 'sugar-calendar-lite' ), $start_date, $start_time ); ?></td>
+				<td><?php echo esc_html( Functions\format_event_when( $start_date, $start_time ) ); ?></td>
 				<td>
 					<?php
 					/** This filter is documented in includes/common/shortcodes.php */
@@ -363,9 +692,25 @@ function render_receipt_body( $order, $event ) {
 			<tr>
 				<td colspan="3">
 					<ul>
-						<?php foreach ( Functions\get_order_tickets( $order->id ) as $ticket ) : ?>
+						<?php
+						/** This filter is documented in ReceiptCardData::tickets(). */
+						$tickets = (array) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+							'sugar_calendar_ticketing_receipt_card_tickets',
+							Functions\get_order_tickets( $order->id ),
+							$order
+						);
+
+						foreach ( $tickets as $ticket ) :
+							?>
 							<li>
-								<?php $attendee = Functions\get_attendee( $ticket->attendee_id ); ?>
+								<?php
+								/** This filter is documented in DetailsCardData::from_ticket(). */
+								$attendee = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+									'sugar_calendar_ticketing_details_card_attendee',
+									empty( $ticket->attendee_id ) ? false : Functions\get_attendee( $ticket->attendee_id ),
+									$ticket
+								);
+								?>
 								<div class="sc-event-ticketing-ticket-id"><?php printf( esc_html__( 'Ticket ID: %d', 'sugar-calendar-lite' ), $ticket->id ); ?></div>
 								<div class="sc-event-ticketing-ticket-code"><?php printf( esc_html__( 'Ticket Code: %s', 'sugar-calendar-lite' ), $ticket->code ); ?></div>
 
@@ -381,13 +726,17 @@ function render_receipt_body( $order, $event ) {
 										printf( esc_html__( 'For: %s', 'sugar-calendar-lite' ), esc_html( $for_value ) );
 										?>
 									</div>
-									<a href="<?php echo wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'email_ticket', 'ticket_code' => $ticket->code ), $home ), $ticket->code ); ?>"><?php esc_html_e( 'Send via Email', 'sugar-calendar-lite' ); ?></a>
-									&nbsp;|&nbsp;
+									<?php if ( ! $read_only ) : ?>
+										<a href="<?php echo wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'email_ticket', 'ticket_code' => $ticket->code ), $home ), $ticket->code ); ?>"><?php esc_html_e( 'Send via Email', 'sugar-calendar-lite' ); ?></a>
+										&nbsp;|&nbsp;
+									<?php endif; ?>
 
 								<?php endif; ?>
 
-								<a href="<?php echo wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'print', 'ticket_code' => $ticket->code ), $home ), $ticket->code ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar-lite' ); ?></a>
-								&nbsp;|&nbsp;<a href="<?php echo esc_url( add_query_arg( array( 'order_id' => $order->id, 'ticket_code' => $ticket->code ), $link ) ); ?>"><?php esc_html_e( 'View', 'sugar-calendar-lite' ); ?></a>
+								<?php if ( ! $read_only ) : ?>
+									<a href="<?php echo esc_url( Functions\get_ticket_print_url( $ticket ) ); ?>" target="_blank"><?php esc_html_e( 'Print', 'sugar-calendar-lite' ); ?></a>
+									&nbsp;|&nbsp;<a href="<?php echo esc_url( add_query_arg( array( 'order_id' => $order->id, 'ticket_code' => $ticket->code ), $link ) ); ?>"><?php esc_html_e( 'View', 'sugar-calendar-lite' ); ?></a>
+								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -397,6 +746,9 @@ function render_receipt_body( $order, $event ) {
 	</div>
 
 	<?php
+	if ( $read_only ) {
+		return ob_get_clean();
+	}
 
 	/**
 	 * Fires after the receipt body has been rendered.
@@ -420,12 +772,17 @@ function render_receipt_body( $order, $event ) {
  */
 function ticket_shortcode() {
 
+	/** This branch is documented in receipt_shortcode(). */
+	if ( EditorPreview::is_active() ) {
+		return EditorPreview::details();
+	}
+
 	if ( empty( $_GET['order_id'] ) ) {
-		return '<div class="sc-et-error alert alert-danger" role="alert">' . esc_html__( 'No order ID was specified.', 'sugar-calendar-lite' ) . '</div>';
+		return details_error_response( esc_html__( 'No order ID was specified.', 'sugar-calendar-lite' ) );
 	}
 
 	if ( empty( $_GET['ticket_code'] ) ) {
-		return '<div class="sc-et-error alert alert-danger" role="alert">' . esc_html__( 'No ticket code was specified.', 'sugar-calendar-lite' ) . '</div>';
+		return details_error_response( esc_html__( 'No ticket code was specified.', 'sugar-calendar-lite' ) );
 	}
 
 	$order_id    = absint( $_GET['order_id'] );
@@ -439,7 +796,7 @@ function ticket_shortcode() {
 		|| empty( $ticket )
 		|| (int) $ticket->order_id !== $order_id
 	) {
-		$error_html = '<div class="sc-et-error alert alert-danger" role="alert">' . esc_html__( 'Invalid ticket or order.', 'sugar-calendar-lite' ) . '</div>';
+		$error_html = details_error_response( esc_html__( 'Invalid ticket or order.', 'sugar-calendar-lite' ) );
 
 		/**
 		 * Filters the "invalid ticket or order" error markup returned by the
@@ -476,19 +833,118 @@ function ticket_shortcode() {
 		$ticket
 	);
 
+	if ( ! $event instanceof Event ) {
+		return event_missing_response(
+			esc_html__(
+				'The event for this order has been removed.',
+				'sugar-calendar-lite'
+			)
+		);
+	}
+
+	return render_ticket_body( $order, $ticket, $event );
+}
+
+/**
+ * Render the ticket details for a resolved order + ticket + event.
+ *
+ * The receipt's twin, `render_receipt_body()`.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order  $order  The order object.
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Ticket $ticket The ticket object.
+ * @param \Sugar_Calendar\Event                          $event  The event object.
+ * @return string
+ */
+function render_ticket_body( $order, $ticket, $event ) {
+
+	if ( is_legacy_details( $ticket, $event ) ) {
+		return render_legacy_ticket_body( $order, $ticket, $event );
+	}
+
+	return render_ticket_card( DetailsCardData::from_ticket( $order, $ticket, $event ) );
+}
+
+/**
+ * Whether the legacy table ticket view renders instead of the card.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Ticket $ticket The ticket object.
+ * @param \Sugar_Calendar\Event                           $event  The event object.
+ * @return bool
+ */
+function is_legacy_details( $ticket, $event ) {
+
+	/**
+	 * Filters whether the legacy table ticket view renders instead of the card.
+	 *
+	 * Body only, with the same caveat as
+	 * `sugar_calendar_ticketing_use_legacy_receipt`: see is_legacy_receipt().
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param bool   $legacy Whether to use the legacy template. Defaults to the setting.
+	 * @param object $ticket The ticket being shown.
+	 * @param object $event  The ticket's event.
+	 */
+	return (bool) apply_filters(
+		'sugar_calendar_ticketing_use_legacy_details',
+		Settings\use_legacy_template(),
+		$ticket,
+		$event
+	);
+}
+
+/**
+ * Render the details card from prepared data, with the output filter.
+ *
+ * Shared by the live ticket page and the editor preview, which supplies sample data.
+ *
+ * @since 3.14.0
+ *
+ * @param DetailsCardData $data Prepared card data.
+ * @return string
+ */
+function render_ticket_card( DetailsCardData $data ) {
+
+	return apply_filters(
+		'sc_event_tickets_ticket_shortcode_output',
+		DetailsCard::render( $data )
+	);
+}
+
+/**
+ * Render the legacy table ticket details for a resolved order + ticket + event.
+ *
+ * Kept for the `use_legacy_template` setting. Unlike the card it also shows
+ * Location, which the new design drops.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Order  $order  The order object.
+ * @param \Sugar_Calendar\AddOn\Ticketing\Database\Ticket $ticket The ticket object.
+ * @param \Sugar_Calendar\Event                          $event  The event object.
+ * @return string
+ */
+function render_legacy_ticket_body( $order, $ticket, $event ) {
+
 	$start_date = $event->format_date( sc_get_date_format(), $event->start );
-	$start_time = $event->format_date( sc_get_time_format(), $event->start );
+	$start_time = Functions\get_event_start_time( $event );
 
-	$attendee = ! empty( $ticket->attendee_id )
-		? Functions\get_attendee( $ticket->attendee_id )
-		: false;
+	/** This filter is documented in DetailsCardData::from_ticket(). */
+	$attendee = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+		'sugar_calendar_ticketing_details_card_attendee',
+		empty( $ticket->attendee_id ) ? false : Functions\get_attendee( $ticket->attendee_id ),
+		$ticket
+	);
 
-	// TODO: Replace table markup
 	ob_start(); ?>
 
 	<div id="sc-event-ticketing-ticket-details">
 		<h3><?php echo $event->title; ?></h3>
-		<h4><?php printf( esc_html__( '%s at %s', 'sugar-calendar-lite' ), $start_date, $start_time ); ?></h4>
+		<h4><?php echo esc_html( Functions\format_event_when( $start_date, $start_time ) ); ?></h4>
 		<table>
 			<tr>
 				<th><?php esc_html_e( 'Ticket #',  'sugar-calendar-lite' ); ?></th>

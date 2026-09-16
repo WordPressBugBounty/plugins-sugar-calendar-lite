@@ -33,6 +33,7 @@ use Sugar_Calendar\Admin\Pages\SMTP;
 use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
+use Sugar_Calendar\Emails\Preview;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Integrations\Abilities\Abilities;
@@ -198,6 +199,8 @@ class Area {
 	 * @return void
 	 */
 	public function hooks() {
+
+		Preview::hooks();
 
 		add_action( 'init', [ $this, 'early_init' ] );
 
@@ -1132,18 +1135,35 @@ class Area {
 	 */
 	private function handle_legacy_settings_post() {
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		$settings = array_filter(
 			get_registered_settings(),
 			fn( $key ) => ( strpos( $key, 'sc_' ) === 0 ),
 			ARRAY_FILTER_USE_KEY
 		);
 
-		foreach ( $settings as $setting => $args ) {
-			$value = $args['default'] ?? false;
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			$value = $_POST[ $setting ] ?? $value;
+		foreach ( array_keys( $settings ) as $setting ) {
 
-			update_option( $setting, $value );
+			// Write only what this form actually submitted. Falling back to the
+			// registered default reset every setting absent from the current
+			// form: saving the Emails tab wiped sc_zapier_public_key and
+			// sc_zapier_token, which the Zapier tab then silently regenerated,
+			// breaking every Zap the site had already built.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( ! isset( $_POST[ $setting ] ) ) {
+				continue;
+			}
+
+			// Sanitizing is each setting's own responsibility, declared through
+			// register_setting()'s `sanitize_callback` and applied by
+			// update_option() via the sanitize_option_{$option} filter. A
+			// blanket sanitize_text_field() here would flatten the array-typed
+			// settings, e.g. sc_cf_feeds.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			update_option( $setting, wp_unslash( $_POST[ $setting ] ) );
 		}
 	}
 
@@ -1282,6 +1302,21 @@ class Area {
 			'3.3.4'
 		);
 
+		wp_register_style(
+			'sugar-calendar-vendor-minicolors',
+			SC_PLUGIN_ASSETS_URL . 'lib/jquery-minicolors/jquery.minicolors.min.css',
+			[],
+			'2.3.6'
+		);
+
+		wp_register_script(
+			'sugar-calendar-vendor-minicolors',
+			SC_PLUGIN_ASSETS_URL . 'lib/jquery-minicolors/jquery.minicolors.min.js',
+			[ 'jquery' ],
+			'2.3.6',
+			false
+		);
+
 		wp_register_script(
 			'sugar-calendar-vendor-choices',
 			SC_PLUGIN_ASSETS_URL . 'lib/choices.min.js',
@@ -1340,6 +1375,24 @@ class Area {
 			BaseHelpers::get_asset_version()
 		);
 
+		// Shared reveal-a-bad-field helper. Registered separately so any metabox
+		// feature can depend on it without pulling in the whole metabox script.
+		wp_register_script(
+			'sugar-calendar-admin-field-error',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-field-error' . WP::asset_min() . '.js',
+			[ 'jquery', 'wp-i18n' ],
+			BaseHelpers::get_asset_version(),
+			true
+		);
+
+		// The guard messages are the only strings this script carries, and without
+		// this they stay English whatever the site language.
+		wp_set_script_translations(
+			'sugar-calendar-admin-field-error',
+			'sugar-calendar-lite',
+			SC_PLUGIN_DIR . 'assets/languages'
+		);
+
 		wp_register_script(
 			'sugar-calendar-admin-event-meta-box',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-event-metabox' . WP::asset_min() . '.js',
@@ -1350,6 +1403,7 @@ class Area {
 				'wp-date',
 				'wp-i18n',
 				'jquery-ui-autocomplete',
+				'sugar-calendar-admin-field-error',
 			],
 			BaseHelpers::get_asset_version(),
 			true
@@ -1374,6 +1428,16 @@ class Area {
 			'sugar-calendar-admin-settings',
 			SC_PLUGIN_ASSETS_URL . 'js/admin-settings' . WP::asset_min() . '.js',
 			[ 'jquery', 'sugar-calendar-vendor-choices' ],
+			BaseHelpers::get_asset_version(),
+			true
+		);
+
+		// Registered only. Enqueued by whichever page renders a color-scheme
+		// control, so tabs without one don't load MiniColors.
+		wp_register_script(
+			'sugar-calendar-admin-color-scheme',
+			SC_PLUGIN_ASSETS_URL . 'js/admin-color-scheme' . WP::asset_min() . '.js',
+			[ 'jquery', 'sugar-calendar-vendor-minicolors' ],
 			BaseHelpers::get_asset_version(),
 			true
 		);

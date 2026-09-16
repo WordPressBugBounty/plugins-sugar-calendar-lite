@@ -56,6 +56,10 @@
       "type": "boolean",
       "default": true
     },
+    "featuredOnly": {
+      "type": "boolean",
+      "default": false
+    },
     "showSearch": {
       "type": "boolean",
       "default": true

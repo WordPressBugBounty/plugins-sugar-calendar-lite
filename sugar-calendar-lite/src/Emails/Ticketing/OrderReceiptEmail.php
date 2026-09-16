@@ -1,0 +1,141 @@
+<?php
+
+namespace Sugar_Calendar\Emails\Ticketing;
+
+use Sugar_Calendar\Admin\Pages\Settings\Emails\SmartTagDropdown;
+use Sugar_Calendar\Emails\TicketingSmartTags;
+use Sugar_Calendar\Emails\AbstractEmail;
+use Sugar_Calendar\Emails\EmailRegistry;
+use Sugar_Calendar\Emails\Styling;
+
+use function Sugar_Calendar\AddOn\Ticketing\Settings\get_receipt_message_resolution;
+use function Sugar_Calendar\AddOn\Ticketing\Settings\get_receipt_subject;
+use function Sugar_Calendar\AddOn\Ticketing\Settings\resolve_email_copy_for_template;
+
+/**
+ * The order receipt sent to the purchaser.
+ *
+ * @since 3.14.0
+ */
+class OrderReceiptEmail extends AbstractEmail {
+
+	/**
+	 * Email id.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var string
+	 */
+	const ID = 'sc_et_receipt_email';
+
+	/**
+	 * Registry id, also the `email_cfg` route and the `EmailStatus` key.
+	 *
+	 * @since 3.14.0
+	 */
+	public function id(): string {
+
+		return self::ID;
+	}
+
+	/**
+	 * Row title, unescaped.
+	 *
+	 * @since 3.14.0
+	 */
+	public function title(): string {
+
+		return __( 'Order Receipt Email To Purchaser', 'sugar-calendar-lite' );
+	}
+
+	/**
+	 * Row description, unescaped.
+	 *
+	 * @since 3.14.0
+	 */
+	public function description(): string {
+
+		return __( 'Order confirmation and details email sent to purchaser', 'sugar-calendar-lite' );
+	}
+
+	/**
+	 * Card group: `EmailRegistry::GROUP_ATTENDEES` or `EmailRegistry::GROUP_ADMIN`.
+	 *
+	 * @since 3.14.0
+	 */
+	public function group(): string {
+
+		return EmailRegistry::GROUP_ATTENDEES;
+	}
+
+	/**
+	 * Whether the sender reads `EmailStatus` on its automatic path.
+	 *
+	 * @since 3.14.0
+	 */
+	public function is_status_managed(): bool {
+
+		return true;
+	}
+
+	/**
+	 * Whether a `sugar_calendar_emails_preview_document` provider renders this email.
+	 *
+	 * @since 3.14.0
+	 */
+	public function is_previewable(): bool {
+
+		return true;
+	}
+
+	/**
+	 * POST names and preview state keys: `[ 'subject' => key, 'message' => key ]`, or `[]`.
+	 *
+	 * @since 3.14.0
+	 */
+	public function option_slugs(): array {
+
+		return [
+			'subject' => 'receipt_subject',
+			'message' => 'receipt_message',
+		];
+	}
+
+	/**
+	 * `LAYOUT_SINGLE`, `LAYOUT_MULTI`, or null when no Modern document exists.
+	 *
+	 * @since 3.14.0
+	 */
+	public function layout(): ?string { // phpcs:ignore PHPCompatibility.FunctionDeclarations.NewNullableTypes.returnTypeFound -- Sugar Calendar requires PHP 7.4+.
+
+		return self::LAYOUT_MULTI;
+	}
+
+	/**
+	 * Smart tags in the editor dropdown's shape: `[ group => [ [ 'value', 'label' ], … ] ]`.
+	 *
+	 * @since 3.14.0
+	 */
+	public function smart_tags(): array {
+
+		return SmartTagDropdown::format( TicketingSmartTags::definitions_for( self::ID ), [ 'order', 'event' ] );
+	}
+
+	/**
+	 * Edit-screen field spec, or null when no edit screen exists.
+	 *
+	 * @since 3.14.0
+	 */
+	public function editor(): ?array { // phpcs:ignore PHPCompatibility.FunctionDeclarations.NewNullableTypes.returnTypeFound -- Sugar Calendar requires PHP 7.4+.
+
+		return [
+			'subject_id'          => 'sc_et_receipt_email_subject',
+			'subject_value'       => get_receipt_subject(),
+			'subject_placeholder' => esc_html__( 'Ticket Purchase Receipt', 'sugar-calendar-lite' ),
+			'subject_description' => esc_html__( 'The subject line of emailed order receipts.', 'sugar-calendar-lite' ),
+			'message_editor_id'   => 'sc_et_settings_receipt_message',
+			'message_value'       => resolve_email_copy_for_template( get_receipt_message_resolution(), Styling::get()['template'] ),
+			'message_label'       => esc_html__( 'Order Receipt Message', 'sugar-calendar-lite' ),
+		];
+	}
+}

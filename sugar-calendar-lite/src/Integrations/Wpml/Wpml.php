@@ -19,6 +19,15 @@ class Wpml {
 	public $setup;
 
 	/**
+	 * Config instance.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var WpmlConfig
+	 */
+	public $config;
+
+	/**
 	 * Admin instance.
 	 *
 	 * @since 3.12.0
@@ -77,6 +86,9 @@ class Wpml {
 		// WPML setup adjustments.
 		$this->setup = new WpmlSetup();
 
+		// Translatable post types / taxonomies declaration.
+		$this->config = new WpmlConfig();
+
 		// Admin UI / List Table.
 		$this->admin = new WpmlAdmin();
 
@@ -104,6 +116,7 @@ class Wpml {
 	private function hooks() {
 
 		$this->setup->hooks();
+		$this->config->hooks();
 		$this->admin->hooks();
 		$this->frontend->hooks();
 		$this->save->hooks();

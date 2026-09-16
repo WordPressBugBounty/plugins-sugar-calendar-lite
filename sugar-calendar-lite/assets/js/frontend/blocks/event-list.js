@@ -38,6 +38,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 	 * @since 3.4.0 Add paged data support.
 	 * @since 3.5.0 Add `venues` and `venuesFilter` to block data.
 	 * @since 3.7.0 Add `tags` and `tagsFilter` to block data.
+	 * @since 3.14.0 Add `featuredOnly` to block data.
 	 */
 	Block.prototype.update = function( args ) {
 
@@ -68,6 +69,7 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 			venuesFilter: this.controls.getVenuesFilter(),
 			speakersFilter: this.controls.getSpeakersFilter(),
 			tagsFilter: this.controls.getTagsFilter(),
+			featuredOnly: this.controls.getFeaturedOnly(),
 			day: parseInt( this.controls.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.controls.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.controls.$formContainer.find( 'input[name="sc_year"]' ).val() ),

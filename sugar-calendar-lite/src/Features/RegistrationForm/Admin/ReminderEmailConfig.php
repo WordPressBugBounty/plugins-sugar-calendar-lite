@@ -2,7 +2,7 @@
 
 namespace Sugar_Calendar\Features\RegistrationForm\Admin;
 
-use Sugar_Calendar\Helpers\UI;
+use Sugar_Calendar\Admin\Pages\Settings\Emails\EmailEditPage;
 
 /**
  * The abandonment reminder's Settings -> Emails entry.
@@ -62,8 +62,9 @@ class ReminderEmailConfig {
 		$emails_to_configure = (array) $emails_to_configure;
 
 		$emails_to_configure[ self::EMAIL_ID ] = [
-			'title'       => __( 'Incomplete Registration Reminder', 'sugar-calendar-lite' ),
-			'description' => __( 'Sent once when a registration form is left incomplete after checkout.', 'sugar-calendar-lite' ),
+			'title'          => __( 'Incomplete Registration Reminder', 'sugar-calendar-lite' ),
+			'description'    => __( 'Sent once when a registration form is left incomplete after checkout.', 'sugar-calendar-lite' ),
+			'status_managed' => true,
 		];
 
 		return $emails_to_configure;
@@ -88,83 +89,27 @@ class ReminderEmailConfig {
 	}
 
 	/**
-	 * Render the subject/body editor.
+	 * Display the email settings: status, subject, and message editor.
 	 *
 	 * @since 3.13.0
+	 * @since 3.14.0 Rendered through the shared EmailEditPage.
 	 */
 	public function display_email_config() {
 
-		UI::heading(
+		EmailEditPage::render(
 			[
-				'title' => esc_html__( 'Incomplete Registration Reminder Email', 'sugar-calendar-lite' ),
+				'email_id'            => self::EMAIL_ID,
+				'subject_id'          => self::OPTION_SUBJECT,
+				'subject_name'        => self::OPTION_SUBJECT,
+				'subject_value'       => self::get_subject(),
+				'subject_placeholder' => esc_html__( 'Please complete your registration for {event_title}', 'sugar-calendar-lite' ),
+				'message_editor_id'   => self::OPTION_MESSAGE,
+				'message_name'        => self::OPTION_MESSAGE,
+				'message_value'       => self::get_message(),
+				'message_label'       => esc_html__( 'Email Message', 'sugar-calendar-lite' ),
+				'smart_tags'          => $this->get_smart_tags(),
 			]
 		);
-
-		UI::text_input(
-			[
-				'id'          => 'sc_registration_reminder_email_subject',
-				'name'        => self::OPTION_SUBJECT,
-				// Deliberately not wp_kses_post(): a subject is a mail header, not HTML,
-				// and UI::text_input() already escapes what it renders. The Message
-				// field below is HTML and still goes through wp_kses_post() on save.
-				'value'       => self::get_subject(),
-				'placeholder' => esc_html__( 'Please complete your registration for {event_title}', 'sugar-calendar-lite' ),
-				'label'       => esc_html__( 'Subject', 'sugar-calendar-lite' ),
-			]
-		);
-
-		UI::field_wrapper(
-			[
-				'label' => esc_html__( 'Message', 'sugar-calendar-lite' ),
-				'id'    => self::OPTION_MESSAGE,
-			],
-			$this->display_message_editor()
-		);
-	}
-
-	/**
-	 * Display the message editor.
-	 *
-	 * @since 3.13.0
-	 *
-	 * @return string
-	 */
-	private function display_message_editor() {
-
-		ob_start();
-
-		wp_editor(
-			stripslashes( self::get_message() ),
-			'sc_registration_reminder_email_message',
-			[
-				'textarea_name' => 'sugar-calendar[' . self::OPTION_MESSAGE . ']',
-			]
-		);
-		?>
-		<div class="sc-admin__settings__emails__tags">
-			<p class="description">
-				<?php esc_html_e( 'Dynamic Placeholders', 'sugar-calendar-lite' ); ?>
-			</p>
-			<div class="sc-admin__settings__emails__tags__list">
-				<?php
-				foreach ( $this->get_tags_lists() as $tag => $description ) {
-					?>
-					<div class="sc-admin__settings__emails__tags__list__item">
-						<div class="sc-admin__settings__emails__tags__list__item__tag">
-							<code><?php echo esc_html( $tag ); ?></code>
-						</div>
-						<div class="sc-admin__settings__emails__tags__list__item__desc">
-							<?php echo esc_html( $description ); ?>
-						</div>
-					</div>
-					<?php
-				}
-				?>
-			</div>
-		</div>
-		<?php
-
-		return ob_get_clean();
 	}
 
 	/**
@@ -177,22 +122,51 @@ class ReminderEmailConfig {
 	private function get_tags_lists() {
 
 		return [
-			'{attendee_name}' => __( 'The Attendee Name', 'sugar-calendar-lite' ),
-			'{event_title}'   => __( 'The Event Title', 'sugar-calendar-lite' ),
-			'{event_date}'    => __( 'The Event Date', 'sugar-calendar-lite' ),
-			'{resume_link}'   => __( 'The link to finish the registration form', 'sugar-calendar-lite' ),
-			'{site_name}'     => __( 'The Site Name', 'sugar-calendar-lite' ),
+			'{attendee_name}' => __( 'Attendee Name', 'sugar-calendar-lite' ),
+			'{event_title}'   => __( 'Event Title', 'sugar-calendar-lite' ),
+			'{event_date}'    => __( 'Event Date', 'sugar-calendar-lite' ),
+			'{resume_link}'   => __( 'Complete Registration Link', 'sugar-calendar-lite' ),
+			'{site_name}'     => __( 'Site Name', 'sugar-calendar-lite' ),
 		];
+	}
+
+	/**
+	 * Transform placeholder lists to Smart Tags format.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return array
+	 */
+	private function get_smart_tags() {
+
+		$tags = [];
+
+		foreach ( $this->get_tags_lists() as $tag => $description ) {
+			$tags[] = [
+				'value' => trim( $tag, '{}' ),
+				'label' => $description,
+			];
+		}
+
+		return [ 'registration' => $tags ];
 	}
 
 	/**
 	 * Persist the submitted subject and message.
 	 *
 	 * @since 3.13.0
+	 * @since 3.14.0 Added a manage_options capability check.
 	 *
 	 * @param array $post_data Submitted data.
 	 */
 	public function save_emails_config( $post_data ) {
+
+		// `Area::handle_post()` verifies the nonce before firing the action this is
+		// hooked to, but it checks NO capability — so guard with the cap that governs
+		// these global site options.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 
 		if ( ! $this->is_own_email_config_request() ) {
 			return;

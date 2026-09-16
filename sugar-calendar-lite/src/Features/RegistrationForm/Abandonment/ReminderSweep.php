@@ -2,6 +2,8 @@
 
 namespace Sugar_Calendar\Features\RegistrationForm\Abandonment;
 
+use Sugar_Calendar\EmailStatus;
+use Sugar_Calendar\Features\RegistrationForm\Admin\ReminderEmailConfig;
 use Sugar_Calendar\Features\RegistrationForm\Frontend\HostState;
 use Sugar_Calendar\Features\RegistrationForm\Frontend\Renderer;
 use Sugar_Calendar\Features\RegistrationForm\ResponseRepository;
@@ -55,15 +57,15 @@ class ReminderSweep {
 		/**
 		 * Filters whether abandonment reminders are sent at all.
 		 *
-		 * The documented off switch — there is deliberately no setting (spec §2.4).
+		 * The legacy programmatic off switch, in addition to the per-email status.
 		 *
 		 * @since 3.13.0
 		 *
-		 * @param bool $enabled Whether the sweep runs. Default true.
+		 * @param bool $enabled Whether the sweep may run. Default true.
 		 */
 		$enabled = (bool) apply_filters( 'sugar_calendar_registration_reminders_enabled', true ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
-		if ( ! $enabled ) {
+		if ( ! $enabled || ! EmailStatus::is_enabled( ReminderEmailConfig::EMAIL_ID ) ) {
 			return 0;
 		}
 

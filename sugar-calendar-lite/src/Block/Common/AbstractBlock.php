@@ -346,6 +346,63 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get the block's own settings, whichever way the block was rendered.
+	 *
+	 * They sit at the top level on the first render and nested under `attributes` on an
+	 * AJAX update, where the top level carries the visitor's filter choices instead.
+	 *
+	 * @since 3.1.0
+	 * @since 3.14.0 Moved up from the Event List block so both blocks can use it.
+	 *
+	 * @return array
+	 */
+	public function get_settings_attributes() {
+
+		$attributes = $this->get_attributes();
+
+		return empty( $attributes['attributes'] ) ? $attributes : $attributes['attributes'];
+	}
+
+	/**
+	 * Whether the block's own setting restricts it to featured events.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	public function is_featured_only_by_setting() {
+
+		return ! empty( $this->get_settings_attributes()['featuredOnly'] );
+	}
+
+	/**
+	 * Whether the block shows only featured events.
+	 *
+	 * The block's own setting is a floor a visitor can add to but not remove, matching
+	 * how get_calendars() and get_tags() only ever offer the author's own selection.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	public function is_featured_only() {
+
+		$attributes = $this->get_attributes();
+
+		$featured_only = $this->is_featured_only_by_setting() || ! empty( $attributes['featuredOnly'] );
+
+		/**
+		 * Filter whether the block shows only featured events.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param bool          $featured_only Whether only featured events are shown.
+		 * @param AbstractBlock $block         The block instance.
+		 */
+		return (bool) apply_filters( 'sugar_calendar_block_common_abstract_block_is_featured_only', $featured_only, $this );
+	}
+
+	/**
 	 * Set the view.
 	 *
 	 * @since 3.0.0
@@ -748,6 +805,7 @@ abstract class AbstractBlock {
 	 * @since 3.6.0 Added filter hook `sugar_calendar_block_common_abstract_block_get_week_events`.
 	 * @since 3.7.0 Added support for filtering by tags.
 	 * @since 3.7.0 Filter the number of events to load.
+	 * @since 3.14.0 Added support for filtering by featured events.
 	 *
 	 * @return Event[]
 	 */
@@ -771,6 +829,7 @@ abstract class AbstractBlock {
 		$block_tags       = $this->get_tags();
 		$block_venues     = $this->get_venues();
 		$block_speakers   = $this->get_speakers();
+		$featured_only    = $this->is_featured_only();
 
 		// Get all the events on the calendar period.
 		$calendar_events = sugar_calendar_get_events_within_range(
@@ -784,6 +843,7 @@ abstract class AbstractBlock {
 				'tags'         => $block_tags,
 				'speakers'     => $block_speakers,
 				'has_password' => false,
+				'featured'     => $featured_only,
 			]
 		);
 
@@ -792,6 +852,7 @@ abstract class AbstractBlock {
 		 *
 		 * @since 3.6.0
 		 * @since 3.7.0 Added support for filtering by tags.
+		 * @since 3.14.0 Added support for filtering by featured.
 		 *
 		 * @param \Sugar_Calendar\Event[] $calendar_events    The calendar events.
 		 * @param \DateTimeImmutable      $start_period_range The start period range.
@@ -801,6 +862,7 @@ abstract class AbstractBlock {
 		 * @param int[]                   $venues             The venues to filter the occurrences.
 		 * @param int[]                   $tags               The tags to filter the occurrences.
 		 * @param int[]                   $speakers           The speakers to filter the occurrences.
+		 * @param bool                    $featured_only      Whether to only include featured events.
 		 */
 		$calendar_events = apply_filters(
 			'sugar_calendar_block_common_abstract_block_get_week_events',
@@ -811,7 +873,8 @@ abstract class AbstractBlock {
 			$search_term,
 			$block_venues,
 			$block_tags,
-			$block_speakers
+			$block_speakers,
+			$featured_only
 		);
 
 		$this->has_events_for_week = ! empty( $calendar_events );

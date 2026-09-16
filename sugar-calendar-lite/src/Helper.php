@@ -364,8 +364,9 @@ class Helper {
 	 * Get the event excerpt.
 	 *
 	 * @since 3.0.0
+	 * @since 3.14.0 Delegates to Helpers::get_event_excerpt(), so this shares the manual-excerpt precedence and third-party filters (e.g. WPBakery's) the blocks already apply.
 	 *
-	 * @param Event  $event        Event object.
+	 * @param Event  $event        Event object. Must have an `object_id` resolving to an existing post — returns '' otherwise.
 	 * @param int    $num_words    Number of words to return.
 	 * @param string $excerpt_more More text to append to the excerpt.
 	 *
@@ -373,23 +374,12 @@ class Helper {
 	 */
 	public static function get_event_excerpt( $event, $num_words = 20, $excerpt_more = '...' ) {
 
-		if ( empty( $event->content ) ) {
+		if ( empty( $event->object_id ) || ! get_post( $event->object_id ) ) {
 			return '';
 		}
 
-		$text = strip_shortcodes( $event->content );
-		$text = excerpt_remove_blocks( $text );
-
-		// excerpt_remove_footnotes() was introduced in WordPress 6.3; guard it
-		// so the plugin keeps working (and passes the static compat check) on
-		// the supported minimum WordPress version.
-		if ( function_exists( 'excerpt_remove_footnotes' ) ) {
-			$text = excerpt_remove_footnotes( $text );
-		}
-
-		$text = str_replace( ']]>', ']]&gt;', $text );
-
-		return wp_trim_words( $text, $num_words, $excerpt_more );
+		// Helpers::get_event_excerpt() doesn't cap a manual excerpt to a word count, so clamp here regardless of which of its return paths produced $excerpt.
+		return wp_trim_words( (string) Helpers::get_event_excerpt( $event->object_id ), $num_words, $excerpt_more );
 	}
 
 	/**
@@ -404,6 +394,35 @@ class Helper {
 	public static function get_event_time_recur_class( $event ) {
 
 		return ! empty( $event->recurrence ) ? 'sugar-calendar-block__event-cell__time--recur' : '';
+	}
+
+	/**
+	 * Get the title markup of a block event, for the Calendar and Event List blocks.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param Event  $event Event object.
+	 * @param string $color Accent color of the surface, when it has one.
+	 *
+	 * @return string
+	 */
+	public static function get_event_title_html( $event, $color = '' ) {
+
+		/**
+		 * Filter the title markup of a block event.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param string $html  Escaped title markup.
+		 * @param Event  $event Event object.
+		 * @param string $color Accent color of the surface, when it has one.
+		 */
+		return (string) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+			'sugar_calendar_helper_get_event_title_html',
+			esc_html( $event->title ),
+			$event,
+			$color
+		);
 	}
 
 	/**

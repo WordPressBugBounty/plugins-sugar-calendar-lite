@@ -402,16 +402,7 @@ class OrderEdit {
 			? $fname . ' ' . $lname
 			: '&mdash;';
 
-		$print_url = wp_nonce_url(
-			add_query_arg(
-				[
-					'sc_et_action' => 'print',
-					'ticket_code'  => $ticket->code,
-				],
-				home_url()
-			),
-			$ticket->code
-		);
+		$print_url = Functions\get_ticket_print_url( $ticket );
 
 		$email_url = wp_nonce_url(
 			add_query_arg(

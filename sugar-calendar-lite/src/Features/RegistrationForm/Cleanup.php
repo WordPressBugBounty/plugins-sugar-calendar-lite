@@ -23,8 +23,11 @@ class Cleanup {
 		add_action( 'sugar_calendar_ticketing_order_deleted', [ $this, 'delete_order_responses' ] );
 
 		// before_delete_post, not trashed_post: trashing is reversible, so
-		// responses must survive it.
-		add_action( 'before_delete_post', [ $this, 'delete_event_responses' ] );
+		// responses must survive it. Priority 5, not the default 10: core's own
+		// sugar_calendar_delete_post_events() sits on this hook at 10 and deletes
+		// the wp_sc_events row, after which the post-id -> event-id lookup below
+		// resolves to nothing and the rows survive the deletion.
+		add_action( 'before_delete_post', [ $this, 'delete_event_responses' ], 5 );
 
 		add_action( 'before_delete_post', [ $this, 'delete_rsvp_responses' ] );
 

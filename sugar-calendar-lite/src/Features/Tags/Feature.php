@@ -15,6 +15,9 @@ use Sugar_Calendar\Features\Tags\Admin\Area;
 // Frontend blocks.
 use Sugar_Calendar\Features\Tags\Frontend\Blocks;
 
+// Public single event.
+use Sugar_Calendar\Features\Tags\Frontend\SingleEvent;
+
 /**
  * Feature class for the Tags feature.
  *
@@ -56,6 +59,14 @@ class Feature extends FeatureAbstract {
 	public $blocks;
 
 	/**
+	 * The public single event instance.
+	 *
+	 * @var SingleEvent
+	 * @since 3.14.0
+	 */
+	public $single_event;
+
+	/**
 	 * Setup the feature.
 	 *
 	 * @since 3.7.0
@@ -76,6 +87,9 @@ class Feature extends FeatureAbstract {
 
 			// Load Block helper.
 			$this->blocks = new Blocks();
+
+			// Load public single event.
+			$this->single_event = new SingleEvent();
 		}
 	}
 
@@ -105,6 +119,9 @@ class Feature extends FeatureAbstract {
 
 			// Block hooks.
 			$this->blocks->hooks();
+
+			// Public single event hooks.
+			$this->single_event->hooks();
 		}
 	}
 

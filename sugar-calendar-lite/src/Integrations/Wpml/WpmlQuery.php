@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Integrations\Wpml;
 
+use Sugar_Calendar\Helpers as BaseHelpers;
 use WP_Term;
 
 /**
@@ -44,6 +45,7 @@ class WpmlQuery {
 	 * Sugar Calendar event row.
 	 *
 	 * @since 3.12.0
+	 * @since 3.14.0 Accept an array of object subtypes.
 	 *
 	 * @param array $args Event query args.
 	 *
@@ -56,14 +58,20 @@ class WpmlQuery {
 			return $args;
 		}
 
-		// Ensure we are resolving SC events.
-		if ( ( $args['object_subtype'] ?? '' ) !== sugar_calendar_get_event_post_type_id() ) {
+		// Callers pass either a single event post type or a list of them.
+		$object_subtypes = (array) ( $args['object_subtype'] ?? '' );
+		$object_id       = absint( $args['object_id'] );
+
+		// WPML keys translations by element type, so remap on the post's own
+		// type, and only when the caller asked for that event post type.
+		$post_type = get_post_type( $object_id );
+		$requested = array_intersect( BaseHelpers::get_event_post_types(), $object_subtypes );
+
+		if ( ! in_array( $post_type, $requested, true ) ) {
 			return $args;
 		}
 
-		$object_id = absint( $args['object_id'] );
-
-		$mapped = Wpml::get_original_post_id( $object_id, sugar_calendar_get_event_post_type_id() );
+		$mapped = Wpml::get_original_post_id( $object_id, $post_type );
 
 		if ( ! empty( $mapped ) && $mapped !== $object_id ) {
 			$args['object_id'] = $mapped;

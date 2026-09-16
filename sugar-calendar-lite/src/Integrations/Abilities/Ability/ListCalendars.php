@@ -11,6 +11,7 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\Formatter;
 use WP_Term;
 
 /**
@@ -53,7 +54,10 @@ class ListCalendars extends AbstractAbility {
 	 */
 	protected function get_description(): string {
 
-		return esc_html__( 'List all calendars (event taxonomy terms).', 'sugar-calendar-lite' );
+		return esc_html__(
+			'List all calendars, optionally filtered by a search term.',
+			'sugar-calendar-lite'
+		);
 	}
 
 	/**
@@ -69,6 +73,7 @@ class ListCalendars extends AbstractAbility {
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => [
+				'search'     => [ 'type' => 'string' ],
 				'number'     => [ 'type' => 'integer', 'minimum' => 0, 'maximum' => 200, 'default' => 100 ],
 				'orderby'    => [
 					'type'    => 'string',
@@ -89,13 +94,7 @@ class ListCalendars extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [
-			'type'       => 'object',
-			'properties' => [
-				'calendars' => [ 'type' => 'array' ],
-				'total'     => [ 'type' => 'integer' ],
-			],
-		];
+		return Formatter::collection_schema( 'calendars', Formatter::term_schema() );
 	}
 
 	/**
@@ -134,6 +133,12 @@ class ListCalendars extends AbstractAbility {
 			'hide_empty' => ! empty( $args['hide_empty'] ),
 		];
 
+		$search = sanitize_text_field( (string) ( $args['search'] ?? '' ) );
+
+		if ( $search !== '' ) {
+			$query_args['search'] = $search;
+		}
+
 		$terms = $this->events->get_calendars( $query_args );
 
 		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
@@ -150,7 +155,7 @@ class ListCalendars extends AbstractAbility {
 
 		return [
 			'calendars' => $out,
-			'total'     => count( $out ),
+			'total'     => $this->events->count_calendars( $query_args ),
 		];
 	}
 }

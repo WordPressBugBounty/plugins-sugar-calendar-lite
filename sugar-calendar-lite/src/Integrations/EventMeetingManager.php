@@ -22,9 +22,9 @@ use Sugar_Calendar\Integrations\OAuthRelay\Webhooks\IncomingWebhookHandler;
  *              (dormant until a 2nd provider exists).
  *   removal  — Online -> None; delete + clear meta.
  *
- * On before_delete_post / wp_trash_post, cleanup() deletes the meeting. SCE
- * deletes the event row on `deleted_post` (after before_delete_post), so the
- * meeting meta is still readable when cleanup() runs.
+ * On before_delete_post / wp_trash_post, cleanup() deletes the meeting. Core
+ * deletes the event row on the same hook at priority 999, so the meeting meta is
+ * still readable at the default 10.
  *
  * A Zoom failure NEVER blocks the save/trash/delete — every path is wrapped in
  * try/catch and logs `[SC Zoom]`. Guarded by IncomingWebhookHandler::is_processing()

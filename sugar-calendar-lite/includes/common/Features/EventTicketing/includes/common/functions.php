@@ -16,7 +16,12 @@ use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
 use Sugar_Calendar\AddOn\Ticketing\Emails;
 use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
-use Sugar_Calendar\Features\RegistrationForm\Frontend\OrderEmailResumeLink;
+use Sugar_Calendar\AdminNotificationRecipient;
+use Sugar_Calendar\EmailStatus;
+use Sugar_Calendar\Emails\ContentEnrichment;
+use Sugar_Calendar\Emails\Renderer;
+use Sugar_Calendar\Emails\Ticketing\OrderReceiptEmail;
+use Sugar_Calendar\Emails\Ticketing\TicketSaleAdminEmail;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 use Sugar_Calendar\Integrations\OnlineMeetingPresenter;
 use Throwable;
@@ -461,6 +466,78 @@ function maybe_send_fresh_receipt_email( $order ) {
 	send_order_receipt_email( $order_id );
 
 	return true;
+}
+
+/**
+ * Send a ticket email to its attendee, rate-limited per ticket.
+ *
+ * Wraps `send_ticket_email()` for the customer-facing entry points, which are
+ * reachable by anyone holding the receipt URL, and for the admin resends on Order
+ * Edit and the tickets view. Of the admin resends, only the bulk action in
+ * `TicketsTab` calls `send_ticket_email()` directly and stays ungated.
+ *
+ * The transient stores the moment it lapses rather than a flag, so a caller can
+ * report the seconds remaining without reading WordPress's timeout option.
+ *
+ * @since 3.14.0
+ *
+ * @param int $ticket_id Ticket to email.
+ *
+ * @return array {
+ *     @type bool $sent        Whether an email was dispatched.
+ *     @type int  $retry_after Seconds until another send is allowed, 0 when none.
+ * }
+ */
+function maybe_send_ticket_email( $ticket_id ) {
+
+	$ticket_id = (int) $ticket_id;
+	$wait      = get_ticket_email_wait( $ticket_id );
+
+	if ( $wait > 0 ) {
+		return [
+			'sent'        => false,
+			'retry_after' => $wait,
+		];
+	}
+
+	/**
+	 * Filter the rate-limit TTL (in seconds) between ticket emails.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param int $ttl       Default 30 seconds.
+	 * @param int $ticket_id The ticket being emailed.
+	 */
+	$ttl = (int) apply_filters( 'sc_et_ticket_email_rate_limit', 30, $ticket_id );
+	$ttl = max( 1, $ttl );
+
+	// Arm the limiter before dispatching so a failed send cannot be hammered.
+	set_transient( 'sc_et_ticket_email_' . $ticket_id, time() + $ttl, $ttl );
+
+	return [
+		'sent'        => (bool) send_ticket_email( $ticket_id ),
+		'retry_after' => $ttl,
+	];
+}
+
+/**
+ * Seconds until this ticket may be emailed again.
+ *
+ * @since 3.14.0
+ *
+ * @param int $ticket_id Ticket to check.
+ *
+ * @return int Zero when a send is allowed now.
+ */
+function get_ticket_email_wait( $ticket_id ) {
+
+	$lapses = get_transient( 'sc_et_ticket_email_' . (int) $ticket_id );
+
+	if ( empty( $lapses ) ) {
+		return 0;
+	}
+
+	return max( 0, (int) $lapses - time() );
 }
 
 /**
@@ -1601,11 +1678,17 @@ function get_stripe_secret_key() {
  *                  send via the sc_et_use_external_receipt filter, and fire
  *                  sc_et_send_external_receipt_email so it can send its own.
  *
- * @param int $order_id ID of the order to send receipt for.
+ * @since 3.14.0 Honour the per-email enable toggle on automatic sends. The
+ *                  administrator's explicit resend passes $force to bypass it.
+ *
+ * @param int  $order_id ID of the order to send receipt for.
+ * @param bool $force    Send even when the receipt email is switched off in
+ *                       Settings → Emails. Only an explicit human action (the
+ *                       admin Resend button) may pass true.
  *
  * @return bool
  */
-function send_order_receipt_email( $order_id = 0 ) {
+function send_order_receipt_email( $order_id = 0, $force = false ) {
 
 	// Get order
 	$order = get_order( $order_id );
@@ -1649,66 +1732,154 @@ function send_order_receipt_email( $order_id = 0 ) {
 		return;
 	}
 
-	if ( ! empty( $order->event_id ) ) {
-		add_online_meeting_email_filter( (int) $order->event_id );
+	// AFTER the takeover block, deliberately. The toggle governs Sugar Calendar's
+	// own receipt, not a third-party integration's — a site whose receipts come
+	// from an external provider must keep getting them while the built-in email is
+	// switched off. Moving this guard above the block silently breaks every such
+	// site, with no error anywhere.
+	//
+	// $force is passed only by the administrator's Resend button. Checkout and
+	// maybe_send_fresh_receipt_email() take the default and are suppressed.
+	if ( ! $force && ! EmailStatus::is_enabled( OrderReceiptEmail::ID ) ) {
+		return false;
 	}
 
-	// The receipt page shows the registration form only to the browser that checked
-	// out, so this link is how any other device answers. Installed here, immediately
-	// before send(), for the same one-shot reason as the block above.
-	OrderEmailResumeLink::install( (int) $order_id );
+	$enrichment = new ContentEnrichment();
 
-	$emails              = new Emails;
-	$emails->object_id   = $order_id;
-	$emails->object_type = 'order';
-	$emails->heading     = esc_html__( 'Order Receipt', 'sugar-calendar-lite' );
+	try {
+		$event_id = ! empty( $order->event_id ) ? (int) $order->event_id : 0;
 
-	return $emails->send(
-		$order->email,
-		Settings\get_setting( 'receipt_subject' ),
-		Settings\get_setting( 'receipt_message' )
+		$enrichment->install_receipt( (int) $order_id, $event_id );
+
+		$emails                     = new Emails();
+		$emails->email_id           = Renderer::ORDER_RECEIPT;
+		$emails->object_id          = $order_id;
+		$emails->object_type        = 'order';
+		$emails->heading            = esc_html__( 'Order Receipt', 'sugar-calendar-lite' );
+		$emails->content_enrichment = $enrichment;
+
+		return $emails->send(
+			$order->email,
+			Settings\get_receipt_subject(),
+			Settings\get_receipt_message_resolution()
+		);
+	} finally {
+		$enrichment->remove();
+
+		if ( isset( $emails ) ) {
+			$emails->content_enrichment = null;
+		}
+	}
+}
+
+/**
+ * Send the admin notification for a completed ticket sale.
+ *
+ * One email per completed order, to the site administrator, always as plain
+ * text.
+ *
+ * **Hooked separately to `sc_et_checkout_pre_redirect` rather than being called
+ * from inside `send_order_receipt_email()`, deliberately.** That function has a
+ * second, non-purchase caller — `maybe_send_fresh_receipt_email()`, which
+ * re-sends a receipt when a customer reopens a stale receipt link. Nesting this
+ * inside it would re-notify the admin about a week-old order every time that
+ * happened.
+ *
+ * No `$force` parameter: unlike the receipt, this email has no manual resend
+ * button, so there is no human action to exempt. Add the parameter with the
+ * button, not before.
+ *
+ * @since 3.14.0
+ *
+ * @param int $order_id ID of the completed order.
+ *
+ * @return bool Whether the send was attempted and accepted.
+ */
+function send_ticket_sale_admin_email( $order_id = 0 ) {
+
+	$order = get_order( $order_id );
+
+	if ( empty( $order ) ) {
+		return false;
+	}
+
+	if ( ! EmailStatus::is_enabled( TicketSaleAdminEmail::ID ) ) {
+		return false;
+	}
+
+	// One resolver for every admin notification, in core, so the filter is
+	// applied in exactly one place — see AdminNotificationRecipient below. An
+	// empty return means "suppress", and both plugins honour that identically.
+	$recipient = AdminNotificationRecipient::resolve( TicketSaleAdminEmail::ID );
+
+	if ( empty( $recipient ) ) {
+		return false;
+	}
+
+	$emails                     = new Emails();
+	$emails->email_id           = TicketSaleAdminEmail::ID;
+	$emails->object_id          = $order_id;
+	$emails->object_type        = 'order';
+	$emails->legacy_plain_text  = true;
+	$emails->admin_order_record = true;
+
+	return (bool) $emails->send(
+		$recipient,
+		Settings\get_ticket_sale_admin_subject(),
+		Settings\get_ticket_sale_admin_message()
 	);
 }
 
 /**
- * Send ticket email
+ * Send ticket email.
  *
  * @since 1.0.0
- * @param $ticket_id ID of the ticket to send email for
- * @return bool
+ * @since 3.14.0 Return false for missing ticket or attendee email.
+ *
+ * @param int $ticket_id ID of the ticket to send email for.
+ *
+ * @return bool Whether the email was sent.
  */
 function send_ticket_email( $ticket_id = 0 ) {
 
-	// Get ticket
 	$ticket = get_ticket( $ticket_id );
 
-	// Bail if no Ticket
 	if ( empty( $ticket ) ) {
-		return;
+		return false;
 	}
 
-	// Get attendee
 	$attendee = get_attendee( $ticket->attendee_id );
 
-	// Bail if no attendee
-	if ( empty( $attendee->id ) ) {
-		return;
+	if ( empty( $attendee->id ) || empty( $attendee->email ) ) {
+		return false;
 	}
 
-	if ( ! empty( $ticket->event_id ) ) {
-		add_online_meeting_email_filter( (int) $ticket->event_id );
+	$enrichment = new ContentEnrichment();
+
+	try {
+		$event_id = ! empty( $ticket->event_id ) ? (int) $ticket->event_id : 0;
+
+		$enrichment->install_ticket( $event_id );
+
+		$emails                     = new Emails();
+		$emails->email_id           = Renderer::TICKET_ATTENDEE;
+		$emails->object_id          = $ticket_id;
+		$emails->object_type        = 'ticket';
+		$emails->heading            = esc_html__( 'Event Ticket', 'sugar-calendar-lite' );
+		$emails->content_enrichment = $enrichment;
+
+		return $emails->send(
+			$attendee->email,
+			Settings\get_ticket_subject(),
+			Settings\get_ticket_message_resolution()
+		);
+	} finally {
+		$enrichment->remove();
+
+		if ( isset( $emails ) ) {
+			$emails->content_enrichment = null;
+		}
 	}
-
-	$emails              = new Emails;
-	$emails->object_id   = $ticket_id;
-	$emails->object_type = 'ticket';
-	$emails->heading     = esc_html__( 'Event Ticket', 'sugar-calendar-lite' );
-
-	return $emails->send(
-		$attendee->email,
-		Settings\get_setting( 'ticket_subject' ),
-		Settings\get_setting( 'ticket_message' )
-	);
 }
 
 /**
@@ -1798,7 +1969,6 @@ function get_email_tag_tickets( $order_id = 0 ) {
 
 	$page = Settings\get_setting( 'ticket_page' );
 	$link = get_permalink( $page );
-	$home = home_url();
 
 	foreach ( $tickets as $ticket ) {
 		$retval .= '<li>';
@@ -1811,7 +1981,7 @@ function get_email_tag_tickets( $order_id = 0 ) {
 			}
 
 			$retval .= '<div>';
-				$retval .= '<a href="' . wp_nonce_url( add_query_arg( array( 'sc_et_action' => 'print', 'ticket_code' => $ticket->code ), $home ), $ticket->code ) . '">' . esc_html__( 'Print', 'sugar-calendar-lite' ) . '</a>';
+				$retval .= '<a href="' . esc_url( get_ticket_print_url( $ticket ) ) . '">' . esc_html__( 'Print', 'sugar-calendar-lite' ) . '</a>';
 				$retval .= '&nbsp;|&nbsp;<a href="' . add_query_arg( array( 'order_id' => $order_id, 'ticket_code' => $ticket->code ), $link ) . '">' . esc_html__( 'View', 'sugar-calendar-lite' ) . '</a>';
 			$retval .= '</div>';
 		$retval .= '</li>';
@@ -1823,15 +1993,20 @@ function get_email_tag_tickets( $order_id = 0 ) {
 }
 
 /**
- * Email template tag: event_id
+ * Email template tag: event_id.
  *
  * @since 1.0.0
- * @param int $order_id
- * @return int Event ID
+ *
+ * @param int    $object_id   Order or ticket ID.
+ * @param string $object_type Either order or ticket.
+ *
+ * @return int|string Event ID, or empty when the source is unavailable.
  */
-function get_email_tag_event_id( $order_id = 0 ) {
-	$order = get_order( $order_id );
-	return $order->event_id;
+function get_email_tag_event_id( $object_id = 0, $object_type = 'order' ) {
+
+	$object = $object_type === 'order' ? get_order( $object_id ) : get_ticket( $object_id );
+
+	return ! empty( $object->event_id ) ? $object->event_id : '';
 }
 
 /**
@@ -1851,6 +2026,16 @@ function get_email_tag_event_title( $object_id = 0, $object_type = 'order' ) {
 	}
 
 	$event = sugar_calendar_get_event( $object->event_id );
+
+	// The order/ticket's event_id may not resolve to a real event (e.g. a
+	// free/test order with no event, or the event was deleted after purchase).
+	// Without this guard, resolving {event_title} fatals every automatic email
+	// send for such an order — including the admin ticket-sale notification,
+	// which (unlike the receipt) defaults to a non-empty message on every fresh
+	// install and so hits this on the very first sale.
+	if ( empty( $event ) ) {
+		return '';
+	}
 
 	return $event->title;
 }
@@ -1888,6 +2073,14 @@ function get_email_tag_event_url( $object_id = 0, $object_type = 'order' ) {
 		$object_type,
 		$object
 	);
+
+	// Same guard as get_email_tag_event_title(): the order/ticket's event_id may
+	// not resolve to a real event (a free/test order with no event, or an event
+	// deleted after purchase). Without it, resolving {event_url} fatals every
+	// automatic email send for such an order.
+	if ( empty( $event ) ) {
+		return '';
+	}
 
 	/**
 	 * Filters the email tag event URL.
@@ -1938,6 +2131,14 @@ function get_email_tag_event_date( $object_id = 0, $object_type = 'order' ) {
 		$object
 	);
 
+	// Same guard as get_email_tag_event_title(): the order/ticket's event_id may
+	// not resolve to a real event (a free/test order with no event, or an event
+	// deleted after purchase). Without it, resolving {event_date} fatals every
+	// automatic email send for such an order.
+	if ( empty( $event ) ) {
+		return '';
+	}
+
 	$retval = $event->format_date( sc_get_date_format(), $event->start );
 
 	return $retval;
@@ -1962,7 +2163,6 @@ function get_email_tag_event_start_time( $object_id = 0, $object_type = 'order' 
 	}
 
 	$event = sugar_calendar_get_event( $object->event_id );
-
 	if ( empty( $event ) ) {
 		return '';
 	}
@@ -1993,7 +2193,6 @@ function get_email_tag_event_end_time( $object_id = 0, $object_type = 'order' ) 
 	}
 
 	$event = sugar_calendar_get_event( $object->event_id );
-
 	if ( empty( $event ) ) {
 		return '';
 	}
@@ -2048,6 +2247,34 @@ function get_email_tag_ticket_url( $ticket_id = 0 ) {
 	);
 
 	return esc_url( $url );
+}
+
+/**
+ * Get the print-view URL for a ticket.
+ *
+ * Gated by the same order and ticket-code pair as the Ticket Details page,
+ * so the link never expires. Deliberately carries no nonce.
+ *
+ * @since 3.14.0
+ *
+ * @param object $ticket Ticket row.
+ *
+ * @return string The URL, or an empty string when the ticket has no code.
+ */
+function get_ticket_print_url( $ticket ) {
+
+	if ( empty( $ticket->code ) ) {
+		return '';
+	}
+
+	return add_query_arg(
+		array(
+			'sc_et_action' => 'print',
+			'order_id'     => (int) $ticket->order_id,
+			'ticket_code'  => $ticket->code,
+		),
+		home_url()
+	);
 }
 
 /**
@@ -2124,6 +2351,51 @@ function should_display_tickets( $event ) {
 		'sc_et_should_display_tickets',
 		$display_tickets,
 		$event
+	);
+}
+
+/**
+ * The event's start time as the ticketing surfaces show it.
+ *
+ * All-day events have no meaningful start time — formatting one yields midnight
+ * — so they get an empty string, which format_event_when() then omits.
+ *
+ * @since 3.14.0
+ *
+ * @param \Sugar_Calendar\Event $event The event object.
+ *
+ * @return string Formatted time, or '' for an all-day event.
+ */
+function get_event_start_time( $event ) {
+
+	if ( $event->is_all_day() ) {
+		return '';
+	}
+
+	return $event->format_date( sc_get_time_format(), $event->start );
+}
+
+/**
+ * Join an event's date and time the way the ticketing surfaces show them.
+ *
+ * @since 3.14.0
+ *
+ * @param string $date Formatted date.
+ * @param string $time Formatted time, or '' when there is none.
+ *
+ * @return string
+ */
+function format_event_when( $date, $time ) {
+
+	if ( $time === '' ) {
+		return $date;
+	}
+
+	return sprintf(
+		/* translators: %1$s - event start date, %2$s - event start time. */
+		__( '%1$s at %2$s', 'sugar-calendar-lite' ),
+		$date,
+		$time
 	);
 }
 
@@ -2409,33 +2681,36 @@ function render_admin_order_online_meeting( $order ) {
  *
  * The Emails class stores object_type/object_id as private properties with no
  * public __get, so they cannot be read from inside the sc_email_message filter
- * callback. Instead, callers (send_order_receipt_email, send_ticket_email)
- * resolve the event_id themselves and install this closure-based, self-removing
- * filter before handing off to Emails::send().
+ * callback. Instead, ContentEnrichment receives the event id and prepares this
+ * closure before binding it to one exact render frame.
  *
  * HTML emails carry the `<!-- End Content -->` template marker; we inject the
  * HTML block just before it (inside the body container). Without the marker the
  * message is plain text, so we append the plain-text block.
  *
  * @since 3.12.0
+ * @since 3.14.0 Return the callback and support deferred registration.
  *
- * @param int $event_id SC event ID.
+ * @param int  $event_id           SC event ID.
+ * @param bool $defer_registration Whether to defer filter registration.
  *
- * @return void
+ * @return callable|null Exact callback installed or prepared, or null when ineligible.
  */
-function add_online_meeting_email_filter( $event_id ) {
+function add_online_meeting_email_filter( $event_id, $defer_registration = false ) {
 
 	$event   = sugar_calendar_get_event( (int) $event_id );
 	$details = OnlineMeeting::for_event( $event );
 
 	if ( $details === null ) {
-		return;
+		return null;
 	}
 
 	$callback = null;
-	$callback = function ( $message ) use ( $details, &$callback ) {
-		// Self-remove: fire exactly once per send() call.
-		remove_filter( 'sc_email_message', $callback, 20 );
+	$callback = function ( $message ) use ( $details, $defer_registration, &$callback ) {
+		if ( ! $defer_registration ) {
+			// Self-remove: fire exactly once for direct legacy callers.
+			remove_filter( 'sc_email_message', $callback, 20 );
+		}
 
 		// HTML template → inject before the content-closing marker.
 		if ( strpos( $message, '<!-- End Content -->' ) !== false ) {
@@ -2448,11 +2723,9 @@ function add_online_meeting_email_filter( $event_id ) {
 		return $message . OnlineMeetingPresenter::email_text( $details );
 	};
 
-	// Contract: callers MUST install this immediately before Emails::send(),
-	// which always reaches build_email() and applies sc_email_message exactly
-	// once — so the closure fires and self-removes. Installing it without a
-	// guaranteed send() would leave it registered and inject into the next
-	// email; the two callers (send_order_receipt_email / send_ticket_email)
-	// honor this.
-	add_filter( 'sc_email_message', $callback, 20 );
+	if ( ! $defer_registration ) {
+		add_filter( 'sc_email_message', $callback, 20 );
+	}
+
+	return $callback;
 }

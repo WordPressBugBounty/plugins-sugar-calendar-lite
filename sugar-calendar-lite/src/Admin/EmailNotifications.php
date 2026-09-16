@@ -541,11 +541,11 @@ class EmailNotifications {
 				'tags'  => [
 					[
 						'value'       => 'name',
-						'description' => __( 'Attendee name', 'sugar-calendar-lite' ),
+						'description' => __( 'Attendee Name', 'sugar-calendar-lite' ),
 					],
 					[
 						'value'       => 'email',
-						'description' => __( 'Attendee email', 'sugar-calendar-lite' ),
+						'description' => __( 'Attendee Email', 'sugar-calendar-lite' ),
 					],
 				],
 			],
@@ -554,7 +554,7 @@ class EmailNotifications {
 				'tags'  => [
 					[
 						'value'       => 'event_title',
-						'description' => __( 'Event title', 'sugar-calendar-lite' ),
+						'description' => __( 'Event Title', 'sugar-calendar-lite' ),
 					],
 					[
 						'value'       => 'event_url',
@@ -562,19 +562,19 @@ class EmailNotifications {
 					],
 					[
 						'value'       => 'event_date',
-						'description' => __( 'Event date', 'sugar-calendar-lite' ),
+						'description' => __( 'Event Date', 'sugar-calendar-lite' ),
 					],
 					[
 						'value'       => 'event_end_date',
-						'description' => __( 'Event end date', 'sugar-calendar-lite' ),
+						'description' => __( 'Event End Date', 'sugar-calendar-lite' ),
 					],
 					[
 						'value'       => 'event_start_time',
-						'description' => __( 'Event start time', 'sugar-calendar-lite' ),
+						'description' => __( 'Event Start Time', 'sugar-calendar-lite' ),
 					],
 					[
 						'value'       => 'event_end_time',
-						'description' => __( 'Event end time', 'sugar-calendar-lite' ),
+						'description' => __( 'Event End Time', 'sugar-calendar-lite' ),
 					],
 				],
 			],
@@ -583,7 +583,7 @@ class EmailNotifications {
 				'tags'  => [
 					[
 						'value'       => 'site_name',
-						'description' => __( 'Site name', 'sugar-calendar-lite' ),
+						'description' => __( 'Site Name', 'sugar-calendar-lite' ),
 					],
 				],
 			],

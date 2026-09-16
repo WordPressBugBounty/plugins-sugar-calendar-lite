@@ -66,6 +66,7 @@ class Day implements InterfaceBaseView {
 	 * @since 3.7.0 Added support for filtering by tags.
 	 * @since 3.7.0 Filter the number of events to load.
 	 * @since 3.9.0 Added support for correct multiday positioning.
+	 * @since 3.14.0 Added support for filtering by featured events.
 	 *
 	 * @return \Sugar_Calendar\Event[]
 	 */
@@ -102,9 +103,10 @@ class Day implements InterfaceBaseView {
 
 		$block_categories = ! empty( $this->block->get_calendars() ) ? array_map( 'absint', $this->block->get_calendars() ) : [];
 		$search_term      = $this->block->get_search_term();
-		$block_venues   = $this->block->get_venues();
-		$block_tags     = $this->block->get_tags();
-		$block_speakers = $this->block->get_speakers();
+		$block_venues     = $this->block->get_venues();
+		$block_tags       = $this->block->get_tags();
+		$block_speakers   = $this->block->get_speakers();
+		$featured_only    = $this->block->is_featured_only();
 
 		$events = sugar_calendar_get_events_within_range(
 			[
@@ -117,6 +119,7 @@ class Day implements InterfaceBaseView {
 				'tags'         => $block_tags,
 				'speakers'     => $block_speakers,
 				'has_password' => false,
+				'featured'     => $featured_only,
 			]
 		);
 
@@ -125,6 +128,7 @@ class Day implements InterfaceBaseView {
 		 *
 		 * @since 3.6.0
 		 * @since 3.7.0 Added support for filtering by tags.
+		 * @since 3.14.0 Added support for filtering by featured.
 		 *
 		 * @param \Sugar_Calendar\Event[] $events           The calendar events.
 		 * @param \DateTimeImmutable      $start_range      The start period range.
@@ -134,6 +138,7 @@ class Day implements InterfaceBaseView {
 		 * @param int[]                   $venues           The venues to filter the occurrences.
 		 * @param int[]                   $tags             The tags to filter the occurrences.
 		 * @param int[]                   $speakers         The speakers to filter the occurrences.
+		 * @param bool                    $featured_only    Whether to only include featured events.
 		 */
 		$events = apply_filters(
 			'sugar_calendar_block_calendar_view_day_events',
@@ -144,7 +149,8 @@ class Day implements InterfaceBaseView {
 			$search_term,
 			$block_venues,
 			$block_tags,
-			$block_speakers
+			$block_speakers,
+			$featured_only
 		);
 
 		if ( ! empty( $events ) && $this->get_block()->get_visitor_timezone() ) {

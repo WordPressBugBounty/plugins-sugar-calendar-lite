@@ -21,6 +21,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sugar-calendar-block__popover__calendar_selector__container">
 
 		<?php
+		/*
+		 * Offered only when the block itself isn't already restricted to featured
+		 * events, mirroring how get_calendars_for_filter() drops a section the
+		 * visitor has no choice within. Not a section either: it has no heading, so
+		 * the accordion and section-indicator logic skips it.
+		 */
+		if ( ! $context->is_featured_only_by_setting() ) :
+			$featured_input_id = sprintf( 'sc-featured-only-%s', $context->get_block_id() );
+			?>
+			<div class="sc-filter-toggle-row">
+				<label class="sc-filter-toggle-row-label" for="<?php echo esc_attr( $featured_input_id ); ?>">
+					<?php esc_html_e( 'Featured Only', 'sugar-calendar-lite' ); ?>
+				</label>
+				<span class="sc-toggle">
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $featured_input_id ); ?>"
+						class="sc-toggle-input sc-filters-featured-only"
+						<?php checked( $context->is_featured_only() ); ?>
+					/>
+					<span class="sc-toggle-track" aria-hidden="true"></span>
+				</span>
+			</div>
+			<?php
+		endif;
 		$calendars = $context->get_calendars_for_filter();
 
 		if ( ! empty( $calendars ) ) {

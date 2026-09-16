@@ -18,6 +18,8 @@ use Sugar_Calendar\Features\RegistrationForm\Frontend\SubmitEndpoint;
 use Sugar_Calendar\Features\RegistrationForm\Frontend\TicketingCheckout;
 use Sugar_Calendar\Features\RegistrationForm\Frontend\TicketingReceipt;
 use Sugar_Calendar\Features\RegistrationForm\Frontend\TokenResume;
+use Sugar_Calendar\Features\RegistrationForm\Integrations\Abilities\RegistrationFormContributor;
+use Sugar_Calendar\Features\RegistrationForm\Integrations\Export\ResponsesExporter;
 
 /**
  * The Registration Form feature (issue #601).
@@ -111,11 +113,16 @@ class Feature extends FeatureAbstract {
 
 				( new ReminderEmailConfig() )->hooks();
 				( new AnswersConfirmationEmailConfig() )->hooks();
+
+				// Tools → Export runs as an admin POST, so is_admin() holds here.
+				( new ResponsesExporter() )->hooks();
 			} else {
 				// Lite gets a picture of the editor plus an upgrade path.
 				( new LiteEducationSection() )->hooks();
 			}
 		}
+
+		RegistrationFormContributor::hooks();
 	}
 
 	/**

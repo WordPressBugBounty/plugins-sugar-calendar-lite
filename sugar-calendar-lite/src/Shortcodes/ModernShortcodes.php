@@ -85,6 +85,11 @@ class ModernShortcodes {
 						'default'         => true,
 						'type'            => 'boolean',
 					],
+					'featured_only'             => [
+						'block_attribute' => 'featuredOnly',
+						'default'         => false,
+						'type'            => 'boolean',
+					],
 					'appearance'                => [
 						'block_attribute' => 'appearance',
 						'default'         => 'light',
@@ -171,6 +176,11 @@ class ModernShortcodes {
 					'show_search'               => [
 						'block_attribute' => 'showSearch',
 						'default'         => true,
+						'type'            => 'boolean',
+					],
+					'featured_only'             => [
+						'block_attribute' => 'featuredOnly',
+						'default'         => false,
 						'type'            => 'boolean',
 					],
 					'show_date_cards'           => [

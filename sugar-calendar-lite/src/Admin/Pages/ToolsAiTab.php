@@ -10,7 +10,8 @@ use Sugar_Calendar\Integrations\Abilities\Abilities;
 
 /**
  * AI Tools tab: 1-click installs the WPVibe.ai MCP plugin and surfaces the
- * read-only Abilities API (`Sugar_Calendar\Integrations\Abilities\Abilities`).
+ * Abilities API (`Sugar_Calendar\Integrations\Abilities\Abilities`), both its
+ * reads and its writes.
  *
  * Only registered on WordPress 6.9+ — see `Abilities::is_available()`.
  *
@@ -333,8 +334,9 @@ class ToolsAiTab extends Tools {
 				'color'     => 'yellow',
 				'title'     => __( 'Events', 'sugar-calendar-lite' ),
 				'bullets'   => [
-					__( 'Browse and filter your events by status, calendar, and date range', 'sugar-calendar-lite' ),
-					__( "Get a single event's full details", 'sugar-calendar-lite' ),
+					__( 'Filter events by status, calendar, and date', 'sugar-calendar-lite' ),
+					__( 'Search your events by keyword', 'sugar-calendar-lite' ),
+					__( 'Create and edit events, always as drafts', 'sugar-calendar-lite' ),
 				],
 				'is_locked' => false,
 			],
@@ -344,18 +346,51 @@ class ToolsAiTab extends Tools {
 				'title'     => __( 'Calendars', 'sugar-calendar-lite' ),
 				'bullets'   => [
 					__( 'List all your calendars', 'sugar-calendar-lite' ),
-					__( 'Look up a single calendar by id or slug', 'sugar-calendar-lite' ),
+					__( 'Look up a calendar by id or slug', 'sugar-calendar-lite' ),
+					__( 'Create a calendar and assign events', 'sugar-calendar-lite' ),
 				],
 				'is_locked' => false,
+			],
+			[
+				'icon_class' => 'sc:icon-[fa6-solid--tags]',
+				'color'      => 'blue',
+				'title'      => __( 'Tags', 'sugar-calendar-lite' ),
+				'bullets'    => [
+					__( 'List and search your event tags', 'sugar-calendar-lite' ),
+					__( 'Look up a tag by id or slug', 'sugar-calendar-lite' ),
+					__( 'Create a tag and apply it to events', 'sugar-calendar-lite' ),
+				],
+				'is_locked'  => false,
 			],
 			[
 				'icon'      => 'tools-ai-icon-event-stats',
 				'color'     => 'red',
 				'title'     => __( 'Event Stats', 'sugar-calendar-lite' ),
 				'bullets'   => [
-					__( 'See aggregate stats for any date range, grouped by calendar and by month', 'sugar-calendar-lite' ),
+					__( 'Stats by date range, calendar, and month', 'sugar-calendar-lite' ),
+					__( "Get a single event's full details", 'sugar-calendar-lite' ),
 				],
 				'is_locked' => false,
+			],
+			[
+				// Not a chart glyph: `tools-ai-icon-event-stats` is a rising line on an
+				// axis, and this card sits directly beside it. Revenue is what separates
+				// the two, so the icon says revenue.
+				'icon_class'   => 'sc:icon-[fa6-solid--money-bill-trend-up]',
+				'color'        => 'red',
+				'title'        => __( 'Registrations', 'sugar-calendar-lite' ),
+				'bullets'      => [
+					__( 'Signup and revenue totals by date range', 'sugar-calendar-lite' ),
+					__( 'Compare a period against the one before', 'sugar-calendar-lite' ),
+					__( 'Counts ticket orders and going RSVPs', 'sugar-calendar-lite' ),
+				],
+				'is_locked'    => ! $this->is_signup_stats_active(),
+				'lock_label'   => __( 'Pro', 'sugar-calendar-lite' ),
+				'lock_cta'     => __( 'Get Event Ticketing', 'sugar-calendar-lite' ),
+				'lock_cta_url' => BaseHelpers\Helpers::get_utm_url(
+					'https://sugarcalendar.com/downloads/event-tickets/',
+					[ 'medium' => 'tools-ai-registrations', 'content' => 'Get Event Ticketing' ]
+				),
 			],
 			[
 				'icon_class'   => 'sc:icon-[fa6-solid--ticket]',
@@ -378,7 +413,8 @@ class ToolsAiTab extends Tools {
 				'color'        => 'indigo',
 				'title'        => __( 'Venues', 'sugar-calendar-lite' ),
 				'bullets'      => [
-					__( 'List your venues and look up a single venue', 'sugar-calendar-lite' ),
+					__( 'List and look up your venues', 'sugar-calendar-lite' ),
+					__( 'Add a venue and attach it to an event', 'sugar-calendar-lite' ),
 				],
 				'is_locked'    => ! $this->is_venues_active(),
 				'lock_label'   => __( 'Pro', 'sugar-calendar-lite' ),
@@ -390,7 +426,8 @@ class ToolsAiTab extends Tools {
 				'color'        => 'indigo',
 				'title'        => __( 'Speakers', 'sugar-calendar-lite' ),
 				'bullets'      => [
-					__( 'List your speakers and look up a single speaker', 'sugar-calendar-lite' ),
+					__( 'List and look up your speakers', 'sugar-calendar-lite' ),
+					__( 'Add a speaker and attach them to an event', 'sugar-calendar-lite' ),
 				],
 				'is_locked'    => ! $this->is_speakers_active(),
 				'lock_label'   => __( 'Pro', 'sugar-calendar-lite' ),
@@ -402,7 +439,7 @@ class ToolsAiTab extends Tools {
 				'color'        => 'green',
 				'title'        => __( 'RSVP', 'sugar-calendar-lite' ),
 				'bullets'      => [
-					__( "See who's RSVP'd to an event and check attendee capacity", 'sugar-calendar-lite' ),
+					__( "See who's RSVP'd and check capacity", 'sugar-calendar-lite' ),
 				],
 				'is_locked'    => ! $this->is_rsvp_active(),
 				'lock_label'   => __( 'Pro', 'sugar-calendar-lite' ),
@@ -436,6 +473,25 @@ class ToolsAiTab extends Tools {
 	protected function is_ticketing_active() {
 
 		return (bool) apply_filters( 'sugar_calendar_tools_ai_capability_active', false, 'tickets' );
+	}
+
+	/**
+	 * Whether `get-registration-stats` is registered — display signal for the
+	 * Registrations card. Mirrors the ability's own gate, which registers it
+	 * only when at least one signup mode declared itself
+	 * (`SignupModes::available()`); ticketing and RSVP are the two that can.
+	 * Asking the same question a second way rather than calling
+	 * `SignupModes::available()` keeps this consistent with the sibling card
+	 * checks, which resolve through the filter so a module that is present but
+	 * unlicensed reads as inactive.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return bool
+	 */
+	protected function is_signup_stats_active() {
+
+		return $this->is_ticketing_active() || $this->is_rsvp_active();
 	}
 
 	/**
@@ -528,7 +584,7 @@ class ToolsAiTab extends Tools {
 			echo wp_kses(
 				sprintf(
 					/* translators: %s - "Learn more about Abilities API" inline link. */
-					__( 'Connect your WordPress site and Sugar Calendar to AI assistants like Claude, ChatGPT, Cursor, and more. Ask it about your events, calendars, and stats in your plain language. %s', 'sugar-calendar-lite' ),
+					__( 'Connect your WordPress site and Sugar Calendar to AI assistants like Claude, ChatGPT, Cursor, and more. Ask about your events, calendars, and stats in plain language, and have it draft new events for you. %s', 'sugar-calendar-lite' ),
 					sprintf(
 						'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 						esc_url( $docs_url ),

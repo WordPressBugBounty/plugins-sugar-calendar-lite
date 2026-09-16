@@ -43,7 +43,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 		<div class="sugar-calendar-block__event-cell__title">
-			<?php echo esc_html( $context->get_event_title() ); ?>
+			<?php
+			echo wp_kses_post(
+				Helper::get_event_title_html(
+					$context->get_event(),
+					$context->get_color()
+				)
+			);
+			?>
 		</div>
 
 		<div class="sugar-calendar-block__event-cell__desc">

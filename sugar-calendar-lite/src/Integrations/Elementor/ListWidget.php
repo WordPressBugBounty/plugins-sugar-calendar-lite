@@ -111,6 +111,7 @@ class ListWidget extends Widget_Base {
 	 *
 	 * @since 3.2.0
 	 * @since 3.11.0 Removed the `max` attributes in "Events per page" and "Max events to show" fields.
+	 * @since 3.14.0 Added the "Show only Featured Events" control.
 	 */
 	protected function register_controls() {
 
@@ -295,6 +296,17 @@ class ListWidget extends Widget_Base {
 			]
 		);
 
+		// Filters the query, so it applies in every display mode and with the header hidden.
+		$this->add_control(
+			'featured_only',
+			[
+				'default'      => '',
+				'label'        => esc_html__( 'Show only Featured Events', 'sugar-calendar-lite' ),
+				'return_value' => 'yes',
+				'type'         => Controls_Manager::SWITCHER,
+			]
+		);
+
 		$this->add_control(
 			'show_date_cards',
 			[
@@ -400,6 +412,7 @@ class ListWidget extends Widget_Base {
 	 *
 	 * @since 3.2.0
 	 * @since 3.4.0 Additional options for event list block.
+	 * @since 3.14.0 Added support for featured events.
 	 */
 	protected function render() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
@@ -413,6 +426,7 @@ class ListWidget extends Widget_Base {
 		$allow_users_to_change_display = $show_block_header === 'yes' ? $this->get_settings_for_display( 'allow_users_to_change_display' ) : '';
 		$show_filters                  = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_filters' ) : '';
 		$show_search                   = $show_block_header === 'yes' ? $this->get_settings_for_display( 'show_search' ) : '';
+		$featured_only                 = $this->get_settings_for_display( 'featured_only' );
 		$show_date_cards               = $this->get_settings_for_display( 'show_date_cards' );
 		$show_descriptions             = $this->get_settings_for_display( 'show_descriptions' );
 		$show_featured_images          = $this->get_settings_for_display( 'show_featured_images' );
@@ -433,6 +447,7 @@ class ListWidget extends Widget_Base {
 			'allowUserChangeDisplay' => ! empty( $allow_users_to_change_display ) && $allow_users_to_change_display === 'yes',
 			'showFilters'            => ! empty( $show_filters ) && $show_filters === 'yes',
 			'showSearch'             => ! empty( $show_search ) && $show_search === 'yes',
+			'featuredOnly'           => ! empty( $featured_only ) && $featured_only === 'yes',
 			'showDateCards'          => ! empty( $show_date_cards ) && $show_date_cards === 'yes',
 			'showDescriptions'       => ! empty( $show_descriptions ) && $show_descriptions === 'yes',
 			'showFeaturedImages'     => ! empty( $show_featured_images ) && $show_featured_images === 'yes',

@@ -344,18 +344,6 @@ class Block extends AbstractBlock {
 	}
 
 	/**
-	 * Get the settings/attributes for the block.
-	 *
-	 * @since 3.1.0
-	 *
-	 * @return array
-	 */
-	public function get_settings_attributes() {
-
-		return empty( $this->get_attributes()['attributes'] ) ? $this->get_attributes() : $this->get_attributes()['attributes'];
-	}
-
-	/**
 	 * Get paged attribute if defined.
 	 *
 	 * @since 3.4.0
@@ -483,6 +471,7 @@ class Block extends AbstractBlock {
 	 * @since 3.6.0 Optimize the method to get the upcoming events.
 	 * @since 3.8.0 Respect the maximum events to show set by the user.
 	 * @since 3.11.0 Added support `show_past_only` args.
+	 * @since 3.14.0 Added support for filtering by featured events.
 	 *
 	 * @return Event[]
 	 */
@@ -541,6 +530,7 @@ class Block extends AbstractBlock {
 			'offset'         => ( $page - 1 ) * $events_per_page,
 			'show_past_only' => false,
 			'event_order'    => 'oldest_first',
+			'featured'       => $this->is_featured_only(),
 		];
 
 		/**

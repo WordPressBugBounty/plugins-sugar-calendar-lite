@@ -59,11 +59,12 @@ function display( $settings = '', $screen = false ) {
  */
 function get_defaults() {
 	return array(
-		'events_max_num' => '100',
-		'start_of_week'  => '1',
-		'date_format'    => 'F j, Y',
-		'time_format'    => 'g:i a',
-		'timezone'       => ''
+		'events_max_num'     => '100',
+		'events_max_per_day' => '10',
+		'start_of_week'      => '1',
+		'date_format'        => 'F j, Y',
+		'time_format'        => 'g:i a',
+		'timezone'           => ''
 	);
 }
 
@@ -265,6 +266,26 @@ function preferences() {
 }
 
 /**
+ * Return the preference keys this screen's own panel renders inputs for.
+ *
+ * A subset of get_defaults(): the panel has no field for events_max_per_day
+ * (the events cog owns it) or timezone.
+ *
+ * @since 3.14.0
+ *
+ * @return array
+ */
+function offered_preferences() {
+
+	return [
+		'events_max_num',
+		'start_of_week',
+		'date_format',
+		'time_format',
+	];
+}
+
+/**
  * Save the current user's preferences
  *
  * @since 2.0.0
@@ -281,9 +302,23 @@ function save() {
 
 	// Get the default preferences
 	$preferences = get_defaults();
+	$offered     = offered_preferences();
+
+	// `screen-options-apply` is core's submit name, so core's own panel sets it
+	// too. Core normally saves and exits first, but not on an empty per-page
+	// value, and this then ran with none of our fields posted and reset every
+	// preference to its default.
+	if ( empty( array_intersect( $offered, array_keys( $_POST ) ) ) ) {
+		return;
+	}
 
 	// Assign preferences to variable variables to use below
 	foreach ( $preferences as $key => $default ) {
+
+		// A key this panel never renders is "not offered", not "cleared".
+		if ( ! in_array( $key, $offered, true ) ) {
+			continue;
+		}
 
 		// Get the POSTed value of this key
 		$pref = isset( $_POST[ $key ] )

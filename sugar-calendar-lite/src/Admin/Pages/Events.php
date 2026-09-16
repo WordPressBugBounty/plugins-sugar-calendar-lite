@@ -12,7 +12,6 @@ use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Plugin;
-use function Sugar_Calendar\Admin\Screen\Options\get_defaults;
 
 /**
  * Events page.
@@ -309,27 +308,29 @@ class Events extends PageAbstract {
 
 		$settings = [
 			'events_max_num',
+			'events_max_per_day',
 			'start_of_week',
 		];
 
-		$defaults = get_defaults();
-
 		foreach ( $settings as $key ) {
 
-			if ( isset( $post_data[ $key ] ) ) {
-				$value = $post_data[ $key ];
+			// The cog renders only the max field this view uses, so an absent
+			// key means "not offered", not "cleared".
+			if ( ! isset( $post_data[ $key ] ) ) {
+				continue;
+			}
 
-				switch ( $key ) {
-					case 'events_max_num':
-						$value = max( 0, intval( $value ) );
-						break;
+			$value = $post_data[ $key ];
 
-					case 'start_of_week':
-						$value = in_array( intval( $value ), range( 0, 6 ) ) ? intval( $value ) : 0;
-						break;
-				}
-			} else {
-				$value = $defaults[ $key ];
+			switch ( $key ) {
+				case 'events_max_num':
+				case 'events_max_per_day':
+					$value = max( 0, intval( $value ) );
+					break;
+
+				case 'start_of_week':
+					$value = in_array( intval( $value ), range( 0, 6 ), true ) ? intval( $value ) : 0;
+					break;
 			}
 
 			sugar_calendar_set_user_preference( $key, $value );

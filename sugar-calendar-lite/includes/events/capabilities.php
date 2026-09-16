@@ -51,7 +51,10 @@ function sugar_calendar_post_meta_caps( $caps = array(), $cap = '', $user_id = 0
 			}
 
 			// If the post author is set and the user is the author...
-			if ( (int) $user_id === $post->post_author ) {
+			// Both sides cast: get_post() returns post_author as a string, so a
+			// bare === never matched and every owner fell through to the
+			// others-post branch below.
+			if ( (int) $user_id === (int) $post->post_author ) {
 
 				// If the post is published or scheduled...
 				if ( in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
@@ -76,10 +79,12 @@ function sugar_calendar_post_meta_caps( $caps = array(), $cap = '', $user_id = 0
 				$caps = array( 'delete_others_posts' );
 
 				// The post is published or scheduled, extra cap required.
+				// Appended, not assigned: core's map_meta_cap() requires both,
+				// and replacing here would drop the others-posts requirement.
 				if ( in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
-					$caps = array( 'delete_published_posts' );
+					$caps[] = 'delete_published_posts';
 				} elseif ( 'private' === $post->post_status ) {
-					$caps = array( 'delete_private_posts' );
+					$caps[] = 'delete_private_posts';
 				}
 			}
 			break;
@@ -132,10 +137,12 @@ function sugar_calendar_post_meta_caps( $caps = array(), $cap = '', $user_id = 0
 				$caps = array( 'edit_others_posts' );
 
 				// The post is published or scheduled, extra cap required.
+				// Appended, not assigned: core's map_meta_cap() requires both,
+				// and replacing here let any Author edit every published event.
 				if ( in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
-					$caps = array( 'edit_published_posts' );
+					$caps[] = 'edit_published_posts';
 				} elseif ( 'private' === $post->post_status ) {
-					$caps = array( 'edit_private_posts' );
+					$caps[] = 'edit_private_posts';
 				}
 			}
 			break;
@@ -171,7 +178,8 @@ function sugar_calendar_post_meta_caps( $caps = array(), $cap = '', $user_id = 0
 					break;
 				}
 
-				if ( (int) $user_id === $post->post_author ) {
+				// Cast both sides; see the delete_event case above.
+				if ( (int) $user_id === (int) $post->post_author ) {
 					$caps = array( 'read' );
 				} elseif ( true === $status_obj->private ) {
 					$caps = array( 'read_private_posts' );

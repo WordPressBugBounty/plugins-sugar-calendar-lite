@@ -63,18 +63,61 @@ function email_ticket() {
 		exit;
 	}
 
-	// Send email and set notice type.
-	$notice_type = Functions\send_ticket_email( $ticket->id ) ? 'updated' : 'error';
+	// Rate-limited, so the plain link cannot be used to sidestep the gate the
+	// ajax path honours. A blocked send reports as an error, as a failure would.
+	$result = Functions\maybe_send_ticket_email( $ticket->id );
 
-	// Redirect with status.
+	$notice_type = $result['sent'] ? 'updated' : 'error';
+
+	// Redirect with status. `ticket_code` carries the recipient through so the
+	// receipt page can name who the email went to; the admin notice ignores it.
 	wp_safe_redirect(
 		add_query_arg(
 			[
 				'sc-notice-id'   => 'email-send',
 				'sc-notice-type' => $notice_type,
+				'ticket_code'    => $ticket->code,
 			],
 			wp_get_referer()
 		)
 	);
 	exit;
+}
+
+/**
+ * Email a ticket to its attendee without leaving the receipt.
+ *
+ * Verifies the same per-ticket nonce the link carries, so a request has to have
+ * been served the row it acts on. Registered for logged-out visitors too: the
+ * receipt is reached from an email, not from an account.
+ *
+ * @since 3.14.0
+ */
+function ajax_email_ticket() {
+
+	$code  = isset( $_POST['ticket_code'] ) ? sanitize_text_field( wp_unslash( $_POST['ticket_code'] ) ) : '';
+	$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+
+	if ( empty( $code ) || ! wp_verify_nonce( $nonce, $code ) ) {
+		wp_send_json_error();
+	}
+
+	$ticket = Functions\get_ticket_by_code( $code );
+
+	if ( empty( $ticket ) ) {
+		wp_send_json_error();
+	}
+
+	// A deleted event would fail deeper in, inside the email template.
+	if ( empty( sugar_calendar_get_event( $ticket->event_id ) ) ) {
+		wp_send_json_error();
+	}
+
+	$result = Functions\maybe_send_ticket_email( $ticket->id );
+
+	if ( ! $result['sent'] ) {
+		wp_send_json_error( [ 'retry_after' => $result['retry_after'] ] );
+	}
+
+	wp_send_json_success( [ 'retry_after' => $result['retry_after'] ] );
 }

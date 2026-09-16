@@ -266,6 +266,12 @@ abstract class AbstractAbility {
 	 * same name would make PHP treat it as an override and fatal on the
 	 * incompatible signature.
 	 *
+	 * `edit_post` is the whole gate on purpose, so an ability allows exactly
+	 * what the editor allows. It is load-bearing that SCE's meta-cap map
+	 * (`includes/events/capabilities.php`) appends the published/private
+	 * requirement rather than replacing the others-posts one; while it
+	 * replaced, any Author passed here on any published event.
+	 *
 	 * @since 3.13.0
 	 *
 	 * @param int    $event_id Sugar Calendar event ID.
@@ -275,7 +281,11 @@ abstract class AbstractAbility {
 	 */
 	protected function check_per_event_permission( int $event_id, string $message ) {
 
-		$query     = $event_id > 0 ? $this->events->get_event_query( [ 'id' => $event_id, 'number' => 1 ] ) : null;
+		$args      = [
+			'id'     => $event_id,
+			'number' => 1,
+		];
+		$query     = $event_id > 0 ? $this->events->get_event_query( $args ) : null;
 		$event     = ( $query && ! empty( $query->items ) ) ? $query->items[0] : null;
 		$object_id = $event ? absint( $event->object_id ) : 0;
 

@@ -10,12 +10,19 @@ namespace Sugar_Calendar\Integrations\Abilities;
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\Integrations\Abilities\Ability\CreateCalendar;
+use Sugar_Calendar\Integrations\Abilities\Ability\CreateEvent;
+use Sugar_Calendar\Integrations\Abilities\Ability\CreateTag;
 use Sugar_Calendar\Integrations\Abilities\Ability\GetCalendar;
 use Sugar_Calendar\Integrations\Abilities\Ability\GetEvent;
 use Sugar_Calendar\Integrations\Abilities\Ability\GetEventStats;
+use Sugar_Calendar\Integrations\Abilities\Ability\GetRegistrationStats;
+use Sugar_Calendar\Integrations\Abilities\Ability\GetTag;
 use Sugar_Calendar\Integrations\Abilities\Ability\ListCalendars;
 use Sugar_Calendar\Integrations\Abilities\Ability\ListEvents;
+use Sugar_Calendar\Integrations\Abilities\Ability\ListTags;
 use Sugar_Calendar\Integrations\Abilities\Ability\SearchEvents;
+use Sugar_Calendar\Integrations\Abilities\Ability\UpdateEvent;
 use Throwable;
 
 /**
@@ -110,8 +117,20 @@ class Abilities {
 			new SearchEvents( $events, $formatter ),
 			new ListCalendars( $events, $formatter ),
 			new GetCalendar( $events, $formatter ),
+			new ListTags( $events, $formatter ),
+			new GetTag( $events, $formatter ),
 			new GetEventStats( $events, $formatter ),
+			new CreateEvent( $events, $formatter ),
+			new UpdateEvent( $events, $formatter ),
+			new CreateCalendar( $events, $formatter ),
+			new CreateTag( $events, $formatter ),
 		];
+
+		// An install with no signup mode can only ever get zeros back, so the
+		// aggregate is not advertised there.
+		if ( SignupModes::available() !== [] ) {
+			$abilities[] = new GetRegistrationStats( $events, $formatter );
+		}
 
 		/**
 		 * Filters the list of registered abilities. Pro features and
@@ -187,7 +206,7 @@ class Abilities {
 			[
 				'label'       => esc_html__( 'Sugar Calendar — Events', 'sugar-calendar-lite' ),
 				'description' => esc_html__(
-					'Read-only abilities for discovering events and calendars in Sugar Calendar.',
+					'Abilities for reading events and calendars in Sugar Calendar, and for creating and editing them.',
 					'sugar-calendar-lite'
 				),
 			]

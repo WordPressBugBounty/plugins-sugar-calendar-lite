@@ -682,6 +682,29 @@ SugarCalendarBlocks.Controls.prototype.getDaysOfWeek = function() {
 }
 
 /**
+ * Whether only featured events should be shown.
+ *
+ * Falls back to the block setting when the filter popover is hidden, so paging or
+ * searching can't silently drop the filter.
+ *
+ * @since 3.14.0
+ *
+ * @return {boolean}
+ */
+SugarCalendarBlocks.Controls.prototype.getFeaturedOnly = function() {
+
+	const $toggle = this.$blockContainer.find( '.sc-filters-featured-only' );
+
+	if ( $toggle.length <= 0 ) {
+		const attributes = this.$blockContainer.data( 'attributes' );
+
+		return !! ( attributes && attributes.featuredOnly );
+	}
+
+	return $toggle.is( ':checked' );
+}
+
+/**
  * Control Popovers.
  *
  * @since 3.1.0
@@ -703,6 +726,7 @@ SugarCalendarBlocks.Controls.Popovers = SugarCalendarBlocks.Controls.Popovers ||
 		popoverCalendarSelectorApply: '.sc-filters-apply',
 		popoverCalendarSelectorClear: '.sc-filters-clear',
 		popoverSelectedIndicator: '.sc-filter-applied-indicator',
+		popoverFeaturedOnly: '.sc-filters-featured-only',
 	};
 
 	let popovers = [
@@ -990,7 +1014,8 @@ SugarCalendarBlocks.Controls.Popovers.prototype.updateIndicators = function() {
 		return jQuery( this ).find( that.selector.popoverCalendarSelectorHeading ).length > 0;
 	} );
 
-	let anyChecked = false;
+	// The Featured Only toggle sits outside the sections, so count it on its own.
+	let anyChecked = $popover.find( this.selector.popoverFeaturedOnly ).is( ':checked' );
 
 	$sections.each( function() {
 

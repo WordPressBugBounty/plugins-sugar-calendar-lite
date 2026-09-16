@@ -11,6 +11,7 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\Formatter;
 use WP_Error;
 
 /**
@@ -89,13 +90,7 @@ class SearchEvents extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [
-			'type'       => 'object',
-			'properties' => [
-				'events' => [ 'type' => 'array' ],
-				'total'  => [ 'type' => 'integer' ],
-			],
-		];
+		return Formatter::collection_schema( 'events', Formatter::event_schema() );
 	}
 
 	/**

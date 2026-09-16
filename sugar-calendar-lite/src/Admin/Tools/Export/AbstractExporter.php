@@ -220,6 +220,30 @@ abstract class AbstractExporter {
 	}
 
 	/**
+	 * The active date range, shaped for add-on filter callbacks.
+	 *
+	 * Carries both the raw picker dates and the UTC bounds so a consumer of a
+	 * UTC-stamped table never re-implements range_bound_utc().
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return array Empty when no range is active.
+	 */
+	protected function range_filter_arg(): array {
+
+		if ( ! $this->has_date_range() ) {
+			return [];
+		}
+
+		return [
+			'start'     => (string) ( $this->date_range['start'] ?? '' ),
+			'end'       => (string) ( $this->date_range['end'] ?? '' ),
+			'start_utc' => $this->range_start_utc(),
+			'end_utc'   => $this->range_end_utc(),
+		];
+	}
+
+	/**
 	 * Convert one range bound from the site's timezone to UTC.
 	 *
 	 * For UTC-stored columns only (BerlinDB `created` columns such as
@@ -267,16 +291,19 @@ abstract class AbstractExporter {
 		 * Filter for extra export support.
 		 *
 		 * @since 3.6.0
+		 * @since 3.14.0 Added the $range argument.
 		 *
 		 * @param array $export_data    Export data.
 		 * @param array $keys_to_export Keys to export.
+		 * @param array $range          Active date range (see range_filter_arg()), or [].
 		 *
 		 * @return array
 		 */
 		return (array) apply_filters(
 			'sugar_calendar_admin_tools_exporter_export_data',
 			$this->export_data,
-			$this->keys
+			$this->keys,
+			$this->range_filter_arg()
 		);
 		// phpcs:enable WPForms.PHP.ValidateHooks.InvalidHookName
 	}

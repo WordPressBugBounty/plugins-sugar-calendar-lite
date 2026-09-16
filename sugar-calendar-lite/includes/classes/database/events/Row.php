@@ -342,9 +342,14 @@ final class Event extends Row {
 	}
 
 	/**
-	 * Return if start & end datetime parts do not match.
+	 * Return if start & end fall on different datetime parts.
+	 *
+	 * Each unit compares a fully qualified value, not a bare cyclic part, so a span
+	 * whose ends share that part still counts: Sep 8 to Oct 8 is multi-day, and
+	 * 9am Mon to 9am Tue is multi-hour.
 	 *
 	 * @since 2.0.0
+	 * @since 3.13.0 Compare fully qualified datetime values, not bare cyclic parts.
 	 *
 	 * @param string $format
 	 * @return bool
@@ -356,22 +361,24 @@ final class Event extends Row {
 
 			// Hour
 			case 'hour' :
-				$format = 'G';
+				$format = 'Y-m-d H';
 				break;
 
 			// Day
 			case 'day' :
-				$format = 'j';
+			case 'j' :
+			case 'd' :
+				$format = 'Y-m-d';
 				break;
 
 			// Week
 			case 'week' :
-				$format = 'W';
+				$format = 'o-W';
 				break;
 
 			// Month
 			case 'month' :
-				$format = 'n';
+				$format = 'Y-n';
 				break;
 
 			// Year

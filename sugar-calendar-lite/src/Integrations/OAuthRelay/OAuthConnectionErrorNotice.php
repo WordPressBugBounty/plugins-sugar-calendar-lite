@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Integrations\OAuthRelay;
 
 use Sugar_Calendar\Admin\Pages\SettingsIntegrationsTab;
+use Sugar_Calendar\Helpers as BaseHelpers;
 use WP_Post;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -59,7 +60,7 @@ class OAuthConnectionErrorNotice {
 
 		if (
 			! $post instanceof WP_Post ||
-			! in_array( $post->post_type, [ 'sc_event', 'sc_recurring_event' ], true )
+			! in_array( $post->post_type, BaseHelpers::get_event_post_types(), true )
 		) {
 			return;
 		}

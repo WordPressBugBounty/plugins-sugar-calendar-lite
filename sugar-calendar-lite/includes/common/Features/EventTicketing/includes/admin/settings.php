@@ -6,6 +6,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Settings;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\AddOn\Ticketing\Frontend\EditorPreview;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\Helpers\Helpers;
@@ -13,6 +14,7 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Admin\Pages\Settings as PageSettings;
 use Sugar_Calendar\Admin\Pages\Settings\SingleEmailConfig;
+use Sugar_Calendar\Emails\Styling;
 
 /**
  * Register page ids.
@@ -304,13 +306,22 @@ function payments_section() {
 		]
 	);
 
-	$receipt_page_description = sprintf( /* translators: %1$s - field description; %2$s - configuration hints; %3$s - shortcode. */
-		'%1$s.<br/>%2$s <code>[sc_event_tickets_receipt]</code> %3$s.',
+	$receipt_page_description = sprintf(
+		'%1$s.<br/>%2$s',
 		esc_html__( 'The page customers are sent to after completing their ticket purchase', 'sugar-calendar-lite' ),
-		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
-		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
-
+		sprintf(
+			/* translators: %s - shortcode tag, already wrapped in a code element. */
+			esc_html__( "If the selected page doesn't have the %s shortcode, you can embed it and preview your changes.", 'sugar-calendar-lite' ),
+			'<code>[sc_event_tickets_receipt]</code>'
+		)
 	);
+
+	// Which pages already hold each shortcode, read from the objects above so the
+	// button state costs no query of its own.
+	$shortcode_pages = [
+		'receipt_page' => get_pages_holding_shortcode( $pages, get_page_shortcode_tag( 'receipt_page' ) ),
+		'ticket_page'  => get_pages_holding_shortcode( $pages, get_page_shortcode_tag( 'ticket_page' ) ),
+	];
 
 	$pages = wp_list_pluck( $pages, 'post_title', 'ID' );
 
@@ -328,7 +339,27 @@ function payments_section() {
 
 	UI::heading(
 		[
-			'title' => esc_html__( 'Pages Configuration', 'sugar-calendar-lite' ),
+			'title' => esc_html__( 'Tickets Page Configuration', 'sugar-calendar-lite' ),
+		]
+	);
+
+	localize_page_action_data( $shortcode_pages );
+
+	// With no saved value, or one the list no longer offers, the select shows its
+	// first option, so the buttons answer for the page actually on screen.
+	$first_page = (int) array_key_first( $pages );
+
+	$receipt_preview = get_page_action_button( 'receipt_page', isset( $pages[ $receipt_page ] ) ? $receipt_page : $first_page, $shortcode_pages['receipt_page'] );
+	$ticket_preview  = get_page_action_button( 'ticket_page', isset( $pages[ $ticket_page ] ) ? $ticket_page : $first_page, $shortcode_pages['ticket_page'] );
+
+	// Use Legacy Template.
+	UI::toggle_control(
+		[
+			'id'          => 'use_legacy_template',
+			'name'        => 'use_legacy_template',
+			'value'       => Settings\get_setting( 'use_legacy_template', false ),
+			'label'       => esc_html__( 'Use Legacy Template', 'sugar-calendar-lite' ),
+			'description' => esc_html__( 'Use the legacy HTML table instead of styled templates.', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -340,14 +371,18 @@ function payments_section() {
 			'value'       => $receipt_page,
 			'label'       => esc_html__( 'Payment Success Page', 'sugar-calendar-lite' ),
 			'description' => $receipt_page_description,
+			'after_input' => $receipt_preview,
 		]
 	);
 
-	$ticket_page_description = sprintf( /* translators: %1$s - field description; %2$s - field directions; %3$s shortcode.*/
-		'%1$s.<br>%2$s<code>[sc_event_tickets_details]</code> %3$s.',
+	$ticket_page_description = sprintf(
+		'%1$s.<br/>%2$s',
 		esc_html__( 'The page where customer will view the details of their ticket purchases', 'sugar-calendar-lite' ),
-		esc_html__( 'This page must contain the', 'sugar-calendar-lite' ),
-		esc_html__( 'shortcode', 'sugar-calendar-lite' ),
+		sprintf(
+			/* translators: %s - shortcode tag, already wrapped in a code element. */
+			esc_html__( "If the selected page doesn't have the %s shortcode, you can embed it and preview your changes.", 'sugar-calendar-lite' ),
+			'<code>[sc_event_tickets_details]</code>'
+		)
 	);
 
 	UI::select_input(
@@ -358,6 +393,32 @@ function payments_section() {
 			'value'       => $ticket_page,
 			'label'       => esc_html__( 'Ticket Details Page', 'sugar-calendar-lite' ),
 			'description' => $ticket_page_description,
+			'after_input' => $ticket_preview,
+		]
+	);
+
+	$colors = [];
+
+	// Order comes from the fields array, so the pickers and the sanitizer agree.
+	foreach ( Settings\get_color_scheme_fields() as $color_key => $color_field ) {
+		$colors[] = [
+			'name'    => $color_key,
+			'value'   => Settings\get_setting( $color_key, $color_field['default'] ),
+			'label'   => $color_field['label'],
+			'default' => $color_field['default'],
+		];
+	}
+
+	// Color Scheme.
+	UI::color_scheme_input(
+		[
+			'id'          => 'color_scheme',
+			'label'       => esc_html__( 'Color Scheme', 'sugar-calendar-lite' ),
+			'colors'      => $colors,
+
+			// Hidden until Use Legacy Template is on; admin-color-scheme.js reveals it
+			// alongside the dimming, so it only ever appears next to a disabled control.
+			'description' => esc_html__( 'Color schemes will be disabled when legacy template is turned on', 'sugar-calendar-lite' ),
 		]
 	);
 
@@ -373,6 +434,134 @@ function payments_section() {
 	);
 
 	do_action( 'sc_et_settings_general_section_bottom' );
+}
+
+/**
+ * The shortcode tag one of the two ticket page settings expects.
+ *
+ * @since 3.14.0
+ *
+ * @param string $key Setting key.
+ *
+ * @return string Shortcode tag, or '' when the key is not a ticket page setting.
+ */
+function get_page_shortcode_tag( $key ) {
+
+	switch ( $key ) {
+		case 'receipt_page':
+			return 'sc_event_tickets_receipt';
+
+		case 'ticket_page':
+			return 'sc_event_tickets_details';
+	}
+
+	return '';
+}
+
+/**
+ * Ids of the given pages whose content holds a shortcode.
+ *
+ * @since 3.14.0
+ *
+ * @param \WP_Post[] $pages Page objects.
+ * @param string     $tag   Shortcode tag.
+ *
+ * @return int[]
+ */
+function get_pages_holding_shortcode( $pages, $tag ) {
+
+	$ids = [];
+
+	if ( empty( $tag ) ) {
+		return $ids;
+	}
+
+	foreach ( $pages as $page ) {
+		if ( has_shortcode( (string) $page->post_content, $tag ) ) {
+			$ids[] = (int) $page->ID;
+		}
+	}
+
+	return $ids;
+}
+
+/**
+ * Hand the page-action buttons their state map, nonces and labels.
+ *
+ * Localized from the render rather than the enqueue so the map can reuse the page
+ * objects already in hand. The script sits in the footer, so this still lands.
+ *
+ * @since 3.14.0
+ *
+ * @param array $shortcode_pages Setting key => ids of pages holding its shortcode.
+ */
+function localize_page_action_data( $shortcode_pages ) {
+
+	wp_localize_script(
+		'sc-et-admin-page-shortcode',
+		'sc_et_page_shortcode',
+		[
+			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
+
+			// `?page_id=` resolves any page and survives the canonical redirect with
+			// its query string, so Preview can retarget without a permalink map.
+			'home'     => home_url( '/' ),
+			'nonce'    => wp_create_nonce( 'sc-et-page-action' ),
+			'preview'  => wp_create_nonce( EditorPreview::NONCE_ACTION ),
+			'embedded' => $shortcode_pages,
+			'labels'   => [
+				'preview' => esc_html__( 'Preview', 'sugar-calendar-lite' ),
+				'embed'   => esc_html__( 'Embed', 'sugar-calendar-lite' ),
+			],
+			'error'    => esc_html__( 'Could not add the shortcode to that page.', 'sugar-calendar-lite' ),
+		]
+	);
+}
+
+/**
+ * The Embed / Preview button for one of the two ticket page settings.
+ *
+ * Both states are handled in JS, so this renders a button rather than a link: the
+ * Preview URL carries the values on screen, which are not known until the click.
+ *
+ * Empty when no page is set: there is nothing to embed into or to preview.
+ *
+ * @since 3.14.0
+ *
+ * @param string $key      Setting key.
+ * @param int    $page_id  Page the row currently shows.
+ * @param int[]  $embedded Ids of pages already holding this setting's shortcode.
+ *
+ * @return string Button HTML, or '' when there is nothing to act on.
+ */
+function get_page_action_button( $key, $page_id, $embedded ) {
+
+	$page_id = (int) $page_id;
+
+	if ( empty( $page_id ) || empty( get_permalink( $page_id ) ) || empty( get_page_shortcode_tag( $key ) ) ) {
+		return '';
+	}
+
+	$is_embedded = in_array( $page_id, $embedded, true );
+
+	ob_start();
+
+	UI::button(
+		[
+			'text'   => $is_embedded
+				? esc_html__( 'Preview', 'sugar-calendar-lite' )
+				: esc_html__( 'Embed', 'sugar-calendar-lite' ),
+			'name'   => '',
+			'type'   => 'tertiary',
+			'class'  => [
+				'sugar-calendar-setting-page-action',
+				$is_embedded ? 'is-preview' : 'is-embed',
+			],
+			'submit' => false,
+		]
+	);
+
+	return ob_get_clean();
 }
 
 function display_stripe_connect_field( $is_sandbox ) {
@@ -686,11 +875,14 @@ function add_page_states( $states = [], $post = false ) {
  *
  * @since 3.3.0
  * @since 3.6.0 Added `attendee_fields_is_required`.
+ * @since 3.14.0 Added `ticket_sale_admin_subject` and `ticket_sale_admin_message`.
+ * @since 3.14.0 Added `use_legacy_template` and the four color-scheme keys.
  *
  * @return array
  */
 function get_setting_names() {
-	return [
+
+	$names = [
 		'sandbox',
 		'receipt_page',
 		'currency',
@@ -704,17 +896,29 @@ function get_setting_names() {
 		'receipt_message',
 		'ticket_subject',
 		'ticket_message',
+		'ticket_sale_admin_subject',
+		'ticket_sale_admin_message',
 		'attendee_fields_is_required',
+		'use_legacy_template',
 	];
+
+	// Derived, not restated: an unlisted color key is dropped by handle_post()
+	// with no notice, so the defaults stay the single source of truth.
+	$names = array_merge( $names, array_keys( Settings\get_color_scheme_defaults() ), Styling::setting_names() );
+
+	return $names;
 }
 
 /**
  * Sanitize a settings value by its key.
  *
  * Message fields render via wp_editor and are sent as text/html, so they keep
- * safe HTML via wp_kses_post(); every other field is treated as plain text.
+ * safe HTML via wp_kses_post(); color fields must be a #rrggbb string; every
+ * other field is treated as plain text.
  *
  * @since 3.12.0
+ * @since 3.14.0 Added ticket_sale_admin_message.
+ * @since 3.14.0 Added the color-field branch.
  *
  * @param string $key   The setting key.
  * @param mixed  $value The raw value to sanitize.
@@ -723,9 +927,76 @@ function get_setting_names() {
  */
 function sanitize_setting_value( $key, $value ) {
 
-	return in_array( $key, [ 'receipt_message', 'ticket_message' ], true )
-		? wp_kses_post( $value )
-		: sanitize_textarea_field( $value );
+	if ( in_array( $key, Styling::setting_names(), true ) ) {
+		return Styling::sanitize_setting( $key, $value );
+	}
+
+	if ( in_array( $key, [ 'receipt_message', 'ticket_message', 'ticket_sale_admin_message' ], true ) ) {
+		return wp_kses_post( $value );
+	}
+
+	$color_defaults = Settings\get_color_scheme_defaults();
+
+	if ( isset( $color_defaults[ $key ] ) ) {
+		$color = sanitize_hex_color( $value );
+
+		// sanitize_hex_color() returns null for a malformed value but passes the
+		// empty string straight through, and get_setting() only falls back when a
+		// key is absent, so storing '' would leave the field blank for good.
+		return ( $color === null || $color === '' ) ? $color_defaults[ $key ] : $color;
+	}
+
+	return sanitize_textarea_field( $value );
+}
+
+/**
+ * Whether a posted message is still the route-sensitive default the editor rendered.
+ *
+ * The edit screen shows the current template's default while nothing is stored.
+ * Storing that copy on an untouched save would pin it to one template, so a later
+ * switch to Plain Text would deliver the short Modern body without `{tickets}`
+ * and `{receipt_url}`.
+ *
+ * @since 3.14.0
+ *
+ * @param string $key   Setting key.
+ * @param mixed  $value Posted value.
+ *
+ * @return bool
+ */
+function is_unchanged_route_sensitive_message( $key, $value ) {
+
+	if ( $key === 'receipt_message' ) {
+		$resolution = Settings\get_receipt_message_resolution();
+	} elseif ( $key === 'ticket_message' ) {
+		$resolution = Settings\get_ticket_message_resolution();
+	} else {
+		return false;
+	}
+
+	if ( empty( $resolution['route_sensitive'] ) ) {
+		return false;
+	}
+
+	$rendered = Settings\resolve_email_copy_for_template( $resolution, Styling::get()['template'] );
+
+	return normalize_message_for_comparison( $value ) === normalize_message_for_comparison( $rendered );
+}
+
+/**
+ * Reduce a message to the form the editor round trip cannot change.
+ *
+ * @since 3.14.0
+ *
+ * @param mixed $value Message value.
+ *
+ * @return string
+ */
+function normalize_message_for_comparison( $value ) {
+
+	$value = is_string( $value ) ? $value : '';
+
+	return trim( preg_replace( '/\R/', "\n", wp_kses_post( $value ) ) );
 }
 
 /**
@@ -736,26 +1007,44 @@ function sanitize_setting_value( $key, $value ) {
  * @since 3.3.0 Decouple setting field names.
  * @since 3.6.0 Handling for attendee field checkbox.
  * @since 3.7.0 Changed support from `tickets` to `emails` section.
+ * @since 3.14.0 Scoped the `attendee_fields_is_required` write to the Payments section.
+ * @since 3.14.0 Added a manage_options capability check.
+ * @since 3.14.0 Handling for the use legacy template checkbox.
  *
  * @param array $post_data Array containing the data to be saved.
  */
-function handle_post( $post_data ) {
+function handle_post( $post_data ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded -- The settings ownership checks remain in this existing entry point.
 
-	if (
-		! isset( $_GET['section'] )
-		||
-		! in_array( $_GET['section'], [ 'payments', 'emails' ], true )
-	) {
+	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$settings = get_setting_names();
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	$page      = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+	$section   = isset( $_GET['section'] ) ? sanitize_key( $_GET['section'] ) : '';
+	$email_cfg = isset( $_GET['email_cfg'] ) ? sanitize_key( $_GET['email_cfg'] ) : '';
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+	if ( ! in_array( $section, [ 'payments', 'emails' ], true ) ) {
+		return;
+	}
+
+	$settings                = get_setting_names();
+	$is_email_styling_screen = $page === 'sugarcalendar-settings' && $section === 'emails' && $email_cfg === '';
 
 	$options = get_option( 'sc_et_settings', [] );
 
 	foreach ( $post_data as $key => $value ) {
 
 		if ( ! in_array( $key, $settings, true ) ) {
+			continue;
+		}
+
+		if ( in_array( $key, Styling::setting_names(), true ) && ! $is_email_styling_screen ) {
+			continue;
+		}
+
+		if ( is_unchanged_route_sensitive_message( $key, $value ) ) {
 			continue;
 		}
 
@@ -766,8 +1055,19 @@ function handle_post( $post_data ) {
 		$options['sandbox'] = isset( $post_data['sandbox'] );
 	}
 
-	// Checkbox field - Attendee Fields is Required.
-	$options['attendee_fields_is_required'] = isset( $post_data['attendee_fields_is_required'] );
+	// Checkbox fields - Attendee Fields is Required, Use Legacy Template.
+	//
+	// Only the Payments section renders these, and an unchecked checkbox posts
+	// nothing, so writing them on an Emails save would silently clear a setting
+	// the user never saw. Scope them to the section that owns them.
+	if ( $section === 'payments' ) {
+		$options['attendee_fields_is_required'] = isset( $post_data['attendee_fields_is_required'] );
+		$options['use_legacy_template']         = isset( $post_data['use_legacy_template'] );
+	}
+
+	if ( $is_email_styling_screen ) {
+		$options[ Styling::SETTING_HIDE_BRANDING ] = Styling::can_hide_branding() && isset( $post_data[ Styling::SETTING_HIDE_BRANDING ] );
+	}
 
 	update_option( 'sc_et_settings', $options );
 
@@ -828,7 +1128,7 @@ function handle_post_ajax() {
 	$posted_data = $_POST['options'];
 
 	// Setting names.
-	$setting_names = get_setting_names();
+	$setting_names = array_diff( get_setting_names(), Styling::setting_names() );
 
 	// Current options.
 	$options = get_option( 'sc_et_settings', [] );
@@ -869,6 +1169,98 @@ function handle_post_ajax() {
 
 	// Return the response.
 	wp_send_json( $response );
+}
+
+/**
+ * Shared guard for the two page-shortcode endpoints.
+ *
+ * Sends a JSON error and exits unless the request is a valid one.
+ *
+ * @since 3.14.0
+ *
+ * @return array The validated page id and the shortcode tag its setting expects.
+ */
+function get_page_shortcode_ajax_request() {
+
+	check_ajax_referer( 'sc-et-page-action', 'nonce' );
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error();
+	}
+
+	$page_id = isset( $_POST['page_id'] ) ? absint( $_POST['page_id'] ) : 0;
+	$key     = isset( $_POST['key'] ) ? sanitize_key( wp_unslash( $_POST['key'] ) ) : '';
+
+	// Derived from the setting key, never taken from the request.
+	$tag = get_page_shortcode_tag( $key );
+
+	if ( empty( $tag ) || get_post_type( $page_id ) !== 'page' ) {
+		wp_send_json_error();
+	}
+
+	return [ $page_id, $tag ];
+}
+
+/**
+ * Answer whether a page currently holds its setting's shortcode.
+ *
+ * The render-time map can go stale while the tab sits open, so a dropdown change
+ * confirms itself against the page as it is now.
+ *
+ * @since 3.14.0
+ */
+function handle_check_page_shortcode_ajax() {
+
+	list( $page_id, $tag ) = get_page_shortcode_ajax_request();
+
+	wp_send_json_success(
+		[
+			'embedded' => has_shortcode( (string) get_post_field( 'post_content', $page_id ), $tag ),
+		]
+	);
+}
+
+/**
+ * Append a ticket page shortcode to the end of a page's content.
+ *
+ * Idempotent, so a stale button label costs a no-op rather than a second copy of
+ * the shortcode.
+ *
+ * @since 3.14.0
+ */
+function handle_embed_page_shortcode_ajax() {
+
+	list( $page_id, $tag ) = get_page_shortcode_ajax_request();
+
+	if ( ! current_user_can( 'edit_post', $page_id ) ) {
+		wp_send_json_error();
+	}
+
+	$content = (string) get_post_field( 'post_content', $page_id );
+
+	if ( has_shortcode( $content, $tag ) ) {
+		wp_send_json_success( [ 'embedded' => true ] );
+	}
+
+	// A block-editor page keeps it in a shortcode block; appended raw it would open
+	// as an unexpected Classic block.
+	$appended = has_blocks( $content )
+		? '<!-- wp:shortcode -->[' . $tag . ']<!-- /wp:shortcode -->'
+		: '[' . $tag . ']';
+
+	$updated = wp_update_post(
+		[
+			'ID'           => $page_id,
+			'post_content' => wp_slash( $content === '' ? $appended : $content . "\n\n" . $appended ),
+		],
+		true
+	);
+
+	if ( is_wp_error( $updated ) ) {
+		wp_send_json_error();
+	}
+
+	wp_send_json_success( [ 'embedded' => true ] );
 }
 
 /**

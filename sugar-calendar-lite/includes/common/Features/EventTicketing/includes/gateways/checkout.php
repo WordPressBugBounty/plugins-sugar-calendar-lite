@@ -30,6 +30,26 @@ class Checkout {
 	const NONCE_KEY = 'sc_et_nonce';
 
 	/**
+	 * Maximum length of a name field, matching the `varchar(100)` columns on
+	 * `sc_attendees` and `sc_orders`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var int
+	 */
+	const MAX_NAME_LENGTH = 100;
+
+	/**
+	 * Maximum length of an email address (RFC 5321), matching the `varchar(254)`
+	 * columns on `sc_attendees` and `sc_orders`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @var int
+	 */
+	const MAX_EMAIL_LENGTH = 254;
+
+	/**
 	 * The built-in gateway map used as the `sc_et_gateways` filter default.
 	 *
 	 * Single source of truth so the constructor and any other caller (e.g.
@@ -315,9 +335,61 @@ class Checkout {
 			$this->add_error( 'missing_last_name', esc_html__( 'Please enter your last name.', 'sugar-calendar-lite' ), '#sc-event-ticketing-last-name' );
 		}
 
-		if ( empty( $_POST['email'] ) || ! is_email( $_POST['email'] ) ) {
+		if ( empty( $_POST['email'] ) || ! is_string( $_POST['email'] ) || ! is_email( $_POST['email'] ) ) {
 			$this->add_error( 'missing_email', esc_html__( 'Please enter a valid email address.', 'sugar-calendar-lite' ), '#sc-event-ticketing-email' );
 		}
+
+		// Length is checked before the gateway runs, so an unstorable value can
+		// never reach a confirmed payment intent.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- validate_data() runs after the nonce check in process_ajax_validation()/process_form().
+		if (
+			! empty( $_POST['first_name'] )
+			&&
+			$this->submitted_length( $_POST['first_name'] ) > self::MAX_NAME_LENGTH
+		) {
+			$this->add_error(
+				'first_name_too_long',
+				sprintf(
+					/* translators: %1$d - maximum number of characters. */
+					esc_html__( 'Please use %1$d characters or fewer for your first name.', 'sugar-calendar-lite' ),
+					self::MAX_NAME_LENGTH
+				),
+				'#sc-event-ticketing-first-name'
+			);
+		}
+
+		if (
+			! empty( $_POST['last_name'] )
+			&&
+			$this->submitted_length( $_POST['last_name'] ) > self::MAX_NAME_LENGTH
+		) {
+			$this->add_error(
+				'last_name_too_long',
+				sprintf(
+					/* translators: %1$d - maximum number of characters. */
+					esc_html__( 'Please use %1$d characters or fewer for your last name.', 'sugar-calendar-lite' ),
+					self::MAX_NAME_LENGTH
+				),
+				'#sc-event-ticketing-last-name'
+			);
+		}
+
+		if (
+			! empty( $_POST['email'] )
+			&&
+			$this->submitted_length( $_POST['email'] ) > self::MAX_EMAIL_LENGTH
+		) {
+			$this->add_error(
+				'email_too_long',
+				sprintf(
+					/* translators: %1$d - maximum number of characters. */
+					esc_html__( 'Please use an email address of %1$d characters or fewer.', 'sugar-calendar-lite' ),
+					self::MAX_EMAIL_LENGTH
+				),
+				'#sc-event-ticketing-email'
+			);
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$qty = ! empty( $_POST['sc_et_quantity'] )
 			? absint( $_POST['sc_et_quantity'] )
@@ -367,6 +439,7 @@ class Checkout {
 				// Always: if an email was submitted, it must be a valid email address.
 				if (
 					isset( $attendee['email'] )
+					&& is_string( $attendee['email'] )
 					&& $attendee['email'] !== ''
 					&& ! is_email( wp_unslash( $attendee['email'] ) )
 				) {
@@ -377,6 +450,52 @@ class Checkout {
 					);
 				}
 			}
+
+			// Ungated on purpose: an oversize value fails the insert whether or not
+			// the admin turned required attendee fields on, and that failure would
+			// otherwise land after the card is charged.
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- see the buyer-field block above.
+			foreach ( $_POST['attendees'] as $index => $attendee ) {
+
+				if ( ! is_array( $attendee ) ) {
+					continue;
+				}
+
+				$length_selector = '.sc-et-form-group.sc-event-ticketing-attendee[attendee-key=\'' . absint( $index ) . '\']';
+
+				if (
+					isset( $attendee['full_name'] )
+					&&
+					$this->submitted_length( $attendee['full_name'] ) > self::MAX_NAME_LENGTH
+				) {
+					$this->add_error(
+						'attendee_name_too_long_' . absint( $index ),
+						sprintf(
+							/* translators: %1$d - maximum number of characters. */
+							esc_html__( 'Please use %1$d characters or fewer for the attendee name.', 'sugar-calendar-lite' ),
+							self::MAX_NAME_LENGTH
+						),
+						$length_selector
+					);
+				}
+
+				if (
+					isset( $attendee['email'] )
+					&&
+					$this->submitted_length( $attendee['email'] ) > self::MAX_EMAIL_LENGTH
+				) {
+					$this->add_error(
+						'attendee_email_too_long_' . absint( $index ),
+						sprintf(
+							/* translators: %1$d - maximum number of characters. */
+							esc_html__( 'Please use an email address of %1$d characters or fewer.', 'sugar-calendar-lite' ),
+							self::MAX_EMAIL_LENGTH
+						),
+						$length_selector
+					);
+				}
+			}
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 			// Gated: required-field enforcement only runs when the admin opted in.
 			if ( $this->is_attendee_validation_enabled() ) {
@@ -404,6 +523,39 @@ class Checkout {
 		 * @param Checkout $this Checkout object.
 		 */
 		do_action( 'sc_et_checkout_validate_data', $this ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	/**
+	 * Length of a submitted value in characters, measured in the slash state
+	 * this request actually carries.
+	 *
+	 * `process_ajax_validation()` rebuilds `$_POST` with
+	 * `parse_str( wp_unslash( … ) )`, so on that path the value arrives already
+	 * unslashed while a form POST is still slashed. Unslashing unconditionally
+	 * made the pre-flight measure one character short per backslash, so a name
+	 * the form POST rejects passed the pre-charge gate and the card was charged
+	 * against a value that could not be stored. Mirrors the `$slashed` branch in
+	 * `RegistrationForm\Frontend\TicketingCheckout::validate()`.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param mixed $value Raw `$_POST` value.
+	 *
+	 * @return int Character count, or 0 for a non-scalar (an array-typed field).
+	 */
+	private function submitted_length( $value ) {
+
+		if ( ! is_scalar( $value ) ) {
+			return 0;
+		}
+
+		$value = (string) $value;
+
+		if ( ! wp_doing_ajax() ) {
+			$value = wp_unslash( $value );
+		}
+
+		return mb_strlen( sanitize_text_field( $value ) );
 	}
 
 	/**
@@ -884,6 +1036,13 @@ class Checkout {
 
 		// Get attendee object.
 		$attendee_object = Functions\get_attendee( $attendee_id );
+
+		// The insert can fail (a name longer than the column, for one), leaving
+		// no attendee to filter. Return the raw attendee so prepare_attendees()
+		// files it as anonymous instead of passing false to filter consumers.
+		if ( empty( $attendee_object ) ) {
+			return $attendee;
+		}
 
 		/**
 		 * Filter the attendee object after retrieval.

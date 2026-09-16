@@ -427,6 +427,7 @@ class OnlineMeetingSection {
 	 * online_provider is `custom`, so a hidden stale value is ignored.
 	 *
 	 * @since 3.12.0
+	 * @since 3.14.0 Renders the empty error element the field-error helper fills.
 	 *
 	 * @param object $event SCE Event object.
 	 *
@@ -442,9 +443,14 @@ class OnlineMeetingSection {
 		<div class="sugar-calendar-metabox__online-custom"<?php echo $is_custom ? '' : ' style="display: none;"'; ?>>
 			<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--online-detail">
 				<label for="custom_link_url"><?php esc_html_e( 'Event Link', 'sugar-calendar-lite' ); ?></label>
-				<div class="sugar-calendar-metabox__field sugar-calendar-metabox__online-copy">
-					<input type="url" id="custom_link_url" name="custom_link_url" class="sugar-calendar-metabox__online-field" value="<?php echo esc_url( $url ); ?>" placeholder="<?php esc_attr_e( 'Add your link here', 'sugar-calendar-lite' ); ?>" />
-					<button type="button" class="sugar-calendar-metabox__copy" data-copy-target="custom_link_url"><?php esc_html_e( 'Copy', 'sugar-calendar-lite' ); ?></button>
+				<div class="sugar-calendar-metabox__field">
+					<?php // The input and Copy sit in their own flex row so the message below them is not pulled onto the same line. ?>
+					<div class="sugar-calendar-metabox__online-copy">
+						<input type="url" id="custom_link_url" name="custom_link_url" class="sugar-calendar-metabox__online-field" value="<?php echo esc_url( $url ); ?>" placeholder="<?php esc_attr_e( 'Add your link here', 'sugar-calendar-lite' ); ?>" />
+						<button type="button" class="sugar-calendar-metabox__copy" data-copy-target="custom_link_url"><?php esc_html_e( 'Copy', 'sugar-calendar-lite' ); ?></button>
+					</div>
+					<?php // Filled by SugarCalendar.Admin.FieldError on a blocked save. Rendered inside the field column, like the .desc paragraphs, so it lines up under the input rather than under the label. ?>
+					<p id="custom_link_url-error" data-sc-field-error="custom_link_url" class="sugar-calendar-field-error" role="alert" style="display: none;"></p>
 				</div>
 			</div>
 		</div>

@@ -11,6 +11,7 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\Formatter;
 
 /**
  * List events with filters and pagination. Requires `edit_posts`.
@@ -104,13 +105,7 @@ class ListEvents extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [
-			'type'       => 'object',
-			'properties' => [
-				'events' => [ 'type' => 'array' ],
-				'total'  => [ 'type' => 'integer' ],
-			],
-		];
+		return Formatter::collection_schema( 'events', Formatter::event_schema() );
 	}
 
 	/**

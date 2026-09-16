@@ -134,15 +134,16 @@ class Event implements MetaboxInterface {
 	 * Setup default sections.
 	 *
 	 * @since 2.0.3
+	 * @since 3.14.0 Renamed the Duration section to General and switched its icon.
 	 */
 	public function setup_sections() {
 
-		// Duration.
+		// General. Section id stays `duration` so existing selectors keep working.
 		$this->add_section(
 			[
 				'id'       => 'duration',
-				'label'    => esc_html__( 'Duration', 'sugar-calendar-lite' ),
-				'icon'     => 'clock',
+				'label'    => esc_html__( 'General', 'sugar-calendar-lite' ),
+				'icon'     => 'info-outline',
 				'order'    => 10,
 				'callback' => [ $this, 'section_duration' ],
 			]
@@ -520,6 +521,8 @@ class Event implements MetaboxInterface {
 	 * Output the event duration meta-box section.
 	 *
 	 * @since  2.0.0
+	 * @since 3.14.0 Added the `sugar_calendar_admin_meta_box_duration_section` action.
+	 * @since 3.14.0 Renders the empty error element the field-error helper fills.
 	 *
 	 * @param Event $event The event object.
 	 */
@@ -654,10 +657,6 @@ class Event implements MetaboxInterface {
 				if ( empty( $hour ) && empty( $minute ) ) {
 					$am_pm = '';
 				}
-
-				// All day.
-			} elseif ( $date === $end_date ) {
-				$end_date = '';
 			}
 		}
 
@@ -804,6 +803,9 @@ class Event implements MetaboxInterface {
 
                     </div>
 				<?php endif; ?>
+
+				<?php // Filled by SugarCalendar.Admin.FieldError when the start is unusable. ?>
+                <p id="start_date-error" data-sc-field-error="start_date" class="sugar-calendar-field-error" role="alert" style="display: none;"></p>
             </div>
         </div>
         <div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--end_date">
@@ -881,6 +883,9 @@ class Event implements MetaboxInterface {
 
                     </div>
 				<?php endif; ?>
+
+				<?php // Filled by SugarCalendar.Admin.FieldError when the range is unusable. ?>
+                <p id="end_date-error" data-sc-field-error="end_date" class="sugar-calendar-field-error" role="alert" style="display: none;"></p>
             </div>
         </div>
 
@@ -907,6 +912,17 @@ class Event implements MetaboxInterface {
 
 		<?php
 		endif;
+
+		/**
+		 * Fires at the end of the General metabox section, after the date fields.
+		 *
+		 * Mirrors `sugar_calendar_admin_meta_box_location_section` on the Location tab.
+		 *
+		 * @since 3.14.0
+		 *
+		 * @param Event $event The event object.
+		 */
+		do_action( 'sugar_calendar_admin_meta_box_duration_section', $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}

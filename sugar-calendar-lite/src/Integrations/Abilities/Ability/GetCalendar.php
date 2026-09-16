@@ -11,6 +11,7 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\Formatter;
 use WP_Error;
 use WP_Term;
 
@@ -85,7 +86,7 @@ class GetCalendar extends AbstractAbility {
 	 */
 	protected function get_output_schema(): array {
 
-		return [ 'type' => 'object' ];
+		return Formatter::term_schema();
 	}
 
 	/**

@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Integrations\Elementor\Widgets;
 
 use Elementor\Widget_Base;
 use Sugar_Calendar\Integrations\Elementor\Helpers;
+use Sugar_Calendar\Helpers as BaseHelpers;
 use Elementor\Plugin as ElementorPlugin;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers as TicketingHelpers;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as TicketingFunctions;
@@ -78,7 +79,14 @@ abstract class AbstractEventWidget extends Widget_Base {
 		 */
 		$event = apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_integrations_elementor_widgets_get_event',
-			sugar_calendar_get_event_by_object( $post_id ),
+			sugar_calendar_get_event_by_object(
+				$post_id,
+				'post',
+				// Without this, the lookup defaults to 'sc_event' only and
+				// silently fails to resolve recurring events, leaving every
+				// widget in this family blank.
+				[ 'object_subtype' => BaseHelpers::get_event_post_types() ]
+			),
 			$post_id
 		);
 
@@ -146,7 +154,7 @@ abstract class AbstractEventWidget extends Widget_Base {
 
 		if (
 			! ElementorPlugin::$instance->editor->is_edit_mode() &&
-			! is_singular( sugar_calendar_get_event_post_type_id() )
+			! is_singular( BaseHelpers::get_event_post_types() )
 		) {
 			return false;
 		}

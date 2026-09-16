@@ -47,8 +47,9 @@ function sugar_calendar_transition_post_status( $new_status = '', $old_status = 
 /**
  * Delete events for a given post ID.
  *
- * This is hooked to the `deleted_posts` action to ensure that all events
- * related to a post ID are deleted when the post is also deleted.
+ * Hooked to `before_delete_post` (not `deleted_post`) so the event lookup below
+ * still resolves — it keys off the post id, which no longer exists once the post
+ * has been deleted. Ensures the `wp_sc_events` row is removed with the post.
  *
  * @since 2.0.0
  *

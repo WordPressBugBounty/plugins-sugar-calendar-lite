@@ -197,12 +197,14 @@ class CsvExporter extends AbstractExporter {
 		 * dropped.
 		 *
 		 * @since 3.13.0
+		 * @since 3.14.0 Added the $range argument.
 		 *
 		 * @param array $tables Map of entity slug => CSV string.
 		 * @param array $data   Collected export data.
 		 * @param array $keys   Selected data-type keys.
+		 * @param array $range  Active date range (see AbstractExporter::range_filter_arg()), or [].
 		 */
-		$this->parts = (array) apply_filters( 'sugar_calendar_admin_tools_export_csv_tables', $parts, $data, $this->keys );
+		$this->parts = (array) apply_filters( 'sugar_calendar_admin_tools_export_csv_tables', $parts, $data, $this->keys, $this->range_filter_arg() );
 		// phpcs:enable WPForms.PHP.ValidateHooks.InvalidHookName
 
 		return $this->parts;

@@ -34,7 +34,7 @@ final class Orders_Table extends Table {
 	 * @since 3.12.0 Updated to `202607020001`.
 	 * @since 3.12.0 Updated to `202607080001`.
 	 */
-	protected $version = 202607080001;
+	protected $version = 202609010001;
 
 	/**
 	 * @var string Table schema
@@ -61,6 +61,7 @@ final class Orders_Table extends Table {
 		'202605070001' => 202605070001,
 		'202607020001' => 202607020001,
 		'202607080001' => 202607080001,
+		'202609010001' => 202609010001,
 	];
 
 	/**
@@ -76,9 +77,9 @@ final class Orders_Table extends Table {
 			status varchar(20) NOT NULL default '',
 			currency varchar(20) NOT NULL default '',
 			discount_id bigint(20) unsigned NOT NULL default '0',
-			email varchar(100) NOT NULL default '',
-			first_name varchar(20) NOT NULL default '',
-			last_name varchar(20) NOT NULL default '',
+			email varchar(254) NOT NULL default '',
+			first_name varchar(100) NOT NULL default '',
+			last_name varchar(100) NOT NULL default '',
 			subtotal decimal(18,9) NOT NULL default '0',
 			discount decimal(18,9) NOT NULL default '0',
 			tax decimal(18,9) NOT NULL default '0',
@@ -383,5 +384,91 @@ final class Orders_Table extends Table {
 		);
 
 		return $this->is_success( $result );
+	}
+
+	/**
+	 * Upgrade to version 202609010001
+	 * - Widen `first_name` and `last_name` to 100, `email` to 254.
+	 *
+	 * Mirrors the same widening on `sc_attendees`. The buyer's own name and email
+	 * reach this table through a different POST path from the attendee fields, so
+	 * both tables have to move together.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @return boolean
+	 */
+	protected function __202609010001() { // phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.MethodDoubleUnderscore
+
+		$db    = $this->get_db();
+		$table = $this->table_name;
+
+		$width = $db->get_var( $db->prepare(
+			"SELECT CHARACTER_MAXIMUM_LENGTH
+			   FROM INFORMATION_SCHEMA.COLUMNS
+			  WHERE TABLE_SCHEMA = %s
+			    AND TABLE_NAME   = %s
+			    AND COLUMN_NAME  = 'first_name'",
+			DB_NAME,
+			$table
+		) );
+
+		$has_index = $db->get_var( $db->prepare(
+			"SELECT COUNT(*)
+			   FROM INFORMATION_SCHEMA.STATISTICS
+			  WHERE TABLE_SCHEMA = %s
+			    AND TABLE_NAME   = %s
+			    AND INDEX_NAME   = 'email'",
+			DB_NAME,
+			$table
+		) );
+
+		// Idempotency covers the index too, not just the width: a run interrupted
+		// between the widen and the re-index would otherwise satisfy a width-only
+		// check and report success, leaving the column permanently un-indexed.
+		if ( (int) $width >= 100 && ! empty( $has_index ) ) {
+			return $this->is_success( true );
+		}
+
+		// The `email` KEY spans the whole column. At utf8mb4, 254 chars is 1016
+		// bytes, over the 767-byte index limit on COMPACT/REDUNDANT tables, so
+		// widening underneath the full-column key would fail there and the upgrade
+		// would retry forever. Drop the key, widen, then re-add it as a 191-char
+		// prefix (WordPress core's utf8mb4-safe number). Lookups here are
+		// exact-match, so the prefix costs nothing.
+		//
+		// Order matters: MySQL rejects a prefix longer than the column, so the
+		// index cannot be re-added until after the widen.
+		if (
+			! empty( $has_index )
+			&&
+			false === $db->query( "ALTER TABLE {$table} DROP INDEX `email`" )
+		) {
+			return $this->is_success( false );
+		}
+
+		// Collation is named explicitly: a bare MODIFY inherits the TABLE default,
+		// which silently rewrites a column whose collation differs. This table
+		// already holds one such column (`transaction_id`).
+		$result = $db->query(
+			"ALTER TABLE {$table}
+			 MODIFY COLUMN `first_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT '',
+			 MODIFY COLUMN `last_name`  varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT '',
+			 MODIFY COLUMN `email`      varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL DEFAULT ''"
+		);
+
+		if ( false === $result ) {
+			// The column is still its original width here, so the key has to go
+			// back un-prefixed: a 191-char prefix is longer than the column and
+			// MySQL would reject it, leaving the table with no `email` index and
+			// the next retry bailing on the DROP.
+			$db->query( "ALTER TABLE {$table} ADD INDEX `email` (`email`)" );
+
+			return $this->is_success( false );
+		}
+
+		$reindexed = $db->query( "ALTER TABLE {$table} ADD INDEX `email` (`email`(191))" );
+
+		return $this->is_success( $reindexed );
 	}
 }

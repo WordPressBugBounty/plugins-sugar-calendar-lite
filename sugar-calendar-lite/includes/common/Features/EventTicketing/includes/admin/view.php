@@ -203,16 +203,7 @@ function view( $order_id = 0 ) {
 								? $fname . ' ' . $lname
 								: '&mdash;';
 
-							$print_url = wp_nonce_url(
-								add_query_arg(
-									array(
-										'sc_et_action' => 'print',
-										'ticket_code'  => $ticket->code
-									),
-									home_url()
-								),
-								$ticket->code
-							);
+							$print_url = Functions\get_ticket_print_url( $ticket );
 
 							$email_url = wp_nonce_url(
 								add_query_arg(
@@ -588,9 +579,14 @@ function resend_receipt() {
 		? absint( $_POST['order_id'] )
 		: 0;
 
-	// Send receipt email
+	// Send receipt email.
+	//
+	// $force = true: this is an administrator clicking "Resend Email Receipt".
+	// An explicit human action must never silently no-op just because automatic
+	// receipts are switched off in Settings → Emails — the admin would have no
+	// way to tell that apart from a broken mail server.
 	if ( ! empty( $order_id ) ) {
-		$notice_type = Functions\send_order_receipt_email( $order_id )
+		$notice_type = Functions\send_order_receipt_email( $order_id, true )
 			? 'updated'
 			: 'error';
 	}
