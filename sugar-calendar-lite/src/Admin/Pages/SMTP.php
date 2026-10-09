@@ -2,10 +2,13 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
+use PHPMailer\PHPMailer\PHPMailer;
 use Sugar_Calendar\Admin\PageAbstract;
+use Sugar_Calendar\Admin\Tools\Smtp as SmtpDetector;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers as BaseHelpers;
-use Sugar_Calendar\Helpers\Installer;
+use Sugar_Calendar\PartnerPlugins\Catalog;
+use Sugar_Calendar\PartnerPlugins\Installer;
 
 /**
  * SMTP Sub-page.
@@ -24,19 +27,21 @@ class SMTP extends PageAbstract {
 	const SLUG = 'sugar-calendar-smtp';
 
 	/**
-	 * Configuration.
+	 * WP Mail SMTP's `PartnerPlugins\Catalog` key.
+	 *
+	 * @since 3.15.0
+	 */
+	const WP_MAIL_SMTP_KEY = 'wp-mail-smtp';
+
+	/**
+	 * Configuration. WP Mail SMTP's basenames, package and admin page come from `PartnerPlugins\Catalog`.
 	 *
 	 * @since 3.11.0
 	 *
 	 * @var array
 	 */
 	private $config = [
-		'lite_plugin'       => 'wp-mail-smtp/wp_mail_smtp.php',
-		'lite_wporg_url'    => 'https://wordpress.org/plugins/wp-mail-smtp/',
-		'lite_download_url' => 'https://downloads.wordpress.org/plugin/wp-mail-smtp.zip',
-		'pro_plugin'        => 'wp-mail-smtp-pro/wp_mail_smtp.php',
-		'smtp_settings_url' => 'admin.php?page=wp-mail-smtp',
-		'smtp_wizard_url'   => 'admin.php?page=wp-mail-smtp-setup-wizard',
+		'smtp_wizard_url' => 'admin.php?page=wp-mail-smtp-setup-wizard',
 	];
 
 	/**
@@ -69,7 +74,6 @@ class SMTP extends PageAbstract {
 			add_action( 'sugar_calendar_ajax_sce_install_smtp', [ $this, 'ajax_install_smtp' ] );
 			add_action( 'sugar_calendar_ajax_sce_activate_smtp', [ $this, 'ajax_activate_smtp' ] );
 			add_action( 'sugar_calendar_ajax_sce_check_plugin_status', [ $this, 'ajax_check_plugin_status' ] );
-			add_action( 'sugar_calendar_plugin_activated', [ $this, 'smtp_activated' ] );
 		}
 
 		add_action( 'admin_init', [ $this, 'redirect_to_smtp_settings' ] );
@@ -128,56 +132,18 @@ class SMTP extends PageAbstract {
 		 */
 		do_action( 'sugar_calendar_admin_pages_smtp_install_clicked', 'install' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
-		$error      = esc_html__( 'Could not install the plugin. Please download and install it manually.', 'sugar-calendar-lite' );
-		$plugin_url = ! empty( $_POST['plugin'] ) ? esc_url_raw( wp_unslash( $_POST['plugin'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$result = $this->run_smtp();
 
-		if ( empty( $plugin_url ) ) {
-			wp_send_json_error( $error );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( $result->get_error_message() );
 		}
 
-		$args_str = ! empty( $_POST['args'] ) ? sanitize_text_field( wp_unslash( $_POST['args'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$args     = json_decode( $args_str, true ) ?? [];
-
-		// Set the current screen to avoid undefined notices.
-		set_current_screen( 'events_page_sugar-calendar-smtp' );
-
-		// Prepare variables.
-		$credentials_url = esc_url_raw(
-			add_query_arg(
-				[
-					'page' => self::get_slug(),
-				],
-				admin_url( 'admin.php' )
-			)
+		wp_send_json_success(
+			[
+				'is_activated' => $result['plugin_state'] === 'active',
+				'msg'          => $result['message'],
+			]
 		);
-
-		$plugin_basename = Installer::install_plugin(
-			$credentials_url,
-			$plugin_url,
-			current_user_can( 'activate_plugins' ),
-			$args
-		);
-
-		if ( is_wp_error( $plugin_basename ) ) {
-			wp_send_json_error( $error );
-		}
-
-		$result = [
-			'is_activated' => false,
-			'basename'     => $plugin_basename,
-		];
-
-		// Check for permissions.
-		if ( ! current_user_can( 'activate_plugins' ) ) {
-			$result['msg'] = esc_html__( 'Plugin installed.', 'sugar-calendar-lite' );
-
-			wp_send_json_success( $result );
-		}
-
-		$result['is_activated'] = true;
-		$result['msg']          = esc_html__( 'Plugin installed & activated.', 'sugar-calendar-lite' );
-
-		wp_send_json_success( $result );
 	}
 
 	/**
@@ -195,30 +161,63 @@ class SMTP extends PageAbstract {
 		/** This action is documented in src/Admin/Pages/SMTP.php (ajax_install_smtp). */
 		do_action( 'sugar_calendar_admin_pages_smtp_install_clicked', 'activate' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
-		$success_message = __( 'Plugin activated.', 'sugar-calendar-lite' );
-		$error_message   = __( 'Could not activate the plugin. Please activate it on the Plugins page.', 'sugar-calendar-lite' );
+		$result = $this->run_smtp();
 
-		if ( isset( $_POST['plugin'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$plugin   = sanitize_text_field( wp_unslash( $_POST['plugin'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$activate = activate_plugin( $plugin );
-
-			/**
-			 * Fire after plugin activating via the Sugar Calendar installer.
-			 *
-			 * @since 3.11.0
-			 *
-			 * @param string $plugin Path to the plugin file relative to the plugins' directory.
-			 */
-			do_action( 'sugar_calendar_plugin_activated', $plugin ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
-
-			if ( $activate === null ) {
-				wp_send_json_success( wp_kses_post( $success_message ) );
-			}
-
-			$error_message = $activate->get_error_message();
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( $result->get_error_message() );
 		}
 
-		wp_send_json_error( wp_kses_post( $error_message ) );
+		wp_send_json_success( $result['message'] );
+	}
+
+	/**
+	 * Install or activate WP Mail SMTP, whichever its live state allows.
+	 *
+	 * The package and basename come from `PartnerPlugins\Catalog`, never from the request.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return array|WP_Error `Helpers\ActionResult` array, or the operation error.
+	 */
+	private function run_smtp() {
+
+		// Set the current screen to avoid undefined notices.
+		set_current_screen( 'events_page_sugar-calendar-smtp' );
+
+		$credentials_url = esc_url_raw(
+			add_query_arg(
+				[
+					'page' => self::get_slug(),
+				],
+				admin_url( 'admin.php' )
+			)
+		);
+
+		return ( new Installer() )->run( ( new Catalog() )->get_target( self::WP_MAIL_SMTP_KEY ), $credentials_url );
+	}
+
+	/**
+	 * WP Mail SMTP's Catalog record: basenames, package, wp.org listing and admin page.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return array
+	 */
+	private function get_partner() {
+
+		return ( new Catalog() )->get( self::WP_MAIL_SMTP_KEY );
+	}
+
+	/**
+	 * WP Mail SMTP's settings screen, relative to wp-admin as the page script expects.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return string
+	 */
+	private function get_settings_path() {
+
+		return 'admin.php?page=' . $this->get_partner()['admin_page'];
 	}
 
 	/**
@@ -300,7 +299,7 @@ class SMTP extends PageAbstract {
 	 */
 	public function smtp_activated( $plugin_basename ) {
 
-		if ( $plugin_basename !== $this->config['lite_plugin'] ) {
+		if ( $plugin_basename !== $this->get_partner()['basename'] ) {
 			return;
 		}
 
@@ -319,6 +318,8 @@ class SMTP extends PageAbstract {
 	 */
 	protected function get_js_strings() {
 
+		$download_url = $this->get_partner()['download_url'];
+
 		$error_could_not_install = sprintf(
 			wp_kses( /* translators: %s - Lite plugin download URL. */
 				__( 'Could not install the plugin automatically. Please <a href="%s">download</a> it and install it manually.', 'sugar-calendar-lite' ),
@@ -328,7 +329,7 @@ class SMTP extends PageAbstract {
 					],
 				]
 			),
-			esc_url( $this->config['lite_download_url'] )
+			esc_url( $download_url )
 		);
 
 		$error_could_not_activate = sprintf(
@@ -353,11 +354,11 @@ class SMTP extends PageAbstract {
 			'plugins_page'             => esc_html__( 'Go to Plugins page', 'sugar-calendar-lite' ),
 			'error_could_not_install'  => $error_could_not_install,
 			'error_could_not_activate' => $error_could_not_activate,
-			'manual_install_url'       => $this->config['lite_download_url'],
+			'manual_install_url'       => $download_url,
 			'manual_activate_url'      => admin_url( 'plugins.php' ),
 			'smtp_settings'            => esc_html__( 'Go to SMTP settings', 'sugar-calendar-lite' ),
 			'smtp_wizard'              => esc_html__( 'Open Setup Wizard', 'sugar-calendar-lite' ),
-			'smtp_settings_url'        => esc_url( $this->config['smtp_settings_url'] ),
+			'smtp_settings_url'        => esc_url( $this->get_settings_path() ),
 			'smtp_wizard_url'          => esc_url( $this->config['smtp_wizard_url'] ),
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'nonce'                    => wp_create_nonce( 'sugar-calendar' ),
@@ -568,9 +569,12 @@ class SMTP extends PageAbstract {
 		$step['heading']     = esc_html__( 'Install and Activate WP Mail SMTP', 'sugar-calendar-lite' );
 		$step['description'] = esc_html__( 'Install WP Mail SMTP from the WordPress.org plugin repository.', 'sugar-calendar-lite' );
 
+		$partner    = $this->get_partner();
+		$pro_plugin = $partner['pro_basenames'][0];
+
 		$this->output_data['all_plugins']          = get_plugins();
-		$this->output_data['plugin_installed']     = array_key_exists( $this->config['lite_plugin'], $this->output_data['all_plugins'] );
-		$this->output_data['pro_plugin_installed'] = array_key_exists( $this->config['pro_plugin'], $this->output_data['all_plugins'] );
+		$this->output_data['plugin_installed']     = array_key_exists( $partner['basename'], $this->output_data['all_plugins'] );
+		$this->output_data['pro_plugin_installed'] = array_key_exists( $pro_plugin, $this->output_data['all_plugins'] );
 		$this->output_data['plugin_activated']     = false;
 		$this->output_data['plugin_setup']         = false;
 
@@ -579,13 +583,13 @@ class SMTP extends PageAbstract {
 			$step['button_text']   = esc_html__( 'Install WP Mail SMTP', 'sugar-calendar-lite' );
 			$step['button_class']  = 'button-primary';
 			$step['button_action'] = 'install';
-			$step['plugin']        = $this->config['lite_download_url'];
+			$step['plugin']        = $partner['download_url'];
 
 			if ( ! current_user_can( 'install_plugins' ) ) {
 				$step['heading']     = esc_html__( 'WP Mail SMTP', 'sugar-calendar-lite' );
 				$step['description'] = '';
 				$step['button_text'] = esc_html__( 'WP Mail SMTP on WordPress.org', 'sugar-calendar-lite' );
-				$step['plugin']      = $this->config['lite_wporg_url'];
+				$step['plugin']      = $partner['wporg_url'];
 			}
 		} else {
 			$this->output_data['plugin_activated'] = $this->is_smtp_activated();
@@ -594,7 +598,7 @@ class SMTP extends PageAbstract {
 			$step['button_text']                   = $this->output_data['plugin_activated'] ? esc_html__( 'WP Mail SMTP Installed & Activated', 'sugar-calendar-lite' ) : esc_html__( 'Activate WP Mail SMTP', 'sugar-calendar-lite' );
 			$step['button_class']                  = $this->output_data['plugin_activated'] ? 'grey disabled' : 'button-primary';
 			$step['button_action']                 = $this->output_data['plugin_activated'] ? '' : 'activate';
-			$step['plugin']                        = $this->output_data['pro_plugin_installed'] ? $this->config['pro_plugin'] : $this->config['lite_plugin'];
+			$step['plugin']                        = $this->output_data['pro_plugin_installed'] ? $pro_plugin : $partner['basename'];
 		}
 
 		return $step;
@@ -632,27 +636,6 @@ class SMTP extends PageAbstract {
 	}
 
 	/**
-	 * Get $phpmailer instance.
-	 *
-	 * @since 3.11.0
-	 *
-	 * @return \PHPMailer|\PHPMailer\PHPMailer\PHPMailer Instance of PHPMailer.
-	 */
-	protected function get_phpmailer() {
-
-		global $phpmailer;
-
-		if ( ! ( $phpmailer instanceof \PHPMailer\PHPMailer\PHPMailer ) ) {
-			require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-			require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
-			require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
-			$phpmailer = new \PHPMailer\PHPMailer\PHPMailer( true ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		return $phpmailer;
-	}
-
-	/**
 	 * Whether WP Mail SMTP plugin configured or not.
 	 *
 	 * @since 3.11.0
@@ -661,16 +644,7 @@ class SMTP extends PageAbstract {
 	 */
 	protected function is_smtp_configured() {
 
-		if ( ! $this->is_smtp_activated() ) {
-			return false;
-		}
-
-		$phpmailer = $this->get_phpmailer();
-		$mailer    = \WPMailSMTP\Options::init()->get( 'mail', 'mailer' );
-
-		return ! empty( $mailer ) &&
-			   $mailer !== 'mail' &&
-			   wp_mail_smtp()->get_providers()->get_mailer( $mailer, $phpmailer )->is_mailer_complete();
+		return ( new SmtpDetector() )->is_configured();
 	}
 
 	/**
@@ -682,7 +656,7 @@ class SMTP extends PageAbstract {
 	 */
 	protected function is_smtp_activated() {
 
-		return function_exists( 'wp_mail_smtp' ) && ( \is_plugin_active( $this->config['lite_plugin'] ) || \is_plugin_active( $this->config['pro_plugin'] ) );
+		return ( new SmtpDetector() )->is_active();
 	}
 
 	/**
@@ -694,7 +668,7 @@ class SMTP extends PageAbstract {
 
 		// Redirect to SMTP plugin if it is activated.
 		if ( $this->is_smtp_configured() ) {
-			wp_safe_redirect( admin_url( $this->config['smtp_settings_url'] ) );
+			wp_safe_redirect( admin_url( $this->get_settings_path() ) );
 			exit;
 		}
 	}
@@ -761,5 +735,27 @@ class SMTP extends PageAbstract {
 	public function get_admin_title( $admin_title ) {
 
 		return sprintf( '%s %s', self::get_title(), $admin_title );
+	}
+
+	/**
+	 * Get the WordPress PHPMailer instance.
+	 *
+	 * @since 3.11.0
+	 * @deprecated 3.15.0 SMTP detection moved to Sugar_Calendar\Admin\Tools\Smtp; kept for subclasses.
+	 *
+	 * @return PHPMailer
+	 */
+	protected function get_phpmailer() {
+
+		global $phpmailer;
+
+		if ( ! ( $phpmailer instanceof PHPMailer ) ) {
+			require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+			require_once ABSPATH . WPINC . '/PHPMailer/SMTP.php';
+			require_once ABSPATH . WPINC . '/PHPMailer/Exception.php';
+			$phpmailer = new PHPMailer( true ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		return $phpmailer;
 	}
 }

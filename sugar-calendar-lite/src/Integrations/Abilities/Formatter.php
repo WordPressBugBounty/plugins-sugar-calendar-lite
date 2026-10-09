@@ -14,12 +14,13 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Sugar_Calendar\Event;
+use Sugar_Calendar\Features\FeaturedEvents\Common\Featured;
 use WP_Term;
 
 /**
- * Formatter — pure transforms from Sugar Calendar objects into the canonical
- * array shapes the abilities return. No database access; callers supply any
- * resolved calendar map.
+ * Formatter — transforms from Sugar Calendar objects into the canonical array
+ * shapes the abilities return. Callers supply any resolved calendar map; this
+ * class still reads the post (permalink, password, excerpt) to shape one event.
  *
  * @since 3.12.0
  */
@@ -28,21 +29,24 @@ class Formatter {
 	/**
 	 * Decode stored HTML entities into plain text.
 	 *
-	 * Term names are stored entity-encoded, so a calendar named `Rock & Roll` reads
-	 * back as `Rock &amp; Roll`. These payloads are consumed by language models and
-	 * other API clients rather than rendered as HTML, and a model handed `&amp;`
-	 * repeats it back in prose.
+	 * Term and venue/calendar names are stored (or, for a post title, rendered) entity-encoded,
+	 * so `Rock & Roll` reads back as `Rock &amp; Roll`. These payloads are consumed by language
+	 * models and other API clients rather than rendered as HTML, and a model handed `&amp;`
+	 * repeats it back in prose. Public and static so any caller shaping a name for the same
+	 * abilities (get-event, list-events, a contributor's own snapshot or applied message) uses
+	 * the same decoding rather than a second copy (Minor 6).
 	 *
-	 * Terms only: event titles come out of `wp_sc_events` unencoded, so decoding one
-	 * would be a no-op nothing could prove.
+	 * Not for event titles: those come out of `wp_sc_events` unencoded, so decoding one would be
+	 * a no-op nothing could prove.
 	 *
 	 * @since 3.14.0
+	 * @since 3.15.0 Public and static, so callers outside this class can reuse it.
 	 *
 	 * @param string $value Stored value.
 	 *
 	 * @return string
 	 */
-	private function text( string $value ): string {
+	public static function text( string $value ): string {
 
 		return html_entity_decode( $value, ENT_QUOTES, get_bloginfo( 'charset' ) );
 	}
@@ -61,7 +65,7 @@ class Formatter {
 		return [
 			'id'    => $term->term_id,
 			'slug'  => $term->slug,
-			'name'  => $this->text( $term->name ),
+			'name'  => self::text( $term->name ),
 			'count' => $term->count,
 		];
 	}
@@ -81,7 +85,7 @@ class Formatter {
 		return [
 			'id'    => $term->term_id,
 			'slug'  => $term->slug,
-			'name'  => $this->text( $term->name ),
+			'name'  => self::text( $term->name ),
 			'count' => $term->count,
 		];
 	}
@@ -104,13 +108,39 @@ class Formatter {
 		}
 
 		try {
-			$tz = new DateTimeZone( '' !== $tz_name ? $tz_name : 'UTC' );
+			$tz = new DateTimeZone( '' !== $tz_name ? $this->resolve_offset( $tz_name ) : 'UTC' );
 			$dt = new DateTimeImmutable( $datetime, $tz );
 
 			return $dt->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d\TH:i:s\Z' );
 		} catch ( Exception $e ) {
 			return '';
 		}
+	}
+
+	/**
+	 * Convert Sugar Calendar's manual UTC-offset zone strings (`UTC+5`, `UTC-3.5`) into the
+	 * `+HH:MM` shape `DateTimeZone` accepts.
+	 *
+	 * `sugar_calendar_get_valid_timezones()` stores and offers this bare `UTC±N` form, which
+	 * PHP's constructor otherwise rejects outright, leaving an event stored with such a zone
+	 * unreadable through this method.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $tz_name Stored time zone name.
+	 *
+	 * @return string
+	 */
+	private function resolve_offset( string $tz_name ): string {
+
+		if ( ! preg_match( '/^UTC([+-])(\d+(?:\.\d+)?)$/', $tz_name, $matches ) ) {
+			return $tz_name;
+		}
+
+		$hours   = (float) $matches[2];
+		$minutes = round( ( $hours - floor( $hours ) ) * 60 );
+
+		return sprintf( '%s%02d:%02d', $matches[1], floor( $hours ), $minutes );
 	}
 
 	/**
@@ -131,12 +161,15 @@ class Formatter {
 	 *
 	 * @since 3.12.0
 	 *
+	 * @since 3.15.0 Takes a tag map and adds `tags`, so a caller can add a tag without dropping the others.
+	 *
 	 * @param Event $event        The event to format.
 	 * @param array $calendar_map Calendar lookup keyed by post_id.
+	 * @param array $tag_map      Tag lookup keyed by post_id.
 	 *
 	 * @return array
 	 */
-	public function event( Event $event, array $calendar_map = [] ): array {
+	public function event( Event $event, array $calendar_map = [], array $tag_map = [] ): array {
 
 		$object_id = (int) $event->object_id;
 		$terms     = $calendar_map[ $object_id ] ?? [];
@@ -149,17 +182,25 @@ class Formatter {
 			}
 		}
 
+		$tags = [];
+
+		foreach ( $tag_map[ $object_id ] ?? [] as $term ) {
+			if ( $term instanceof WP_Term ) {
+				$tags[] = $this->tag( $term );
+			}
+		}
+
 		$recurrence_end    = ! empty( $event->recurrence_end ) && strpos( $event->recurrence_end, '0000-00-00' ) !== 0
 			? $this->iso8601( $event->recurrence_end, $event->recurrence_end_tz )
 			: '';
 		$recurrence_end_tz = '' !== $recurrence_end ? $event->recurrence_end_tz : null;
 
 		$content_protected = $object_id > 0 && post_password_required( $object_id );
-		$content            = ( $content_protected && ! current_user_can( 'edit_post', $object_id ) )
-			? ''
-			: $event->content;
+		$hide_protected    = $content_protected && ! current_user_can( 'edit_post', $object_id );
+		$content           = $hide_protected ? '' : $event->content;
+		$venue_id          = (int) ( $event->venue_id ?? 0 );
 
-		return [
+		$out = [
 			'id'                  => (int) $event->id,
 			'object_id'           => $object_id,
 			'title'               => $event->title,
@@ -180,25 +221,83 @@ class Formatter {
 			'date_created'        => $this->iso8601( $event->date_created, '' ),
 			'date_modified'       => $this->iso8601( $event->date_modified, '' ),
 			'calendars'           => $calendars,
+			'tags'                => $tags,
+			// Excerpt has no counterpart column in wp_sc_events (see EventWriter), so it is
+			// always read from the post. Featured is a whole-series flag, resolved from the
+			// post for the same reason `Featured::is_featured()` always is. Blanked under the
+			// same password gate as content (final review I4): otherwise a password-protected
+			// excerpt leaked to anyone who could merely read the event.
+			'excerpt'             => ( ! $hide_protected && $object_id > 0 ) ? (string) get_post_field( 'post_excerpt', $object_id ) : '',
+			'featured'            => Featured::is_featured( $event ),
+			'signup'              => SignupModes::current( (int) $event->id ),
+			'location'            => (string) get_event_meta( (int) $event->id, 'location', true ),
+			'venue_id'            => $venue_id,
+			'venue'               => self::venue_name( $venue_id ),
 		];
+
+		/**
+		 * Filters one formatted event, for a feature that adds read-only fields of its own.
+		 *
+		 * Declare an added key through `sugar_calendar_integrations_abilities_formatter_event_schema`.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param array $out   Formatted event.
+		 * @param Event $event The event it was formatted from.
+		 */
+		$filtered = apply_filters( 'sugar_calendar_integrations_abilities_formatter_event', $out, $event );
+
+		return is_array( $filtered ) ? $filtered : $out;
+	}
+
+	/**
+	 * A venue's title, decoded, or '' for no venue (id 0).
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int $venue_id Venue post id, or 0.
+	 *
+	 * @return string
+	 */
+	public static function venue_name( int $venue_id ): string {
+
+		return $venue_id > 0 ? self::text( (string) get_the_title( $venue_id ) ) : '';
 	}
 
 	/**
 	 * Format a list of events against a pre-resolved calendar map.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Takes a tag map; primes the venue posts' title cache once for the
+	 *                  whole list.
 	 *
 	 * @param Event[] $events       Event objects.
 	 * @param array   $calendar_map Calendar lookup keyed by post_id.
+	 * @param array   $tag_map      Tag lookup keyed by post_id.
 	 *
 	 * @return array
 	 */
-	public function events( array $events, array $calendar_map ): array {
+	public function events( array $events, array $calendar_map, array $tag_map = [] ): array {
+
+		$venue_ids = [];
+
+		foreach ( $events as $event ) {
+
+			$venue_id = (int) ( $event->venue_id ?? 0 );
+
+			if ( $venue_id > 0 ) {
+				$venue_ids[] = $venue_id;
+			}
+		}
+
+		if ( ! empty( $venue_ids ) ) {
+			_prime_post_caches( array_values( array_unique( $venue_ids ) ), false, false );
+		}
 
 		$out = [];
 
 		foreach ( $events as $event ) {
-			$out[] = $this->event( $event, $calendar_map );
+			$out[] = $this->event( $event, $calendar_map, $tag_map );
 		}
 
 		return $out;
@@ -239,13 +338,21 @@ class Formatter {
 	 * result *after* `wp_ability_execute_result` has filtered it, so closing the
 	 * shape would turn any third-party addition into `ability_invalid_output`.
 	 *
+	 * The properties below `featured` are not in `required`: `event()` itself sets `signup`,
+	 * `location`, `venue_id` and `venue` for every ability; only get-event also merges
+	 * `EventSnapshot::for_event()`'s edit-only detail keys (`ticketing`, plus whatever a
+	 * signup mode or add-on contributes through `sugar_calendar_integrations_abilities_get_event_detail`),
+	 * and none of that detail applies when the event doesn't use that mode.
+	 *
 	 * @since 3.14.0
+	 * @since 3.15.0 Adds `excerpt`, `featured`, `signup`, `location`, `venue_id`, `venue`, and the
+	 *                  read-only detail properties get-event layers on top of the shared shape.
 	 *
 	 * @return array
 	 */
 	public static function event_schema(): array {
 
-		return [
+		$schema = [
 			'type'       => 'object',
 			'required'   => [
 				'id',
@@ -268,6 +375,8 @@ class Formatter {
 				'date_created',
 				'date_modified',
 				'calendars',
+				'excerpt',
+				'featured',
 			],
 			'properties' => [
 				'id'                  => [ 'type' => 'integer' ],
@@ -293,8 +402,35 @@ class Formatter {
 					'type'  => 'array',
 					'items' => self::term_schema(),
 				],
+				'tags'                => [
+					'type'  => 'array',
+					'items' => self::term_schema(),
+				],
+				'excerpt'             => [ 'type' => 'string' ],
+				'featured'            => [ 'type' => 'boolean' ],
+				'signup'              => [ 'type' => 'string' ],
+				'location'            => [ 'type' => 'string' ],
+				'venue_id'            => [ 'type' => 'integer' ],
+				'venue'               => [ 'type' => 'string' ],
+				'online_link'         => [ 'type' => 'string' ],
+				'online_visibility'   => [ 'type' => 'string' ],
+				'online_provider'     => [ 'type' => 'string' ],
+				'online_join_url'     => [ 'type' => 'string' ],
+				'ticketing'           => [ 'type' => 'object' ],
 			],
 		];
+
+		/**
+		 * Filters the formatted event's schema, so a key added through
+		 * `sugar_calendar_integrations_abilities_formatter_event` is declared too.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param array $schema Event object schema.
+		 */
+		$filtered = apply_filters( 'sugar_calendar_integrations_abilities_formatter_event_schema', $schema );
+
+		return is_array( $filtered ) ? $filtered : $schema;
 	}
 
 	/**

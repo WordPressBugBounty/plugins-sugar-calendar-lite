@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\Events\EventWriter;
 use Sugar_Calendar\Integrations\Abilities\AbstractWriteAbility;
 use Sugar_Calendar\Integrations\Abilities\EventInputSchema;
+use Sugar_Calendar\Integrations\Abilities\EventSnapshot;
 
 /**
  * CreateEvent — creates the event as a draft. There is deliberately no status
@@ -113,6 +114,7 @@ class CreateEvent extends AbstractWriteAbility {
 					'type'  => 'array',
 					'items' => [ 'type' => 'string' ],
 				],
+				'event'       => [ 'type' => 'object' ],
 			],
 		];
 	}
@@ -163,6 +165,10 @@ class CreateEvent extends AbstractWriteAbility {
 		// normalize() so it doesn't land in $normalized['extra'].
 		unset( $args['idempotency_key'] );
 
+		// What the diff compares the stored event against, kept under its own
+		// name so a later refactor can't quietly widen it past the raw request.
+		$requested = $args;
+
 		$normalized = EventInputSchema::normalize( $args );
 
 		if ( is_wp_error( $normalized ) ) {
@@ -178,14 +184,22 @@ class CreateEvent extends AbstractWriteAbility {
 
 		$this->remember_idempotency( $key, (int) $result['event_id'] );
 
+		$snapshot    = EventSnapshot::for_event( (int) $result['event_id'] );
+		// Field paths a contributor already explained in errors/assumptions this
+		// write, so the diff below does not add a second, contradicting line.
+		$explained   = array_values( array_unique( (array) ( $result['explained'] ?? [] ) ) );
+		$errors      = array_merge( self::collect( $normalized, $result, 'errors' ), EventSnapshot::diff( $requested, $snapshot, $explained ) );
+		$assumptions = self::collect( $normalized, $result, 'assumptions' );
+
 		return [
 			'event_id'    => (int) $result['event_id'],
 			'post_id'     => (int) $result['post_id'],
 			'edit_url'    => EventWriter::edit_url( (int) $result['post_id'] ),
 			'created'     => true,
-			'assumptions' => array_values( (array) ( $normalized['assumptions'] ?? [] ) ),
+			'assumptions' => array_values( $assumptions ),
 			'applied'     => array_values( (array) ( $result['applied'] ?? [] ) ),
-			'errors'      => array_values( (array) ( $result['errors'] ?? [] ) ),
+			'errors'      => array_values( $errors ),
+			'event'       => $snapshot,
 		];
 	}
 
@@ -238,6 +252,7 @@ class CreateEvent extends AbstractWriteAbility {
 					'sugar-calendar-lite'
 				),
 			],
+			'event'       => EventSnapshot::for_event( $event_id ),
 		];
 	}
 }

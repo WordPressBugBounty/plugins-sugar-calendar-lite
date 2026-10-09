@@ -10,9 +10,10 @@ use Sugar_Calendar\Helpers;
 use Sugar_Calendar\Helpers\Installer;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Options;
-use Sugar_Calendar\Vendor\ProductApi\Auth\SiteRegistration;
-use Sugar_Calendar\Vendor\ProductApi\ProductApi;
-use Throwable;
+use Sugar_Calendar\PartnerPlugins\Catalog;
+use Sugar_Calendar\PartnerPlugins\Installer as PartnerInstaller;
+use Sugar_Calendar\UsageTracking\OptIn;
+use SplObjectStorage;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -31,6 +32,18 @@ use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\update_stripe_crede
  * @since 3.7.0
  */
 class RestApi {
+
+	/**
+	 * Requests whose successful authorization has been announced.
+	 *
+	 * WordPress may run a route's permission callback again while adding
+	 * response headers. The authorization itself must still run every time.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var SplObjectStorage|null
+	 */
+	private $announced_requests;
 
 	/**
 	 * URL prefix.
@@ -145,6 +158,21 @@ class RestApi {
 
 		$auth->refresh_token();
 
+		if ( ! $this->announced_requests instanceof SplObjectStorage ) {
+			$this->announced_requests = new SplObjectStorage();
+		}
+
+		if ( ! $this->announced_requests->contains( $request ) ) {
+			$this->announced_requests->attach( $request );
+
+			/**
+			 * Fires after a setup wizard request is bound to an authorized administrator.
+			 *
+			 * @since 3.15.0
+			 */
+			do_action( 'sugar_calendar_setup_wizard_request_authorized' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName -- named for the feature, not this class.
+		}
+
 		return true;
 	}
 
@@ -197,25 +225,10 @@ class RestApi {
 		$data = $request->get_json_params();
 		$data = ! empty( $data ) ? $data : [];
 
-		// Opt-in for usage tracking + integrations (Lite). A directive, not an
-		// option: map it to the disable_integrations kill-switch (inverted) and,
-		// when opting in, register the site so integrations can connect. Pro drops
-		// it (is_pro guard in set_disable_integrations). Unset so the loop below
-		// never treats it as an option key.
-		if ( array_key_exists( 'opt_in_tracking_and_integrations', $data ) ) {
+		$opt_in = $this->process_opt_in_directive( $data );
 
-			if ( ! sugar_calendar()->is_pro() ) {
-
-				$opted_in = (bool) $data['opt_in_tracking_and_integrations'];
-
-				$this->set_disable_integrations( ! $opted_in );
-
-				if ( $opted_in ) {
-					$this->maybe_register_site();
-				}
-			}
-
-			unset( $data['opt_in_tracking_and_integrations'] );
+		if ( is_wp_error( $opt_in ) ) {
+			return $this->error( $opt_in->get_error_message() );
 		}
 
 		foreach ( $data as $option_name => $option_data ) {
@@ -397,33 +410,15 @@ class RestApi {
 			return $this->error( __( 'Missing plugin list.', 'sugar-calendar-lite' ) );
 		}
 
-		$plugins = (array) $data['plugins'];
+		$plugins = array_filter( (array) $data['plugins'], 'is_string' );
 
 		if ( empty( $plugins ) ) {
 			return $this->error( __( 'Missing plugin list.', 'sugar-calendar-lite' ) );
 		}
 
-		$addons = sugar_calendar()->get_addons();
-
-		$plugins = array_map(
-			function ( $plugin_slug ) use ( $addons ) {
-
-				$addon = $addons->get_addon( $plugin_slug );
-
-				if ( ! empty( $addon['url'] ) ) {
-					return $addon['url'];
-				}
-
-				return $addons->get_suggested_plugin_url( $plugin_slug );
-			},
-			$plugins
-		);
-
-		if ( empty( $plugins ) ) {
-			return $this->error( __( 'No plugins found.', 'sugar-calendar-lite' ) );
-		}
-
-		$plugins = array_filter( $plugins );
+		$addons            = sugar_calendar()->get_addons();
+		$catalog           = new Catalog();
+		$partner_installer = new PartnerInstaller();
 
 		// Prepare variables.
 		$credentials_url = esc_url_raw(
@@ -435,8 +430,21 @@ class RestApi {
 			)
 		);
 
-		foreach ( $plugins as $plugin_url ) {
-			Installer::install_plugin( $credentials_url, $plugin_url, true, false );
+		// The wizard reports detected plugins, not install outcomes, so results are not collected.
+		foreach ( $plugins as $plugin_slug ) {
+			$addon = $addons->get_addon( $plugin_slug );
+
+			if ( ! empty( $addon['url'] ) ) {
+				Installer::install_plugin( $credentials_url, $addon['url'], true, false );
+
+				continue;
+			}
+
+			$target = $catalog->get_target( $plugin_slug );
+
+			if ( $target !== null ) {
+				$partner_installer->run( $target, $credentials_url );
+			}
 		}
 
 		return $this->response(
@@ -653,7 +661,7 @@ class RestApi {
 	 * Set the Lite "disable integrations" kill-switch, running teardown on the enable->disable edge.
 	 *
 	 * Lite-only: Pro must never write this (it would delete Pro's live connections).
-	 * Shared by update_core_option() and the opt_in_tracking_and_integrations flag.
+	 * Used by update_core_option() and the false opt-in directive.
 	 * Mirrors the `! is_pro()` guard in SettingsMiscTab::handle_post().
 	 *
 	 * @since 3.12.0
@@ -680,35 +688,64 @@ class RestApi {
 	}
 
 	/**
-	 * Best-effort site registration with the Product API on Lite opt-in.
+	 * Consume the Lite tracking directive before ordinary option processing.
 	 *
-	 * Failures are swallowed and it is skipped under SC_OAUTH_RELAY_TEST_MODE — the
-	 * wizard must never fail because the relay is unreachable (integrations still
-	 * register lazily on the first connect). Mirrors Zoom::maybe_register_site()
-	 * without the stale-reset/rate-limit handling (first-run wizard context).
+	 * @since 3.15.0
 	 *
-	 * @since 3.12.0
+	 * @param array $data Request data, with the directive removed when present.
 	 *
-	 * @return void
+	 * @return true|WP_Error
 	 */
-	private function maybe_register_site() {
+	private function process_opt_in_directive( &$data ) {
 
-		if ( defined( 'SC_OAUTH_RELAY_TEST_MODE' ) && SC_OAUTH_RELAY_TEST_MODE ) {
-			return;
+		if ( ! array_key_exists( 'opt_in_tracking_and_integrations', $data ) ) {
+			return true;
 		}
 
-		try {
-			$registration = ProductApi::get( SiteRegistration::class );
+		$opted_in = (bool) $data['opt_in_tracking_and_integrations'];
 
-			if ( $registration->is_registered() ) {
-				return;
-			}
+		unset( $data['opt_in_tracking_and_integrations'] );
 
-			$registration->register();
-		} catch ( Throwable $e ) {
-			// Best-effort — swallow relay errors so the wizard always proceeds.
-			return;
+		if ( sugar_calendar()->is_pro() ) {
+			return true;
 		}
+
+		if ( $opted_in ) {
+			return $this->enable_usage_tracking();
+		}
+
+		$this->set_disable_integrations( true );
+
+		return true;
+	}
+
+	/**
+	 * Enable usage tracking from the wizard.
+	 *
+	 * Only a tracking failure fails the wizard. A missed consent-source write is logged and
+	 * ignored; the checklist keeps offering its usage-tracking row until a source is recorded.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return true|WP_Error
+	 */
+	private function enable_usage_tracking() {
+
+		$enabled = ( new OptIn() )->enable( 'wizard' );
+
+		if ( ! is_wp_error( $enabled ) ) {
+			return true;
+		}
+
+		if ( $enabled->get_error_code() !== OptIn::PROVENANCE_ERROR ) {
+			return $enabled;
+		}
+
+		$data = (array) $enabled->get_error_data();
+
+		error_log( '[SC Setup Wizard] usage tracking enabled, checklist provenance not recorded: ' . ( $data['cause'] ?? '' ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+		return true;
 	}
 
 	/**

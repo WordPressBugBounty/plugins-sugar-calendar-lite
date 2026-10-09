@@ -1,0 +1,51 @@
+@charset "UTF-8";
+/* Ported from DS: table-row */
+/* Source mtime: 2026-10-02T12:26:27Z */
+/* Sugar Calendar — components/table-row.css (AI cluster)
+   Mirrors Figma ".table-row" (node 17003:6596).
+   .sc-ai-table-row — one row of a Response Table.
+   Columns = Two (Field / Details) | Three (Field / Before / After).
+   Type = Header (tinted, bold labels) | Body (Field bold, Before struck).
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-table-row {
+  /* body rows are transparent; the header row tints */
+  --sc-ai-table-row-background: transparent;
+  /* body cells read primary; the Before cell drops to secondary */
+  --sc-ai-table-row-color: var(--sc-text-primary);
+  /* every row closes with a divider; the table's last row drops it */
+  --sc-ai-table-row-divider: 1px solid var(--sc-surface-divider);
+  background: var(--sc-ai-table-row-background);
+}
+
+.sc-ai-table-row[data-type=header] {
+  --sc-ai-table-row-background: var(--sc-surface-background-light);
+}
+
+.sc-ai-table-row[data-type=body]:last-child {
+  --sc-ai-table-row-divider: 0;
+} /* header is alone in <thead>, keep its divider */
+/* cells — top-aligned so a wrapped After value keeps Field on its first line */
+.sc-ai-table-row__cell {
+  box-sizing: border-box;
+  padding: var(--sc-padding-8) var(--sc-spacing-10);
+  text-align: left;
+  vertical-align: top;
+  color: var(--sc-ai-table-row-color);
+  border-bottom: var(--sc-ai-table-row-divider);
+}
+
+/* fixed label columns; the value column takes the rest (Figma: 96 / 152 / fill) */
+.sc-ai-table-row__cell--field {
+  width: 96px;
+}
+
+.sc-ai-table-row__cell--before {
+  width: 152px;
+}
+
+/* Before — the superseded value: secondary colour + strikethrough */
+.sc-ai-table-row__before {
+  color: var(--sc-text-secondary);
+  text-decoration: line-through;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vdGFibGUtcm93LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBO0FBQ0E7QUFLQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFPQTtBQUNFO0VBQ0E7QUFDQTtFQUNBO0FBQ0E7RUFDQTtFQUVBOzs7QUFFRjtFQUF1Qzs7O0FBQ3ZDO0VBQWdEO0VBQWdDO0FBRWhGO0FBQ0E7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQ0E7RUFBaUM7OztBQUNqQztFQUFpQzs7O0FBRWpDO0FBQ0E7RUFDRTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi90YWJsZS1yb3cuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLyogUG9ydGVkIGZyb20gRFM6IHRhYmxlLXJvdyAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTEwLTAyVDEyOjI2OjI3WiAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8qIFN1Z2FyIENhbGVuZGFyIOKAlCBjb21wb25lbnRzL3RhYmxlLXJvdy5jc3MgKEFJIGNsdXN0ZXIpXG4gICBNaXJyb3JzIEZpZ21hIFwiLnRhYmxlLXJvd1wiIChub2RlIDE3MDAzOjY1OTYpLlxuICAgLnNjLWFpLXRhYmxlLXJvdyDigJQgb25lIHJvdyBvZiBhIFJlc3BvbnNlIFRhYmxlLlxuICAgQ29sdW1ucyA9IFR3byAoRmllbGQgLyBEZXRhaWxzKSB8IFRocmVlIChGaWVsZCAvIEJlZm9yZSAvIEFmdGVyKS5cbiAgIFR5cGUgPSBIZWFkZXIgKHRpbnRlZCwgYm9sZCBsYWJlbHMpIHwgQm9keSAoRmllbGQgYm9sZCwgQmVmb3JlIHN0cnVjaykuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLCB0b2tlbnMvdGV4dC1zdHlsZXMuY3NzLiAqL1xuXG4uc2MtYWktdGFibGUtcm93IHtcbiAgLyogYm9keSByb3dzIGFyZSB0cmFuc3BhcmVudDsgdGhlIGhlYWRlciByb3cgdGludHMgKi9cbiAgLS1zYy1haS10YWJsZS1yb3ctYmFja2dyb3VuZDogdHJhbnNwYXJlbnQ7XG4gIC8qIGJvZHkgY2VsbHMgcmVhZCBwcmltYXJ5OyB0aGUgQmVmb3JlIGNlbGwgZHJvcHMgdG8gc2Vjb25kYXJ5ICovXG4gIC0tc2MtYWktdGFibGUtcm93LWNvbG9yOiB2YXIoLS1zYy10ZXh0LXByaW1hcnkpO1xuICAvKiBldmVyeSByb3cgY2xvc2VzIHdpdGggYSBkaXZpZGVyOyB0aGUgdGFibGUncyBsYXN0IHJvdyBkcm9wcyBpdCAqL1xuICAtLXNjLWFpLXRhYmxlLXJvdy1kaXZpZGVyOiAxcHggc29saWQgdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcblxuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1haS10YWJsZS1yb3ctYmFja2dyb3VuZCk7XG59XG4uc2MtYWktdGFibGUtcm93W2RhdGEtdHlwZT1cImhlYWRlclwiXSB7IC0tc2MtYWktdGFibGUtcm93LWJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC1saWdodCk7IH1cbi5zYy1haS10YWJsZS1yb3dbZGF0YS10eXBlPVwiYm9keVwiXTpsYXN0LWNoaWxkIHsgLS1zYy1haS10YWJsZS1yb3ctZGl2aWRlcjogMDsgfSAvKiBoZWFkZXIgaXMgYWxvbmUgaW4gPHRoZWFkPiwga2VlcCBpdHMgZGl2aWRlciAqL1xuXG4vKiBjZWxscyDigJQgdG9wLWFsaWduZWQgc28gYSB3cmFwcGVkIEFmdGVyIHZhbHVlIGtlZXBzIEZpZWxkIG9uIGl0cyBmaXJzdCBsaW5lICovXG4uc2MtYWktdGFibGUtcm93X19jZWxsIHtcbiAgYm94LXNpemluZzogYm9yZGVyLWJveDtcbiAgcGFkZGluZzogdmFyKC0tc2MtcGFkZGluZy04KSB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbiAgdGV4dC1hbGlnbjogbGVmdDtcbiAgdmVydGljYWwtYWxpZ246IHRvcDtcbiAgY29sb3I6IHZhcigtLXNjLWFpLXRhYmxlLXJvdy1jb2xvcik7XG4gIGJvcmRlci1ib3R0b206IHZhcigtLXNjLWFpLXRhYmxlLXJvdy1kaXZpZGVyKTtcbn1cblxuLyogZml4ZWQgbGFiZWwgY29sdW1uczsgdGhlIHZhbHVlIGNvbHVtbiB0YWtlcyB0aGUgcmVzdCAoRmlnbWE6IDk2IC8gMTUyIC8gZmlsbCkgKi9cbi5zYy1haS10YWJsZS1yb3dfX2NlbGwtLWZpZWxkICB7IHdpZHRoOiA5NnB4OyB9XG4uc2MtYWktdGFibGUtcm93X19jZWxsLS1iZWZvcmUgeyB3aWR0aDogMTUycHg7IH1cblxuLyogQmVmb3JlIOKAlCB0aGUgc3VwZXJzZWRlZCB2YWx1ZTogc2Vjb25kYXJ5IGNvbG91ciArIHN0cmlrZXRocm91Z2ggKi9cbi5zYy1haS10YWJsZS1yb3dfX2JlZm9yZSB7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LXNlY29uZGFyeSk7XG4gIHRleHQtZGVjb3JhdGlvbjogbGluZS10aHJvdWdoO1xufVxuIl19 */

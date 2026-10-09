@@ -76,17 +76,6 @@ class Addons {
 	private $addons_titles = [];
 
 	/**
-	 * Suggested plugins.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @var array
-	 */
-	protected $suggested_plugins = [
-		'wp-mail-smtp' => 'https://downloads.wordpress.org/plugin/wp-mail-smtp.zip',
-	];
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 3.7.0
@@ -529,19 +518,5 @@ class Addons {
 		}
 
 		return $translation;
-	}
-
-	/**
-	 * Get suggested plugin URL.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param string $plugin_slug Plugin slug.
-	 *
-	 * @return string Plugin URL.
-	 */
-	public function get_suggested_plugin_url( string $plugin_slug ) {
-
-		return $this->suggested_plugins[ $plugin_slug ] ?? false;
 	}
 }

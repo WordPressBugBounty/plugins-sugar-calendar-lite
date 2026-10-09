@@ -1,0 +1,145 @@
+@charset "UTF-8";
+/* Ported from DS: chat-box */
+/* Source mtime: 2026-09-18T13:29:02Z */
+/* Sugar Calendar — components/chat-box.css (AI cluster PATTERN)
+   Mirrors Figma "chat-box-flex" (node 14522:103980).
+   .sc-ai-chat-box — the flexible composer: field + embedded
+   Insert Button + Submit Button. Two layouts, driven by data-lines:
+     single — insert | field | send in one row (52px)
+     multi  — field on top, insert/send on a bottom row (Figma "Double Line")
+   Figma State ↔ implementation:
+     Double Line    → data-lines="multi" (any data-state)
+     Reply          → data-state="reply"
+     Filled         → data-state="filled"
+     Generating     → data-state="generating"
+     Out of credits → data-state="out-of-credits"
+   Published hooks (parents set them on their own root; they cascade in):
+     --sc-ai-chat-box-min-height, --sc-ai-chat-box-field-min-height,
+     --sc-ai-chat-box-field-padding
+   The field floor falls back per layout (36px single / 60px Double Line);
+   Reply Section Type=Conversation pins 36px so a wrapped follow-up grows
+   with its content instead of snapping to the opener's depth.
+   Composes Insert Button + Submit Button — requires insert-button.css,
+   submit-button.css. The embedded controls carry the sub-element classes
+   __insert / __send for grid placement.
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-chat-box {
+  /* box surface + border themed via the cascade (focus / out of credits) */
+  --sc-ai-chat-box-bg: var(--sc-surface-background-white);
+  --sc-ai-chat-box-border: var(--sc-surface-divider);
+  /* controls center against the single row; the two-row layout bottom-aligns
+     them on the button row (Figma) */
+  --sc-ai-chat-box-control-align: center;
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--sc-spacing-5);
+  width: 100%;
+  min-height: var(--sc-ai-chat-box-min-height, 52px);
+  padding: var(--sc-padding-8);
+  background: var(--sc-ai-chat-box-bg);
+  border: 1px solid var(--sc-ai-chat-box-border);
+  border-radius: var(--sc-radius-10);
+  box-shadow: var(--sc-shadow-1);
+  transition: border-color var(--sc-transition-normal), background var(--sc-transition-normal);
+}
+
+.sc-ai-chat-box:focus-within {
+  --sc-ai-chat-box-border: var(--sc-components-field-border--focus);
+}
+
+/* one row — insert | field | send, children vertically centered (Figma) */
+.sc-ai-chat-box[data-lines=single] {
+  grid-template-areas: "insert field send";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+/* two rows (Figma "Double Line") — field above, insert/send bottom-aligned
+   on the button row; the field gets its 4px inset here, and its 60px Double
+   Line depth below (Figma: 117px box) */
+.sc-ai-chat-box[data-lines=multi] {
+  --sc-ai-chat-box-control-align: end;
+  --sc-ai-chat-box-field-padding: 0 var(--sc-padding-4);
+  grid-template-areas: "field  field" "insert send";
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 1fr auto;
+}
+
+/* Out of credits — locked gray composer (pair with disabled field,
+   insert and send in markup). Always the compact single row, so the
+   element-level hooks win over any Reply Section Type=Start values. */
+.sc-ai-chat-box[data-state=out-of-credits] {
+  --sc-ai-chat-box-bg: var(--sc-surface-background-light);
+  --sc-ai-chat-box-min-height: 52px;
+  --sc-ai-chat-box-field-min-height: 36px;
+}
+
+/* composer field — chromeless textarea; the default 8px vertical padding
+   centers a single 20px line inside the 36px middle cell (Figma: single
+   rows carry no horizontal field inset). */
+.sc-ai-chat-box__field {
+  box-sizing: border-box;
+  grid-area: field;
+  min-width: 0;
+  /* one 20px line by default — the per-layout min-height governs the real
+     floor; consumers grow it with content (see chat-box.interactive.js),
+     and past 120px the field scrolls internally on a slim scrollbar */
+  height: 20px;
+  min-height: var(--sc-ai-chat-box-field-min-height, 36px);
+  max-height: 120px;
+  overflow-y: auto;
+  padding: var(--sc-ai-chat-box-field-padding, var(--sc-padding-8) 0);
+  border: 0;
+  background: transparent;
+  color: var(--sc-text-primary);
+  resize: none;
+  outline: none;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--sc-surface-divider) transparent;
+}
+
+/* Double Line depth — a fallback, never set on the element, so a parent's
+   hook value (Reply Section's 36px Conversation floor) wins */
+.sc-ai-chat-box[data-lines=multi] .sc-ai-chat-box__field {
+  min-height: var(--sc-ai-chat-box-field-min-height, 60px);
+}
+
+.sc-ai-chat-box__field::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sc-ai-chat-box__field::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sc-ai-chat-box__field::-webkit-scrollbar-thumb {
+  background: var(--sc-surface-divider);
+  border-radius: var(--sc-radius-full);
+}
+
+.sc-ai-chat-box__field::-webkit-scrollbar-thumb:hover {
+  background: var(--sc-text-icon);
+}
+
+.sc-ai-chat-box__field::placeholder {
+  color: var(--sc-text-placeholder);
+}
+
+.sc-ai-chat-box__field:disabled {
+  color: var(--sc-text-placeholder);
+  cursor: default;
+}
+
+/* embedded controls pin to their grid corners */
+.sc-ai-chat-box__insert {
+  grid-area: insert;
+  justify-self: start;
+  align-self: var(--sc-ai-chat-box-control-align);
+}
+
+.sc-ai-chat-box__send {
+  grid-area: send;
+  justify-self: end;
+  align-self: var(--sc-ai-chat-box-control-align);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vY2hhdC1ib3guc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBdUJBO0FBQ0U7RUFDQTtFQUNBO0FBQ0E7QUFBQTtFQUVBO0VBRUE7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7RUFBK0I7OztBQUUvQjtBQUNBO0VBQ0U7RUFDQTtFQUNBOzs7QUFHRjtBQUFBO0FBQUE7QUFHQTtFQUNFO0VBQ0E7RUFDQSxxQkFDRTtFQUVGO0VBQ0E7OztBQUdGO0FBQUE7QUFBQTtBQUdBO0VBQ0U7RUFDQTtFQUNBOzs7QUFHRjtBQUFBO0FBQUE7QUFHQTtFQUNFO0VBQ0E7RUFDQTtBQUNBO0FBQUE7QUFBQTtFQUdBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7QUFBQTtBQUVBO0VBQ0U7OztBQUVGO0VBQTRDOzs7QUFDNUM7RUFBa0Q7OztBQUNsRDtFQUNFO0VBQ0E7OztBQUVGO0VBQXdEOzs7QUFDeEQ7RUFBc0M7OztBQUN0QztFQUFrQztFQUFtQzs7O0FBRXJFO0FBQ0E7RUFDRTtFQUNBO0VBQ0E7OztBQUVGO0VBQ0U7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi9jaGF0LWJveC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogY2hhdC1ib3ggKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0wOS0xOFQxMzoyOTowMlogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vKiBTdWdhciBDYWxlbmRhciDigJQgY29tcG9uZW50cy9jaGF0LWJveC5jc3MgKEFJIGNsdXN0ZXIgUEFUVEVSTilcbiAgIE1pcnJvcnMgRmlnbWEgXCJjaGF0LWJveC1mbGV4XCIgKG5vZGUgMTQ1MjI6MTAzOTgwKS5cbiAgIC5zYy1haS1jaGF0LWJveCDigJQgdGhlIGZsZXhpYmxlIGNvbXBvc2VyOiBmaWVsZCArIGVtYmVkZGVkXG4gICBJbnNlcnQgQnV0dG9uICsgU3VibWl0IEJ1dHRvbi4gVHdvIGxheW91dHMsIGRyaXZlbiBieSBkYXRhLWxpbmVzOlxuICAgICBzaW5nbGUg4oCUIGluc2VydCB8IGZpZWxkIHwgc2VuZCBpbiBvbmUgcm93ICg1MnB4KVxuICAgICBtdWx0aSAg4oCUIGZpZWxkIG9uIHRvcCwgaW5zZXJ0L3NlbmQgb24gYSBib3R0b20gcm93IChGaWdtYSBcIkRvdWJsZSBMaW5lXCIpXG4gICBGaWdtYSBTdGF0ZSDihpQgaW1wbGVtZW50YXRpb246XG4gICAgIERvdWJsZSBMaW5lICAgIOKGkiBkYXRhLWxpbmVzPVwibXVsdGlcIiAoYW55IGRhdGEtc3RhdGUpXG4gICAgIFJlcGx5ICAgICAgICAgIOKGkiBkYXRhLXN0YXRlPVwicmVwbHlcIlxuICAgICBGaWxsZWQgICAgICAgICDihpIgZGF0YS1zdGF0ZT1cImZpbGxlZFwiXG4gICAgIEdlbmVyYXRpbmcgICAgIOKGkiBkYXRhLXN0YXRlPVwiZ2VuZXJhdGluZ1wiXG4gICAgIE91dCBvZiBjcmVkaXRzIOKGkiBkYXRhLXN0YXRlPVwib3V0LW9mLWNyZWRpdHNcIlxuICAgUHVibGlzaGVkIGhvb2tzIChwYXJlbnRzIHNldCB0aGVtIG9uIHRoZWlyIG93biByb290OyB0aGV5IGNhc2NhZGUgaW4pOlxuICAgICAtLXNjLWFpLWNoYXQtYm94LW1pbi1oZWlnaHQsIC0tc2MtYWktY2hhdC1ib3gtZmllbGQtbWluLWhlaWdodCxcbiAgICAgLS1zYy1haS1jaGF0LWJveC1maWVsZC1wYWRkaW5nXG4gICBUaGUgZmllbGQgZmxvb3IgZmFsbHMgYmFjayBwZXIgbGF5b3V0ICgzNnB4IHNpbmdsZSAvIDYwcHggRG91YmxlIExpbmUpO1xuICAgUmVwbHkgU2VjdGlvbiBUeXBlPUNvbnZlcnNhdGlvbiBwaW5zIDM2cHggc28gYSB3cmFwcGVkIGZvbGxvdy11cCBncm93c1xuICAgd2l0aCBpdHMgY29udGVudCBpbnN0ZWFkIG9mIHNuYXBwaW5nIHRvIHRoZSBvcGVuZXIncyBkZXB0aC5cbiAgIENvbXBvc2VzIEluc2VydCBCdXR0b24gKyBTdWJtaXQgQnV0dG9uIOKAlCByZXF1aXJlcyBpbnNlcnQtYnV0dG9uLmNzcyxcbiAgIHN1Ym1pdC1idXR0b24uY3NzLiBUaGUgZW1iZWRkZWQgY29udHJvbHMgY2FycnkgdGhlIHN1Yi1lbGVtZW50IGNsYXNzZXNcbiAgIF9faW5zZXJ0IC8gX19zZW5kIGZvciBncmlkIHBsYWNlbWVudC5cbiAgIFJlcXVpcmVzIHRva2Vucy9wcmltaXRpdmVzLmNzcywgdG9rZW5zL3Rva2Vucy5jc3MsIHRva2Vucy90ZXh0LXN0eWxlcy5jc3MuICovXG5cbi5zYy1haS1jaGF0LWJveCB7XG4gIC8qIGJveCBzdXJmYWNlICsgYm9yZGVyIHRoZW1lZCB2aWEgdGhlIGNhc2NhZGUgKGZvY3VzIC8gb3V0IG9mIGNyZWRpdHMpICovXG4gIC0tc2MtYWktY2hhdC1ib3gtYmc6ICAgICB2YXIoLS1zYy1zdXJmYWNlLWJhY2tncm91bmQtd2hpdGUpO1xuICAtLXNjLWFpLWNoYXQtYm94LWJvcmRlcjogdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbiAgLyogY29udHJvbHMgY2VudGVyIGFnYWluc3QgdGhlIHNpbmdsZSByb3c7IHRoZSB0d28tcm93IGxheW91dCBib3R0b20tYWxpZ25zXG4gICAgIHRoZW0gb24gdGhlIGJ1dHRvbiByb3cgKEZpZ21hKSAqL1xuICAtLXNjLWFpLWNoYXQtYm94LWNvbnRyb2wtYWxpZ246IGNlbnRlcjtcblxuICBib3gtc2l6aW5nOiBib3JkZXItYm94O1xuICBkaXNwbGF5OiBncmlkO1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctNSk7XG4gIHdpZHRoOiAxMDAlO1xuICBtaW4taGVpZ2h0OiB2YXIoLS1zYy1haS1jaGF0LWJveC1taW4taGVpZ2h0LCA1MnB4KTtcbiAgcGFkZGluZzogdmFyKC0tc2MtcGFkZGluZy04KTtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtYWktY2hhdC1ib3gtYmcpO1xuICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1zYy1haS1jaGF0LWJveC1ib3JkZXIpO1xuICBib3JkZXItcmFkaXVzOiB2YXIoLS1zYy1yYWRpdXMtMTApO1xuICBib3gtc2hhZG93OiB2YXIoLS1zYy1zaGFkb3ctMSk7XG4gIHRyYW5zaXRpb246IGJvcmRlci1jb2xvciB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCksIGJhY2tncm91bmQgdmFyKC0tc2MtdHJhbnNpdGlvbi1ub3JtYWwpO1xufVxuLnNjLWFpLWNoYXQtYm94OmZvY3VzLXdpdGhpbiB7IC0tc2MtYWktY2hhdC1ib3gtYm9yZGVyOiB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWJvcmRlci0tZm9jdXMpOyB9XG5cbi8qIG9uZSByb3cg4oCUIGluc2VydCB8IGZpZWxkIHwgc2VuZCwgY2hpbGRyZW4gdmVydGljYWxseSBjZW50ZXJlZCAoRmlnbWEpICovXG4uc2MtYWktY2hhdC1ib3hbZGF0YS1saW5lcz1cInNpbmdsZVwiXSB7XG4gIGdyaWQtdGVtcGxhdGUtYXJlYXM6IFwiaW5zZXJ0IGZpZWxkIHNlbmRcIjtcbiAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiBhdXRvIG1pbm1heCgwLCAxZnIpIGF1dG87XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG59XG5cbi8qIHR3byByb3dzIChGaWdtYSBcIkRvdWJsZSBMaW5lXCIpIOKAlCBmaWVsZCBhYm92ZSwgaW5zZXJ0L3NlbmQgYm90dG9tLWFsaWduZWRcbiAgIG9uIHRoZSBidXR0b24gcm93OyB0aGUgZmllbGQgZ2V0cyBpdHMgNHB4IGluc2V0IGhlcmUsIGFuZCBpdHMgNjBweCBEb3VibGVcbiAgIExpbmUgZGVwdGggYmVsb3cgKEZpZ21hOiAxMTdweCBib3gpICovXG4uc2MtYWktY2hhdC1ib3hbZGF0YS1saW5lcz1cIm11bHRpXCJdIHtcbiAgLS1zYy1haS1jaGF0LWJveC1jb250cm9sLWFsaWduOiBlbmQ7XG4gIC0tc2MtYWktY2hhdC1ib3gtZmllbGQtcGFkZGluZzogMCB2YXIoLS1zYy1wYWRkaW5nLTQpO1xuICBncmlkLXRlbXBsYXRlLWFyZWFzOlxuICAgIFwiZmllbGQgIGZpZWxkXCJcbiAgICBcImluc2VydCBzZW5kXCI7XG4gIGdyaWQtdGVtcGxhdGUtY29sdW1uczogMWZyIGF1dG87XG4gIGdyaWQtdGVtcGxhdGUtcm93czogMWZyIGF1dG87XG59XG5cbi8qIE91dCBvZiBjcmVkaXRzIOKAlCBsb2NrZWQgZ3JheSBjb21wb3NlciAocGFpciB3aXRoIGRpc2FibGVkIGZpZWxkLFxuICAgaW5zZXJ0IGFuZCBzZW5kIGluIG1hcmt1cCkuIEFsd2F5cyB0aGUgY29tcGFjdCBzaW5nbGUgcm93LCBzbyB0aGVcbiAgIGVsZW1lbnQtbGV2ZWwgaG9va3Mgd2luIG92ZXIgYW55IFJlcGx5IFNlY3Rpb24gVHlwZT1TdGFydCB2YWx1ZXMuICovXG4uc2MtYWktY2hhdC1ib3hbZGF0YS1zdGF0ZT1cIm91dC1vZi1jcmVkaXRzXCJdIHtcbiAgLS1zYy1haS1jaGF0LWJveC1iZzogdmFyKC0tc2Mtc3VyZmFjZS1iYWNrZ3JvdW5kLWxpZ2h0KTtcbiAgLS1zYy1haS1jaGF0LWJveC1taW4taGVpZ2h0OiA1MnB4O1xuICAtLXNjLWFpLWNoYXQtYm94LWZpZWxkLW1pbi1oZWlnaHQ6IDM2cHg7XG59XG5cbi8qIGNvbXBvc2VyIGZpZWxkIOKAlCBjaHJvbWVsZXNzIHRleHRhcmVhOyB0aGUgZGVmYXVsdCA4cHggdmVydGljYWwgcGFkZGluZ1xuICAgY2VudGVycyBhIHNpbmdsZSAyMHB4IGxpbmUgaW5zaWRlIHRoZSAzNnB4IG1pZGRsZSBjZWxsIChGaWdtYTogc2luZ2xlXG4gICByb3dzIGNhcnJ5IG5vIGhvcml6b250YWwgZmllbGQgaW5zZXQpLiAqL1xuLnNjLWFpLWNoYXQtYm94X19maWVsZCB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG4gIGdyaWQtYXJlYTogZmllbGQ7XG4gIG1pbi13aWR0aDogMDtcbiAgLyogb25lIDIwcHggbGluZSBieSBkZWZhdWx0IOKAlCB0aGUgcGVyLWxheW91dCBtaW4taGVpZ2h0IGdvdmVybnMgdGhlIHJlYWxcbiAgICAgZmxvb3I7IGNvbnN1bWVycyBncm93IGl0IHdpdGggY29udGVudCAoc2VlIGNoYXQtYm94LmludGVyYWN0aXZlLmpzKSxcbiAgICAgYW5kIHBhc3QgMTIwcHggdGhlIGZpZWxkIHNjcm9sbHMgaW50ZXJuYWxseSBvbiBhIHNsaW0gc2Nyb2xsYmFyICovXG4gIGhlaWdodDogMjBweDtcbiAgbWluLWhlaWdodDogdmFyKC0tc2MtYWktY2hhdC1ib3gtZmllbGQtbWluLWhlaWdodCwgMzZweCk7XG4gIG1heC1oZWlnaHQ6IDEyMHB4O1xuICBvdmVyZmxvdy15OiBhdXRvO1xuICBwYWRkaW5nOiB2YXIoLS1zYy1haS1jaGF0LWJveC1maWVsZC1wYWRkaW5nLCB2YXIoLS1zYy1wYWRkaW5nLTgpIDApO1xuICBib3JkZXI6IDA7XG4gIGJhY2tncm91bmQ6IHRyYW5zcGFyZW50O1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1wcmltYXJ5KTtcbiAgcmVzaXplOiBub25lO1xuICBvdXRsaW5lOiBub25lO1xuICBzY3JvbGxiYXItd2lkdGg6IHRoaW47ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLyogRmlyZWZveCAqL1xuICBzY3JvbGxiYXItY29sb3I6IHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcikgdHJhbnNwYXJlbnQ7XG59XG4vKiBEb3VibGUgTGluZSBkZXB0aCDigJQgYSBmYWxsYmFjaywgbmV2ZXIgc2V0IG9uIHRoZSBlbGVtZW50LCBzbyBhIHBhcmVudCdzXG4gICBob29rIHZhbHVlIChSZXBseSBTZWN0aW9uJ3MgMzZweCBDb252ZXJzYXRpb24gZmxvb3IpIHdpbnMgKi9cbi5zYy1haS1jaGF0LWJveFtkYXRhLWxpbmVzPVwibXVsdGlcIl0gLnNjLWFpLWNoYXQtYm94X19maWVsZCB7XG4gIG1pbi1oZWlnaHQ6IHZhcigtLXNjLWFpLWNoYXQtYm94LWZpZWxkLW1pbi1oZWlnaHQsIDYwcHgpO1xufVxuLnNjLWFpLWNoYXQtYm94X19maWVsZDo6LXdlYmtpdC1zY3JvbGxiYXIgeyB3aWR0aDogNnB4OyB9XG4uc2MtYWktY2hhdC1ib3hfX2ZpZWxkOjotd2Via2l0LXNjcm9sbGJhci10cmFjayB7IGJhY2tncm91bmQ6IHRyYW5zcGFyZW50OyB9XG4uc2MtYWktY2hhdC1ib3hfX2ZpZWxkOjotd2Via2l0LXNjcm9sbGJhci10aHVtYiB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcik7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy1mdWxsKTtcbn1cbi5zYy1haS1jaGF0LWJveF9fZmllbGQ6Oi13ZWJraXQtc2Nyb2xsYmFyLXRodW1iOmhvdmVyIHsgYmFja2dyb3VuZDogdmFyKC0tc2MtdGV4dC1pY29uKTsgfVxuLnNjLWFpLWNoYXQtYm94X19maWVsZDo6cGxhY2Vob2xkZXIgeyBjb2xvcjogdmFyKC0tc2MtdGV4dC1wbGFjZWhvbGRlcik7IH1cbi5zYy1haS1jaGF0LWJveF9fZmllbGQ6ZGlzYWJsZWQgeyBjb2xvcjogdmFyKC0tc2MtdGV4dC1wbGFjZWhvbGRlcik7IGN1cnNvcjogZGVmYXVsdDsgfVxuXG4vKiBlbWJlZGRlZCBjb250cm9scyBwaW4gdG8gdGhlaXIgZ3JpZCBjb3JuZXJzICovXG4uc2MtYWktY2hhdC1ib3hfX2luc2VydCB7XG4gIGdyaWQtYXJlYTogaW5zZXJ0O1xuICBqdXN0aWZ5LXNlbGY6IHN0YXJ0O1xuICBhbGlnbi1zZWxmOiB2YXIoLS1zYy1haS1jaGF0LWJveC1jb250cm9sLWFsaWduKTtcbn1cbi5zYy1haS1jaGF0LWJveF9fc2VuZCB7XG4gIGdyaWQtYXJlYTogc2VuZDtcbiAganVzdGlmeS1zZWxmOiBlbmQ7XG4gIGFsaWduLXNlbGY6IHZhcigtLXNjLWFpLWNoYXQtYm94LWNvbnRyb2wtYWxpZ24pO1xufVxuIl19 */

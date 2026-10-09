@@ -531,6 +531,8 @@ class Block extends AbstractBlock {
 			'show_past_only' => false,
 			'event_order'    => 'oldest_first',
 			'featured'       => $this->is_featured_only(),
+			'days_of_week'   => $this->get_days_of_week(),
+			'time_of_day'    => $this->get_time_of_day(),
 		];
 
 		/**

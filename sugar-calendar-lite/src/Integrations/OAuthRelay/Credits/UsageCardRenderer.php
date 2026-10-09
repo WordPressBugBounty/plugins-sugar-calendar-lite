@@ -22,41 +22,103 @@ use Sugar_Calendar\Helpers\UI;
 class UsageCardRenderer {
 
 	/**
+	 * Card configuration; the defaults render the integration card unchanged.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var array
+	 */
+	private $config;
+
+	// phpcs:disable Squiz.Commenting.FunctionComment.ParamCommentNotCapital -- hash-notation @param docblock; the sniff misreads the "{" as the comment start (see OAuthConnectionInterface.php).
+	/**
+	 * Constructor.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array $config {
+	 *     Card configuration.
+	 *
+	 *     @type CreditsPresenter|null $presenter      Presenter; defaults to the integration credits.
+	 *     @type string                $label          Card label.
+	 *     @type string                $icon_svg       Inline SVG for the card icon.
+	 *     @type string                $license_note_text Inactive-license note, with %1$s/%2$s anchor placeholders.
+	 *     @type string                $modifier_class Extra class on the card.
+	 *     @type string                $anchor_id      Id on the cards wrapper.
+	 *     @type string                $description    Heading description (plain text).
+	 *     @type string                $docs_url       "Learn more" target.
+	 *     @type string                $maxed_text     Copy shown when usage is maxed.
+	 *     @type string                $upgrade_url    "Upgrade For More" target; defaults to the Lite upgrade page.
+	 *     @type bool                  $show_heading   Whether to render the section heading.
+	 * }
+	 */
+	public function __construct( array $config = [] ) {
+	// phpcs:enable Squiz.Commenting.FunctionComment.ParamCommentNotCapital
+
+		$this->config = wp_parse_args(
+			$config,
+			[
+				'presenter'         => null,
+				'label'             => __( 'Integration Usage', 'sugar-calendar-lite' ),
+				'icon_svg'          => $this->get_usage_icon_svg(),
+				'modifier_class'    => '',
+				'anchor_id'         => '',
+				'description'       => __( 'Usage credits allow you to access advanced features such as Integrations and Sugar Calendar AI. These limits depend on your license type and can be increased by upgrading.', 'sugar-calendar-lite' ),
+				'docs_url'          => 'https://sugarcalendar.com/docs/events/understanding-integration-credits-and-limits/',
+				'maxed_text'        => __( "You've hit your usage limit for this month! Features that use credits will be temporarily disabled until your usage reset or your limit is increased.", 'sugar-calendar-lite' ),
+				'upgrade_url'       => Helpers::get_upgrade_link(
+					[
+						'content' => 'usage-credits-upgrade',
+						'medium'  => 'license-usage',
+					]
+				),
+				/* translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field. */
+				'license_note_text' => __( 'Your license isn\'t active, so integrations are using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits.', 'sugar-calendar-lite' ),
+				'show_heading'      => true,
+			]
+		);
+	}
+
+	/**
 	 * Render the Integration Usage section: heading + description + the card
 	 * (only when credit data exists).
 	 *
 	 * @since 3.12.0
 	 *
-	 * @return void
+	 * @return bool Whether the section was rendered.
 	 */
-	public function render() {
+	public function render(): bool {
 
-		$presenter = CreditsPresenter::from_service( new CreditsService() );
+		$presenter = $this->config['presenter'] instanceof CreditsPresenter ? $this->config['presenter'] : CreditsPresenter::from_service( new CreditsService() );
 
 		if ( ! $presenter->has_data() ) {
-			return;
+			return false;
 		}
 
-		$this->render_heading( $presenter );
+		if ( ! empty( $this->config['show_heading'] ) ) {
+			$this->render_heading( $presenter );
+		}
 
 		$is_maxed   = $presenter->is_maxed();
-		$card_class = 'sugar-calendar-usage-card' . ( $is_maxed ? ' sugar-calendar-usage-card--maxed' : '' );
+		$card_class = 'sugar-calendar-usage-card' . ( $is_maxed ? ' sugar-calendar-usage-card--maxed' : '' ) . ( $this->config['modifier_class'] !== '' ? ' ' . $this->config['modifier_class'] : '' );
 		$segments   = $presenter->segments();
 		?>
-		<div class="sugar-calendar-usage-cards">
+		<div class="sugar-calendar-usage-cards"<?php echo $this->config['anchor_id'] !== '' ? ' id="' . esc_attr( $this->config['anchor_id'] ) . '"' : ''; ?>>
 			<div class="<?php echo esc_attr( $card_class ); ?>">
 				<div class="sugar-calendar-usage-card__body">
 					<div class="sugar-calendar-usage-card__header">
 						<div class="sugar-calendar-usage-card__icon">
 							<?php
-							// Static plugin SVG (tools/wrench icon); not user data.
+							// Plugin-authored SVG (static or passed via $config); not user data.
+							// Inline SVG markup from a config default or an integration's
+							// own constant, never user input, so it is echoed raw.
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_usage_icon_svg();
+							echo $this->config['icon_svg'];
 							?>
 						</div>
 						<div class="sugar-calendar-usage-card__info">
 							<div class="sugar-calendar-usage-card__label-row">
-								<span class="sugar-calendar-usage-card__label"><?php esc_html_e( 'Integration Usage', 'sugar-calendar-lite' ); ?></span>
+								<span class="sugar-calendar-usage-card__label"><?php echo esc_html( $this->config['label'] ); ?></span>
 								<?php if ( $is_maxed ) : ?>
 									<span class="sugar-calendar-usage-card__badge"><?php esc_html_e( 'Out of Usage!', 'sugar-calendar-lite' ); ?></span>
 								<?php endif; ?>
@@ -85,11 +147,11 @@ class UsageCardRenderer {
 
 					<?php if ( $is_maxed ) : ?>
 						<p class="sugar-calendar-usage-card__maxed-text">
-							<?php esc_html_e( "You've hit your usage limit for this month! Features that use credits will be temporarily disabled until your usage reset or your limit is increased.", 'sugar-calendar-lite' ); ?>
+							<?php echo esc_html( $this->config['maxed_text'] ); ?>
 						</p>
 						<?php if ( $presenter->show_upgrade() ) : ?>
 							<a class="sugar-calendar-usage-card__upgrade-btn"
-								href="<?php echo esc_url( Helpers::get_upgrade_link( [ 'content' => 'usage-credits-upgrade', 'medium' => 'license-usage' ] ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound ?>"
+								href="<?php echo esc_url( $this->config['upgrade_url'] ); ?>"
 								target="_blank" rel="noopener noreferrer">+ <?php esc_html_e( 'Upgrade For More', 'sugar-calendar-lite' ); ?></a>
 						<?php endif; ?>
 					<?php endif; ?>
@@ -99,6 +161,8 @@ class UsageCardRenderer {
 			</div>
 		</div>
 		<?php
+
+		return true;
 	}
 
 	/**
@@ -116,7 +180,7 @@ class UsageCardRenderer {
 	private function render_heading( CreditsPresenter $presenter ) {
 
 		$docs_url = Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/events/understanding-integration-credits-and-limits/',
+			$this->config['docs_url'],
 			[
 				'content' => 'usage-credits',
 				'medium'  => 'license-usage',
@@ -129,7 +193,7 @@ class UsageCardRenderer {
 			esc_html__( 'Learn more', 'sugar-calendar-lite' )
 		);
 
-		$description = esc_html__( 'Usage credits allow you to access advanced features such as Integrations. These limits depend on your license plan and can be increased by upgrading.', 'sugar-calendar-lite' );
+		$description = esc_html( $this->config['description'] );
 
 		if ( $presenter->is_monthly() ) {
 			$description .= ' ' . sprintf(
@@ -252,8 +316,7 @@ class UsageCardRenderer {
 			<?php
 			echo wp_kses(
 				sprintf(
-					/* translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field. */
-					__( 'Your license isn\'t active, so integrations are using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits.', 'sugar-calendar-lite' ),
+					$this->config['license_note_text'],
 					'<a href="#sugar-calendar-setting-license-key">',
 					'</a>'
 				),

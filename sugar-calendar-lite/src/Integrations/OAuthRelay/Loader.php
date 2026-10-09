@@ -8,6 +8,7 @@ use Sugar_Calendar\Integrations\Admin\MeetingRemovedNotice;
 use Sugar_Calendar\Integrations\Admin\OnlineMeetingSection;
 use Sugar_Calendar\Integrations\Admin\OutOfCreditsNotice;
 use Sugar_Calendar\Integrations\EventMeetingManager;
+use Sugar_Calendar\Integrations\OnlineLinkContributor;
 use Sugar_Calendar\Integrations\Frontend\OnlineEventSchemaProvider;
 use Sugar_Calendar\Integrations\Frontend\OnlineMeetingDisplay;
 use Sugar_Calendar\Helpers\Helpers;
@@ -48,6 +49,7 @@ class Loader {
 		$this->maybe_configure_relay_for_lite();
 
 		add_filter( 'sugar_calendar_migrations_get_migrations', [ $this, 'register_migrations' ] );
+		add_filter( 'sugar_calendar_tasks_get_tasks', [ $this, 'register_tasks' ] );
 
 		if ( is_admin() ) {
 			( new OAuthConnectionErrorNotice() )->init();
@@ -92,6 +94,10 @@ class Loader {
 		// filter) runs before init:10 on every request; its section-render and
 		// save hooks only fire in the admin editor / on event saves anyway.
 		( new OnlineMeetingSection() )->hooks();
+
+		// The Custom Link slice of the event write abilities. Same reason as the
+		// section above: the schema filter has to be registered on every request.
+		OnlineLinkContributor::hooks();
 
 		// Public Join Link on the single-event front-end page (Show to = Everyone).
 		// Booted unconditionally; the action only fires on the single-event page.
@@ -140,10 +146,9 @@ class Loader {
 	 *
 	 * Guarded on ! is_pro() because ProductApi::configure() throws if called
 	 * twice and Pro already configures it. Event tracking (with_events()) is
-	 * enabled so the SMTP promo-page install click can be tracked on Lite (see
-	 * SmtpProductEvents); the four Pro product events stay Pro-only because
-	 * ProductEvents itself boots only from Pro.php. The try/catch keeps a misconfigured
-	 * or already-configured edge case from fataling — the relay calls have their
+	 * enabled so Lite installs send UsageTracking\ProductEvents when tracking is
+	 * on. The try/catch keeps a misconfigured or already-configured edge case
+	 * from fataling — the relay calls have their
 	 * own guards and degrade to WP_Error / null.
 	 *
 	 * @since 3.12.0
@@ -214,5 +219,21 @@ class Loader {
 		$migrations[] = OAuthConnectionsTableMigration::class;
 
 		return $migrations;
+	}
+
+	/**
+	 * Add SiteRegistrationTask to the task list.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array $tasks Registered task classes.
+	 *
+	 * @return array
+	 */
+	public function register_tasks( $tasks ) {
+
+		$tasks[] = SiteRegistrationTask::class;
+
+		return $tasks;
 	}
 }

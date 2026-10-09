@@ -10,7 +10,6 @@ namespace Sugar_Calendar\Events;
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
-use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use WP_Error;
 
 /**
@@ -32,10 +31,32 @@ class EventWriter {
 	 * How many unknown term ids an error message names before counting the rest.
 	 *
 	 * @since 3.14.0
+	 * @deprecated 3.15.0 Use EventTermAssigner::MAX_REPORTED_IDS.
 	 *
 	 * @var int
 	 */
-	const MAX_REPORTED_IDS = 10;
+	const MAX_REPORTED_IDS = EventTermAssigner::MAX_REPORTED_IDS;
+
+	/**
+	 * Calendar/tag term assignment.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var EventTermAssigner
+	 */
+	private $terms;
+
+	/**
+	 * Composes the term assigner, so a caller can substitute its own.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param EventTermAssigner|null $terms Term assigner. Defaults to a new instance.
+	 */
+	public function __construct( ?EventTermAssigner $terms = null ) {
+
+		$this->terms = $terms ?? new EventTermAssigner();
+	}
 
 	/**
 	 * Create a draft event.
@@ -46,9 +67,12 @@ class EventWriter {
 	 *
 	 * @param array $normalized Normalized input, see the class docblock.
 	 *
-	 * @return array|WP_Error `[ event_id, post_id, applied, errors ]` or an error.
+	 * @return array|WP_Error `[ event_id, post_id, applied, errors, explained ]` or an error.
 	 */
 	public function create( array $normalized ) {
+
+		$assumptions = [];
+		$normalized  = $this->terms->apply_default_calendar_on_create( $normalized, $assumptions );
 
 		$row = isset( $normalized['row'] ) ? (array) $normalized['row'] : [];
 
@@ -62,6 +86,7 @@ class EventWriter {
 				'post_type'    => sugar_calendar_get_event_post_type_id(),
 				'post_title'   => wp_slash( $row['title'] ?? '' ),
 				'post_content' => wp_slash( $row['content'] ?? '' ),
+				'post_excerpt' => wp_slash( $row['excerpt'] ?? '' ),
 				'post_status'  => 'draft',
 				'post_author'  => get_current_user_id(),
 			],
@@ -76,6 +101,11 @@ class EventWriter {
 			);
 		}
 
+		// Excerpt has no counterpart column in wp_sc_events; it was written to
+		// the post above, so it must not also ride into the event row as
+		// unregistered (and therefore silently dropped) meta.
+		unset( $row['excerpt'] );
+
 		$event_id = sugar_calendar_add_event( $this->to_save( $row, $normalized, (int) $post_id ) );
 
 		if ( empty( $event_id ) ) {
@@ -89,15 +119,19 @@ class EventWriter {
 			);
 		}
 
-		$terms = $this->assign_terms( (int) $post_id, $normalized );
+		$terms = $this->terms->assign_terms( (int) $post_id, $normalized );
 
 		$result = [
-			'event_id' => (int) $event_id,
-			'post_id'  => (int) $post_id,
+			'event_id'    => (int) $event_id,
+			'post_id'     => (int) $post_id,
 			// Contributors fill `applied` through the by-reference $result on
 			// the write action; core writes nothing into it.
-			'applied'  => [],
-			'errors'   => $terms['errors'],
+			'applied'     => [],
+			'assumptions' => $assumptions,
+			'errors'      => $terms['errors'],
+			// calendar_ids/tag_ids whose unknown/wrong-taxonomy ids assign_terms()
+			// already named in errors, so the snapshot diff does not double them.
+			'explained'   => $terms['explained'],
 		];
 
 		$this->fire_write_action( (int) $event_id, $normalized, $result );
@@ -113,7 +147,7 @@ class EventWriter {
 	 * @param int   $event_id   Sugar Calendar event id.
 	 * @param array $normalized Normalized patch, see the class docblock.
 	 *
-	 * @return array|WP_Error `[ post_id, previous, applied, errors ]` or an error.
+	 * @return array|WP_Error `[ post_id, previous, applied, errors, explained ]` or an error.
 	 */
 	public function update( int $event_id, array $normalized ) {
 
@@ -127,13 +161,24 @@ class EventWriter {
 			);
 		}
 
-		// A recurring parent's occurrences live in their own wp_sc_occurrences
-		// rows, and the only code that rewrites them (Pro's AdvancedRecurring
-		// occurrence sync) is driven by $_POST fields the editor submits, so it
-		// cannot run for a programmatic patch. Updating the parent alone would
-		// move the event row while every occurrence kept its old times, and the
-		// caller would be told it succeeded. Refuse instead of desyncing.
-		if ( (string) $event->object_subtype !== sugar_calendar_get_event_post_type_id() ) {
+		/**
+		 * Filters whether the writer may patch this event.
+		 *
+		 * Core writes single events only. A feature that keeps another kind of event in step
+		 * with its row, such as a recurring series and its occurrences, answers for its own.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param bool   $supported Whether the event can be patched.
+		 * @param object $event     The event before the patch.
+		 */
+		$supported = (bool) apply_filters(
+			'sugar_calendar_events_event_writer_supports_event',
+			(string) $event->object_subtype === sugar_calendar_get_event_post_type_id(),
+			$event
+		);
+
+		if ( ! $supported ) {
 			return new WP_Error(
 				'sc_events_unsupported_event',
 				__( 'Recurring events have to be edited in the event editor, so their repeats stay in step.', 'sugar-calendar-lite' ),
@@ -141,16 +186,39 @@ class EventWriter {
 			);
 		}
 
-		$post_id = (int) $event->object_id;
-		$row     = isset( $normalized['row'] ) ? (array) $normalized['row'] : [];
-		$meta    = isset( $normalized['meta'] ) ? (array) $normalized['meta'] : [];
+		$post_id     = (int) $event->object_id;
+		$assumptions = [];
+		$explained   = [];
+		$normalized  = $this->terms->apply_default_calendar_on_clear( $post_id, $normalized, $assumptions, $explained );
+		$row         = isset( $normalized['row'] ) ? (array) $normalized['row'] : [];
+		$meta        = isset( $normalized['meta'] ) ? (array) $normalized['meta'] : [];
 
 		// Never let a patch move the event's status.
 		unset( $row['status'] );
 
-		$changed  = $this->changed_columns( $event, $row );
+		// Excerpt has no counterpart column in wp_sc_events, so it must not go
+		// through the generic column-diff/write path below (which would treat
+		// it as an unregistered, silently-dropped eventmeta write). It is
+		// still passed to apply_post_fields() further down, which writes it
+		// straight to the post.
+		$event_row = $row;
+
+		unset( $event_row['excerpt'] );
+
+		$changed  = $this->changed_columns( $event, $event_row );
 		$previous = $this->previous_values( $event, $changed, $normalized );
-		$errors   = $this->apply_post_fields( $post_id, $row );
+
+		// Diff it by value the way the columns above are, so a patch resending
+		// the stored excerpt is not reported as a change or offered as an undo.
+		if ( array_key_exists( 'excerpt', $row ) ) {
+			$stored = (string) get_post_field( 'post_excerpt', $post_id );
+
+			if ( $stored !== (string) $row['excerpt'] ) {
+				$previous['excerpt'] = $stored;
+			}
+		}
+
+		$errors = $this->apply_post_fields( $post_id, $row );
 
 		// Direct meta writes persist regardless of whether any column changes.
 		foreach ( $meta as $key => $value ) {
@@ -163,22 +231,28 @@ class EventWriter {
 			return $written;
 		}
 
-		$terms  = $this->assign_terms( $post_id, $normalized );
-		$errors = array_merge( $errors, $terms['errors'] );
+		$terms     = $this->terms->assign_terms( $post_id, $normalized );
+		$errors    = array_merge( $errors, $terms['errors'] );
+		$explained = array_merge( $explained, $terms['explained'] );
 
 		// A bucket nothing could be applied for did not change, so it must not
-		// be reported as changed or offered as an undo.
-		foreach ( $terms['skipped'] as $field ) {
+		// be reported as changed or offered as an undo. Same for a bucket that
+		// was applied but landed on the same set it started from (a resend).
+		foreach ( array_merge( $terms['skipped'], $terms['unchanged'] ) as $field ) {
 			unset( $previous[ $field ] );
 		}
 
 		$result = [
-			'post_id'  => $post_id,
-			'previous' => $previous,
+			'post_id'     => $post_id,
+			'previous'    => $previous,
 			// Contributors fill `applied` through the by-reference $result on
 			// the write action; core writes nothing into it.
-			'applied'  => [],
-			'errors'   => $errors,
+			'applied'     => [],
+			'assumptions' => $assumptions,
+			'errors'      => $errors,
+			// Field paths whose refusal is already explained in `errors`/
+			// `assumptions`, so EventSnapshot::diff() does not double-report them.
+			'explained'   => $explained,
 		];
 
 		$this->fire_write_action( $event_id, $normalized, $result );
@@ -231,7 +305,7 @@ class EventWriter {
 	}
 
 	/**
-	 * Write the patched title and content back to the event's post.
+	 * Write the patched title, content and excerpt back to the event's post.
 	 *
 	 * Values are slashed because `wp_update_post()` unslashes; the same
 	 * unslashed values go to the event row, which `$wpdb` expects raw.
@@ -248,6 +322,7 @@ class EventWriter {
 		$map = [
 			'title'   => 'post_title',
 			'content' => 'post_content',
+			'excerpt' => 'post_excerpt',
 		];
 
 		$post = [];
@@ -270,7 +345,7 @@ class EventWriter {
 		// post and the event record out of step (#636).
 		if ( is_wp_error( $updated ) || empty( $updated ) ) {
 			return [
-				__( 'The title and description could not be saved to the event post, so the post may still show the old text. Send the patch again.', 'sugar-calendar-lite' ),
+				__( 'The title, description and excerpt could not be saved to the event post, so the post may still show the old text. Send the patch again.', 'sugar-calendar-lite' ),
 			];
 		}
 
@@ -290,28 +365,20 @@ class EventWriter {
 
 		$url = get_edit_post_link( $post_id, 'raw' );
 
+		/**
+		 * Filters the editor URL the writer reports for an event's post.
+		 *
+		 * A feature whose events are edited somewhere core does not know, such as a recurring
+		 * series opened through one of its dates, answers for its own.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param string $url     Editor URL, or empty when core has none for this user.
+		 * @param int    $post_id Post id.
+		 */
+		$url = apply_filters( 'sugar_calendar_events_event_writer_edit_url', is_string( $url ) ? $url : '', $post_id );
+
 		return is_string( $url ) ? $url : '';
-	}
-
-	/**
-	 * Taxonomy and input field name for each terms bucket.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @return array Bucket name => `[ taxonomy, field ]`.
-	 */
-	private function term_buckets(): array {
-
-		return [
-			'calendars' => [
-				'taxonomy' => sugar_calendar_get_calendar_taxonomy_id(),
-				'field'    => 'calendar_ids',
-			],
-			'tags'      => [
-				'taxonomy' => TagsHelpers::get_tags_taxonomy_id(),
-				'field'    => 'tag_ids',
-			],
-		];
 	}
 
 	/**
@@ -451,13 +518,11 @@ class EventWriter {
 			$previous[ $field ] = $column === 'all_day' ? (bool) (int) $value : (string) $value;
 		}
 
-		if ( isset( $normalized['meta']['location'] ) ) {
-			$previous['location'] = (string) get_event_meta( (int) $event->id, 'location', true );
-		}
+		$previous = array_merge( $previous, $this->previous_location( $event, $normalized ) );
 
 		$terms = (array) ( $normalized['terms'] ?? [] );
 
-		foreach ( $this->term_buckets() as $bucket => $spec ) {
+		foreach ( $this->terms->term_buckets() as $bucket => $spec ) {
 			// array_key_exists, not empty(): the caller explicitly clearing a
 			// bucket (an empty array) still needs its pre-patch value captured,
 			// or replaying `previous` later could never undo the clear.
@@ -474,178 +539,27 @@ class EventWriter {
 	}
 
 	/**
-	 * Assign calendar and tag terms, ignoring buckets the caller omitted.
+	 * Pre-patch `location` value, only when the patch actually changes it.
 	 *
-	 * @since 3.14.0
+	 * Split out of `previous_values()` so a patch resending the stored text is not reported as
+	 * a change or offered as an undo, without pushing that method over its complexity budget.
 	 *
-	 * @param int   $post_id    Post id.
-	 * @param array $normalized Full normalized input.
+	 * @since 3.15.0
 	 *
-	 * @return array `[ errors => string[], skipped => string[] ]`, where
-	 *               `skipped` names the input fields whose bucket was not
-	 *               applied at all, so a caller can stop reporting them as
-	 *               changed.
+	 * @param object $event      Event before the patch.
+	 * @param array  $normalized Full normalized input.
+	 *
+	 * @return array `[ 'location' => string ]`, or empty.
 	 */
-	private function assign_terms( int $post_id, array $normalized ): array {
+	private function previous_location( $event, array $normalized ): array {
 
-		$errors  = [];
-		$skipped = [];
-		$terms   = (array) ( $normalized['terms'] ?? [] );
-
-		foreach ( $this->term_buckets() as $bucket => $spec ) {
-			// array_key_exists: a bucket the caller never mentioned is left
-			// alone; an explicitly empty bucket is a request to clear it.
-			if ( ! array_key_exists( $bucket, $terms ) ) {
-				continue;
-			}
-
-			if ( ! $this->assign_bucket( $post_id, $spec, (array) $terms[ $bucket ], $errors ) ) {
-				$skipped[] = $spec['field'];
-			}
-		}
-
-		return [
-			'errors'  => $errors,
-			'skipped' => $skipped,
-		];
-	}
-
-	/**
-	 * Assign one bucket's term ids, replacing whatever the post carried.
-	 *
-	 * An empty id list is an explicit clear. When every id in a non-empty list
-	 * is unknown, existing assignments are left alone rather than wiped by
-	 * `wp_set_object_terms()`'s replace semantics.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @param int   $post_id Post id.
-	 * @param array $spec    Bucket spec, see term_buckets().
-	 * @param array $ids     Requested term ids.
-	 * @param array $errors  Collects messages, by reference.
-	 *
-	 * @return bool Whether the bucket was applied.
-	 */
-	private function assign_bucket( int $post_id, array $spec, array $ids, array &$errors ): bool {
-
-		$taxonomy = $spec['taxonomy'];
-		$field    = $spec['field'];
-		$object   = get_taxonomy( $taxonomy );
-
-		if ( empty( $object ) ) {
-			$errors[] = sprintf(
-				/* translators: %s: input field name, e.g. tag_ids. */
-				__( 'That taxonomy is turned off on this site, so %s was not applied.', 'sugar-calendar-lite' ),
-				$field
-			);
-
-			return false;
-		}
-
-		// wp_set_object_terms() runs no capability check of its own, so the
-		// gate core's own posts controller applies is applied here.
-		if ( ! current_user_can( $object->cap->assign_terms ) ) {
-			$errors[] = sprintf(
-				/* translators: %s: input field name, e.g. calendar_ids. */
-				__( 'You do not have permission to assign these terms, so %s was not applied.', 'sugar-calendar-lite' ),
-				$field
-			);
-
-			return false;
-		}
-
-		$valid = $this->existing_term_ids( $ids, $taxonomy, $errors );
-
-		if ( ! empty( $ids ) && empty( $valid ) ) {
-			return false;
-		}
-
-		$assigned = wp_set_object_terms( $post_id, $valid, $taxonomy );
-
-		if ( is_wp_error( $assigned ) ) {
-			$errors[] = sprintf(
-				/* translators: %1$s: input field name, %2$s: the reason the assignment failed. */
-				__( '%1$s could not be saved: %2$s', 'sugar-calendar-lite' ),
-				$field,
-				$assigned->get_error_message()
-			);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Keep only the ids that exist in the taxonomy, reporting the rest.
-	 *
-	 * One query for the whole list: the caller is a language model, so a long
-	 * hallucinated list is a real input shape.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @param array  $ids      Requested term ids.
-	 * @param string $taxonomy Taxonomy id.
-	 * @param array  $errors   Collects messages, by reference.
-	 *
-	 * @return int[]
-	 */
-	private function existing_term_ids( array $ids, string $taxonomy, array &$errors ): array {
-
-		$ids = array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
-
-		if ( empty( $ids ) ) {
+		if ( ! isset( $normalized['meta']['location'] ) ) {
 			return [];
 		}
 
-		$found = get_terms(
-			[
-				'taxonomy'   => $taxonomy,
-				'include'    => $ids,
-				'fields'     => 'ids',
-				'hide_empty' => false,
-			]
-		);
+		$stored = (string) get_event_meta( (int) $event->id, 'location', true );
 
-		$found   = is_array( $found ) ? array_map( 'intval', $found ) : [];
-		$unknown = array_values( array_diff( $ids, $found ) );
-
-		if ( ! empty( $unknown ) ) {
-			$errors[] = $this->unknown_ids_message( $unknown );
-		}
-
-		return array_values( array_intersect( $ids, $found ) );
-	}
-
-	/**
-	 * Message naming the term ids that do not exist.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @param int[] $unknown Ids that resolved to no term.
-	 *
-	 * @return string
-	 */
-	private function unknown_ids_message( array $unknown ): string {
-
-		$named     = array_slice( $unknown, 0, self::MAX_REPORTED_IDS );
-		$remaining = count( $unknown ) - count( $named );
-
-		$message = sprintf(
-			/* translators: %s: comma-separated list of term ids. */
-			__( 'These ids do not exist and were not assigned: %s', 'sugar-calendar-lite' ),
-			implode( ', ', $named )
-		);
-
-		if ( $remaining > 0 ) {
-			$message .= ' ' . sprintf(
-				/* translators: %d: how many further ids were skipped. */
-				_n( '%d more id was skipped as well.', '%d more ids were skipped as well.', $remaining, 'sugar-calendar-lite' ),
-				$remaining
-			);
-		}
-
-		return $message;
+		return $stored !== (string) $normalized['meta']['location'] ? [ 'location' => $stored ] : [];
 	}
 
 	/**

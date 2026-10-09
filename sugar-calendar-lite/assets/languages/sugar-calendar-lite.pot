@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.14.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.15.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-16T13:53:09+00:00\n"
+"POT-Creation-Date: 2026-10-08T23:00:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: sugar-calendar-lite\n"
@@ -15,7 +15,7 @@ msgstr ""
 #. Plugin Name of the plugin
 #. Author of the plugin
 #: sugar-calendar.php
-#: src/Admin/Area.php:343
+#: src/Admin/Area.php:352
 #: src/Admin/Tools/DashboardWidget.php:120
 #: src/Block/Calendar/Loader.php:502
 #: src/Integrations/Elementor/Elementor.php:211
@@ -54,15 +54,15 @@ msgstr ""
 #: includes/admin/general.php:233
 #: includes/admin/help.php:34
 #: includes/admin/nav.php:25
-#: src/Admin/Area.php:344
+#: src/Admin/Area.php:353
 #: src/Admin/Events/Tables/Base.php:449
 #: src/Admin/Events/Tables/Base.php:3785
 #: src/Admin/Pages/Calendars.php:466
 #: src/Admin/Pages/Events.php:53
 #: src/Admin/Pages/Events.php:157
-#: src/Admin/Pages/Events.php:184
-#: src/Admin/Pages/ToolsAiTab.php:335
-#: src/Admin/Pages/ToolsExportTab.php:251
+#: src/Admin/Pages/Events.php:191
+#: src/Admin/Pages/ToolsAiTab.php:330
+#: src/Admin/Pages/ToolsExportTab.php:261
 #: src/Features/Tags/Admin/Pages/Tags.php:281
 #: src/Integrations/Elementor/Elementor.php:262
 msgid "Events"
@@ -257,7 +257,8 @@ msgstr ""
 #: src/Admin/Tools/DashboardWidget.php:253
 #: src/Block/Calendar/templates/week/multi-and-all-day-events-rows.php:43
 #: src/Block/Common/templates/popovers.php:147
-#: src/Helpers.php:482
+#: src/Helpers.php:634
+#: src/Integrations/Ai/Funnels.php:253
 msgid "All Day"
 msgstr ""
 
@@ -456,7 +457,6 @@ msgid "<code>99</code> or <code>03</code>"
 msgstr ""
 
 #: includes/admin/help.php:303
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:175
 msgid "Time"
 msgstr ""
 
@@ -764,8 +764,6 @@ msgid "Add New"
 msgstr ""
 
 #: includes/admin/menu.php:101
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:129
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:136
 msgid "Close"
 msgstr ""
 
@@ -921,7 +919,6 @@ msgstr ""
 #: src/Emails/AdminOrderRecord.php:341
 #: src/Emails/EventContext.php:76
 #: src/Emails/EventContext.php:259
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:232
 msgid "All-day"
 msgstr ""
 
@@ -951,11 +948,11 @@ msgstr ""
 msgid "Classic Editor"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/Feature.php:468
+#: includes/common/Features/EventTicketing/Feature.php:471
 msgid "Ticket Receipt"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/Feature.php:486
+#: includes/common/Features/EventTicketing/Feature.php:489
 msgid "Ticket Details"
 msgstr ""
 
@@ -993,8 +990,9 @@ msgstr ""
 #: includes/common/Features/EventTicketing/src/Admin/Pages/Tickets.php:155
 #: includes/common/Features/EventTicketing/src/Admin/Pages/TicketsTab.php:88
 #: includes/common/Features/EventTicketing/src/Frontend/ReceiptCard.php:218
-#: src/Admin/Pages/ToolsAiTab.php:398
+#: src/Admin/Pages/ToolsAiTab.php:393
 #: src/Emails/Modern/MultiTicketEmail.php:222
+#: src/Integrations/Ai/Admin/ChatShell.php:497
 msgid "Tickets"
 msgstr ""
 
@@ -1004,15 +1002,13 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:76
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:227
-#: includes/pro/Features/EventUrls/Admin/Meta.php:63
-#: src/Admin/Events/Metaboxes.php:546
+#: src/Admin/Events/Metaboxes.php:551
 msgid "ON"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:77
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:228
-#: includes/pro/Features/EventUrls/Admin/Meta.php:64
-#: src/Admin/Events/Metaboxes.php:547
+#: src/Admin/Events/Metaboxes.php:552
 msgid "OFF"
 msgstr ""
 
@@ -1021,7 +1017,7 @@ msgid "Price"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/meta-box.php:206
-#: src/Admin/Events/Metaboxes.php:662
+#: src/Admin/Events/Metaboxes.php:667
 msgid "Limit Capacity"
 msgstr ""
 
@@ -1138,7 +1134,6 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:490
 #: src/Admin/Pages/Settings/Emails/EmailsList.php:83
 #: src/Admin/Tools/ScheduledImportsEducation.php:345
-#: src/Features/RegistrationForm/Admin/OrderPage.php:125
 msgid "Edit"
 msgstr ""
 
@@ -1188,6 +1183,7 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:610
 #: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:156
 #: src/Block/Common/templates/popovers.php:188
+#: src/Integrations/Ai/Admin/ChatShell.php:390
 msgid "Apply"
 msgstr ""
 
@@ -1200,7 +1196,6 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/admin/orders-list-table.php:660
 #: includes/common/Features/EventTicketing/includes/classes/export/orders.php:64
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:323
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:267
 msgid "Total"
 msgstr ""
 
@@ -1237,7 +1232,6 @@ msgstr ""
 #: src/Admin/Events/Tables/Base.php:450
 #: src/Admin/Pages/Event.php:38
 #: src/Emails/Modern/MultiTicketEmail.php:107
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:173
 msgid "Event"
 msgstr ""
 
@@ -1383,7 +1377,7 @@ msgid "The page where customer will view the details of their ticket purchases"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:394
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:866
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:896
 msgid "Ticket Details Page"
 msgstr ""
 
@@ -1440,7 +1434,7 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:617
 #: src/Admin/Pages/Addons.php:150
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:129
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:193
 msgid "Learn more"
 msgstr ""
 
@@ -1481,45 +1475,45 @@ msgstr ""
 msgid "The person/business name email notifications are sent from."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:753
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:778
 #, php-format
 msgid "There was an error getting your Stripe credentials. Please <a href=\"%s\">try again</a>. If you continue to have this problem, please contact support."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:861
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:891
 msgid "Ticket Receipt Page"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1074
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1165
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1104
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1195
 #: src/Admin/Pages/Integrations/GoogleMaps.php:343
 #: src/Admin/Pages/SettingsGeneralTab.php:412
-#: src/Admin/Pages/SettingsMiscTab.php:204
+#: src/Admin/Pages/SettingsMiscTab.php:229
 msgid "Settings saved."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1096
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1126
 msgid "Nonce verification failed."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1106
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1136
 msgid "You do not have permission to save these settings."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1122
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1152
 msgid "No options were set."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1167
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1197
 msgid "Settings not saved."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1308
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1338
 msgid "Pay-as-you-go Pricing"
 msgstr ""
 
 #. translators: %1$s - fee percentage, %2$s - SugarCalendar.com Upgrade page URL.
-#: includes/common/Features/EventTicketing/includes/admin/settings.php:1314
+#: includes/common/Features/EventTicketing/includes/admin/settings.php:1344
 #, php-format
 msgid "%1$s fee per-transaction + Stripe fees. <a href=\"%2$s\">Upgrade to Pro</a> to remove additional fees and unlock powerful features."
 msgstr ""
@@ -1542,6 +1536,7 @@ msgstr ""
 #: src/Admin/Events/Tables/Base.php:3794
 #: src/Features/Tags/Common/Helpers.php:71
 #: src/Helpers/UI.php:1469
+#: src/Integrations/Ai/Admin/ChatShell.php:415
 #: assets/jsx/src/components/form/WysiwygEditor/SmartTagsDropdown/index.jsx:88
 msgid "Search"
 msgstr ""
@@ -1561,8 +1556,6 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/tickets-list-table.php:476
 #: src/Admin/EmailNotifications/EventRecentTicketsTable.php:132
-#: src/Features/RegistrationForm/Frontend/TicketingReceipt.php:108
-#: src/Features/RegistrationForm/Frontend/TicketingReceipt.php:151
 msgid "View Order Details"
 msgstr ""
 
@@ -1585,7 +1578,6 @@ msgstr ""
 #: src/Emails/AdminOrderRecord.php:388
 #: src/Emails/TicketContext.php:75
 #: src/Emails/TicketContext.php:107
-#: src/Features/RegistrationForm/Frontend/Renderer.php:540
 msgid "Attendee"
 msgstr ""
 
@@ -1698,7 +1690,7 @@ msgstr ""
 #: src/Admin/Tools/Export/ExportRequest.php:131
 #: src/Admin/Tools/Importers/SugarCalendar.php:225
 #: src/Admin/Tools/Importers/SugarCalendar.php:236
-#: src/Admin/Tools/Importers/SugarCalendar.php:262
+#: src/Admin/Tools/Importers/SugarCalendar.php:265
 #: src/Admin/Tools/ScheduledImportsEducation.php:480
 #: src/Admin/Tools/ScheduledImportsEducation.php:532
 msgid "Error"
@@ -1764,7 +1756,6 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:226
 #: includes/common/Features/EventTicketing/src/Frontend/ReceiptCard.php:118
 #: src/Emails/Modern/MultiTicketEmail.php:79
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1007
 msgid "Email"
 msgstr ""
 
@@ -1850,8 +1841,7 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/classes/utilities/csv-export.php:80
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:621
-#: src/Admin/Events/Metaboxes.php:480
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:174
+#: src/Admin/Events/Metaboxes.php:485
 msgid "Date"
 msgstr ""
 
@@ -1878,7 +1868,6 @@ msgid "Refunded"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/functions.php:662
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:267
 msgid "Paid"
 msgstr ""
 
@@ -2132,7 +2121,7 @@ msgstr ""
 msgid "%1$s at %2$s"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/includes/common/functions.php:2667
+#: includes/common/Features/EventTicketing/includes/common/functions.php:2670
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:657
 #: includes/common/Features/EventTicketing/src/Frontend/ReceiptCard.php:128
 msgid "Online Meeting"
@@ -2149,7 +2138,7 @@ msgid "Body"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/settings.php:56
-#: src/Admin/Events/Metaboxes.php:576
+#: src/Admin/Events/Metaboxes.php:581
 #: src/Admin/Pages/Settings/Emails/EmailStylingSection.php:137
 #: src/Integrations/Elementor/Widgets/EventBuyTicketBox.php:183
 msgid "Text"
@@ -2281,7 +2270,6 @@ msgid "Event not found"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/common/shortcodes.php:246
-#: src/Integrations/Abilities/Ability/GetEvent.php:139
 msgid "Event not found."
 msgstr ""
 
@@ -2432,13 +2420,13 @@ msgid "Please use an email address of %1$d characters or fewer."
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:25
-#: src/Helpers.php:413
+#: src/Helpers.php:565
 msgid "Date/Time:"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:50
 #: includes/themes/legacy/event-display.php:152
-#: src/Helpers.php:416
+#: src/Helpers.php:568
 msgid "Date:"
 msgstr ""
 
@@ -2457,7 +2445,7 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:171
 #: includes/common/Features/EventTicketing/includes/gateways/stripe.php:320
 #: includes/common/Features/EventTicketing/src/Renderer.php:441
-#: src/Admin/Pages/EventAbstract.php:594
+#: src/Admin/Pages/EventAbstract.php:601
 #: src/Admin/Tools/DashboardWidget.php:533
 msgid "Event Tickets"
 msgstr ""
@@ -2499,7 +2487,6 @@ msgid "Payment Card"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:286
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:105
 msgid "Event Summary"
 msgstr ""
 
@@ -2510,7 +2497,6 @@ msgid "<span>Event:</span> %s"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:319
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:274
 msgid "Order Summary"
 msgstr ""
 
@@ -2536,12 +2522,14 @@ msgstr ""
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:677
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:699
 #: src/Admin/Pages/SettingsIntegrationsTab.php:910
-#: src/Admin/Pages/SettingsMiscTab.php:66
+#: src/Admin/Pages/SettingsMiscTab.php:68
+#: src/Admin/Pages/SetupChecklist.php:248
 #: src/Admin/Tools/Importers.php:162
 #: src/Admin/Tools/ScheduledImportsEducation.php:266
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:127
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:153
 #: src/Features/Tags/Admin/Pages/Events.php:313
+#: src/Integrations/Ai/Admin/ChatShell.php:439
 #: assets/js/admin-event-metabox.js:508
 msgid "Cancel"
 msgstr ""
@@ -2556,13 +2544,12 @@ msgid "That ticket could not be found."
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/print.php:55
-#: src/Events/EventWriter.php:125
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:300
+#: src/Events/EventWriter.php:159
 msgid "That event could not be found."
 msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/front-end/print.php:174
-#: src/Admin/Events/Metaboxes.php:558
+#: src/Admin/Events/Metaboxes.php:563
 msgid "URL"
 msgstr ""
 
@@ -2728,6 +2715,7 @@ msgstr ""
 #: src/Admin/Events/Tables/Base.php:3089
 #: src/Admin/Events/Tables/Base.php:3103
 #: src/Emails/Modern/MultiTicketEmail.php:269
+#: src/Integrations/Ai/Admin/ChatShell.php:408
 msgid "Details"
 msgstr ""
 
@@ -3032,7 +3020,7 @@ msgid "Looks Like:"
 msgstr ""
 
 #: includes/common/Features/EventTicketing/src/Helpers/UI.php:537
-#: src/Admin/Events/Metaboxes.php:478
+#: src/Admin/Events/Metaboxes.php:483
 #: src/Features/RegistrationForm/Admin/EditorStrings.php:28
 #: src/Helpers/UI.php:925
 msgid "On"
@@ -3045,32 +3033,66 @@ msgstr ""
 msgid "Off"
 msgstr ""
 
-#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:112
-msgid "Paid ticket settings. Used only when signup is tickets."
-msgstr ""
-
-#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:117
-msgid "Price per ticket in the store currency."
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:121
+msgid "Paid ticket settings. Applies only when signup is tickets; send both together, for example signup: tickets with ticketing: { price: 10, limit_capacity: true, quantity: 20 }."
 msgstr ""
 
 #: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:126
-msgid "How many tickets are available. Used only when limit_capacity is true."
+msgid "Price of one ticket in the store currency, for example 10 or 12.50. 0 makes the tickets free."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:131
+msgid "Whether ticket sales stop once quantity tickets are sold. Send true whenever you send quantity. Default false."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:136
+msgid "How many tickets can be sold in total, for example 20. Applies only when limit_capacity is true; sent alone it is stored but has no effect."
 msgstr ""
 
 #. translators: %d: number of ticket orders already placed.
-#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:174
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:184
 #, php-format
 msgid "This event already has %d ticket order, so its signup method cannot be changed here. Change it in the event editor."
 msgid_plural "This event already has %d ticket orders, so its signup method cannot be changed here. Change it in the event editor."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:244
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:213
+msgid "Ticketed Event"
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:243
+msgid "Ticket Sales"
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:314
 msgid "Turned off ticket sales."
 msgstr ""
 
-#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:268
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:349
 msgid "Turned on paid tickets."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:350
+msgid "Turned on free tickets."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:382
+msgid "No payment method is connected, so tickets stay free. Connect one in Sugar Calendar settings to charge for them."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:415
+msgid "The ticket quantity was not changed because it cannot be negative."
+msgstr ""
+
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:425
+msgid "With a capacity limit, the ticket quantity must be at least 1."
+msgstr ""
+
+#. translators: %d - ticket quantity.
+#: includes/common/Features/EventTicketing/src/Integrations/Abilities/TicketingSignupMode.php:451
+#, php-format
+msgid "Saved a ticket quantity of %d. It has no effect until limit_capacity is turned on."
 msgstr ""
 
 #. translators: %1$s is the price of the ticket.
@@ -3113,9 +3135,9 @@ msgid "%d available"
 msgstr ""
 
 #: includes/common/Features/GoogleMaps/Feature.php:78
-#: src/Admin/Pages/Integrations/Zoom.php:452
-#: src/Admin/Pages/Integrations/Zoom.php:635
-#: src/SetupWizard/RestApi.php:143
+#: src/Admin/Pages/Integrations/Zoom.php:449
+#: src/Admin/Pages/Integrations/Zoom.php:545
+#: src/SetupWizard/RestApi.php:156
 msgid "Insufficient permissions."
 msgstr ""
 
@@ -3137,7 +3159,7 @@ msgid "Invalid coordinates."
 msgstr ""
 
 #: includes/common/Features/GoogleMaps/Feature.php:149
-#: src/Admin/Pages/EventAbstract.php:579
+#: src/Admin/Pages/EventAbstract.php:586
 #: src/Emails/AdminOrderTagResolver.php:141
 msgid "Event Location"
 msgstr ""
@@ -3263,9 +3285,10 @@ msgstr ""
 #: src/Admin/Pages/Calendars.php:42
 #: src/Admin/Pages/Calendars.php:171
 #: src/Admin/Pages/Calendars.php:224
-#: src/Admin/Pages/ToolsAiTab.php:346
-#: src/Admin/Pages/ToolsExportTab.php:253
+#: src/Admin/Pages/ToolsAiTab.php:341
+#: src/Admin/Pages/ToolsExportTab.php:263
 #: src/Block/Common/templates/popovers.php:55
+#: src/Integrations/Ai/Admin/ChatShell.php:493
 #: src/Integrations/Elementor/CalendarWidget.php:134
 #: src/Integrations/Elementor/ListWidget.php:138
 msgid "Calendars"
@@ -3489,11 +3512,6 @@ msgstr ""
 
 #: includes/post/types.php:93
 msgid "Event scheduled."
-msgstr ""
-
-#: includes/pro/Features/DuplicateEvent/Feature.php:165
-msgctxt "verb"
-msgid "Duplicate"
 msgstr ""
 
 #: includes/themes/legacy/calendar.php:184
@@ -3732,7 +3750,7 @@ msgid "Sugar Calendar Requirements"
 msgstr ""
 
 #. translators: %s - addon name.
-#: src/Admin/Addons/Addons.php:440
+#: src/Admin/Addons/Addons.php:429
 #, php-format
 msgid "%s addon"
 msgstr ""
@@ -3803,49 +3821,55 @@ msgstr ""
 msgid "an older version of %1$s than %2$s"
 msgstr ""
 
-#: src/Admin/Area.php:117
+#: src/Admin/Area.php:119
 msgid "Invalid request!"
 msgstr ""
 
-#: src/Admin/Area.php:121
+#: src/Admin/Area.php:123
 msgid "Status is required"
 msgstr ""
 
-#: src/Admin/Area.php:127
+#: src/Admin/Area.php:129
 msgid "Status invalid!"
 msgstr ""
 
-#: src/Admin/Area.php:461
-#: src/Admin/Pages/SMTP.php:87
-#: src/Admin/Pages/SMTP.php:749
+#: src/Admin/Area.php:470
+#: src/Admin/Pages/SMTP.php:91
+#: src/Admin/Pages/SMTP.php:723
 msgid "SMTP"
 msgstr ""
 
-#: src/Admin/Area.php:462
+#: src/Admin/Area.php:471
 msgid "Email issues?"
 msgstr ""
 
-#: src/Admin/Area.php:492
-#: src/Admin/Area.php:493
-#: src/Admin/Pages/EventAbstract.php:655
+#: src/Admin/Area.php:513
+#: src/Admin/Area.php:514
+#: src/Admin/Pages/EventAbstract.php:662
 #: src/Admin/Pages/Settings/EmailsConfigTab.php:105
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:219
-#: src/Admin/Pages/ToolsAiTab.php:421
-#: src/Admin/Pages/ToolsAiTab.php:434
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:268
+#: src/Admin/Pages/ToolsAiTab.php:416
+#: src/Admin/Pages/ToolsAiTab.php:429
+#: src/Admin/SetupChecklist/PromotionsRenderer.php:63
 #: src/Admin/Tools/ScheduledImportsEducation.php:566
-#: src/Helpers.php:1886
+#: src/Helpers.php:2060
+#: src/Integrations/Ai/Credits/AiUsageService.php:226
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: src/Admin/Area.php:1063
+#: src/Admin/Area.php:1065
+msgid "Sorry, you are not allowed to change these settings."
+msgstr ""
+
+#: src/Admin/Area.php:1109
 msgid "Security check failed. Please try again."
 msgstr ""
 
-#: src/Admin/Area.php:1080
+#: src/Admin/Area.php:1126
 msgid "Missing required data. Please try again."
 msgstr ""
 
-#: src/Admin/Area.php:1112
+#: src/Admin/Area.php:1158
 msgid "RSVP add-on installed and activated successfully."
 msgstr ""
 
@@ -3865,6 +3889,7 @@ msgstr ""
 #: src/Admin/Education.php:223
 #: src/Admin/Pages/Welcome.php:137
 #: src/Admin/Pages/Welcome.php:140
+#: src/SetupChecklist/Config.php:360
 msgid "Recurring Events"
 msgstr ""
 
@@ -3925,11 +3950,11 @@ msgid "And much more..."
 msgstr ""
 
 #: src/Admin/Education.php:317
-#: src/Admin/Events/Metaboxes.php:503
-#: src/Admin/Events/Metaboxes.php:592
-#: src/Admin/Events/Metaboxes.php:721
-#: src/Admin/Events/Metaboxes.php:790
-#: src/Admin/FlyoutMenu.php:107
+#: src/Admin/Events/Metaboxes.php:508
+#: src/Admin/Events/Metaboxes.php:597
+#: src/Admin/Events/Metaboxes.php:726
+#: src/Admin/Events/Metaboxes.php:795
+#: src/Admin/FlyoutMenu.php:113
 #: src/Admin/Pages/Rsvp.php:229
 #: src/Admin/Pages/Rsvp.php:340
 #: src/Admin/Pages/SettingsFeedsTab.php:155
@@ -3944,7 +3969,7 @@ msgstr ""
 #: src/Admin/Pages/Venues.php:185
 #: src/Admin/Tools/Importers/SugarCalendarIcs.php:119
 #: src/Admin/Tools/ScheduledImportsEducation.php:168
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:169
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:159
 msgid "Upgrade to Sugar Calendar Pro"
 msgstr ""
 
@@ -3989,15 +4014,11 @@ msgid "Notify Attendees"
 msgstr ""
 
 #: src/Admin/EmailNotifications.php:544
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:121
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:125
 #: src/SmartTags/Ticketing/DefaultTags.php:53
 msgid "Attendee Name"
 msgstr ""
 
 #: src/Admin/EmailNotifications.php:557
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:122
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:126
 #: src/Integrations/Elementor/Widgets/EventTitle.php:254
 #: src/SmartTags/Ticketing/DefaultTags.php:45
 msgid "Event Title"
@@ -4009,8 +4030,6 @@ msgid "Event URL"
 msgstr ""
 
 #: src/Admin/EmailNotifications.php:565
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:123
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:127
 #: src/Integrations/Elementor/Widgets/BaseEventText.php:75
 #: src/SmartTags/Ticketing/DefaultTags.php:47
 msgid "Event Date"
@@ -4021,8 +4040,6 @@ msgid "Site"
 msgstr ""
 
 #: src/Admin/EmailNotifications.php:586
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:125
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:129
 msgid "Site Name"
 msgstr ""
 
@@ -4108,137 +4125,142 @@ msgstr ""
 msgid "Event name is required."
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:398
+#: src/Admin/Events/Metaboxes.php:400
 msgid "Recurrence"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:409
+#: src/Admin/Events/Metaboxes.php:411
 msgid "Link"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:420
-#: src/Admin/Events/Metaboxes.php:749
+#: src/Admin/Events/Metaboxes.php:422
+#: src/Admin/Events/Metaboxes.php:754
 #: src/Admin/Pages/Speakers.php:71
-#: src/Admin/Pages/ToolsAiTab.php:427
-#: src/Admin/Pages/ToolsExportTab.php:258
+#: src/Admin/Pages/ToolsAiTab.php:422
+#: src/Admin/Pages/ToolsExportTab.php:268
+#: src/SetupChecklist/Config.php:390
 msgid "Speakers"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:431
-#: src/Admin/Events/Metaboxes.php:658
+#: src/Admin/Events/Metaboxes.php:433
+#: src/Admin/Events/Metaboxes.php:663
 #: src/Admin/Pages/Rsvp.php:157
 #: src/Admin/Pages/SettingsRsvpTab.php:39
 #: src/Admin/Pages/SettingsRsvpTab.php:138
-#: src/Admin/Pages/ToolsAiTab.php:440
+#: src/Admin/Pages/ToolsAiTab.php:435
+#: src/Integrations/Ai/Admin/ChatShell.php:504
+#: src/SetupChecklist/Config.php:370
 msgid "RSVP"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:450
+#: src/Admin/Events/Metaboxes.php:455
 msgid "Repeat"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:453
-#: src/Admin/Events/Metaboxes.php:471
+#: src/Admin/Events/Metaboxes.php:458
+#: src/Admin/Events/Metaboxes.php:476
 msgid "Never"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:459
+#: src/Admin/Events/Metaboxes.php:464
 msgid "Every"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:466
+#: src/Admin/Events/Metaboxes.php:471
+#: src/Integrations/Ai/Admin/ChatShell.php:490
 msgid "Ends"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:486
+#: src/Admin/Events/Metaboxes.php:491
+#: src/Integrations/Ai/Admin/ChatShell.php:407
 msgid "After"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:490
+#: src/Admin/Events/Metaboxes.php:495
 msgid "time"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:504
+#: src/Admin/Events/Metaboxes.php:509
 msgid "to unlock daily, weekly, monthly, and custom schedule Recurring Events!"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:533
+#: src/Admin/Events/Metaboxes.php:538
 msgid "Add a custom URL which will be displayed in the event details or redirect visitors to a different page."
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:537
+#: src/Admin/Events/Metaboxes.php:542
 msgid "Redirect"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:549
+#: src/Admin/Events/Metaboxes.php:554
 msgid "Automatically send visitors here. The Event page on your site will be inaccessible."
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:562
+#: src/Admin/Events/Metaboxes.php:567
 msgid "Paste the full URL starting with https://"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:568
+#: src/Admin/Events/Metaboxes.php:573
 msgid "Target"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:571
+#: src/Admin/Events/Metaboxes.php:576
 msgid "Open link in a new tab"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:580
+#: src/Admin/Events/Metaboxes.php:585
 msgid "Use this text instead of showing the URL."
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:593
+#: src/Admin/Events/Metaboxes.php:598
 msgid "to set a custom URL and optionally link out to external platforms!"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:623
+#: src/Admin/Events/Metaboxes.php:628
 msgid "Venue"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:629
+#: src/Admin/Events/Metaboxes.php:634
 msgid "Event Venues"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:637
+#: src/Admin/Events/Metaboxes.php:642
 msgid "Select a venue"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:666
+#: src/Admin/Events/Metaboxes.php:671
 msgid "Phone Required"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:669
+#: src/Admin/Events/Metaboxes.php:674
 msgid "Show Attendee List"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:672
+#: src/Admin/Events/Metaboxes.php:677
 msgid "Allow \"Not Going\""
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:673
+#: src/Admin/Events/Metaboxes.php:678
 msgid "Enabling this will allow users to submit “Not Going” as a response"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:722
+#: src/Admin/Events/Metaboxes.php:727
 msgid "to access a complete guest list management!"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:769
+#: src/Admin/Events/Metaboxes.php:774
 msgid "Search an existing speaker or create a new one."
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:773
+#: src/Admin/Events/Metaboxes.php:778
 msgid "Event Speakers"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:773
+#: src/Admin/Events/Metaboxes.php:778
 msgid "Add New Speaker"
 msgstr ""
 
-#: src/Admin/Events/Metaboxes.php:791
+#: src/Admin/Events/Metaboxes.php:796
 msgid "to create reusable speaker & performer profiles with full details!"
 msgstr ""
 
@@ -4295,6 +4317,7 @@ msgid "End"
 msgstr ""
 
 #: src/Admin/Events/Metaboxes/Event.php:971
+#: src/Integrations/Ai/Admin/ChatShell.php:495
 msgid "Address"
 msgstr ""
 
@@ -4580,19 +4603,19 @@ msgstr ""
 msgid "Multiple Days"
 msgstr ""
 
-#: src/Admin/FlyoutMenu.php:55
+#: src/Admin/FlyoutMenu.php:61
 msgid "See Quick Links"
 msgstr ""
 
-#: src/Admin/FlyoutMenu.php:117
+#: src/Admin/FlyoutMenu.php:123
 msgid "Support & Docs"
 msgstr ""
 
-#: src/Admin/FlyoutMenu.php:124
+#: src/Admin/FlyoutMenu.php:130
 msgid "Join Community"
 msgstr ""
 
-#: src/Admin/FlyoutMenu.php:131
+#: src/Admin/FlyoutMenu.php:137
 msgid "Suggest a Feature"
 msgstr ""
 
@@ -4625,7 +4648,9 @@ msgid "Unknown Addon"
 msgstr ""
 
 #. translators: %s - addon title.
+#. translators: %s - sister plugin name.
 #: src/Admin/Pages/Addons.php:128
+#: src/Admin/SetupChecklist/PromotionsRenderer.php:94
 #, php-format
 msgid "%s logo"
 msgstr ""
@@ -4695,17 +4720,18 @@ msgstr ""
 
 #: src/Admin/Pages/CalendarAbstract.php:323
 #: src/Features/Tags/Admin/Pages/TagAbstract.php:307
+#: src/Integrations/Ai/Admin/ChatShell.php:487
 msgid "Description"
 msgstr ""
 
 #: src/Admin/Pages/CalendarEdit.php:144
 #: src/Admin/Pages/CalendarNew.php:145
 #: src/Admin/Tools/Importers/Importer.php:1115
-#: src/Features/RegistrationForm/Admin/OrderPage.php:991
 msgid "Name"
 msgstr ""
 
 #: src/Admin/Pages/Calendars.php:176
+#: src/Integrations/Ai/EntityTypes.php:64
 msgid "Add Calendar"
 msgstr ""
 
@@ -4724,149 +4750,152 @@ msgid "Number of items per page"
 msgstr ""
 
 #: src/Admin/Pages/Event.php:95
-#: src/Admin/Pages/EventAbstract.php:265
+#: src/Admin/Pages/EventAbstract.php:274
 msgid "Name this event"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:283
+#: src/Admin/Pages/EventAbstract.php:292
 msgid "Event name is required"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:284
+#: src/Admin/Pages/EventAbstract.php:293
 msgid "Save a draft to enable preview."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:361
+#: src/Admin/Pages/EventAbstract.php:370
 msgid "Join us for a night of soulful melodies and heartfelt performances at our Acoustic Open Mic Night! Whether you're a seasoned musician or just starting out, this is the perfect opportunity to showcase your talent in a warm and welcoming environment. Bring your guitar, ukulele, or just your voice, and share your favorite songs or original compositions with an appreciative audience."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:362
+#: src/Admin/Pages/EventAbstract.php:371
 msgid "Enjoy a cozy atmosphere, delicious snacks, and the chance to connect with fellow music lovers."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:363
+#: src/Admin/Pages/EventAbstract.php:372
 msgid "Don't miss out on this vibrant celebration of creativity and community!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:368
+#: src/Admin/Pages/EventAbstract.php:377
 msgid "To sell tickets, enable ticketing here, but ensure your Stripe account is connected first."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:378
+#: src/Admin/Pages/EventAbstract.php:387
 #: src/Admin/Tools/DashboardWidget.php:630
+#: src/SetupChecklist/Config.php:191
 msgid "Learn More"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:383
+#: src/Admin/Pages/EventAbstract.php:392
 msgid "Once all your event details are added, you can publish your event!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:384
+#: src/Admin/Pages/EventAbstract.php:393
 msgid "Your event can be edited anytime from the events page."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:428
+#: src/Admin/Pages/EventAbstract.php:435
 msgid "Are you sure you want to cancel our event creation guide?"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:432
+#: src/Admin/Pages/EventAbstract.php:439
+#: src/Integrations/Ai/AnswerSanitizer.php:341
 #: src/Integrations/Elementor/Widgets/EventTitle.php:130
 #: src/SetupWizard/SetupWizardLandingPage.php:139
 msgid "No"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:437
+#: src/Admin/Pages/EventAbstract.php:444
 #: src/Admin/Tools/Importers.php:161
+#: src/Integrations/Ai/AnswerSanitizer.php:341
 #: src/Integrations/Elementor/Widgets/EventTitle.php:129
 #: src/SetupWizard/SetupWizardLandingPage.php:142
 msgid "Yes"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:443
+#: src/Admin/Pages/EventAbstract.php:450
 msgid "Take a few minutes to walkthrough the whole guided process"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:446
+#: src/Admin/Pages/EventAbstract.php:453
 msgid "Let's create your first event!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:452
+#: src/Admin/Pages/EventAbstract.php:459
 msgid "Let's get started!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:457
+#: src/Admin/Pages/EventAbstract.php:464
 msgid "Finish Setup"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:460
+#: src/Admin/Pages/EventAbstract.php:467
 msgid "Check Documentation"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:463
+#: src/Admin/Pages/EventAbstract.php:470
 msgid "After publishing, display events on your website using our native blocks for Elementor and WP Block Editor, or use shortcodes found in our documentation."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:466
+#: src/Admin/Pages/EventAbstract.php:473
 msgid "Congratulations! You are ready to roll!"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:473
+#: src/Admin/Pages/EventAbstract.php:480
 msgid "Done & Publish"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:483
+#: src/Admin/Pages/EventAbstract.php:490
 msgid "Acoustic Open Mic"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:492
+#: src/Admin/Pages/EventAbstract.php:499
 msgid "Every event must have a name for it to be published. For example, we'll add a name to get you started."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:497
+#: src/Admin/Pages/EventAbstract.php:504
 msgid "Event name"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:512
+#: src/Admin/Pages/EventAbstract.php:519
 msgid "Add your event description here, like a brief summary, agenda, requirements, and plans."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:517
+#: src/Admin/Pages/EventAbstract.php:524
 msgid "Event description"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:534
+#: src/Admin/Pages/EventAbstract.php:541
 msgid "Define the start and end times, or whether this is an all day event, to move to the next step."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:539
+#: src/Admin/Pages/EventAbstract.php:546
 msgid "Set event duration"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:554
+#: src/Admin/Pages/EventAbstract.php:561
 msgid "For repeating events, use the recurrence feature to easily set up & manage them."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:559
+#: src/Admin/Pages/EventAbstract.php:566
 msgid "Event recurrence"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:574
+#: src/Admin/Pages/EventAbstract.php:581
 msgid "You can add a simple address for your event. If you are managing multiple event locations, upgrade to Pro for our awesome Venues feature."
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:607
+#: src/Admin/Pages/EventAbstract.php:614
 msgid "Set up which calendar you'd like this event to be connected to"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:612
+#: src/Admin/Pages/EventAbstract.php:619
 msgid "Set Calendars"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:625
+#: src/Admin/Pages/EventAbstract.php:632
 msgid "Publish"
 msgstr ""
 
-#: src/Admin/Pages/EventAbstract.php:658
+#: src/Admin/Pages/EventAbstract.php:665
 #: src/Admin/Pages/ToolsExportTab.php:145
 #: src/Admin/Tools/ScheduledImportsEducation.php:569
 msgid "feature"
@@ -4922,57 +4951,55 @@ msgstr ""
 msgid "Google returned an unexpected response while we checked this key. Please check that your maps load correctly on your site."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:110
+#: src/Admin/Pages/Integrations/Zoom.php:107
 #: src/Integrations/Zoom/ZoomIntegration.php:119
 #: src/Integrations/Zoom/ZoomWebhookEventHandler.php:60
 msgid "Zoom"
 msgstr ""
 
 #. translators: %s - Documentation link URL.
-#: src/Admin/Pages/Integrations/Zoom.php:213
+#: src/Admin/Pages/Integrations/Zoom.php:210
 #, php-format
 msgid "Connect your Zoom account to automatically generate meeting links for your online events. If you need help, please refer to <a href=\"%s\" target=\"_blank\" rel=\"noopener\">our documentation</a>."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:300
+#: src/Admin/Pages/Integrations/Zoom.php:297
 msgid "Account Connection"
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:322
+#: src/Admin/Pages/Integrations/Zoom.php:319
 msgid "Connect with Zoom"
 msgstr ""
 
 #. translators: %s - date the Zoom account was connected.
-#: src/Admin/Pages/Integrations/Zoom.php:377
+#: src/Admin/Pages/Integrations/Zoom.php:374
 #, php-format
 msgid "Connected on %s"
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:386
+#: src/Admin/Pages/Integrations/Zoom.php:383
 #: src/Admin/Pages/SettingsIntegrationsTab.php:909
 #: src/Integrations/Admin/OnlineMeetingSection.php:363
 #: assets/js/admin-event-metabox.js:503
 msgid "Remove"
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:686
+#: src/Admin/Pages/Integrations/Zoom.php:606
 msgid "Zoom connected successfully."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:687
+#: src/Admin/Pages/Integrations/Zoom.php:607
 msgid "Zoom disconnected."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:688
+#: src/Admin/Pages/Integrations/Zoom.php:608
 msgid "Could not connect to Zoom. Please try again."
 msgstr ""
 
 #. translators: %1$s - Sugar Calendar Account License URL.
 #. translators: %1$s - URL to upgrade the plan.
-#. translators: %1$s Sugar Calendar Account License URL.
 #: src/Admin/Pages/Rsvp.php:73
 #: src/Admin/Pages/SettingsRsvpTab.php:122
-#: src/Pro/Admin/Loader.php:205
 #, php-format
 msgid "RSVP feature is available as an add-on. Please <a target=\"_blank\" href=\"%1$s\">upgrade your plan</a> to Plus, Pro or Elite, in order to get access to the RSVP add-on and others."
 msgstr ""
@@ -5049,7 +5076,7 @@ msgstr ""
 #: src/Admin/Pages/Settings.php:229
 #: src/Admin/Pages/SettingsFeedsTab.php:132
 #: src/Admin/Pages/SettingsIntegrationsTab.php:301
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:120
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:169
 #: src/Admin/Pages/SettingsRsvpTab.php:107
 #: src/Admin/Pages/SettingsZapierTab.php:62
 #: src/Integrations/Elementor/CalendarWidget.php:125
@@ -5074,8 +5101,6 @@ msgstr ""
 
 #: src/Admin/Pages/Settings/Emails/EmailEditPage.php:107
 #: src/Emails/Ticketing/TicketSaleAdminEmail.php:128
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:105
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:109
 msgid "Email Message"
 msgstr ""
 
@@ -5153,7 +5178,7 @@ msgid "Hide Sugar Calendar Branding"
 msgstr ""
 
 #: src/Admin/Pages/Settings/EmailsConfigTab.php:106
-#: src/Helpers.php:1887
+#: src/Helpers.php:2061
 msgid "Already purchased?"
 msgstr ""
 
@@ -5286,7 +5311,7 @@ msgid "The interface to use when adding or editing Events."
 msgstr ""
 
 #: src/Admin/Pages/SettingsGeneralTab.php:245
-#: src/Admin/Pages/ToolsExportTab.php:252
+#: src/Admin/Pages/ToolsExportTab.php:262
 msgid "Custom Fields"
 msgstr ""
 
@@ -5345,6 +5370,7 @@ msgstr ""
 #: src/Admin/Pages/SettingsIntegrationsTab.php:196
 #: src/Admin/Pages/SettingsZapierTab.php:37
 #: src/Admin/Pages/SettingsZapierTab.php:72
+#: src/SetupChecklist/Config.php:410
 msgid "Zapier"
 msgstr ""
 
@@ -5407,79 +5433,101 @@ msgstr ""
 msgid "Links on existing events stay active. New online events won't get Zoom links until you reconnect."
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:43
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:47
 msgid "License & Usage"
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:72
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:76
 msgid "License"
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:73
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:77
 msgid "Your license key provides access to updates and support. "
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:92
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:96
 msgid "License Key"
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:184
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:137
+msgid "AI Usage"
+msgstr ""
+
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:141
+msgid "You've used all of this period's AI usage. Gia can't run new requests until it resets or your limit is increased."
+msgstr ""
+
+#. translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field.
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:145
+#, php-format
+msgid "Your license isn't active, so Gia is using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits."
+msgstr ""
+
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:233
 msgid "You're using <strong>Sugar Calendar Lite</strong> - no license needed. Enjoy! 🙂"
 msgstr ""
 
 #. translators: %1$s - discount badge markup (e.g. "50% OFF!").
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:196
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:245
 #, php-format
 msgid "As a valued Sugar Calendar Lite user, you can enjoy an exclusive %1$s automatically applied at checkout to unlock even more features!"
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:317
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:366
 msgid "Paste license key here"
 msgstr ""
 
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:322
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:371
 msgid "Verify Key"
 msgstr ""
 
 #. translators: %1$s - Sugar Calendar account dashboard url; %2$s - pricing page url.
-#: src/Admin/Pages/SettingsLicenseUsageTab.php:328
+#: src/Admin/Pages/SettingsLicenseUsageTab.php:377
 #, php-format
 msgid "Your license key can be found in your <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sugar Calendar Account Dashboard</a>. Don't have a license?  <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Sign up today!</a>"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:63
+#: src/Admin/Pages/SettingsMiscTab.php:65
 msgid "Disable Integrations?"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:64
+#: src/Admin/Pages/SettingsMiscTab.php:66
 msgid "All existing integration connections will be permanently removed. This action cannot be undone."
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:65
+#: src/Admin/Pages/SettingsMiscTab.php:67
 msgid "Disable"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:114
+#: src/Admin/Pages/SettingsMiscTab.php:116
 msgid "Misc"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:140
+#: src/Admin/Pages/SettingsMiscTab.php:142
 msgid "Miscellaneous"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:152
+#: src/Admin/Pages/SettingsMiscTab.php:154
 msgid "Hide Announcements"
 msgstr ""
 
-#: src/Admin/Pages/SettingsMiscTab.php:153
+#: src/Admin/Pages/SettingsMiscTab.php:155
 msgid "Hide plugin announcements and update details."
 msgstr ""
 
 #: src/Admin/Pages/SettingsMiscTab.php:170
-msgid "Disable Integrations"
+msgid "Hide AI Features"
 msgstr ""
 
 #: src/Admin/Pages/SettingsMiscTab.php:171
+msgid "Hide the Gia AI assistant and AI usage details."
+msgstr ""
+
+#: src/Admin/Pages/SettingsMiscTab.php:189
+msgid "Disable Integrations"
+msgstr ""
+
+#: src/Admin/Pages/SettingsMiscTab.php:190
 msgid "Disconnect and disable all external integrations and usage tracking for Sugar Calendar."
 msgstr ""
 
@@ -5523,172 +5571,219 @@ msgstr ""
 msgid "Build Custom Solutions"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:119
-#: src/Admin/Pages/SMTP.php:235
-#: src/Admin/Pages/ToolsAiTab.php:78
+#: src/Admin/Pages/SetupChecklist.php:60
+msgid "Setup Checklist"
+msgstr ""
+
+#. translators: %1$d - completed steps; %2$d - total steps.
+#: src/Admin/Pages/SetupChecklist.php:90
+#, php-format
+msgid "%1$d of %2$d setup steps complete"
+msgstr ""
+
+#. translators: %d - percentage of setup steps complete.
+#: src/Admin/Pages/SetupChecklist.php:98
+#, php-format
+msgid "Setup Checklist: %d%% complete"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:245
+msgid "Are you sure?"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:246
+msgid "This will permanently dismiss the Setup Checklist, and you will not be able to bring it back. This cannot be undone."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:247
+msgid "Yes, dismiss"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:251
+#: src/Connect.php:59
+#: src/SetupChecklist/Checklist.php:232
+#: src/SetupChecklist/Checklist.php:431
+msgid "Activate"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:252
+#: src/Admin/Pages/SMTP.php:349
+#: src/Admin/Pages/ToolsAiTab.php:175
+#: src/SetupChecklist/Config.php:247
+#: src/SetupChecklist/Config.php:273
+#: src/SetupChecklist/Config.php:289
+msgid "Activating..."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:253
+msgid "Edit this page normally."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:254
+#: src/Admin/Tools/DashboardWidget.php:627
+#: src/SetupChecklist/Checklist.php:231
+#: src/SetupChecklist/Checklist.php:434
+msgid "Install"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:255
+#: src/SetupChecklist/Checklist.php:428
+msgid "Installed"
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:256
+msgid "Installing.."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:257
+msgid "Loading pages..."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:258
+msgid "The request failed. Please try again."
+msgstr ""
+
+#: src/Admin/Pages/SetupChecklist.php:273
+msgid "Complete Sugar Calendar Setup Checklist"
+msgstr ""
+
+#: src/Admin/Pages/SMTP.php:123
+#: src/Admin/Pages/SMTP.php:234
 msgid "You do not have permission."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:131
-#: src/Admin/Tools/WpVibeInstaller.php:113
-msgid "Could not install the plugin. Please download and install it manually."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:172
-#: src/Admin/Tools/WpVibeInstaller.php:110
-#: src/Admin/Tools/WpVibeInstaller.php:117
-msgid "Plugin installed."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:178
-#: src/Admin/Tools/WpVibeInstaller.php:120
-#: src/Connect.php:212
-#: src/Connect.php:220
-#: src/Connect.php:338
-msgid "Plugin installed & activated."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:192
-#: src/Admin/Pages/ToolsAiTab.php:104
+#: src/Admin/Pages/SMTP.php:158
 msgid "Plugin activation is disabled for you on this site."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:198
-#: src/Admin/Tools/WpVibeInstaller.php:145
-msgid "Plugin activated."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:199
-msgid "Could not activate the plugin. Please activate it on the Plugins page."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:245
+#: src/Admin/Pages/SMTP.php:244
 msgid "Plugin unavailable."
 msgstr ""
 
 #. translators: %s - Lite plugin download URL.
-#: src/Admin/Pages/SMTP.php:324
+#: src/Admin/Pages/SMTP.php:325
 #, php-format
 msgid "Could not install the plugin automatically. Please <a href=\"%s\">download</a> it and install it manually."
 msgstr ""
 
 #. translators: %s - Lite plugin download URL.
-#: src/Admin/Pages/SMTP.php:336
+#: src/Admin/Pages/SMTP.php:337
 #, php-format
 msgid "Could not activate the plugin. Please activate it on the <a href=\"%s\">Plugins page</a>."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:347
-#: src/Admin/Pages/ToolsAiTab.php:179
+#: src/Admin/Pages/SMTP.php:348
+#: src/Admin/Pages/ToolsAiTab.php:174
+#: src/SetupChecklist/Config.php:246
+#: src/SetupChecklist/Config.php:272
+#: src/SetupChecklist/Config.php:288
 msgid "Installing..."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:348
-#: src/Admin/Pages/ToolsAiTab.php:180
-msgid "Activating..."
-msgstr ""
-
-#: src/Admin/Pages/SMTP.php:349
-#: src/Admin/Pages/SMTP.php:594
+#: src/Admin/Pages/SMTP.php:350
+#: src/Admin/Pages/SMTP.php:598
 msgid "WP Mail SMTP Installed & Activated"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:350
+#: src/Admin/Pages/SMTP.php:351
 msgid "Install Now"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:351
+#: src/Admin/Pages/SMTP.php:352
 msgid "Activate Now"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:352
+#: src/Admin/Pages/SMTP.php:353
 msgid "Download Now"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:353
+#: src/Admin/Pages/SMTP.php:354
 msgid "Go to Plugins page"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:358
-#: src/Admin/Pages/SMTP.php:628
+#: src/Admin/Pages/SMTP.php:359
+#: src/Admin/Pages/SMTP.php:632
 msgid "Go to SMTP settings"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:359
-#: src/Admin/Pages/SMTP.php:619
+#: src/Admin/Pages/SMTP.php:360
+#: src/Admin/Pages/SMTP.php:623
 msgid "Open Setup Wizard"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:400
+#: src/Admin/Pages/SMTP.php:401
 msgid "Sugar Calendar ♥ WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:401
+#: src/Admin/Pages/SMTP.php:402
 msgid "Making Email Deliverability Easy for WordPress"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:402
+#: src/Admin/Pages/SMTP.php:403
 msgid "WP Mail SMTP fixes deliverability problems with your WordPress emails and event notifications. It's built by the same folks behind Sugar Calendar and is used by more than 4 million websites."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:427
+#: src/Admin/Pages/SMTP.php:428
 msgid "WP Mail SMTP screenshot"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:429
+#: src/Admin/Pages/SMTP.php:430
 msgid "Resolves email deliverability for your site."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:430
+#: src/Admin/Pages/SMTP.php:431
 msgid "Email logs allow you to resend failed emails, alerts notify you about failures and you can set a backup provider for total peace of mind."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:431
+#: src/Admin/Pages/SMTP.php:432
 msgid "Choose from many providers: SendLayer, SMTP.com, Brevo, Gmail, Outlook, SES, and more."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:514
+#: src/Admin/Pages/SMTP.php:515
 msgid "Step 1"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:548
+#: src/Admin/Pages/SMTP.php:549
 msgid "Step 2"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:549
+#: src/Admin/Pages/SMTP.php:550
+#: src/SetupChecklist/Config.php:242
 msgid "Set Up WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:550
+#: src/Admin/Pages/SMTP.php:551
 msgid "Select and configure your mailer."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:568
+#: src/Admin/Pages/SMTP.php:569
 msgid "Install and Activate WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:569
+#: src/Admin/Pages/SMTP.php:570
 msgid "Install WP Mail SMTP from the WordPress.org plugin repository."
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:579
+#: src/Admin/Pages/SMTP.php:583
+#: src/SetupChecklist/Config.php:244
 msgid "Install WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:585
+#: src/Admin/Pages/SMTP.php:589
 #: src/Admin/Tools/DashboardWidget.php:758
 msgid "WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:587
+#: src/Admin/Pages/SMTP.php:591
 msgid "WP Mail SMTP on WordPress.org"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:594
+#: src/Admin/Pages/SMTP.php:598
+#: src/SetupChecklist/Config.php:245
 msgid "Activate WP Mail SMTP"
 msgstr ""
 
-#: src/Admin/Pages/SMTP.php:623
+#: src/Admin/Pages/SMTP.php:627
 msgid "Start Setup"
 msgstr ""
 
@@ -5741,194 +5836,196 @@ msgstr ""
 msgid "Importer not found."
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:181
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:133
+#: src/Admin/Pages/ToolsAiTab.php:176
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:116
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:226
+#: src/Admin/Pages/ToolsAiTab.php:221
 msgid "AI MCP"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:250
+#: src/Admin/Pages/ToolsAiTab.php:245
 msgid "Setup AI MCP"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:264
+#: src/Admin/Pages/ToolsAiTab.php:259
 msgid "Your site is configured to disallow plugin activation from the dashboard."
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:272
+#: src/Admin/Pages/ToolsAiTab.php:267
 msgid "Activate AI MCP"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:289
+#: src/Admin/Pages/ToolsAiTab.php:284
 msgid "Connect AI MCP"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:303
+#: src/Admin/Pages/ToolsAiTab.php:298
 msgid "Install from WordPress.org"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:311
+#: src/Admin/Pages/ToolsAiTab.php:306
 msgid "Your site is configured to disallow plugin installation from the dashboard."
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:337
+#: src/Admin/Pages/ToolsAiTab.php:332
 msgid "Filter events by status, calendar, and date"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:338
+#: src/Admin/Pages/ToolsAiTab.php:333
 msgid "Search your events by keyword"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:339
+#: src/Admin/Pages/ToolsAiTab.php:334
 msgid "Create and edit events, always as drafts"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:348
+#: src/Admin/Pages/ToolsAiTab.php:343
 msgid "List all your calendars"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:349
+#: src/Admin/Pages/ToolsAiTab.php:344
 msgid "Look up a calendar by id or slug"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:350
+#: src/Admin/Pages/ToolsAiTab.php:345
 msgid "Create a calendar and assign events"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:357
+#: src/Admin/Pages/ToolsAiTab.php:352
 #: src/Features/Tags/Admin/Pages/Event.php:42
 #: src/Features/Tags/Admin/Pages/Tags.php:207
 #: src/Features/Tags/Common/Helpers.php:68
 #: src/Features/Tags/Frontend/Blocks.php:57
+#: src/Integrations/Ai/Admin/ChatShell.php:494
 #: src/Integrations/Elementor/CalendarWidget.php:151
 #: src/Integrations/Elementor/ListWidget.php:155
 msgid "Tags"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:359
+#: src/Admin/Pages/ToolsAiTab.php:354
 msgid "List and search your event tags"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:360
+#: src/Admin/Pages/ToolsAiTab.php:355
 msgid "Look up a tag by id or slug"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:361
+#: src/Admin/Pages/ToolsAiTab.php:356
 msgid "Create a tag and apply it to events"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:368
+#: src/Admin/Pages/ToolsAiTab.php:363
 msgid "Event Stats"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:370
+#: src/Admin/Pages/ToolsAiTab.php:365
 msgid "Stats by date range, calendar, and month"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:371
+#: src/Admin/Pages/ToolsAiTab.php:366
 msgid "Get a single event's full details"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:381
+#: src/Admin/Pages/ToolsAiTab.php:376
+#: src/Integrations/Ai/Funnels.php:308
 msgid "Registrations"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:383
+#: src/Admin/Pages/ToolsAiTab.php:378
 msgid "Signup and revenue totals by date range"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:384
+#: src/Admin/Pages/ToolsAiTab.php:379
 msgid "Compare a period against the one before"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:385
+#: src/Admin/Pages/ToolsAiTab.php:380
 msgid "Counts ticket orders and going RSVPs"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:388
-#: src/Admin/Pages/ToolsAiTab.php:404
-#: src/Admin/Pages/ToolsAiTab.php:420
-#: src/Admin/Pages/ToolsAiTab.php:433
-#: src/Admin/Pages/ToolsAiTab.php:445
+#: src/Admin/Pages/ToolsAiTab.php:383
+#: src/Admin/Pages/ToolsAiTab.php:399
+#: src/Admin/Pages/ToolsAiTab.php:415
+#: src/Admin/Pages/ToolsAiTab.php:428
+#: src/Admin/Pages/ToolsAiTab.php:440
 msgid "Pro"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:389
-#: src/Admin/Pages/ToolsAiTab.php:405
+#: src/Admin/Pages/ToolsAiTab.php:384
+#: src/Admin/Pages/ToolsAiTab.php:400
 msgid "Get Event Ticketing"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:400
+#: src/Admin/Pages/ToolsAiTab.php:395
 msgid "See who's registered for an event"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:401
+#: src/Admin/Pages/ToolsAiTab.php:396
 msgid "Check ticket sales and availability"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:414
-#: src/Admin/Pages/ToolsExportTab.php:257
+#: src/Admin/Pages/ToolsAiTab.php:409
+#: src/Admin/Pages/ToolsExportTab.php:267
 #: src/Admin/Pages/Venues.php:71
+#: src/SetupChecklist/Config.php:395
 msgid "Venues"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:416
+#: src/Admin/Pages/ToolsAiTab.php:411
 msgid "List and look up your venues"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:417
+#: src/Admin/Pages/ToolsAiTab.php:412
 msgid "Add a venue and attach it to an event"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:429
+#: src/Admin/Pages/ToolsAiTab.php:424
 msgid "List and look up your speakers"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:430
+#: src/Admin/Pages/ToolsAiTab.php:425
 msgid "Add a speaker and attach them to an event"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:442
+#: src/Admin/Pages/ToolsAiTab.php:437
 msgid "See who's RSVP'd and check capacity"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:446
+#: src/Admin/Pages/ToolsAiTab.php:441
 msgid "Get RSVP"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:551
+#: src/Admin/Pages/ToolsAiTab.php:546
 msgid "WordPress Abilities API + Sugar Calendar"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:567
+#: src/Admin/Pages/ToolsAiTab.php:562
 msgid "Use Sugar Calendar With Your Favorite AI"
 msgstr ""
 
 #. translators: %s - "Learn more about Abilities API" inline link.
-#: src/Admin/Pages/ToolsAiTab.php:587
+#: src/Admin/Pages/ToolsAiTab.php:582
 #, php-format
 msgid "Connect your WordPress site and Sugar Calendar to AI assistants like Claude, ChatGPT, Cursor, and more. Ask about your events, calendars, and stats in plain language, and have it draft new events for you. %s"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:591
+#: src/Admin/Pages/ToolsAiTab.php:586
 msgid "Learn more about Abilities API"
 msgstr ""
 
 #. translators: %s - WPVibe.ai inline link.
-#: src/Admin/Pages/ToolsAiTab.php:620
+#: src/Admin/Pages/ToolsAiTab.php:615
 #, php-format
 msgid "Connecting AI MCP will install and activate our free sister plugin %s"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:820
+#: src/Admin/Pages/ToolsAiTab.php:815
 msgid "Everything Sugar Calendar Can Do With AI"
 msgstr ""
 
-#: src/Admin/Pages/ToolsAiTab.php:830
+#: src/Admin/Pages/ToolsAiTab.php:825
 msgid "...And many more abilities coming soon!"
 msgstr ""
 
@@ -5944,53 +6041,53 @@ msgstr ""
 msgid "Nothing to export"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:221
-#: src/Admin/Pages/ToolsExportTab.php:235
-#: src/Admin/Pages/ToolsExportTab.php:338
+#: src/Admin/Pages/ToolsExportTab.php:231
+#: src/Admin/Pages/ToolsExportTab.php:245
+#: src/Admin/Pages/ToolsExportTab.php:348
 msgid "Export"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:254
+#: src/Admin/Pages/ToolsExportTab.php:264
 msgid "Tickets, Orders and Attendees"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:255
+#: src/Admin/Pages/ToolsExportTab.php:265
 msgid "Registration Responses"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:263
+#: src/Admin/Pages/ToolsExportTab.php:273
 msgid "Select the Sugar Calendar data that you would like to export."
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:268
+#: src/Admin/Pages/ToolsExportTab.php:278
 msgid "Select data to export"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:303
+#: src/Admin/Pages/ToolsExportTab.php:313
 msgid "Export Format"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:312
+#: src/Admin/Pages/ToolsExportTab.php:322
 msgid "JSON"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:313
+#: src/Admin/Pages/ToolsExportTab.php:323
 msgid "CSV"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:321
+#: src/Admin/Pages/ToolsExportTab.php:331
 msgid "Custom Date Range"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:328
+#: src/Admin/Pages/ToolsExportTab.php:338
 msgid "Select Date Range"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:329
+#: src/Admin/Pages/ToolsExportTab.php:339
 msgid "Custom date range"
 msgstr ""
 
-#: src/Admin/Pages/ToolsExportTab.php:330
+#: src/Admin/Pages/ToolsExportTab.php:340
 msgid "Custom Date Range filters Events, Tickets, Orders & Attendees, and Registration Responses. Everything else exports in full."
 msgstr ""
 
@@ -6086,6 +6183,7 @@ msgid "Most event calendar plugins are either way too simple, or extremely overl
 msgstr ""
 
 #: src/Admin/Pages/Welcome.php:113
+#: src/SetupChecklist/Config.php:117
 msgid "Create Your First Event"
 msgstr ""
 
@@ -6168,7 +6266,83 @@ msgstr ""
 msgid "Easily sell tickets to events through Stripe or WooCommerce with the Event Ticketing addon."
 msgstr ""
 
+#: src/Admin/SetupChecklist/ActionRenderer.php:142
+msgid "Select a Page"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:151
+#: src/Admin/SetupChecklist/ActionRenderer.php:156
+msgid "Search pages"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:161
+msgid "No editable pages found."
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:163
+msgid "Open Pages to create a page, then return here."
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:167
+msgid "Load more pages"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:198
+#: assets/jsx/src/features/NotifyForm/index.jsx:616
+msgid "Email address"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ActionRenderer.php:204
+msgid "you@example.com"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:159
+#: src/Admin/Tools/Importers.php:147
+msgid "Complete"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:160
+msgid "Incomplete"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:191
+msgid "Take Your Events to the Next Level"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:211
+msgid "Set Up Recommended Growth Tools"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:212
+msgid "Take your website to the next level with our sister plugins."
+msgstr ""
+
+#: src/Admin/SetupChecklist/ChecklistRenderer.php:230
+msgid "Complete Setup Checklist"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ItemRenderer.php:113
+msgid "Completed"
+msgstr ""
+
+#: src/Admin/SetupChecklist/ItemRenderer.php:125
+msgid "Not completed"
+msgstr ""
+
+#: src/Admin/SetupChecklist/PromotionsRenderer.php:40
+msgid "Plus dozens of other powerful features to help your events succeed."
+msgstr ""
+
+#: src/Admin/SetupChecklist/PromotionsRenderer.php:46
+msgid "$50 OFF"
+msgstr ""
+
+#: src/Admin/SetupChecklist/PromotionsRenderer.php:47
+msgid "for Sugar Calendar Lite users!"
+msgstr ""
+
 #: src/Admin/Tools/DashboardWidget.php:171
+#: src/Integrations/Ai/Funnels.php:313
 msgid "Upcoming Events"
 msgstr ""
 
@@ -6204,15 +6378,12 @@ msgstr ""
 msgid "Recommended Plugin:"
 msgstr ""
 
-#: src/Admin/Tools/DashboardWidget.php:627
-msgid "Install"
-msgstr ""
-
 #: src/Admin/Tools/DashboardWidget.php:777
 msgid "WPForms"
 msgstr ""
 
 #: src/Admin/Tools/DashboardWidget.php:796
+#: src/SetupChecklist/Config.php:432
 msgid "AIOSEO"
 msgstr ""
 
@@ -6222,10 +6393,6 @@ msgstr ""
 
 #: src/Admin/Tools/Export/ExportDownloader.php:88
 msgid "Export failed"
-msgstr ""
-
-#: src/Admin/Tools/Importers.php:147
-msgid "Complete"
 msgstr ""
 
 #: src/Admin/Tools/Importers.php:148
@@ -6316,6 +6483,7 @@ msgid "Payer"
 msgstr ""
 
 #: src/Admin/Tools/Importers/Importer.php:1127
+#: src/Integrations/Ai/Admin/ChatShell.php:486
 #: src/Integrations/Elementor/Widgets/EventBuyTicketBox.php:105
 #: src/Integrations/Elementor/Widgets/EventTitle.php:91
 msgid "Title"
@@ -6887,16 +7055,11 @@ msgstr ""
 msgid "There are no events scheduled this week."
 msgstr ""
 
-#: src/Connect.php:59
-msgid "Activate"
-msgstr ""
-
 #: src/Connect.php:60
 msgid "Almost Done"
 msgstr ""
 
 #: src/Connect.php:62
-#: src/Features/RegistrationForm/Frontend/Renderer.php:253
 msgid "Continue"
 msgstr ""
 
@@ -6913,7 +7076,7 @@ msgid "Please enter your license key to connect."
 msgstr ""
 
 #: src/Connect.php:139
-#: src/SetupWizard/RestApi.php:368
+#: src/SetupWizard/RestApi.php:381
 msgid "Only the Lite version can be upgraded."
 msgstr ""
 
@@ -6927,6 +7090,12 @@ msgstr ""
 
 #: src/Connect.php:180
 msgid "There was an error while installing an upgrade. Please download the plugin from sugarcalendar.com and install it manually."
+msgstr ""
+
+#: src/Connect.php:212
+#: src/Connect.php:220
+#: src/Connect.php:338
+msgid "Plugin installed & activated."
 msgstr ""
 
 #: src/Connect.php:233
@@ -7190,107 +7359,115 @@ msgstr ""
 msgid "The subject line of the notification sent to the site administrator."
 msgstr ""
 
-#: src/Events/EventWriter.php:74
-msgid "The event could not be saved."
+#: src/Events/EventTermAssigner.php:49
+msgid "calendar"
 msgstr ""
 
-#: src/Events/EventWriter.php:87
-msgid "The event record could not be created."
+#: src/Events/EventTermAssigner.php:54
+msgid "tag"
 msgstr ""
 
-#: src/Events/EventWriter.php:139
-msgid "Recurring events have to be edited in the event editor, so their repeats stay in step."
+#. translators: %s: default calendar name.
+#: src/Events/EventTermAssigner.php:136
+#, php-format
+msgid "No calendar was given, so the event is in the default calendar, %s."
 msgstr ""
 
-#: src/Events/EventWriter.php:225
-msgid "The event could not be updated."
-msgstr ""
-
-#: src/Events/EventWriter.php:273
-msgid "The title and description could not be saved to the event post, so the post may still show the old text. Send the patch again."
+#. translators: %s: default calendar name.
+#: src/Events/EventTermAssigner.php:194
+#, php-format
+msgid "Calendars were cleared on a published event, so it keeps the default calendar, %s."
 msgstr ""
 
 #. translators: %s: input field name, e.g. tag_ids.
-#: src/Events/EventWriter.php:538
+#: src/Events/EventTermAssigner.php:283
 #, php-format
 msgid "That taxonomy is turned off on this site, so %s was not applied."
 msgstr ""
 
 #. translators: %s: input field name, e.g. calendar_ids.
-#: src/Events/EventWriter.php:550
+#: src/Events/EventTermAssigner.php:295
 #, php-format
 msgid "You do not have permission to assign these terms, so %s was not applied."
 msgstr ""
 
 #. translators: %1$s: input field name, %2$s: the reason the assignment failed.
-#: src/Events/EventWriter.php:568
+#: src/Events/EventTermAssigner.php:322
 #, php-format
 msgid "%1$s could not be saved: %2$s"
 msgstr ""
 
-#. translators: %s: comma-separated list of term ids.
-#: src/Events/EventWriter.php:636
+#. translators: %1$d: term id. %2$s: taxonomy it belongs to, e.g. calendar. %3$s: this bucket's own label, e.g. tag. %4$s: this bucket's input field name.
+#: src/Events/EventTermAssigner.php:426
 #, php-format
-msgid "These ids do not exist and were not assigned: %s"
+msgid "%1$d is a %2$s, not a %3$s, so it was not assigned to %4$s."
+msgstr ""
+
+#. translators: %1$s: comma-separated term ids. %2$s: taxonomy they belong to, e.g. calendars. %3$s: this bucket's own label, e.g. tags. %4$s: this bucket's input field name.
+#: src/Events/EventTermAssigner.php:434
+#, php-format
+msgid "%1$s are %2$s ids, not %3$s ids, so they were not assigned to %4$s."
+msgstr ""
+
+#. translators: %1$s: input field name, e.g. tag_ids. %2$s: comma-separated list of term ids.
+#: src/Events/EventTermAssigner.php:466
+#, php-format
+msgid "%1$s: these ids do not exist and were not assigned: %2$s."
 msgstr ""
 
 #. translators: %d: how many further ids were skipped.
-#: src/Events/EventWriter.php:643
+#: src/Events/EventTermAssigner.php:474
 #, php-format
 msgid "%d more id was skipped as well."
 msgid_plural "%d more ids were skipped as well."
 msgstr[0] ""
 msgstr[1] ""
 
+#: src/Events/EventWriter.php:99
+msgid "The event could not be saved."
+msgstr ""
+
+#: src/Events/EventWriter.php:117
+msgid "The event record could not be created."
+msgstr ""
+
+#: src/Events/EventWriter.php:184
+msgid "Recurring events have to be edited in the event editor, so their repeats stay in step."
+msgstr ""
+
+#: src/Events/EventWriter.php:299
+msgid "The event could not be updated."
+msgstr ""
+
+#: src/Events/EventWriter.php:348
+msgid "The title, description and excerpt could not be saved to the event post, so the post may still show the old text. Send the patch again."
+msgstr ""
+
 #: src/Features/FeaturedEvents/Admin/Pages/Event.php:28
+#: src/Integrations/Ai/Funnels.php:248
 msgid "Featured Event"
 msgstr ""
 
 #: src/Features/FeaturedEvents/Common/Markup.php:49
 #: src/Helpers/UI.php:1626
+#: src/Integrations/Ai/Admin/ChatShell.php:501
 msgid "Featured"
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/AnswerFields.php:219
-msgid "(deleted field)"
+#: src/Features/FeaturedEvents/Integrations/Abilities/FeaturedContributor.php:53
+msgid "Send true to mark the event as featured, which highlights it in calendar blocks and shortcodes; false removes the mark."
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/AnswerFields.php:327
-msgid "Select"
+#: src/Features/FeaturedEvents/Integrations/Abilities/FeaturedContributor.php:91
+msgid "Marked the event as featured."
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:65
-msgid "Registration Confirmation"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:66
-msgid "Sent each time an attendee completes or edits a registration form filled after checkout."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:101
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:222
-msgid "Your registration for {event_title} is confirmed"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:124
-msgid "Edit Submitted Form Link"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/AnswersConfirmationEmailConfig.php:240
-msgid ""
-"Hi {attendee_name},\n"
-"\n"
-"Thanks, we have your details for {event_title} on {event_date}.\n"
-"\n"
-"Need to change something? Edit your registration here: {edit_link}\n"
-"\n"
-"Thanks,\n"
-"{site_name}"
+#: src/Features/FeaturedEvents/Integrations/Abilities/FeaturedContributor.php:92
+msgid "Removed the featured flag."
 msgstr ""
 
 #: src/Features/RegistrationForm/Admin/EditorStrings.php:27
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:58
-#: src/Features/RegistrationForm/Admin/MetaboxSection.php:80
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:48
 msgid "Registration Form"
 msgstr ""
 
@@ -7363,12 +7540,12 @@ msgid "Select ticket types"
 msgstr ""
 
 #: src/Features/RegistrationForm/Admin/EditorStrings.php:54
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:144
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:134
 msgid "Edit after submission"
 msgstr ""
 
 #: src/Features/RegistrationForm/Admin/EditorStrings.php:55
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:145
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:135
 msgid "Allow attendees to edit forms post-submission"
 msgstr ""
 
@@ -7452,296 +7629,17 @@ msgstr ""
 msgid "Dropdowns"
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:156
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:146
+#: src/SetupChecklist/Config.php:380
 msgid "Registration Forms"
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:157
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:147
 msgid "Registration Forms is a Pro feature. Upgrade to unlock it."
 msgstr ""
 
-#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:170
+#: src/Features/RegistrationForm/Admin/LiteEducationSection.php:160
 msgid "to get access to custom registration forms + much more"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/MetaboxSection.php:106
-msgid "Registration forms are not supported with WooCommerce checkout. Answers will not be collected for this event."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/MetaboxSection.php:114
-msgid "Registration forms collected \"After Checkout\" require a newer version of the RSVP add-on. Answers will not be collected for this event until it is updated."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/MetaboxSection.php:316
-msgid "Registration Form settings were not saved. Please review the form fields and try again."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:651
-msgid "Attendee details not saved. Please fill the required fields and retry."
-msgstr ""
-
-#. translators: %s - the panels at fault, each linking to itself, e.g. "Attendee #1 and Attendee #2".
-#: src/Features/RegistrationForm/Admin/OrderPage.php:655
-#, php-format
-msgid "Attendee details not saved. Please fill the required fields for %s and retry."
-msgstr ""
-
-#. translators: %s - the purchaser's name.
-#: src/Features/RegistrationForm/Admin/OrderPage.php:755
-#, php-format
-msgid "Registration — %s"
-msgstr ""
-
-#. translators: %d - the attendee's position in the order.
-#: src/Features/RegistrationForm/Admin/OrderPage.php:773
-#, php-format
-msgid "Attendee #%d"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:808
-msgid "Attendee — (removed)"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1001
-msgid "First name"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1002
-msgid "Last name"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1096
-msgid "Enter a valid email address."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1099
-msgid "An email address is required."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/OrderPage.php:1102
-msgid "A name is required."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:65
-msgid "Incomplete Registration Reminder"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:66
-msgid "Sent once when a registration form is left incomplete after checkout."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:105
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:229
-msgid "Please complete your registration for {event_title}"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:128
-msgid "Complete Registration Link"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ReminderEmailConfig.php:247
-msgid ""
-"Hi {attendee_name},\n"
-"\n"
-"We still need a few details for {event_title} on {event_date}.\n"
-"\n"
-"Complete your registration here: {resume_link}\n"
-"\n"
-"Thanks,\n"
-"{site_name}"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ResponsesPanel.php:147
-msgid "Choose one of the field's options."
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/ResponsesPanel.php:169
-msgid "This answer is required."
-msgstr ""
-
-#. translators: %s: database error reported by the migration.
-#: src/Features/RegistrationForm/Admin/WriteFailureNotice.php:115
-#, php-format
-msgid "The registration responses table did not finish upgrading: %s"
-msgstr ""
-
-#: src/Features/RegistrationForm/Admin/WriteFailureNotice.php:121
-msgid "Those answers were not stored and cannot be recovered automatically — contact the attendees if you need the information. Ask your host to check the database if this repeats."
-msgstr ""
-
-#. translators: %d: number of registration answers that could not be saved.
-#: src/Features/RegistrationForm/Admin/WriteFailureNotice.php:146
-#, php-format
-msgid "Sugar Calendar could not save %d registration answer submitted by an attendee."
-msgid_plural "Sugar Calendar could not save %d registration answers submitted by attendees."
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %1$s: host type, "order" or "rsvp". %2$d: host id. %3$s: UTC date and time. %4$s: error reported by the database.
-#: src/Features/RegistrationForm/Admin/WriteFailureNotice.php:165
-#, php-format
-msgid "Most recent: %1$s #%2$d at %3$s UTC — %4$s"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:122
-msgid "Complete Your Registration"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:123
-msgid "Submit"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:127
-msgid "Your Registration was Successful!"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:128
-msgid "We will soon send an email confirmation to all attendees"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutAssets.php:137
-msgid "This form can no longer be submitted. Please contact the organizer."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:273
-msgid "Order Successful!"
-msgstr ""
-
-#. translators: %d - the number of tickets of one type on the order.
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:341
-#, php-format
-msgid "× %d"
-msgstr ""
-
-#. translators: %1$s - a ticket's price, %2$d - how many were bought.
-#: src/Features/RegistrationForm/Frontend/AfterCheckoutSummary.php:348
-#, php-format
-msgid "%1$s × %2$d"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/OrderEmailResumeLink.php:134
-#: src/Features/RegistrationForm/Frontend/OrderEmailResumeLink.php:154
-msgid "Complete your registration"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/OrderEmailResumeLink.php:135
-#: src/Features/RegistrationForm/Frontend/OrderEmailResumeLink.php:155
-msgid "The event organiser has a few more questions about your booking."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/OrderEmailResumeLink.php:137
-msgid "Answer them here"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:257
-#: src/Features/RegistrationForm/Frontend/Renderer.php:332
-msgid "Additional Details for Attendees"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:258
-#: src/Features/RegistrationForm/Frontend/Renderer.php:333
-msgid "Enter the details of additional attendees that will attend this event with you"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:293
-msgid "Back"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:402
-#: src/Features/RegistrationForm/Frontend/Renderer.php:487
-msgid "Next Attendee"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:537
-#: assets/jsx/src/utils/validation.js:18
-msgid "This field is required."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:538
-msgid "Please choose one of the available options."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:539
-msgid "Please check this answer."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/Renderer.php:716
-msgid "Select an option"
-msgstr ""
-
-#. translators: %d - the attendee's position in the order.
-#. translators: %d - the attendee's position in the RSVP.
-#: src/Features/RegistrationForm/Frontend/RespondentRows.php:100
-#: src/Features/RegistrationForm/Frontend/RespondentRows.php:309
-#, php-format
-msgid "Attendee %d"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/ResponseGate.php:102
-msgid "Please complete the registration details before continuing."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/ResponseGate.php:117
-msgid "Your registration details could not be submitted in full. Please reduce the number of attendees or contact the organizer."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/RsvpAfterCheckout.php:194
-msgid "Processing your Registration…"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/SubmitEndpoint.php:613
-msgid "This registration link is no longer valid. Please contact the organizer."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/SubmitEndpoint.php:679
-msgid "Your answers could not be saved just now. Please try again."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/SubmitEndpoint.php:703
-msgid "Please wait a moment and try again."
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TicketingReceipt.php:105
-msgid "Complete Order"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TicketingReceipt.php:106
-#: src/Features/RegistrationForm/Frontend/TicketingReceipt.php:150
-msgid "Your Order was Successful!"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TokenResume.php:201
-msgid "Edit Your Registration"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TokenResume.php:202
-msgid "Save Edits"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TokenResume.php:203
-msgid "Your Edits Were Saved Successfully"
-msgstr ""
-
-#: src/Features/RegistrationForm/Frontend/TokenResume.php:531
-msgid "Your registration is already complete. Thank you!"
-msgstr ""
-
-#: src/Features/RegistrationForm/Integrations/Abilities/RegistrationFormContributor.php:80
-msgid "Questions to ask people when they register."
-msgstr ""
-
-#: src/Features/RegistrationForm/Integrations/Abilities/RegistrationFormContributor.php:111
-msgid "Choices, for a checkbox, radio or dropdown question."
-msgstr ""
-
-#. translators: %s: reason the form could not be saved.
-#: src/Features/RegistrationForm/Integrations/Abilities/RegistrationFormContributor.php:154
-#, php-format
-msgid "The event was created, but the registration form was not saved: %s"
-msgstr ""
-
-#: src/Features/RegistrationForm/Integrations/Abilities/RegistrationFormContributor.php:161
-msgid "Added the registration form."
 msgstr ""
 
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:48
@@ -7906,62 +7804,62 @@ msgid "Clear search and return to All %s"
 msgstr ""
 
 #. translators: 1: start date, 2: end date.
-#: src/Helpers.php:443
+#: src/Helpers.php:595
 #, php-format
 msgid "%1$s - %2$s"
 msgstr ""
 
-#: src/Helpers.php:1553
+#: src/Helpers.php:1727
 msgid "There are no events to display."
 msgstr ""
 
-#: src/Helpers.php:1557
+#: src/Helpers.php:1731
 msgid "There are no upcoming events to display."
 msgstr ""
 
-#: src/Helpers.php:1561
+#: src/Helpers.php:1735
 msgid "There are no past events to display."
 msgstr ""
 
 #. translators: %1$s - Bonus label, %2$s - discount percentage.
-#: src/Helpers.php:1875
+#: src/Helpers.php:2049
 #, php-format
 msgid "%1$s Sugar Calendar Lite users get <span>%2$s off</span> regular price, automatically applied at checkout."
 msgstr ""
 
-#: src/Helpers.php:1876
+#: src/Helpers.php:2050
 msgid "<strong>Bonus:</strong>"
 msgstr ""
 
-#: src/Helpers.php:1884
+#: src/Helpers.php:2058
 msgid "is a Pro Feature"
 msgstr ""
 
-#: src/Helpers.php:1885
+#: src/Helpers.php:2059
 msgid "We're sorry, the [feat-name] is not available on your plan. Please upgrade to the Pro plan to unlock all these awesome features."
 msgstr ""
 
 #. translators: %1$s - contact URL.
-#: src/Helpers.php:1911
+#: src/Helpers.php:2085
 #, php-format
 msgid "If you have any questions or issues just <a class=\"sce-upgrade-thank-you-modal-contact-link\" href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">let us know</a>."
 msgstr ""
 
-#: src/Helpers.php:1915
+#: src/Helpers.php:2089
 msgid "After purchasing a license, just <strong>enter your license key on the Sugar Calendar Settings page</strong>. This will let your site automatically upgrade to Sugar Calendar Pro! (Don't worry, all your events and settings will be preserved.)"
 msgstr ""
 
 #. translators: %1$s - documentation URL.
-#: src/Helpers.php:1927
+#: src/Helpers.php:2101
 #, php-format
 msgid "Check out <a class=\"sce-upgrade-thank-you-modal-documentation-link\" href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">our documentation</a> for step-by-step instructions."
 msgstr ""
 
-#: src/Helpers.php:1949
+#: src/Helpers.php:2123
 msgid "Thank you for your interest in <br/>Sugar Calendar Pro!"
 msgstr ""
 
-#: src/Helpers.php:1955
+#: src/Helpers.php:2129
 msgid "Ok"
 msgstr ""
 
@@ -8039,31 +7937,32 @@ msgstr ""
 msgid "The parent must be an existing term in this same taxonomy."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:46
+#: src/Integrations/Abilities/Ability/CreateEvent.php:47
+#: src/SetupChecklist/Config.php:158
 msgid "Create Event"
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:58
+#: src/Integrations/Abilities/Ability/CreateEvent.php:59
 msgid "Creates a draft event with the given title, dates, calendars and location. The draft is not published."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:133
+#: src/Integrations/Abilities/Ability/CreateEvent.php:135
 msgid "You do not have permission to create events."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:207
+#: src/Integrations/Abilities/Ability/CreateEvent.php:221
 msgid "The event from the earlier attempt is no longer available."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:215
+#: src/Integrations/Abilities/Ability/CreateEvent.php:229
 msgid "The event from the earlier attempt has no post attached, so it cannot be opened."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:221
+#: src/Integrations/Abilities/Ability/CreateEvent.php:235
 msgid "You do not have permission to view that event."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/CreateEvent.php:236
+#: src/Integrations/Abilities/Ability/CreateEvent.php:250
 msgid "That idempotency key was already used, so the event from the first call is returned unchanged. Send a new key to apply different input."
 msgstr ""
 
@@ -8101,15 +8000,24 @@ msgstr ""
 msgid "Calendar not found."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetEvent.php:46
+#: src/Integrations/Abilities/Ability/GetEvent.php:65
 msgid "Get Event"
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetEvent.php:58
-msgid "Get a single event by its Sugar Calendar event ID."
+#: src/Integrations/Abilities/Ability/GetEvent.php:77
+msgid "Get a single event by its Sugar Calendar event ID, or by the post ID from its editor URL."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetEvent.php:121
+#: src/Integrations/Abilities/Ability/GetEvent.php:99
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:83
+msgid "Sugar Calendar event id, as returned by sc-events/list-events and sc-events/search-events."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/GetEvent.php:104
+msgid "WP post id, the number in the post= parameter of an event editor URL such as /wp-admin/post.php?post=1304&action=edit. Use this when the user names an event by its editor link. It is not the same number as id."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/GetEvent.php:156
 msgid "You do not have permission to view this event."
 msgstr ""
 
@@ -8122,33 +8030,33 @@ msgid "Aggregate event counts: total, by calendar, and by month within a date ra
 msgstr ""
 
 #: src/Integrations/Abilities/Ability/GetEventStats.php:158
-#: src/Integrations/Abilities/Ability/ListEvents.php:124
-#: src/Integrations/Abilities/Ability/SearchEvents.php:109
+#: src/Integrations/Abilities/Ability/ListEvents.php:126
+#: src/Integrations/Abilities/Ability/SearchEvents.php:114
 msgid "You do not have permission to view events."
 msgstr ""
 
 #: src/Integrations/Abilities/Ability/GetEventStats.php:186
-#: src/Integrations/Abilities/EventRepository.php:237
+#: src/Integrations/Abilities/EventRepository.php:253
 msgid "Invalid start_after datetime."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:62
+#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:89
 msgid "Get registration statistics"
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:74
-msgid "Site-wide registration counts and revenue for a date range, split by signup mode, with the change against the preceding range of the same length. The range filters on when each registration was placed, not on when its event runs. A percentage is null when the preceding range held nothing to compare against, which should be reported as having no comparable previous period rather than as no change."
+#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:101
+msgid "Registration counts and revenue for a date range, split by signup mode, with the change against the preceding range of the same length. The range filters on when each registration was placed, not on when its event runs. Site-wide unless the id-list filters narrow it: several ids in one filter count events in any of them, each event once, and several filters narrow together. The scope in the result says what was counted. A percentage is null when the preceding range held nothing to compare against, which should be reported as having no comparable previous period rather than as no change."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:180
+#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:235
 msgid "You do not have permission to view site-wide registration statistics."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:207
+#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:263
 msgid "Could not read the date range."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:215
+#: src/Integrations/Abilities/Ability/GetRegistrationStats.php:271
 msgid "The start of the range must come before its end."
 msgstr ""
 
@@ -8194,35 +8102,77 @@ msgid "List event tags, optionally filtered by a search term."
 msgstr ""
 
 #: src/Integrations/Abilities/Ability/SearchEvents.php:57
-msgid "Full-text search over event titles and content. Returns parent event records; recurring occurrences are not expanded in v1."
+msgid "Full-text search over event titles, content and location. Without a status it searches every event except trashed ones for a user who can edit all events, and published events for anyone else. Returns parent event records; recurring occurrences are not expanded in v1."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/SearchEvents.php:130
+#: src/Integrations/Abilities/Ability/SearchEvents.php:81
+msgid "Which event statuses to search. Leave it out to find drafts as well as published events, so an event the user names is found whatever its status."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/SearchEvents.php:135
 msgid "Search query is required."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:49
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:51
 msgid "Update Event"
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:61
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:63
 msgid "Changes the given fields on one event and returns their previous values. Does not publish or unpublish the event."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:141
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:89
+msgid "WP post id, the number in the post= parameter of an event editor URL such as /wp-admin/post.php?post=1304&action=edit. Use this when the user names an event by its editor link. It is not the same number as event_id."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:159
 msgid "You do not have permission to edit this event."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:200
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:251
 msgid "This event has no usable start date, so send a start date along with the change."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:338
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:305
+msgid "To turn off all-day, also send the start and end times."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:348
+msgid "The end moved with the start, so the event keeps its length."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:482
 msgid "Nothing in that patch could be applied. Name a field this ability can change."
 msgstr ""
 
-#: src/Integrations/Abilities/Ability/UpdateEvent.php:363
+#. translators: %s: the time zone the event had, such as Europe/Kyiv.
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:522
+#, php-format
+msgid "All-day events have no time zone, so the event's %s time zone was removed."
+msgstr ""
+
+#. translators: %1$s: input property name, for example ticketing. %2$s: signup value, for example tickets.
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:568
+#, php-format
+msgid "This event does not use %1$s. To turn it on, send signup %2$s together with %1$s."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:603
 msgid "Nothing to change. Name at least one field to update."
+msgstr ""
+
+#: src/Integrations/Abilities/Ability/UpdateEvent.php:724
+msgid "The online meeting was not updated with the new time. Open the event in the editor and save it to update the meeting."
+msgstr ""
+
+#: src/Integrations/Abilities/AbstractAbility.php:256
+msgid "Event not found. A number from an editor link (post= in the URL) is a post id: send it as post_id instead."
+msgstr ""
+
+#. translators: %s - the name of the ability's event id field, for example event_id.
+#: src/Integrations/Abilities/AbstractAbility.php:354
+#, php-format
+msgid "Name the event with %s, or with post_id from its editor URL."
 msgstr ""
 
 #: src/Integrations/Abilities/AbstractWriteAbility.php:126
@@ -8238,77 +8188,157 @@ msgid "Too many changes in a short time. Try again shortly."
 msgstr ""
 
 #. translators: %s: input property name, for example ticketing.
-#: src/Integrations/Abilities/AbstractWriteAbility.php:306
+#: src/Integrations/Abilities/AbstractWriteAbility.php:292
 #, php-format
 msgid "The %s settings do not match the signup method you asked for. Send only the settings that belong to the method in signup."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:115
+#: src/Integrations/Abilities/EventInputSchema.php:119
+msgid "The event name shown everywhere, for example Spring Concert."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:124
+msgid "The full event text shown on the event page. HTML is allowed."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:129
+msgid "A short summary of the event, separate from the full description."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:134
 msgid "Local start date and time: 2026-09-14T18:00:00, 2026-09-14 18:00:00, or 2026-09-14 on its own for an all-day event. A UTC offset or a trailing Z is refused; name the zone in the timezone field instead."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:120
+#: src/Integrations/Abilities/EventInputSchema.php:139
 msgid "Local end date and time, in the same formats as start. A UTC offset or a trailing Z is refused; name the zone in the timezone field instead."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:159
-msgid "How people sign up for this event. One method only: an event cannot take both paid tickets and RSVPs."
+#: src/Integrations/Abilities/EventInputSchema.php:144
+msgid "True for an event with no start or end time. start and end are then dates only, for example 2026-09-14. Default false."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:218
+#: src/Integrations/Abilities/EventInputSchema.php:148
+msgid "A city-based IANA time zone such as America/Chicago or Europe/Kyiv. Leave it out to follow the site's time zone. Not stored for all-day events."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:158
+msgid "The event's whole calendar list, for example [3]: an update replaces it, so to add a calendar send the ones the event already has plus the new one. Get them from sc-events/list-calendars; never guess an id. Leave it out to keep the current calendars."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:168
+msgid "The event's whole tag list, for example [7, 9]: an update replaces it, so to add a tag send the tag_ids the event already has plus the new one. Get ids from sc-events/list-tags and the current ones from the event; never guess an id."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:173
+msgid "Free-text place or address shown on the event, for example Central Library, Room 2."
+msgstr ""
+
+#. translators: %s: sentence naming each signup mode's detail object.
+#: src/Integrations/Abilities/EventInputSchema.php:188
+#, php-format
+msgid "How people sign up for this event. One method only: an event cannot take both paid tickets and RSVPs. %s"
+msgstr ""
+
+#. translators: 1: signup mode slug, 2: the property its settings go in.
+#: src/Integrations/Abilities/EventInputSchema.php:250
+#, php-format
+msgid "%1$s settings in %2$s"
+msgstr ""
+
+#. translators: %s: comma-separated list of "mode settings in property" pairs.
+#: src/Integrations/Abilities/EventInputSchema.php:262
+#, php-format
+msgid "Each method's settings go in the object of the same name: %s. Send the method and its object together."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:290
 msgid "The event needs a title."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:343
+#: src/Integrations/Abilities/EventInputSchema.php:303
+msgid "Some HTML in the description was removed (script, iframe or similar). Add it in the event editor if you need it."
+msgstr ""
+
+#: src/Integrations/Abilities/EventInputSchema.php:457
 msgid "The event needs a start date and time."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:351
-msgid "An end date cannot be changed without its start date."
-msgstr ""
-
-#: src/Integrations/Abilities/EventInputSchema.php:362
+#: src/Integrations/Abilities/EventInputSchema.php:473
 msgid "The start date cannot carry a UTC offset or a trailing Z. Give the local time, for example 2026-09-14T18:00:00, and name the zone in the timezone field."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:363
+#: src/Integrations/Abilities/EventInputSchema.php:474
 msgid "The start date could not be read. Use the format 2026-09-14T18:00:00."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:375
+#: src/Integrations/Abilities/EventInputSchema.php:486
 msgid "The end date cannot carry a UTC offset or a trailing Z. Give the local time, for example 2026-09-14T19:00:00, and name the zone in the timezone field."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:376
+#: src/Integrations/Abilities/EventInputSchema.php:487
 msgid "The end date could not be read. Use the format 2026-09-14T19:00:00."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:382
+#: src/Integrations/Abilities/EventInputSchema.php:493
 msgid "No end time was given, so the event ends when it starts."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:394
+#: src/Integrations/Abilities/EventInputSchema.php:505
 msgid "The event ends before it starts. Check the start and end dates."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:424
+#: src/Integrations/Abilities/EventInputSchema.php:539
 msgid "That time zone is not one WordPress recognizes."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:433
+#: src/Integrations/Abilities/EventInputSchema.php:548
 msgid "All-day events have no time zone, so the one you sent was not stored."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:444
+#: src/Integrations/Abilities/EventInputSchema.php:559
 msgid "Sugar Calendar does not store that time zone. Use a city-based zone such as America/Chicago, or UTC."
 msgstr ""
 
-#: src/Integrations/Abilities/EventInputSchema.php:452
+#: src/Integrations/Abilities/EventInputSchema.php:616
 msgid "No time zone was given, so the event follows the site's time zone."
 msgstr ""
 
-#: src/Integrations/Abilities/EventRepository.php:252
+#: src/Integrations/Abilities/EventRepository.php:268
 msgid "Invalid start_before datetime."
+msgstr ""
+
+#. translators: %1$s: input field name, %2$s: the value that was requested, %3$s: the value that is stored.
+#: src/Integrations/Abilities/EventSnapshot.php:479
+#, php-format
+msgid "%1$s was not saved as requested: requested %2$s, stored %3$s."
+msgstr ""
+
+#: src/Integrations/Abilities/EventSnapshot.php:502
+msgid "nothing"
+msgstr ""
+
+#. translators: %d - calendar ID.
+#: src/Integrations/Abilities/RegistrationScope.php:78
+#, php-format
+msgid "No calendar with ID %d."
+msgstr ""
+
+#. translators: %d - tag ID.
+#: src/Integrations/Abilities/RegistrationScope.php:84
+#, php-format
+msgid "No tag with ID %d."
+msgstr ""
+
+#. translators: %d - event ID.
+#: src/Integrations/Abilities/RegistrationScope.php:90
+#, php-format
+msgid "No event with ID %d."
+msgstr ""
+
+#. translators: %s - the most events one filter can match, for example 5,000.
+#: src/Integrations/Abilities/RegistrationScope.php:284
+#, php-format
+msgid "This filter matches %s or more events, which is more than one call can count. Adding another filter does not help. Ask site-wide, or use a narrower filter instead of this one."
 msgstr ""
 
 #: src/Integrations/Admin/CreateMeetingAjax.php:99
@@ -8344,6 +8374,7 @@ msgstr ""
 
 #: src/Integrations/Admin/OnlineMeetingSection.php:146
 #: src/Integrations/Admin/OnlineMeetingSection.php:330
+#: src/Integrations/Ai/Funnels.php:238
 #: src/Integrations/OnlineMeeting.php:104
 msgid "Online"
 msgstr ""
@@ -8443,6 +8474,661 @@ msgstr ""
 
 #: src/Integrations/Admin/RemoveMeetingAjax.php:93
 msgid "Could not load the event."
+msgstr ""
+
+#: src/Integrations/Ai/AccessPolicy.php:55
+#: src/Integrations/Ai/AccessPolicy.php:84
+msgid "You must be logged in."
+msgstr ""
+
+#: src/Integrations/Ai/AccessPolicy.php:59
+msgid "The assistant is turned off."
+msgstr ""
+
+#: src/Integrations/Ai/AccessPolicy.php:63
+msgid "The assistant is not available on this site."
+msgstr ""
+
+#: src/Integrations/Ai/AccessPolicy.php:121
+msgid "You cannot use the assistant here."
+msgstr ""
+
+#: src/Integrations/Ai/AccessPolicy.php:140
+msgid "You cannot use the assistant."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:157
+msgid "New Event with Gia AI"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:326
+msgid "Open Gia AI"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:328
+msgid "Hey! I'm Gia, your events assistant"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:329
+msgid "Just a minute…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:330
+msgid "Gia has replied."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:331
+#: src/Integrations/Ai/Admin/ChatShell.php:464
+msgid "Something went wrong."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:332
+msgid "Event Created Successfully!"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:333
+msgid "Event Updated Successfully!"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:334
+msgid "Here's the data!"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:337
+msgid "Quick Actions"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:338
+msgid "Minimize"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:339
+msgid "Resize the chat window. Press Enter to switch between the default and full size."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:340
+msgid "Clear chat"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:343
+msgid "Hey there! How can I help you?"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:347
+msgid "Pick a specific requirement to get tailor-made templates."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:348
+msgid "Help and Support"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:349
+msgid "Suggest a feature"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:350
+msgid "Join the community"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:353
+msgid "Reply…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:354
+msgid "Just a moment…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:355
+msgid "Out of credits"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:356
+msgid "Send"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:357
+msgid "Stop generating"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:358
+msgid "Insert Events Data"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:359
+msgid "Send again"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:360
+msgid "Retry"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:361
+msgid "Thinking…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:362
+msgid "Gia isn't available for your account on this site."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:363
+msgid "Submit Answer"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:364
+msgid "Chat about this"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:365
+msgid "Show me"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:366
+msgid "Ask something else"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:367
+msgid "Use this Event"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:368
+msgid "I want some edits"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:369
+msgid "Done"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:370
+msgid "Rate Plugin"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:371
+msgid "New Chat"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:372
+msgid "Other…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:373
+msgid "Type your answer"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:374
+msgid "Q."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:375
+msgid "A."
+msgstr ""
+
+#. translators: %1$s - comma-separated list of the selected event properties.
+#: src/Integrations/Ai/Admin/ChatShell.php:377
+#: src/Integrations/Ai/Funnels.php:132
+#, php-format
+msgid "Event features: %1$s."
+msgstr ""
+
+#. translators: %1$s - an optional feature Gia suggests for the event, such as "add a registration form".
+#: src/Integrations/Ai/Admin/ChatShell.php:379
+#, php-format
+msgid "You could also %1$s. Just say the word."
+msgstr ""
+
+#. translators: %1$s and %2$s - optional features Gia suggests for the event, such as "add a registration form".
+#: src/Integrations/Ai/Admin/ChatShell.php:381
+#, php-format
+msgid "You could also %1$s or %2$s. Just say the word."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:382
+msgid "Good response"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:383
+msgid "Bad response"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:384
+msgid "Alrighty! Hope you had a great experience!"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:385
+msgid "You can share your feedback by rating the plugin."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:389
+msgid "Use this event."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:391
+msgid "I want more edits"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:392
+msgid "Retry the failed updates"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:395
+msgid "Make these edits."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:399
+msgid "Retry only the updates that failed."
+msgstr ""
+
+#. translators: %1$d - the event's id.
+#: src/Integrations/Ai/Admin/ChatShell.php:401
+#, php-format
+msgid "Event %1$d"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:402
+msgid "Show All"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:403
+msgid "Show Less"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:405
+msgid "Field"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:406
+msgid "Before"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:410
+msgid "Gia AI changed this event. Reload to see the changes."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:411
+msgid "Reload"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:414
+msgid "Data to insert"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:416
+msgid "Back"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:417
+msgid "Loading…"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:418
+msgid "No matches found."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:419
+msgid "Couldn't load the list."
+msgstr ""
+
+#. translators: %1$s - percentage of AI usage consumed, e.g. "80%".
+#: src/Integrations/Ai/Admin/ChatShell.php:424
+#, php-format
+msgid "You've used %1$s of your AI usage."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:425
+msgid "You've used all of your AI usage."
+msgstr ""
+
+#. translators: %1$s - percentage of AI usage consumed, e.g. "80%".
+#: src/Integrations/Ai/Admin/ChatShell.php:427
+#, php-format
+msgid "You've used %1$s of your lifetime AI usage."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:428
+msgid "You've used all of your lifetime AI usage."
+msgstr ""
+
+#. translators: %1$s - short date the AI usage resets, e.g. "Oct 1".
+#: src/Integrations/Ai/Admin/ChatShell.php:430
+#, php-format
+msgid "It resets on %1$s."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:431
+msgid "This chat is getting long. Clear it to start fresh."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:432
+msgid "View Details"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:433
+msgid "View usage"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:436
+msgid "End and Clear Chat?"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:437
+msgid "Are you sure you want to clear the chat history and start a new chat?"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:438
+msgid "Yes, Continue"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:443
+msgid "You're out of AI usage."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:444
+msgid "Your plan's AI usage for this period is used up."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:447
+msgid "Gia can't reach the AI service right now."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:448
+msgid "Try again in a moment."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:451
+msgid "Gia didn't get a usable answer."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:452
+msgid "Try again, or rephrase your request."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:455
+msgid "That took too many steps."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:456
+msgid "Gia stopped before finishing. Try a shorter or more specific request."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:459
+msgid "You're sending requests too quickly."
+msgstr ""
+
+#. translators: %1$d - seconds to wait.
+#: src/Integrations/Ai/Admin/ChatShell.php:461
+#, php-format
+msgid "Wait %1$d seconds and try again."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:465
+msgid "Try again. If it keeps happening, contact support."
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:488
+msgid "Excerpt"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:489
+msgid "Starts"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:491
+msgid "All day"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:492
+msgid "Time zone"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:496
+msgid "Signup"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:498
+msgid "Ticket price"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:499
+msgid "Ticket quantity"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:500
+msgid "Limit tickets"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:502
+msgid "Online link"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:503
+msgid "Show link to"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:505
+msgid "RSVP capacity"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:506
+msgid "Allow \"Not going\""
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:507
+msgid "Additional attendees"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:508
+msgid "Show attendee list"
+msgstr ""
+
+#: src/Integrations/Ai/Admin/ChatShell.php:509
+msgid "Require phone"
+msgstr ""
+
+#: src/Integrations/Ai/AnswerFeedback.php:103
+msgid "There is no conversation to rate."
+msgstr ""
+
+#: src/Integrations/Ai/AnswerFeedback.php:109
+msgid "That answer can no longer be rated."
+msgstr ""
+
+#: src/Integrations/Ai/Chat.php:532
+msgid "The assistant returned a response we could not read."
+msgstr ""
+
+#: src/Integrations/Ai/Chat.php:580
+msgid "The assistant could not answer."
+msgstr ""
+
+#: src/Integrations/Ai/Conversation.php:371
+msgid "The assistant hit an unexpected error."
+msgstr ""
+
+#: src/Integrations/Ai/Conversation.php:424
+msgid "A message is required."
+msgstr ""
+
+#: src/Integrations/Ai/Conversation.php:451
+msgid "A different assistant task is open. Clear the chat first."
+msgstr ""
+
+#: src/Integrations/Ai/Conversation.php:458
+#: src/Integrations/Ai/SessionStore.php:400
+msgid "The assistant is still working."
+msgstr ""
+
+#: src/Integrations/Ai/Conversation.php:465
+msgid "Choose what you want help with first."
+msgstr ""
+
+#: src/Integrations/Ai/Credits/AiCreditsPresenter.php:74
+msgid "Event Generator"
+msgstr ""
+
+#: src/Integrations/Ai/Credits/AiCreditsPresenter.php:75
+msgid "Image Generator"
+msgstr ""
+
+#. translators: %s - usage period month and year, e.g. "December 2026".
+#: src/Integrations/Ai/Credits/AiCreditsPresenter.php:93
+#, php-format
+msgid "AI Usage for %s"
+msgstr ""
+
+#: src/Integrations/Ai/Credits/AiCreditsPresenter.php:98
+msgid "Lifetime AI Usage"
+msgstr ""
+
+#: src/Integrations/Ai/Credits/AiUsageService.php:236
+#: src/Integrations/OAuthRelay/Credits/CreditsSignalRenderer.php:90
+msgid "Upgrade for more"
+msgstr ""
+
+#: src/Integrations/Ai/EntityTypes.php:85
+msgid "Add Tags"
+msgstr ""
+
+#: src/Integrations/Ai/EntityTypes.php:105
+msgid "Add Events"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:123
+msgid "Create a new event"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:125
+msgid "Create New Event with Gia"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:126
+msgid "What kind of Event do you want to create?"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:127
+msgid "Select any properties that apply to your event and then describe the other specific details like date, time, duration, and cost."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:128
+msgid "Create an event for a yoga class next Friday, from 5pm to 7pm at the community center, for the elderly, specializing in joint movement and stamina. Add it to my default calendar."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:154
+msgid "Not executed: this conversation edits existing events and cannot create one. Tell the user to start a \"Create a new event\" chat for that."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:157
+msgid "Edit existing event"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:159
+msgid "Edit Events"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:160
+msgid "What would you like to edit?"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:161
+msgid "Select any suggestions that apply to your requirements and then describe the other specific details like date, time, duration, and cost."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:162
+msgid "Help me improve my recent events description, title and pricing to be more enticing"
+msgstr ""
+
+#. translators: %1$s - comma-separated list of the selected edit suggestions.
+#: src/Integrations/Ai/Funnels.php:166
+#, php-format
+msgid "Edit type: %1$s."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:185
+msgid "Ask about events"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:187
+msgid "Ask About Events"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:188
+msgid "What would you like to know about your events?"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:189
+msgid "Select any properties that apply to your requirements and then describe what you'd like to know."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:190
+msgid "Tell me about how my recent events have performed compared to previous ones"
+msgstr ""
+
+#. translators: %1$s - comma-separated list of the selected topics.
+#: src/Integrations/Ai/Funnels.php:194
+#, php-format
+msgid "Focus on: %1$s."
+msgstr ""
+
+#. translators: %1$s and %2$s are opening/closing <strong> tags around "Tip"; %3$s and %4$s around "Tab".
+#: src/Integrations/Ai/Funnels.php:212
+#, php-format
+msgid "%1$sTip%2$s: press %3$sTab%4$s to start from this example."
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:243
+msgid "Free Event"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:283
+msgid "Suggest Improvements"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:288
+msgid "Bulk Edit"
+msgstr ""
+
+#: src/Integrations/Ai/Funnels.php:318
+msgid "Last 30 Days"
+msgstr ""
+
+#: src/Integrations/Ai/RestApi.php:463
+msgid "The assistant could not read your usage."
+msgstr ""
+
+#: src/Integrations/Ai/StepRateLimiter.php:74
+msgid "Too many requests in a short time. Please wait a moment."
+msgstr ""
+
+#. translators: %d - the number of tool calls allowed in one round.
+#: src/Integrations/Ai/ToolCallRunner.php:93
+#, php-format
+msgid "Not executed: at most %d tool calls run per round. Re-emit this call in a later round."
+msgstr ""
+
+#: src/Integrations/Ai/ToolCallRunner.php:139
+msgid "This site has no such ability."
+msgstr ""
+
+#: src/Integrations/Ai/ToolCallRunner.php:204
+msgid "The ability failed unexpectedly."
+msgstr ""
+
+#: src/Integrations/Ai/ToolCallRunner.php:225
+msgid "The result was too large to return. Ask for fewer items or a narrower date range."
+msgstr ""
+
+#: src/Integrations/Ai/Turn.php:153
+msgid "This site has no event abilities to work with. The assistant needs WordPress 6.9 or newer."
+msgstr ""
+
+#: src/Integrations/Ai/Turn.php:182
+msgid "The assistant kept asking for data without answering. Please try again."
+msgstr ""
+
+#: src/Integrations/Ai/Turn.php:300
+msgid "An event was already created in this conversation. Use update-event to change it."
+msgstr ""
+
+#: src/Integrations/Ai/Turn.php:413
+msgid "Sorry, I can't help with that. I'm here to help you create, edit and find your events."
 msgstr ""
 
 #: src/Integrations/Elementor/CalendarWidget.php:189
@@ -8619,13 +9305,11 @@ msgstr ""
 
 #: src/Integrations/Elementor/Widgets/EventBuyTicketButton.php:205
 #: src/Integrations/Elementor/Widgets/EventDetails.php:253
-#: src/Pro/Integrations/Elementor/Widgets/EventLink.php:131
 msgid "Normal"
 msgstr ""
 
 #: src/Integrations/Elementor/Widgets/EventBuyTicketButton.php:256
 #: src/Integrations/Elementor/Widgets/EventDetails.php:288
-#: src/Pro/Integrations/Elementor/Widgets/EventLink.php:155
 msgid "Hover"
 msgstr ""
 
@@ -8635,7 +9319,6 @@ msgstr ""
 
 #: src/Integrations/Elementor/Widgets/EventBuyTicketButton.php:317
 #: src/Integrations/Elementor/Widgets/EventDetails.php:306
-#: src/Pro/Integrations/Elementor/Widgets/EventLink.php:173
 msgid "Transition Duration"
 msgstr ""
 
@@ -8671,7 +9354,6 @@ msgstr ""
 
 #: src/Integrations/Elementor/Widgets/EventDetails.php:275
 #: src/Integrations/Elementor/Widgets/EventDetails.php:295
-#: src/Pro/Integrations/Elementor/Widgets/EventLink.php:162
 msgid "Link Color"
 msgstr ""
 
@@ -8764,21 +9446,21 @@ msgid "there"
 msgstr ""
 
 #. translators: %s - usage period month and year, e.g. "December 2026".
-#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:195
+#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:207
 #, php-format
 msgid "Usage for %s"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:200
+#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:212
 msgid "Lifetime Usage"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:248
+#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:260
 msgid "Resets today"
 msgstr ""
 
 #. translators: %d - number of days until the credit reset.
-#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:253
+#: src/Integrations/OAuthRelay/Credits/CreditsPresenter.php:265
 #, php-format
 msgid "Resets in %d day"
 msgid_plural "Resets in %d days"
@@ -8801,52 +9483,48 @@ msgstr ""
 msgid "used lifetime"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/CreditsSignalRenderer.php:90
-msgid "Upgrade for more"
-msgstr ""
-
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:59
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:62
 msgid "Integration Usage"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:61
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:66
+msgid "Usage credits allow you to access advanced features such as Integrations and Sugar Calendar AI. These limits depend on your license type and can be increased by upgrading."
+msgstr ""
+
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:68
+msgid "You've hit your usage limit for this month! Features that use credits will be temporarily disabled until your usage reset or your limit is increased."
+msgstr ""
+
+#. translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field.
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:76
+#, php-format
+msgid "Your license isn't active, so integrations are using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits."
+msgstr ""
+
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:123
 msgid "Out of Usage!"
 msgstr ""
 
 #. translators: %d - percentage of usage credits consumed.
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:73
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:135
 #, php-format
 msgid "%d%% used"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:88
-msgid "You've hit your usage limit for this month! Features that use credits will be temporarily disabled until your usage reset or your limit is increased."
-msgstr ""
-
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:93
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:155
 msgid "Upgrade For More"
 msgstr ""
 
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:132
-msgid "Usage credits allow you to access advanced features such as Integrations. These limits depend on your license plan and can be increased by upgrading."
-msgstr ""
-
 #. translators: %1$s, %2$s - opening and closing <strong> tags.
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:137
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:201
 #, php-format
 msgid "Remember, %1$susage resets every month on the 1st%2$s."
 msgstr ""
 
 #. translators: %s - number of credits used by this integration.
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:170
+#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:234
 #, php-format
 msgid "Credits: %s"
-msgstr ""
-
-#. translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field.
-#: src/Integrations/OAuthRelay/Credits/UsageCardRenderer.php:256
-#, php-format
-msgid "Your license isn't active, so integrations are using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits."
 msgstr ""
 
 #. translators: %1$s - comma-separated provider names; %2$s - URL to Integrations settings page.
@@ -8867,6 +9545,72 @@ msgstr ""
 #: src/Integrations/OAuthRelay/Webhooks/WebhookUrlMonitor.php:166
 #, php-format
 msgid "The WordPress REST API appears to be unreachable on this site. Integration webhooks require the REST API to function. Please ensure it is not disabled by a security plugin or server configuration. Tested URL: <code>%s</code>"
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:65
+msgid "A link attendees join the event through, for example https://meet.example.com/abc. Makes the event online. Send an empty string to remove it. Cannot create a Zoom meeting: that is done in the event editor."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:71
+msgid "Who sees the event link on the public event page. Send everyone to show it to every visitor, or attendees to show it only to people who signed up. Applies only when online_link is sent, or when the event already has a meeting."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:115
+msgid "This event already uses an online meeting provider, so the link was not changed. Remove the meeting in the event editor first."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:139
+msgid "The event link was skipped because it is not a valid URL."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:196
+msgid "Removed the event link."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:265
+msgid "Who the event link is shown to was not changed, because that setting only accepts everyone or people who signed up."
+msgstr ""
+
+#. translators: %s: who will see the link once one exists, "everyone" or "people who signed up".
+#: src/Integrations/OnlineLinkContributor.php:425
+#, php-format
+msgid "Saved: once the event has an online link, it will be shown to %s."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:427
+msgid "everyone"
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:428
+msgid "people who signed up"
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:433
+msgid "The link is shown to everyone."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:434
+msgid "The link is shown to people who signed up."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:450
+msgid "Everyone can see it."
+msgstr ""
+
+#: src/Integrations/OnlineLinkContributor.php:451
+msgid "Only people who signed up can see it."
+msgstr ""
+
+#. translators: %s: who can see the link, for example Everyone can see it.
+#: src/Integrations/OnlineLinkContributor.php:455
+#, php-format
+msgid "Added the event link. %s"
+msgstr ""
+
+#. translators: %s: who can see the link, for example Everyone can see it.
+#: src/Integrations/OnlineLinkContributor.php:459
+#, php-format
+msgid "Changed the event link. %s"
 msgstr ""
 
 #: src/Integrations/OnlineMeetingPresenter.php:30
@@ -8931,34 +9675,528 @@ msgstr ""
 msgid "You do not have permission to run migrations."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:132
+#: src/PartnerPlugins/Installer.php:34
+msgid "You are not allowed to manage plugins."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:45
+msgid "This plugin action is no longer available. Refresh the page and try again."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:61
+msgid "Plugin installation is not available on this site."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:76
+msgid "The plugin was installed, but setup did not finish. Try activating it."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:79
+msgid "The plugin could not be installed. Please try again."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:83
+msgid "The downloaded package did not match the selected plugin."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:87
+msgid "The plugin installation could not be verified. Please try again."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:91
+msgid "Plugin installed and activated."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:95
+msgid "Plugin installed. An administrator with plugin access can activate it."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:113
+msgid "You are not allowed to activate plugins on this site."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:119
+msgid "The selected plugin is not installed."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:148
+#: src/PartnerPlugins/Installer.php:152
+msgid "The plugin could not be activated. Please activate it from the Plugins page."
+msgstr ""
+
+#: src/PartnerPlugins/Installer.php:155
+msgid "Plugin activated."
+msgstr ""
+
+#: src/SetupChecklist/Ajax.php:83
+msgid "This checklist action requires a POST request."
+msgstr ""
+
+#: src/SetupChecklist/Ajax.php:87
+msgid "This checklist request has expired. Refresh the page and try again."
+msgstr ""
+
+#: src/SetupChecklist/Ajax.php:91
+msgid "You are not allowed to manage the setup checklist."
+msgstr ""
+
+#: src/SetupChecklist/Ajax.php:97
+msgid "This checklist action is not supported."
+msgstr ""
+
+#: src/SetupChecklist/Ajax.php:141
+msgid "The setup checklist has been dismissed."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:121
+msgid "Improve Your Event Experience"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:125
+msgid "Connect to Payment Gateway"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:153
+msgid "Create an Event"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:154
+msgid "Add your first event and pick the calendar it belongs to."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:165
+msgid "Import From The Events Calendar"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:166
+msgid "We detected The Events Calendar on your website. Bring your existing events over in just a few clicks."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:170
+msgid "Import Events"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:177
+msgid "Add Your Calendar to a Page"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:178
+msgid "Select an existing page and we’ll add the Sugar Calendar block to it for you."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:182
+msgid "Embed to a Page"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:188
+msgid "Visit Your Events Page"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:189
+msgid "Every event you create automatically appears on your site’s /events archive page. You can also change the page’s slug."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:197
+msgid "View Events Page"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:216
+msgid "Fine-Tune Date & Time Settings"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:217
+msgid "Set your date format, time format, and the first day of your week."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:221
+msgid "Review Settings"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:226
+msgid "Set Up Your Time Zone"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:227
+msgid "Choose the time zone your events are scheduled in so they always display at the right time."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:231
+msgid "Set Time Zone"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:236
+msgid "Make Sure Event Emails Get Delivered"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:237
+msgid "Keep event notifications out of spam by sending them through the free WP Mail SMTP plugin."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:252
+msgid "Host Online Events"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:253
+msgid "Connect Zoom to automatically create meeting links for your virtual events."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:257
+msgid "Connect Zoom"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:262
+msgid "Set Up Privacy Compliance"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:263
+msgid "Improve GDPR, CCPA, and privacy compliance with cookie banner and consent records."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:268
+msgid "Set Up WPConsent"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:270
+msgid "Install WPConsent"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:271
+msgid "Activate WPConsent"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:278
+msgid "Connect Your AI Assistant"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:279
+msgid "Manage your events and calendars with Claude, ChatGPT, and more via the free WPVibe plugin."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:284
+#: src/SetupChecklist/Config.php:286
+msgid "Install WPVibe"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:287
+msgid "Activate WPVibe"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:294
+msgid "Smart Recommendations from Sugar Calendar"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:295
+msgid "Get helpful suggestions from Sugar Calendar on how to improve your events and grow your business."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:299
+msgid "Sign Up for Free"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:300
+#: src/SetupChecklist/Signups.php:100
+msgid "Signing up failed. Please try again later."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:306
+msgid "Help Improve Sugar Calendar"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:307
+msgid "Collect non-sensitive information from your website, to help us fix bugs faster, make smarter decisions, and build features that actually matter to you."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:311
+msgid "Count Me In!"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:328
+msgid "Securely Accept Credit Card Payments"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:329
+msgid "Accept credit card payments, Apple Pay, Google Pay, ACH, and more with Sugar Calendar Events Stripe integration."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:330
+msgid "Note: 3% platform fees apply. Remove them with the Event Ticketing addon, available on"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:332
+msgid "Plus and higher plans"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:343
+msgid "Connect with Stripe"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:361
+msgid "Schedule daily, weekly, or monthly repeats."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:365
+msgid "Advanced Event Ticketing"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:366
+msgid "Sell multiple ticket types per event with 0% fees."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:371
+msgid "Let attendees RSVP and track your headcount."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:375
+msgid "Community Events"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:376
+msgid "Let visitors submit their own events from your site."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:381
+msgid "Collect attendee details with registration forms."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:385
+msgid "More Integration Credits"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:386
+msgid "Get more credits for Zoom and other integrations."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:391
+msgid "Add speaker profiles and pages to your events."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:396
+msgid "Manage venues with maps, details, and pages."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:400
+msgid "Calendar Feeds"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:401
+msgid "Let visitors subscribe via Google or iCal."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:405
+msgid "Priority Support"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:406
+msgid "Get help from our events experts."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:411
+msgid "Connect your events to 8,000+ apps."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:433
+msgid "Improve SEO rankings with AI tools and get valuable insights."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:438
+msgid "Universally"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:439
+msgid "Easily translate your website into 110+ languages within minutes using AI."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:444
+msgid "Duplicator"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:445
+msgid "Easy, fast, and secure WordPress backups and website migrations."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:450
+msgid "Reviews Feed"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:451
+msgid "Show customer reviews from Google, Yelp, TripAdvisor, and more to boost sales."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:456
+msgid "OptinMonster"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:457
+msgid "Get more email subscribers & sales with the #1 CRO toolkit for WordPress."
+msgstr ""
+
+#: src/SetupChecklist/Config.php:462
+msgid "MonsterInsights"
+msgstr ""
+
+#: src/SetupChecklist/Config.php:463
+msgid "Website analytics made easy for WordPress. Form tracking, reports, and more."
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:304
+msgid "This page does not use the block editor, so Sugar Calendar did not add the calendar block."
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:310
+msgid "This page is being edited by another user, so Sugar Calendar did not add the calendar block."
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:351
+msgid "Sugar Calendar could not add the calendar block. Open this page normally and try again."
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:352
+#: src/SetupChecklist/Editor.php:371
+msgid "Open the page editor"
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:563
+msgid "The editor link is invalid. Refresh the page and try again."
+msgstr ""
+
+#: src/SetupChecklist/Editor.php:598
+msgid "The editor could not be opened. Refresh the page and try again."
+msgstr ""
+
+#: src/SetupChecklist/HistoryObserver.php:91
+msgid "The events page is unavailable."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:102
+msgid "This checklist action is unavailable."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:166
+msgid "This checklist item is not currently available."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:170
+msgid "This checklist item is already complete."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:233
+msgid "Enter a valid email address."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:277
+msgid "Select an existing saved page."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:281
+msgid "You are not allowed to edit this page."
+msgstr ""
+
+#: src/SetupChecklist/ItemActions.php:285
+msgid "This page does not use the block editor. Open it from Pages to edit it normally."
+msgstr ""
+
+#: src/SetupChecklist/LifecycleTasks.php:123
+msgid "The events page visit could not be verified."
+msgstr ""
+
+#: src/SetupChecklist/PageSearch.php:64
+msgid "(no title)"
+msgstr ""
+
+#: src/SetupChecklist/PartnerActions.php:100
+msgid "This plugin is already active. Refresh the checklist to update its status."
+msgstr ""
+
+#: src/SetupChecklist/PartnerActions.php:118
+msgid "This Growth Tool is not available."
+msgstr ""
+
+#: src/SetupChecklist/PartnerActions.php:124
+msgid "Plugin already active."
+msgstr ""
+
+#: src/SetupChecklist/PartnerActions.php:144
+msgid "This plugin is not available from the checklist."
+msgstr ""
+
+#: src/SetupChecklist/Request.php:28
+#: src/SetupChecklist/Request.php:69
+#: src/SetupChecklist/Request.php:96
+#: src/SetupChecklist/Request.php:113
+#: src/SetupChecklist/Request.php:120
+msgid "The checklist request contains invalid data."
+msgstr ""
+
+#: src/SetupChecklist/Request.php:54
+msgid "The checklist request contains unexpected data."
+msgstr ""
+
+#: src/SetupChecklist/Request.php:139
+msgid "Page search is limited to 100 characters."
+msgstr ""
+
+#: src/SetupChecklist/Signups.php:104
+msgid "You are signed up, but the checklist could not save it. Please try again."
+msgstr ""
+
+#: src/SetupChecklist/Signups.php:107
+msgid "Thanks for signing up."
+msgstr ""
+
+#: src/SetupChecklist/Signups.php:128
+msgid "Usage tracking enabled."
+msgstr ""
+
+#: src/SetupChecklist/State.php:147
+#: src/SetupChecklist/State.php:168
+#: src/SetupChecklist/State.php:426
+msgid "Could not save checklist progress. Please try again."
+msgstr ""
+
+#: src/SetupChecklist/State.php:179
+msgid "Checklist progress changed in another request. Please try again."
+msgstr ""
+
+#: src/SetupChecklist/State.php:196
+msgid "This checklist item cannot be recorded."
+msgstr ""
+
+#: src/SetupChecklist/State.php:234
+msgid "This opt-in source cannot be recorded."
+msgstr ""
+
+#: src/SetupChecklist/State.php:395
+msgid "Could not dismiss the checklist. Please try again."
+msgstr ""
+
+#: src/SetupChecklist/State.php:449
+msgid "Could not read checklist progress. Please try again."
+msgstr ""
+
+#: src/SetupWizard/RestApi.php:145
 msgid "Session expired."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:265
+#: src/SetupWizard/RestApi.php:278
 msgid "Missing required parameters."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:278
+#: src/SetupWizard/RestApi.php:291
 msgid "There was an error getting your Stripe credentials. Please try again. If you continue to have this problem, please contact support."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:318
-#: src/SetupWizard/RestApi.php:364
+#: src/SetupWizard/RestApi.php:331
+#: src/SetupWizard/RestApi.php:377
 msgid "Missing license key."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:324
+#: src/SetupWizard/RestApi.php:337
 msgid "License key could not be verified."
 msgstr ""
 
-#: src/SetupWizard/RestApi.php:397
-#: src/SetupWizard/RestApi.php:403
+#: src/SetupWizard/RestApi.php:410
+#: src/SetupWizard/RestApi.php:416
 msgid "Missing plugin list."
-msgstr ""
-
-#: src/SetupWizard/RestApi.php:423
-msgid "No plugins found."
 msgstr ""
 
 #: src/SetupWizard/SetupWizardLandingPage.php:99
@@ -9017,11 +10255,31 @@ msgstr ""
 msgid "Ticket URL"
 msgstr ""
 
-#: sugar-calendar-plugin.php:648
-msgid "My Calendar"
+#: src/UsageTracking/OptIn.php:63
+msgid "This usage tracking source is not supported."
+msgstr ""
+
+#: src/UsageTracking/OptIn.php:67
+msgid "Usage tracking cannot be changed from this action."
+msgstr ""
+
+#: src/UsageTracking/OptIn.php:79
+msgid "Usage tracking could not be enabled. Please try again."
+msgstr ""
+
+#: src/UsageTracking/OptIn.php:100
+msgid "Usage tracking was enabled, but Sugar Calendar could not save the checklist progress. Please reload and try again."
+msgstr ""
+
+#: src/UsageTracking/OptIn.php:127
+msgid "Usage tracking could not be verified. Please try again."
 msgstr ""
 
 #: sugar-calendar-plugin.php:651
+msgid "My Calendar"
+msgstr ""
+
+#: sugar-calendar-plugin.php:654
 msgid "The default calendar events will be added to."
 msgstr ""
 
@@ -9232,10 +10490,6 @@ msgstr ""
 msgid "Send From Email"
 msgstr ""
 
-#: assets/jsx/src/features/NotifyForm/index.jsx:616
-msgid "Email address"
-msgstr ""
-
 #: assets/jsx/src/features/NotifyForm/index.jsx:624
 msgid "Send From Name"
 msgstr ""
@@ -9274,6 +10528,10 @@ msgstr ""
 
 #: assets/jsx/src/features/NotifyForm/index.jsx:713
 msgid "Add Recipients"
+msgstr ""
+
+#: assets/jsx/src/utils/validation.js:18
+msgid "This field is required."
 msgstr ""
 
 #: assets/jsx/src/utils/validation.js:22

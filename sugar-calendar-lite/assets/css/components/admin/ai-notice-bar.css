@@ -1,0 +1,73 @@
+@charset "UTF-8";
+/* Ported from DS: ai-notice-bar */
+/* Source mtime: 2026-08-06T18:24:42Z */
+/* Sugar Calendar — components/ai-notice-bar.css (AI cluster)
+   Mirrors Figma "ai-notice-bar" (node 14167:71171).
+   .sc-ai-notice-bar — the slim usage notice that peeks above the
+   AI Chat Container's composer. Type themes the badge surface + glyph
+   (warning = yellow, error = red).
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-notice-bar {
+  /* badge surface + glyph color cascade per Type */
+  --sc-ai-notice-bar-bg: var(--sc-components-badge-yellow-background);
+  --sc-ai-notice-bar-icon: var(--sc-text-warning);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* the strip is inset from the container edges (Figma: padding/32) */
+  padding: 0 var(--sc-padding-32);
+  width: 100%;
+}
+
+.sc-ai-notice-bar[data-type=error] {
+  --sc-ai-notice-bar-bg: var(--sc-components-badge-red-background);
+  --sc-ai-notice-bar-icon: var(--sc-text-error);
+}
+
+/* Default — informational gray strip with a blue info glyph (Figma
+   "Type=Default", node 14597:78636; pair with the circle-info icon) */
+.sc-ai-notice-bar[data-type=default] {
+  --sc-ai-notice-bar-bg: var(--sc-surface-background-light);
+  --sc-ai-notice-bar-icon: var(--sc-text-link);
+}
+
+/* the strip — 24px, top-rounded, open bottom (it tucks behind the composer) */
+.sc-ai-notice-bar__bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-5);
+  width: 100%;
+  height: 24px;
+  padding: 0 var(--sc-padding-8);
+  background: var(--sc-ai-notice-bar-bg);
+  border: 1px solid var(--sc-surface-divider);
+  border-bottom: 0;
+  border-radius: var(--sc-radius-modals) var(--sc-radius-modals) 0 0;
+}
+
+.sc-ai-notice-bar__icon {
+  flex: none;
+  font-size: 12px;
+  color: var(--sc-ai-notice-bar-icon);
+}
+
+.sc-ai-notice-bar__text {
+  flex: 1 1 0;
+  min-width: 0;
+  color: var(--sc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-ai-notice-bar__link {
+  color: var(--sc-text-primary);
+  text-decoration: underline;
+}
+
+.sc-ai-notice-bar__link:hover {
+  color: var(--sc-text-link--hover);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vYWktbm90aWNlLWJhci5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTtBQUNBO0FBS0E7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBT0E7QUFDRTtFQUNBO0VBQ0E7RUFFQTtFQUNBO0VBQ0E7RUFDQTtBQUNBO0VBQ0E7RUFDQTs7O0FBRUY7RUFDRTtFQUNBOzs7QUFFRjtBQUFBO0FBRUE7RUFDRTtFQUNBOzs7QUFHRjtBQUNBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0E7OztBQUVGO0VBQWdDIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi9haS1ub3RpY2UtYmFyLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBhaS1ub3RpY2UtYmFyICovXG4vKiBTb3VyY2UgbXRpbWU6IDIwMjYtMDgtMDZUMTg6MjQ6NDJaICovXG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQb3J0ZWQgZnJvbSBEUyAoZG8gbm90IGVkaXQg4oCUIHJlLXBvcnQgaWYgRFMgc291cmNlIGNoYW5nZXMpXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLyogU3VnYXIgQ2FsZW5kYXIg4oCUIGNvbXBvbmVudHMvYWktbm90aWNlLWJhci5jc3MgKEFJIGNsdXN0ZXIpXG4gICBNaXJyb3JzIEZpZ21hIFwiYWktbm90aWNlLWJhclwiIChub2RlIDE0MTY3OjcxMTcxKS5cbiAgIC5zYy1haS1ub3RpY2UtYmFyIOKAlCB0aGUgc2xpbSB1c2FnZSBub3RpY2UgdGhhdCBwZWVrcyBhYm92ZSB0aGVcbiAgIEFJIENoYXQgQ29udGFpbmVyJ3MgY29tcG9zZXIuIFR5cGUgdGhlbWVzIHRoZSBiYWRnZSBzdXJmYWNlICsgZ2x5cGhcbiAgICh3YXJuaW5nID0geWVsbG93LCBlcnJvciA9IHJlZCkuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLCB0b2tlbnMvdGV4dC1zdHlsZXMuY3NzLiAqL1xuXG4uc2MtYWktbm90aWNlLWJhciB7XG4gIC8qIGJhZGdlIHN1cmZhY2UgKyBnbHlwaCBjb2xvciBjYXNjYWRlIHBlciBUeXBlICovXG4gIC0tc2MtYWktbm90aWNlLWJhci1iZzogICB2YXIoLS1zYy1jb21wb25lbnRzLWJhZGdlLXllbGxvdy1iYWNrZ3JvdW5kKTtcbiAgLS1zYy1haS1ub3RpY2UtYmFyLWljb246IHZhcigtLXNjLXRleHQtd2FybmluZyk7XG5cbiAgYm94LXNpemluZzogYm9yZGVyLWJveDtcbiAgZGlzcGxheTogZmxleDtcbiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcbiAgYWxpZ24taXRlbXM6IGZsZXgtc3RhcnQ7XG4gIC8qIHRoZSBzdHJpcCBpcyBpbnNldCBmcm9tIHRoZSBjb250YWluZXIgZWRnZXMgKEZpZ21hOiBwYWRkaW5nLzMyKSAqL1xuICBwYWRkaW5nOiAwIHZhcigtLXNjLXBhZGRpbmctMzIpO1xuICB3aWR0aDogMTAwJTtcbn1cbi5zYy1haS1ub3RpY2UtYmFyW2RhdGEtdHlwZT1cImVycm9yXCJdIHtcbiAgLS1zYy1haS1ub3RpY2UtYmFyLWJnOiAgIHZhcigtLXNjLWNvbXBvbmVudHMtYmFkZ2UtcmVkLWJhY2tncm91bmQpO1xuICAtLXNjLWFpLW5vdGljZS1iYXItaWNvbjogdmFyKC0tc2MtdGV4dC1lcnJvcik7XG59XG4vKiBEZWZhdWx0IOKAlCBpbmZvcm1hdGlvbmFsIGdyYXkgc3RyaXAgd2l0aCBhIGJsdWUgaW5mbyBnbHlwaCAoRmlnbWFcbiAgIFwiVHlwZT1EZWZhdWx0XCIsIG5vZGUgMTQ1OTc6Nzg2MzY7IHBhaXIgd2l0aCB0aGUgY2lyY2xlLWluZm8gaWNvbikgKi9cbi5zYy1haS1ub3RpY2UtYmFyW2RhdGEtdHlwZT1cImRlZmF1bHRcIl0ge1xuICAtLXNjLWFpLW5vdGljZS1iYXItYmc6ICAgdmFyKC0tc2Mtc3VyZmFjZS1iYWNrZ3JvdW5kLWxpZ2h0KTtcbiAgLS1zYy1haS1ub3RpY2UtYmFyLWljb246IHZhcigtLXNjLXRleHQtbGluayk7XG59XG5cbi8qIHRoZSBzdHJpcCDigJQgMjRweCwgdG9wLXJvdW5kZWQsIG9wZW4gYm90dG9tIChpdCB0dWNrcyBiZWhpbmQgdGhlIGNvbXBvc2VyKSAqL1xuLnNjLWFpLW5vdGljZS1iYXJfX2JhciB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy01KTtcbiAgd2lkdGg6IDEwMCU7XG4gIGhlaWdodDogMjRweDtcbiAgcGFkZGluZzogMCB2YXIoLS1zYy1wYWRkaW5nLTgpO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1haS1ub3RpY2UtYmFyLWJnKTtcbiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbiAgYm9yZGVyLWJvdHRvbTogMDtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLW1vZGFscykgdmFyKC0tc2MtcmFkaXVzLW1vZGFscykgMCAwO1xufVxuXG4uc2MtYWktbm90aWNlLWJhcl9faWNvbiB7XG4gIGZsZXg6IG5vbmU7XG4gIGZvbnQtc2l6ZTogMTJweDtcbiAgY29sb3I6IHZhcigtLXNjLWFpLW5vdGljZS1iYXItaWNvbik7XG59XG5cbi5zYy1haS1ub3RpY2UtYmFyX190ZXh0IHtcbiAgZmxleDogMSAxIDA7XG4gIG1pbi13aWR0aDogMDtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtcHJpbWFyeSk7XG4gIHdoaXRlLXNwYWNlOiBub3dyYXA7XG4gIG92ZXJmbG93OiBoaWRkZW47XG4gIHRleHQtb3ZlcmZsb3c6IGVsbGlwc2lzO1xufVxuXG4uc2MtYWktbm90aWNlLWJhcl9fbGluayB7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LXByaW1hcnkpO1xuICB0ZXh0LWRlY29yYXRpb246IHVuZGVybGluZTtcbn1cbi5zYy1haS1ub3RpY2UtYmFyX19saW5rOmhvdmVyIHsgY29sb3I6IHZhcigtLXNjLXRleHQtbGluay0taG92ZXIpOyB9XG4iXX0= */

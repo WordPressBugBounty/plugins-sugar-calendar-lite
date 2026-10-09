@@ -10,20 +10,55 @@ use Throwable;
 /**
  * Shared plumbing for Product API event trackers.
  *
- * Owns the enabled/context guards and the tracker access every
- * Product Events consumer needs. Concrete trackers register their
- * hooks in hooks().
+ * Owns the guards, the import marker, the shutdown queue and the tracker
+ * access every Product Events consumer needs. Concrete trackers register
+ * their hooks in hooks().
  *
  * @since 3.12.0
  */
 abstract class AbstractProductEvents {
 
 	/**
+	 * Event context that carries the acting user's identity.
+	 *
+	 * @since 3.15.0
+	 */
+	const CONTEXT_USER = 'user';
+
+	/**
+	 * Event context sent without any user identity.
+	 *
+	 * @since 3.15.0
+	 */
+	const CONTEXT_SYSTEM = 'system';
+
+	/**
+	 * Whether an importer runs in this request.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var bool
+	 */
+	private $importing = false;
+
+	/**
+	 * Callbacks to run on shutdown.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var callable[]
+	 */
+	private $deferred = [];
+
+	/**
 	 * Initialize product events tracking.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Listens for the importer marker.
 	 */
-	public function init() {
+	public function init() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+
+		add_action( 'sugar_calendar_importer_started', [ $this, 'mark_importing' ] );
 
 		$this->hooks();
 	}
@@ -34,6 +69,38 @@ abstract class AbstractProductEvents {
 	 * @since 3.12.0
 	 */
 	abstract protected function hooks();
+
+	/**
+	 * Mark the request as an import, so creation events are not reported.
+	 *
+	 * @since 3.15.0
+	 */
+	public function mark_importing() {
+
+		$this->importing = true;
+	}
+
+	/**
+	 * Run the callbacks queued by defer().
+	 *
+	 * Hooked at priority 5: the client registers its flush at 10 on the first
+	 * track(), and WordPress runs a priority added mid-hook only if it is later.
+	 *
+	 * @since 3.15.0
+	 */
+	public function run_deferred() {
+
+		$deferred       = $this->deferred;
+		$this->deferred = [];
+
+		foreach ( $deferred as $callback ) {
+			try {
+				$callback();
+			} catch ( Throwable $e ) {
+				unset( $e );
+			}
+		}
+	}
 
 	/**
 	 * Whether Product Events tracking is enabled.
@@ -58,6 +125,23 @@ abstract class AbstractProductEvents {
 	}
 
 	/**
+	 * Whether an event may be sent without a logged-in editor (system context).
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return bool
+	 */
+	protected function is_allowed_without_user() {
+
+		// Don't track during cron or CLI.
+		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return false;
+		}
+
+		return $this->is_enabled();
+	}
+
+	/**
 	 * Whether Product Events tracking is allowed in the current context.
 	 *
 	 * Only allows tracking from admin dashboard requests by users
@@ -69,8 +153,7 @@ abstract class AbstractProductEvents {
 	 */
 	protected function is_allowed() {
 
-		// Don't track during cron or CLI.
-		if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		if ( ! $this->is_allowed_without_user() ) {
 			return false;
 		}
 
@@ -82,25 +165,57 @@ abstract class AbstractProductEvents {
 		}
 
 		// Ensure user is logged in and has capability to manage content.
-		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
-			return false;
+		return is_user_logged_in() && current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * Whether a creation in this request should be reported.
+	 *
+	 * The user guard waits for send time, so a guest's front-end submission
+	 * still gets noted.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return bool
+	 */
+	protected function can_track_creation() {
+
+		return ! $this->importing && $this->is_allowed_without_user();
+	}
+
+	/**
+	 * Queue a callback for shutdown, once every save in the request has landed.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param callable $callback Callback to run.
+	 */
+	protected function defer( callable $callback ) { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
+
+		if ( empty( $this->deferred ) ) {
+			add_action( 'shutdown', [ $this, 'run_deferred' ], 5 );
 		}
 
-		return $this->is_enabled();
+		$this->deferred[] = $callback;
 	}
 
 	/**
 	 * Track event.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Adds `edition` and accepts a context.
 	 *
 	 * @param string $event_name Event name.
 	 * @param array  $event_data Event data.
+	 * @param string $context    CONTEXT_USER or CONTEXT_SYSTEM.
 	 */
-	protected function track_event( $event_name, $event_data ) {
+	protected function track_event( $event_name, $event_data, $context = self::CONTEXT_USER ) {
 
-		// Safety check in case a handler forgets to call is_allowed().
-		if ( ! $this->is_allowed() ) {
+		$allowed = $context === self::CONTEXT_SYSTEM
+			? $this->is_allowed_without_user()
+			: $this->is_allowed();
+
+		if ( ! $allowed ) {
 			return;
 		}
 
@@ -110,6 +225,14 @@ abstract class AbstractProductEvents {
 			return;
 		}
 
-		$events_manager->get_tracker()->track( new Event( $event_name, $event_data ) );
+		$event_data['edition'] = sugar_calendar()->is_pro() ? 'pro' : 'lite';
+
+		$event = new Event( $event_name, $event_data );
+
+		if ( $context === self::CONTEXT_SYSTEM ) {
+			$event->context( self::CONTEXT_SYSTEM );
+		}
+
+		$events_manager->get_tracker()->track( $event );
 	}
 }

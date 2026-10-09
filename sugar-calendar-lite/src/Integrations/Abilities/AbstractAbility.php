@@ -235,6 +235,132 @@ abstract class AbstractAbility {
 	}
 
 	/**
+	 * Build the standard not-found (404) error.
+	 *
+	 * Kept distinct from `forbidden()`: answering "no permission" for an id
+	 * that does not exist sends the caller looking for an access problem that
+	 * isn't there, and an assistant relays that to the user as a broken
+	 * account.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $message Error message. Empty defaults to the event-not-found wording,
+	 *                        so a subclass naming a different noun (speaker, venue) can
+	 *                        pass its own without redeclaring the whole error.
+	 *
+	 * @return WP_Error
+	 */
+	protected function not_found( string $message = '' ): WP_Error {
+
+		if ( $message === '' ) {
+			$message = esc_html__( 'Event not found. A number from an editor link (post= in the URL) is a post id: send it as post_id instead.', 'sugar-calendar-lite' );
+		}
+
+		return new WP_Error( 'sc_events_not_found', $message, [ 'status' => 404 ] );
+	}
+
+	/**
+	 * Build the standard invalid-input (400) error.
+	 *
+	 * @since 3.14.0
+	 *
+	 * @param string $message Error message, naming the offending field.
+	 *
+	 * @return WP_Error
+	 */
+	protected function invalid_input( string $message ): WP_Error {
+
+		return new WP_Error( 'sc_events_invalid_input', $message, [ 'status' => 400 ] );
+	}
+
+	/**
+	 * Let a missing or unnamed event past the permission check, so the run reports it.
+	 *
+	 * `WP_Ability::execute()` swaps any permission error for "does not have necessary permission",
+	 * which sends the model after an access problem for an id that does not exist.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param true|WP_Error $result Permission check result.
+	 * @param string        $cap    Capability the caller must hold to learn an id does not exist.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function defer_lookup_error( $result, string $cap ) {
+
+		if ( is_wp_error( $result ) && in_array( $result->get_error_code(), [ 'sc_events_not_found', 'sc_events_invalid_input' ], true ) && current_user_can( $cap ) ) {
+			return true;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Permission check shared by a single-post-lookup ability (get-speaker, get-venue):
+	 * an unknown or wrong-type id defers to a 404, otherwise the caller needs `read_event`
+	 * on the post. Mirrors `GetEvent::check_permission()`'s existence-before-forbidden order.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int    $id       Post id from the ability input.
+	 * @param bool   $is_valid Whether that id is a real post of the expected type.
+	 * @param string $message  Forbidden message when the caller can't read it.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function check_single_post_permission( int $id, bool $is_valid, string $message ) {
+
+		if ( ! $id || ! $is_valid ) {
+			return $this->defer_lookup_error( $this->not_found(), 'edit_posts' );
+		}
+
+		if ( ! current_user_can( 'read_event', $id ) ) {
+			return $this->forbidden( $message );
+		}
+
+		return true;
+	}
+
+	/**
+	 * The Sugar Calendar event id a call names, accepting either that id or
+	 * the WP post id from the event's editor URL.
+	 *
+	 * Naming no event at all is a 400 rather than the 404 an unresolved id
+	 * earns: nothing was looked up, so "not found" would send the caller
+	 * hunting for a missing event instead of reading the schema.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array  $args Normalized ability input.
+	 * @param string $key  The key this ability calls its event id, `id` or `event_id`.
+	 *
+	 * @return int|WP_Error
+	 */
+	protected function resolve_event_id_input( array $args, string $key ) {
+
+		$id = $this->events->resolve_event_id(
+			absint( $args[ $key ] ?? 0 ),
+			absint( $args['post_id'] ?? 0 )
+		);
+
+		if ( $id > 0 ) {
+			return $id;
+		}
+
+		if ( empty( $args[ $key ] ) && empty( $args['post_id'] ) ) {
+			return $this->invalid_input(
+				sprintf(
+					/* translators: %s - the name of the ability's event id field, for example event_id. */
+					esc_html__( 'Name the event with %s, or with post_id from its editor URL.', 'sugar-calendar-lite' ),
+					$key
+				)
+			);
+		}
+
+		return $this->not_found();
+	}
+
+	/**
 	 * Coarse capability gate.
 	 *
 	 * @since 3.12.0
@@ -289,7 +415,11 @@ abstract class AbstractAbility {
 		$event     = ( $query && ! empty( $query->items ) ) ? $query->items[0] : null;
 		$object_id = $event ? absint( $event->object_id ) : 0;
 
-		if ( ! $object_id || ! current_user_can( 'edit_post', $object_id ) ) {
+		if ( ! $object_id ) {
+			return $this->not_found();
+		}
+
+		if ( ! current_user_can( 'edit_post', $object_id ) ) {
 			return $this->forbidden( $message );
 		}
 
@@ -301,6 +431,8 @@ abstract class AbstractAbility {
 	 * batched calendar lookup. Shared by list-events and search-events.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Rows carry `signup`, `location`, `venue_id` and `venue` (set by
+	 *                  `Formatter::event()`).
 	 *
 	 * @param Event[] $events Event objects from Event_Query->items.
 	 *
@@ -312,6 +444,7 @@ abstract class AbstractAbility {
 			return [];
 		}
 
+		$events   = array_values( $events );
 		$post_ids = [];
 
 		foreach ( $events as $event ) {
@@ -321,6 +454,6 @@ abstract class AbstractAbility {
 		$post_ids     = array_values( array_filter( array_unique( $post_ids ) ) );
 		$calendar_map = $this->events->resolve_calendar_map( $post_ids );
 
-		return $this->formatter->events( $events, $calendar_map );
+		return $this->formatter->events( $events, $calendar_map, $this->events->resolve_tag_map( $post_ids ) );
 	}
 }

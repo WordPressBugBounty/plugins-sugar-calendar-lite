@@ -562,6 +562,15 @@ class TheEventCalendar extends Importer {
 	 */
 	public function run( $total_number_to_import = [] ) {
 
+		/**
+		 * Fires when an importer starts a run: one batch request, or a whole one-request import.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param string $source Import source: tec, json or ics.
+		 */
+		do_action( 'sugar_calendar_importer_started', 'tec' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		update_option( self::SC_TEC_MIGRATION_OPTION_KEY, 'in_progress', false );
 
 		// Get the migration progress.
@@ -662,6 +671,9 @@ class TheEventCalendar extends Importer {
 
 			case self::AJAX_RETURN_STATUS_COMPLETE:
 
+				// Counted before drop_migration_tables() removes the mapping table.
+				$events_imported = $this->count_migrated_events();
+
 				$this->post_migration_process();
 				$this->drop_migration_tables();
 
@@ -675,6 +687,16 @@ class TheEventCalendar extends Importer {
 				 * @param TheEventCalendar $this The importer object.
 				 */
 				do_action( 'sugar_calendar_admin_tools_importers_the_event_calendar_post_migration_process', $this );
+
+				/**
+				 * Fires once when an import finishes.
+				 *
+				 * @since 3.15.0
+				 *
+				 * @param string $source          Import source: tec, json or ics.
+				 * @param int    $events_imported Number of events the import created.
+				 */
+				do_action( 'sugar_calendar_importer_completed', 'tec', $events_imported ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 				$result = [
 					'status'     => self::AJAX_RETURN_STATUS_COMPLETE,
@@ -2554,6 +2576,22 @@ class TheEventCalendar extends Importer {
 		}
 
 		return $venue_address;
+	}
+
+	/**
+	 * Count the events this migration created.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return int
+	 */
+	private function count_migrated_events() {
+
+		global $wpdb;
+
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct query for the import tool over TEC tables.
+			'SELECT COUNT(*) FROM ' . $wpdb->prefix . esc_sql( self::MIGRATE_EVENTS_TABLE ) . ' WHERE sc_event_id > 0' // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		);
 	}
 
 	/**

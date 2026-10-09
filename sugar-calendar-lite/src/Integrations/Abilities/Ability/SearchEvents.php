@@ -55,7 +55,7 @@ class SearchEvents extends AbstractAbility {
 	protected function get_description(): string {
 
 		return esc_html__(
-			'Full-text search over event titles and content. Returns parent event records; recurring occurrences are not expanded in v1.',
+			'Full-text search over event titles, content and location. Without a status it searches every event except trashed ones for a user who can edit all events, and published events for anyone else. Returns parent event records; recurring occurrences are not expanded in v1.',
 			'sugar-calendar-lite'
 		);
 	}
@@ -75,6 +75,11 @@ class SearchEvents extends AbstractAbility {
 			'required'             => [ 'search' ],
 			'properties'           => [
 				'search' => [ 'type' => 'string', 'minLength' => 1 ],
+				'status' => [
+					'type'        => 'string',
+					'enum'        => [ 'publish', 'draft', 'pending', 'future', 'private', 'trash', 'any' ],
+					'description' => __( 'Which event statuses to search. Leave it out to find drafts as well as published events, so an event the user names is found whatever its status.', 'sugar-calendar-lite' ),
+				],
 				'number' => [ 'type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 20 ],
 				'offset' => [ 'type' => 'integer', 'minimum' => 0, 'default' => 0 ],
 			],
@@ -132,15 +137,43 @@ class SearchEvents extends AbstractAbility {
 			);
 		}
 
-		$query_args = [
-			'search'         => $search,
-			'search_columns' => [ 'title', 'content' ],
-			'status'         => 'publish',
-			'number'         => absint( $args['number'] ?? 20 ),
-			'offset'         => absint( $args['offset'] ?? 0 ),
-			'orderby'        => 'start',
-			'order'          => 'DESC',
-		];
+		// A name lookup must see drafts too: finding only the published event of two with the
+		// same title is how an edit landed on the wrong one. build_query_args() would narrow a
+		// non-public status to the caller's own events, so only an editor of all events gets it.
+		if ( ! isset( $args['status'] ) && current_user_can( 'edit_others_events' ) ) {
+			$args['status'] = 'any';
+		}
+
+		// build_query_args() owns the status gate: a non-public status is
+		// narrowed to the caller's own events rather than refused, the same
+		// way list-events scopes it.
+		$query_args = $this->events->build_query_args( $args );
+
+		if ( is_wp_error( $query_args ) ) {
+			return $query_args;
+		}
+
+		// `location` is event meta, not an Event_Query search column, so a match on it
+		// is resolved separately and unioned with the title/content match rather than
+		// being expressible as one `search` call.
+		$ids = array_values(
+			array_unique(
+				array_merge(
+					$this->events->resolve_search_title_content_ids( $search, $query_args ),
+					$this->events->resolve_search_location_ids( $search, $query_args )
+				)
+			)
+		);
+
+		if ( empty( $ids ) ) {
+			return [ 'events' => [], 'total' => 0 ];
+		}
+
+		$query_args['id__in']  = $ids;
+		$query_args['number']  = absint( $args['number'] ?? 20 );
+		$query_args['offset']  = absint( $args['offset'] ?? 0 );
+		$query_args['orderby'] = 'start';
+		$query_args['order']   = 'DESC';
 
 		$query = $this->events->get_event_query( $query_args );
 		$total = $this->events->count( $query_args );

@@ -8,8 +8,6 @@ use Sugar_Calendar\AddOn\Ticketing\Database\Order;
 use Sugar_Calendar\AddOn\Ticketing\Database\Ticket;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Features\RegistrationForm\RespondentNaming;
-use Sugar_Calendar\Features\RegistrationForm\ResponseRepository;
-use Sugar_Calendar\Features\RegistrationForm\SchemaRepository;
 
 /**
  * The data the ticket details card renders, and nothing else.
@@ -288,7 +286,7 @@ final class DetailsCardData {
 		$data->location_name    = (string) $location['name'];
 		$data->location_url     = (string) $location['url'];
 		$data->location_address = (string) $location['address'];
-		$data->registration     = self::registration( $order, $ticket, $event );
+		$data->registration     = self::registration( $ticket, $event );
 
 		return $data;
 	}
@@ -397,54 +395,21 @@ final class DetailsCardData {
 	}
 
 	/**
-	 * This ticket's attendee's answers, picked out of the order's responses.
-	 *
-	 * Matches on `attendee_id`, the attendee row id checkout stored, NOT the
-	 * ticket id. No match means no answers: falling back to another row would
-	 * print one person's answers on another's ticket.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @param Order  $order  The order.
-	 * @param Ticket $ticket The ticket.
-	 *
-	 * @return array Field id => answer, empty when nothing matches.
-	 */
-	private static function answers_for_ticket( $order, $ticket ) {
-
-		if ( empty( $ticket->attendee_id ) ) {
-			return [];
-		}
-
-		foreach ( (array) ResponseRepository::get_for_order( $order->id ) as $row ) {
-			$row = (array) $row;
-
-			if ( (int) ( $row['attendee_id'] ?? 0 ) === (int) $ticket->attendee_id ) {
-				return (array) ( $row['answers'] ?? [] );
-			}
-		}
-
-		return [];
-	}
-
-	/**
 	 * The Registration Details rows: each answered question with its answer.
 	 *
 	 * @since 3.14.0
 	 *
-	 * @param Order  $order  The order.
 	 * @param Ticket $ticket The ticket.
 	 * @param Event  $event  The event.
 	 *
 	 * @return array[] Each with label and answer; empty when there is nothing to show.
 	 */
-	private static function registration( $order, $ticket, $event ) {
-
-		$schema        = SchemaRepository::get( $event->id );
-		$schema_fields = empty( $schema['fields'] ) ? [] : (array) $schema['fields'];
+	private static function registration( $ticket, $event ) {
 
 		/**
 		 * Filters the registration questions shown on the card.
+		 *
+		 * Empty unless a form provider (Pro's Registration Form) supplies them.
 		 *
 		 * @since 3.14.0
 		 *
@@ -454,7 +419,7 @@ final class DetailsCardData {
 		 */
 		$fields = (array) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_ticketing_details_card_registration_fields',
-			$schema_fields,
+			[],
 			$ticket,
 			$event
 		);
@@ -476,7 +441,7 @@ final class DetailsCardData {
 		 */
 		$answers = (array) apply_filters( // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 			'sugar_calendar_ticketing_details_card_registration_answers',
-			self::answers_for_ticket( $order, $ticket ),
+			[],
 			$ticket,
 			$event
 		);

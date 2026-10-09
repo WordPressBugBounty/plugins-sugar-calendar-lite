@@ -403,6 +403,45 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * The weekdays the visitor has filtered to, as PHP `w` values.
+	 *
+	 * Visitor-only: there is no block setting for this, so unlike get_calendars() there
+	 * is no author selection to fall back to.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return int[]
+	 */
+	public function get_days_of_week() {
+
+		$attributes = $this->get_attributes();
+
+		if ( empty( $attributes['daysOfWeek'] ) || ! is_array( $attributes['daysOfWeek'] ) ) {
+			return [];
+		}
+
+		return array_map( 'absint', $attributes['daysOfWeek'] );
+	}
+
+	/**
+	 * The day divisions the visitor has filtered to.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return string[]
+	 */
+	public function get_time_of_day() {
+
+		$attributes = $this->get_attributes();
+
+		if ( empty( $attributes['timeOfDay'] ) || ! is_array( $attributes['timeOfDay'] ) ) {
+			return [];
+		}
+
+		return array_map( 'sanitize_key', $attributes['timeOfDay'] );
+	}
+
+	/**
 	 * Set the view.
 	 *
 	 * @since 3.0.0

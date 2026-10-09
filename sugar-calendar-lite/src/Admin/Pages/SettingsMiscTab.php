@@ -7,6 +7,8 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\Helpers as BaseHelper;
+use Sugar_Calendar\Integrations\Abilities\Abilities;
+use Sugar_Calendar\Integrations\Ai\Availability;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 
 /**
@@ -154,6 +156,23 @@ class SettingsMiscTab extends Settings {
 			]
 		);
 
+		// Gia AI assistant. Abilities stay registered regardless; this only hides
+		// the chat and the AI usage card on the License and Usage tab. Hidden when
+		// the relay is not wired up or the Abilities API is missing (WordPress before
+		// 6.9), matching that card. Worded as a Hide, like the toggle above, so it is
+		// the inverse of the stored `ai_assistant_enabled`.
+		if ( Abilities::is_available() && Availability::relay_ready() ) {
+			UI::toggle_control(
+				[
+					'id'          => 'hide_ai_features',
+					'name'        => 'hide_ai_features',
+					'value'       => ! Options::get( Availability::OPTION_KEY, true ),
+					'label'       => esc_html__( 'Hide AI Features', 'sugar-calendar-lite' ),
+					'description' => esc_html__( 'Hide the Gia AI assistant and AI usage details.', 'sugar-calendar-lite' ),
+				]
+			);
+		}
+
 		// Lite-only kill-switch: disables every external integration AND usage
 		// tracking (tracking is derived from this option). Pro is always enabled
 		// and always tracks (forced via the sugar_calendar_usage_tracking_is_enabled
@@ -185,6 +204,12 @@ class SettingsMiscTab extends Settings {
 
 		// Hide Announcements (all editions).
 		Options::update( 'hide_announcements', isset( $post_data['hide_announcements'] ) );
+
+		// Only when the toggle was rendered: without it the field is absent, which
+		// reads as "not hidden" and would silently switch a hidden assistant back on.
+		if ( Abilities::is_available() && Availability::relay_ready() ) {
+			Options::update( Availability::OPTION_KEY, ! isset( $post_data['hide_ai_features'] ) );
+		}
 
 		// Disable Integrations is a Lite-only control; never let a Pro request
 		// write it (the toggle is not rendered there).

@@ -42,6 +42,7 @@ class OAuthConnectionModel {
 	 * subsequent read in the same request never sees a stale row.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Fires the sugar_calendar_oauth_connections_changed action.
 	 *
 	 * @return void
 	 */
@@ -49,6 +50,13 @@ class OAuthConnectionModel {
 
 		self::$active_by_provider_cache = [];
 		self::$auth_error_cache         = null;
+
+		/**
+		 * Fires after a connection row is inserted, updated or deleted.
+		 *
+		 * @since 3.15.0
+		 */
+		do_action( 'sugar_calendar_oauth_connections_changed' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName -- named for the table, not this class.
 	}
 
 	/**

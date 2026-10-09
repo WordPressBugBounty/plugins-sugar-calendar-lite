@@ -737,11 +737,36 @@ function process_stripe_connect_completion() {
 
 	$is_sandbox               = Functions\is_sandbox();
 	$url_payment_settings     = get_section_url( [ 'section' => 'payments' ] );
+	$redirect                 = $url_payment_settings;
 	$state                    = sanitize_text_field( $_GET['state'] );
 	$url_customer_site_for_am = add_query_arg(
 		[ '_wpnonce' => $_GET['_wpnonce'] ],
 		$url_payment_settings
 	);
+
+	$defaults = [
+		'is_sandbox'        => $is_sandbox,
+		'redirect'          => $redirect,
+		'customer_site_url' => $url_customer_site_for_am,
+	];
+
+	/**
+	 * Filters the Stripe Connect completion context.
+	 *
+	 * A feature that started the connection with its own return URL echoes it here:
+	 * the broker rejects a `customer_site_url` that differs from the one sent at init.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array $args Completion context: `is_sandbox` (bool, fetch and store Test Mode credentials),
+	 *                    `redirect` (string, where the user lands afterwards) and
+	 *                    `customer_site_url` (string, what the broker compares against the init request).
+	 */
+	$args = wp_parse_args( apply_filters( 'sugar_calendar_event_ticketing_admin_settings_stripe_connect_completion', $defaults ), $defaults );
+
+	$is_sandbox               = (bool) $args['is_sandbox'];
+	$redirect                 = $args['redirect'];
+	$url_customer_site_for_am = $args['customer_site_url'];
 
 	$sc_credentials_url   = Functions\get_stripe_credentials_url( $is_sandbox, $state, $url_customer_site_for_am );
 	$response             = wp_remote_get( esc_url_raw( $sc_credentials_url ) );
@@ -754,7 +779,7 @@ function process_stripe_connect_completion() {
 				'There was an error getting your Stripe credentials. Please <a href="%s">try again</a>. If you continue to have this problem, please contact support.',
 				'sugar-calendar-lite'
 			),
-			esc_url( $url_payment_settings )
+			esc_url( $redirect )
 		);
 		$message .= '</p>';
 
@@ -778,8 +803,6 @@ function process_stripe_connect_completion() {
 		$data['stripe_user_id'],
 		$is_sandbox
 	);
-
-	$redirect = $url_payment_settings;
 
 	// Redirect
 	wp_safe_redirect( $redirect );
@@ -818,6 +841,8 @@ function process_stripe_disconnect() {
 		return;
 	}
 
+	$was_connected = ! empty( get_option( 'sc_stripe_connect_account_id' ) );
+
 	if ( Functions\is_sandbox() ) {
 		update_option( 'sc_stripe_test_secret', false );
 		update_option( 'sc_stripe_test_publishable', false );
@@ -827,6 +852,11 @@ function process_stripe_disconnect() {
 	}
 
 	update_option( 'sc_stripe_connect_account_id', false );
+
+	if ( $was_connected ) {
+		/** This action is documented in src/Admin/Pages/Integrations/Zoom.php */
+		do_action( 'sugar_calendar_integration_disconnected', 'stripe', [ 'mode' => Functions\is_sandbox() ? 'sandbox' : 'live' ] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
 
 	$redirect = get_section_url( [ 'section' => 'payments' ] );
 

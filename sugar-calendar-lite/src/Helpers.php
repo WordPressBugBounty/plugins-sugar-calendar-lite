@@ -144,6 +144,14 @@ class Helpers {
 				'default' => false,
 				'type'    => 'bool',
 			],
+			'daysOfWeek'         => [
+				'default' => [],
+				'type'    => 'array',
+			],
+			'timeOfDay'          => [
+				'default' => [],
+				'type'    => 'key_array',
+			],
 			'id'                 => [
 				'default' => '',
 				'type'    => 'string',
@@ -212,7 +220,11 @@ class Helpers {
 
 			switch ( $expected_data[ $block_data_key ]['type'] ) {
 				case 'array':
-					$temp_data = array_map( 'absint', $block_data_val );
+					$temp_data = array_map( 'absint', (array) $block_data_val );
+					break;
+
+				case 'key_array':
+					$temp_data = array_map( 'sanitize_key', (array) $block_data_val );
 					break;
 
 				case 'attributes':
@@ -248,6 +260,146 @@ class Helpers {
 		}
 
 		return $clean_data;
+	}
+
+	/**
+	 * SQL restricting events to a set of weekdays.
+	 *
+	 * Mirrors `EventListView\EventView::get_event_days()`, which reports every day a
+	 * multi-day event covers, not just the day it starts on: a Friday-to-Monday event
+	 * is a Saturday event too. Seven offsets is the whole span that can matter, because
+	 * an event running a week or longer covers every weekday and matches regardless.
+	 *
+	 * Fails closed on an unusable alias, so a mistake shows as "no events" rather than
+	 * silently dropping the restriction and showing every event.
+	 *
+	 * Takes the columns rather than a table alias because the Pro recurring query filters
+	 * on an occurrence's own dates, which reach it through a UNION under different names.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $start_col Qualified column holding the start datetime.
+	 * @param string $end_col   Qualified column holding the end datetime.
+	 * @param array  $days      Weekdays as PHP `w` values, 0 (Sunday) to 6 (Saturday).
+	 *
+	 * @return string
+	 */
+	public static function get_days_of_week_sql( $start_col, $end_col, $days ) {
+
+		// Keep only real weekdays, as PHP `w` values (0 = Sunday).
+		$days = array_intersect( range( 0, 6 ), array_map( 'absint', (array) $days ) );
+
+		if ( empty( $days ) || count( $days ) === 7 ) {
+			return '';
+		}
+
+		if ( ! self::is_safe_sql_column( $start_col ) || ! self::is_safe_sql_column( $end_col ) ) {
+			return ' AND 1 = 0';
+		}
+
+		$list  = implode( ',', $days );
+		$parts = [];
+
+		for ( $offset = 0; $offset <= 6; $offset++ ) {
+			$parts[] = sprintf(
+				'( DATEDIFF( %1$s, %2$s ) >= %3$d AND ( DAYOFWEEK( DATE_ADD( %2$s, INTERVAL %3$d DAY ) ) - 1 ) IN ( %4$s ) )',
+				$end_col,
+				$start_col,
+				$offset,
+				$list
+			);
+		}
+
+		return ' AND ( ' . implode( ' OR ', $parts ) . ' )';
+	}
+
+	/**
+	 * Whether a string is a plain qualified column this class may drop into SQL.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $column Column reference, e.g. `wp_sc_events.start`.
+	 *
+	 * @return bool
+	 */
+	private static function is_safe_sql_column( $column ) {
+
+		return (bool) preg_match( '/^[A-Za-z0-9_]+\.`?[A-Za-z0-9_]+`?$/', (string) $column );
+	}
+
+	/**
+	 * SQL restricting events to a set of day divisions.
+	 *
+	 * Mirrors `Helper::get_time_day_division_of_event()`: an all-day event reports only
+	 * `all_day`, and a timed event matches every division its hours run through, with
+	 * night being the two ranges either side of midnight.
+	 *
+	 * Fails closed on an unusable alias, as `get_days_of_week_sql()` does.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $start_col   Qualified column holding the start datetime.
+	 * @param string $end_col     Qualified column holding the end datetime.
+	 * @param string $all_day_col Qualified column holding the all-day flag.
+	 * @param array  $divisions   Division keys: all_day, morning, afternoon, evening, night.
+	 *
+	 * @return string
+	 */
+	public static function get_time_of_day_sql( $start_col, $end_col, $all_day_col, $divisions ) {
+
+		$ranges = [
+			'morning'   => [ [ 6, 11 ] ],
+			'afternoon' => [ [ 12, 17 ] ],
+			'evening'   => [ [ 18, 23 ] ],
+			'night'     => [ [ 0, 5 ], [ 21, 23 ] ],
+		];
+
+		$known     = array_merge( [ 'all_day' ], array_keys( $ranges ) );
+		$divisions = array_intersect( $known, array_map( 'sanitize_key', (array) $divisions ) );
+
+		if ( empty( $divisions ) || count( $divisions ) === count( $known ) ) {
+			return '';
+		}
+
+		if (
+			! self::is_safe_sql_column( $start_col ) ||
+			! self::is_safe_sql_column( $end_col ) ||
+			! self::is_safe_sql_column( $all_day_col )
+		) {
+			return ' AND 1 = 0';
+		}
+
+		$parts = [];
+
+		foreach ( $divisions as $division ) {
+
+			if ( $division === 'all_day' ) {
+				$parts[] = sprintf( '%s = 1', $all_day_col );
+
+				continue;
+			}
+
+			$hour_tests = [];
+
+			foreach ( $ranges[ $division ] as $range ) {
+				// LEAST/GREATEST because a multi-day event can end at an earlier clock hour than it started.
+				$hour_tests[] = sprintf(
+					'( LEAST( HOUR( %1$s ), HOUR( %2$s ) ) <= %3$d AND GREATEST( HOUR( %1$s ), HOUR( %2$s ) ) >= %4$d )',
+					$start_col,
+					$end_col,
+					$range[1],
+					$range[0]
+				);
+			}
+
+			$parts[] = sprintf(
+				'( %1$s = 0 AND ( %2$s ) )',
+				$all_day_col,
+				implode( ' OR ', $hour_tests )
+			);
+		}
+
+		return ' AND ( ' . implode( ' OR ', $parts ) . ' )';
 	}
 
 	/**
@@ -1038,6 +1190,8 @@ class Helpers {
 			'show_past_only' => false,
 			'event_order'    => 'asc',
 			'featured'       => false,
+			'days_of_week'   => [],
+			'time_of_day'    => [],
 		];
 
 		$args = wp_parse_args(
@@ -1180,6 +1334,23 @@ class Helpers {
 			$where_query .= Featured::get_exists_sql( $wpdb->prefix . 'sc_events' );
 		}
 
+		if ( ! empty( $args['days_of_week'] ) ) {
+			$where_query .= self::get_days_of_week_sql(
+				$wpdb->prefix . 'sc_events.`start`',
+				$wpdb->prefix . 'sc_events.`end`',
+				$args['days_of_week']
+			);
+		}
+
+		if ( ! empty( $args['time_of_day'] ) ) {
+			$where_query .= self::get_time_of_day_sql(
+				$wpdb->prefix . 'sc_events.`start`',
+				$wpdb->prefix . 'sc_events.`end`',
+				$wpdb->prefix . 'sc_events.`all_day`',
+				$args['time_of_day']
+			);
+		}
+
 		if ( ! empty( $where_calendars ) ) {
 			$where_query .= ' ' . $where_calendars;
 		}
@@ -1274,7 +1445,10 @@ class Helpers {
 			'id__in'  => wp_list_pluck( $event_ids, 'id' ),
 			// Without this the query defaults to 30 and drops rows already selected.
 			'number'  => count( $event_ids ),
-			'orderby' => ! empty( $args['show_past_only'] ) ? 'end' : 'start',
+			// This is the order the caller renders and trims, so it needs the id
+			// tiebreak: events sharing a start would otherwise come back in a
+			// different order per page and the one on the boundary is dropped.
+			'orderby' => ! empty( $args['show_past_only'] ) ? [ 'end', 'id' ] : [ 'start', 'id' ],
 			'order'   => $args['event_order'],
 		];
 

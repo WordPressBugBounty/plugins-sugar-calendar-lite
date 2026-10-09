@@ -1,0 +1,68 @@
+@charset "UTF-8";
+/* Ported from DS: submit-button */
+/* Source mtime: 2026-08-06T18:24:42Z */
+/* Sugar Calendar — components/submit-button.css (AI cluster)
+   Mirrors Figma ".submit-button" (node 14156:57604).
+   .sc-ai-submit-button — the 36×36 AI composer send square.
+   Type=Generating restyles to tertiary + stop glyph; Disabled is native.
+   Requires tokens/primitives.css, tokens/tokens.css. */
+.sc-ai-submit-button {
+  box-sizing: border-box;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--sc-radius-4);
+  background: var(--sc-components-button-primary-background);
+  color: var(--sc-components-button-primary-text);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background var(--sc-transition-normal), border-color var(--sc-transition-normal), opacity var(--sc-transition-normal);
+}
+
+.sc-ai-submit-button:hover {
+  background: var(--sc-components-button-primary-background--hover);
+}
+
+.sc-ai-submit-button:focus {
+  outline: none;
+}
+
+/* focus mirrors Button primary: hover surface + white inner border + halo */
+.sc-ai-submit-button:focus-visible {
+  background: var(--sc-components-button-primary-background--hover);
+  border-color: var(--sc-color-neutral-white);
+  box-shadow: 0 0 0 2px var(--sc-components-button-primary-background--hover);
+}
+
+/* Generating — tertiary treatment, glyph becomes circle-stop */
+.sc-ai-submit-button[data-type=generating] {
+  background: var(--sc-components-button-tertiary-background);
+  border-color: var(--sc-components-button-tertiary-border);
+  color: var(--sc-components-button-tertiary-text);
+}
+
+.sc-ai-submit-button[data-type=generating]:hover {
+  background: var(--sc-components-button-tertiary-background--hover);
+}
+
+.sc-ai-submit-button[data-type=generating]:focus-visible {
+  background: var(--sc-components-button-tertiary-background--hover);
+  border-color: var(--sc-components-button-tertiary-border--hover);
+  box-shadow: 0 0 0 2px var(--sc-components-button-tertiary-border--hover);
+}
+
+.sc-ai-submit-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.sc-ai-submit-button__icon {
+  font-size: 16px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vc3VibWl0LWJ1dHRvbi5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTtBQUNBO0FBS0E7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQU1BO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtFQUE2Qjs7O0FBQzdCO0VBQTZCOzs7QUFDN0I7QUFDQTtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTs7O0FBRUY7RUFDRTs7O0FBRUY7RUFDRTtFQUNBO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTtFQUNBOzs7QUFHRjtFQUE2QiIsImZpbGUiOiJhc3NldHMvY3NzL2NvbXBvbmVudHMvYWRtaW4vc3VibWl0LWJ1dHRvbi5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogc3VibWl0LWJ1dHRvbiAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA4LTA2VDE4OjI0OjQyWiAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8qIFN1Z2FyIENhbGVuZGFyIOKAlCBjb21wb25lbnRzL3N1Ym1pdC1idXR0b24uY3NzIChBSSBjbHVzdGVyKVxuICAgTWlycm9ycyBGaWdtYSBcIi5zdWJtaXQtYnV0dG9uXCIgKG5vZGUgMTQxNTY6NTc2MDQpLlxuICAgLnNjLWFpLXN1Ym1pdC1idXR0b24g4oCUIHRoZSAzNsOXMzYgQUkgY29tcG9zZXIgc2VuZCBzcXVhcmUuXG4gICBUeXBlPUdlbmVyYXRpbmcgcmVzdHlsZXMgdG8gdGVydGlhcnkgKyBzdG9wIGdseXBoOyBEaXNhYmxlZCBpcyBuYXRpdmUuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLiAqL1xuXG4uc2MtYWktc3VibWl0LWJ1dHRvbiB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG4gIGZsZXg6IG5vbmU7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgd2lkdGg6IDM2cHg7XG4gIGhlaWdodDogMzZweDtcbiAgYm9yZGVyOiAxcHggc29saWQgdHJhbnNwYXJlbnQ7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy00KTtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tcHJpbWFyeS1iYWNrZ3JvdW5kKTtcbiAgY29sb3I6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXByaW1hcnktdGV4dCk7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgYXBwZWFyYW5jZTogbm9uZTtcbiAgLXdlYmtpdC1hcHBlYXJhbmNlOiBub25lO1xuICB0cmFuc2l0aW9uOiBiYWNrZ3JvdW5kIHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKSwgYm9yZGVyLWNvbG9yIHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKSwgb3BhY2l0eSB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCk7XG59XG4uc2MtYWktc3VibWl0LWJ1dHRvbjpob3ZlciB7IGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXByaW1hcnktYmFja2dyb3VuZC0taG92ZXIpOyB9XG4uc2MtYWktc3VibWl0LWJ1dHRvbjpmb2N1cyB7IG91dGxpbmU6IG5vbmU7IH1cbi8qIGZvY3VzIG1pcnJvcnMgQnV0dG9uIHByaW1hcnk6IGhvdmVyIHN1cmZhY2UgKyB3aGl0ZSBpbm5lciBib3JkZXIgKyBoYWxvICovXG4uc2MtYWktc3VibWl0LWJ1dHRvbjpmb2N1cy12aXNpYmxlIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tcHJpbWFyeS1iYWNrZ3JvdW5kLS1ob3Zlcik7XG4gIGJvcmRlci1jb2xvcjogdmFyKC0tc2MtY29sb3ItbmV1dHJhbC13aGl0ZSk7XG4gIGJveC1zaGFkb3c6IDAgMCAwIDJweCB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi1wcmltYXJ5LWJhY2tncm91bmQtLWhvdmVyKTtcbn1cblxuLyogR2VuZXJhdGluZyDigJQgdGVydGlhcnkgdHJlYXRtZW50LCBnbHlwaCBiZWNvbWVzIGNpcmNsZS1zdG9wICovXG4uc2MtYWktc3VibWl0LWJ1dHRvbltkYXRhLXR5cGU9XCJnZW5lcmF0aW5nXCJdIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tdGVydGlhcnktYmFja2dyb3VuZCk7XG4gIGJvcmRlci1jb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tdGVydGlhcnktYm9yZGVyKTtcbiAgY29sb3I6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LXRleHQpO1xufVxuLnNjLWFpLXN1Ym1pdC1idXR0b25bZGF0YS10eXBlPVwiZ2VuZXJhdGluZ1wiXTpob3ZlciB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LWJhY2tncm91bmQtLWhvdmVyKTtcbn1cbi5zYy1haS1zdWJtaXQtYnV0dG9uW2RhdGEtdHlwZT1cImdlbmVyYXRpbmdcIl06Zm9jdXMtdmlzaWJsZSB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LWJhY2tncm91bmQtLWhvdmVyKTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi10ZXJ0aWFyeS1ib3JkZXItLWhvdmVyKTtcbiAgYm94LXNoYWRvdzogMCAwIDAgMnB4IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LWJvcmRlci0taG92ZXIpO1xufVxuXG4uc2MtYWktc3VibWl0LWJ1dHRvbjpkaXNhYmxlZCB7XG4gIG9wYWNpdHk6IDAuNTtcbiAgY3Vyc29yOiBkZWZhdWx0O1xuICBwb2ludGVyLWV2ZW50czogbm9uZTtcbn1cblxuLnNjLWFpLXN1Ym1pdC1idXR0b25fX2ljb24geyBmb250LXNpemU6IDE2cHg7IH1cbiJdfQ== */

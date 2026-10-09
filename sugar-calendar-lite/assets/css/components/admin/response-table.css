@@ -1,0 +1,34 @@
+@charset "UTF-8";
+/* Ported from DS: response-table */
+/* Source mtime: 2026-10-02T12:26:27Z */
+/* Sugar Calendar — components/response-table.css (AI cluster PATTERN)
+   Mirrors Figma ".response-table" (node 17003:6642).
+   .sc-ai-response-table — the table block inside an AI Response:
+   a framed, rounded table of Table Rows (header + body rows).
+   Columns = Two (Field / Details) | Three (Field / Before / After).
+   Composes Table Row — requires table-row.css.
+   Requires tokens/primitives.css and tokens/tokens.css. */
+.sc-ai-response-table {
+  width: 100%;
+  /* separate + 0 spacing so the radius clips cleanly; rows draw their own dividers */
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--sc-surface-divider);
+  border-radius: var(--sc-radius-table);
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+/* optional screen-reader caption (`caption` arg) — visually hidden */
+.sc-ai-response-table__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vcmVzcG9uc2UtdGFibGUuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBUUE7RUFDRTtBQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUNBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi9yZXNwb25zZS10YWJsZS5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogcmVzcG9uc2UtdGFibGUgKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0xMC0wMlQxMjoyNjoyN1ogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vKiBTdWdhciBDYWxlbmRhciDigJQgY29tcG9uZW50cy9yZXNwb25zZS10YWJsZS5jc3MgKEFJIGNsdXN0ZXIgUEFUVEVSTilcbiAgIE1pcnJvcnMgRmlnbWEgXCIucmVzcG9uc2UtdGFibGVcIiAobm9kZSAxNzAwMzo2NjQyKS5cbiAgIC5zYy1haS1yZXNwb25zZS10YWJsZSDigJQgdGhlIHRhYmxlIGJsb2NrIGluc2lkZSBhbiBBSSBSZXNwb25zZTpcbiAgIGEgZnJhbWVkLCByb3VuZGVkIHRhYmxlIG9mIFRhYmxlIFJvd3MgKGhlYWRlciArIGJvZHkgcm93cykuXG4gICBDb2x1bW5zID0gVHdvIChGaWVsZCAvIERldGFpbHMpIHwgVGhyZWUgKEZpZWxkIC8gQmVmb3JlIC8gQWZ0ZXIpLlxuICAgQ29tcG9zZXMgVGFibGUgUm93IOKAlCByZXF1aXJlcyB0YWJsZS1yb3cuY3NzLlxuICAgUmVxdWlyZXMgdG9rZW5zL3ByaW1pdGl2ZXMuY3NzIGFuZCB0b2tlbnMvdG9rZW5zLmNzcy4gKi9cblxuLnNjLWFpLXJlc3BvbnNlLXRhYmxlIHtcbiAgd2lkdGg6IDEwMCU7XG4gIC8qIHNlcGFyYXRlICsgMCBzcGFjaW5nIHNvIHRoZSByYWRpdXMgY2xpcHMgY2xlYW5seTsgcm93cyBkcmF3IHRoZWlyIG93biBkaXZpZGVycyAqL1xuICBib3JkZXItY29sbGFwc2U6IHNlcGFyYXRlO1xuICBib3JkZXItc3BhY2luZzogMDtcbiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLXRhYmxlKTtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgdGFibGUtbGF5b3V0OiBmaXhlZDtcbn1cblxuLyogb3B0aW9uYWwgc2NyZWVuLXJlYWRlciBjYXB0aW9uIChgY2FwdGlvbmAgYXJnKSDigJQgdmlzdWFsbHkgaGlkZGVuICovXG4uc2MtYWktcmVzcG9uc2UtdGFibGVfX2NhcHRpb24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHdpZHRoOiAxcHg7XG4gIGhlaWdodDogMXB4O1xuICBwYWRkaW5nOiAwO1xuICBtYXJnaW46IC0xcHg7XG4gIG92ZXJmbG93OiBoaWRkZW47XG4gIGNsaXA6IHJlY3QoMCAwIDAgMCk7XG4gIHdoaXRlLXNwYWNlOiBub3dyYXA7XG4gIGJvcmRlcjogMDtcbn1cbiJdfQ== */

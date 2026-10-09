@@ -1,0 +1,174 @@
+@charset "UTF-8";
+/* Ported from DS: ai-chat-container */
+/* Source mtime: 2026-10-02T12:26:27Z */
+/* Sugar Calendar — components/ai-chat-container.css (AI cluster PATTERN)
+   Mirrors Figma "ai-chat-container" (node 14167:92964).
+   .sc-ai-chat-container — the floating AI chat window:
+   Top Nav + (Quick Actions view: header + action rows | Conversation view:
+   header + scrolling chat + Reply Section) + a corner resize affordance.
+   Composes Top Nav, AI Chat Header, User Prompt, AI Response, Reply Section
+   (and their transitive deps) — see the stories file for the CSS import list.
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-chat-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 500px;
+  /* the window resizes freely above the 400×420 floor — no width cap on
+     the container itself; the content columns (__content, __chat, Reply
+     Section box) cap at 750px and center, so a wide window just gains
+     breathing room (consumer resize wiring honors the floor) */
+  min-width: 400px;
+  max-width: 100%;
+  height: 620px;
+  min-height: 420px;
+  background: var(--sc-surface-background-white);
+  /* TODO: add radius/cards to tokens.css on next use_figma regen */
+  border-radius: var(--sc-radius-cards, var(--sc-radius-10));
+  box-shadow: var(--sc-shadow-2);
+  overflow: hidden;
+}
+
+/* header zone — Quick Actions also stacks the action rows in here */
+.sc-ai-chat-container__content {
+  box-sizing: border-box;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sc-spacing-20);
+  width: 100%;
+  max-width: 750px;
+  padding: var(--sc-spacing-20);
+}
+
+/* quick-action rows — two-column grid (Figma Type=Quick Actions) */
+.sc-ai-chat-container__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sc-spacing-10);
+  width: 100%;
+}
+
+/* quick-action row — 52px bubble: icon tile + title */
+.sc-ai-chat-container__action {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-10);
+  width: 100%;
+  height: 52px;
+  padding: var(--sc-spacing-10);
+  background: var(--sc-surface-background-white);
+  border: 1px solid var(--sc-surface-divider);
+  border-radius: var(--sc-radius-10);
+  cursor: pointer;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: box-shadow var(--sc-transition-normal), border-color var(--sc-transition-normal);
+}
+
+/* hover lifts with shadow-1 (Figma) rather than a surface change */
+.sc-ai-chat-container__action:hover {
+  box-shadow: var(--sc-shadow-1);
+}
+
+.sc-ai-chat-container__action:focus {
+  outline: none;
+}
+
+.sc-ai-chat-container__action:focus-visible {
+  border-color: var(--sc-components-field-border--focus);
+}
+
+.sc-ai-chat-container__action-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--sc-color-brand-blue-0);
+  border-radius: var(--sc-radius-table);
+  color: var(--sc-text-link);
+  font-size: 16px;
+}
+
+.sc-ai-chat-container__action-text {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.sc-ai-chat-container__action-title {
+  color: var(--sc-text-primary);
+}
+
+.sc-ai-chat-container__action-description {
+  color: var(--sc-text-tertiary);
+}
+
+/* conversation column — scrolls between the header and the Reply Section.
+   Default cross-axis stretch makes each message row span the column.
+   Content fades out over the last 50px instead of clipping hard against
+   the composer. The curve is eased: barely dimmed where the fade starts,
+   fully transparent only at the edge, so a message resting in the fade
+   zone still reads. (No top fade — the header edge stays crisp.) */
+.sc-ai-chat-container__chat {
+  /* fade height — the last message rests ~30px above the edge (padding),
+     i.e. in the gentle first part of the fade */
+  --sc-ai-chat-container-fade: var(--sc-spacing-50);
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-spacing-20);
+  width: 100%;
+  max-width: 750px;
+  padding: var(--sc-spacing-20) var(--sc-spacing-20) var(--sc-spacing-30);
+  overflow-y: auto;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--sc-ai-chat-container-fade)), rgba(0, 0, 0, 0.85) calc(100% - var(--sc-ai-chat-container-fade) * 0.6), rgba(0, 0, 0, 0.4) calc(100% - var(--sc-ai-chat-container-fade) * 0.2), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--sc-ai-chat-container-fade)), rgba(0, 0, 0, 0.85) calc(100% - var(--sc-ai-chat-container-fade) * 0.6), rgba(0, 0, 0, 0.4) calc(100% - var(--sc-ai-chat-container-fade) * 0.2), transparent 100%);
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--sc-surface-divider) transparent;
+}
+
+.sc-ai-chat-container__chat::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sc-ai-chat-container__chat::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sc-ai-chat-container__chat::-webkit-scrollbar-thumb {
+  background: var(--sc-surface-divider);
+  border-radius: var(--sc-radius-full);
+}
+
+.sc-ai-chat-container__chat::-webkit-scrollbar-thumb:hover {
+  background: var(--sc-text-icon);
+}
+
+/* resize affordance — the 12px expand strokes (inline SVG in markup,
+   stroke = currentColor) in the top-left corner. Drag wiring is
+   consumer-owned; the container is user-resizable. */
+.sc-ai-chat-container__resize {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sc-surface-divider);
+  cursor: nwse-resize;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vYWktY2hhdC1jb250YWluZXIuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFTQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7QUFDQTtBQUFBO0FBQUE7QUFBQTtFQUlBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7QUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUNBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtBQUNBO0VBQXNDOzs7QUFDdEM7RUFBc0M7OztBQUN0QztFQUE4Qzs7O0FBRTlDO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtFQUE0Qzs7O0FBQzVDO0VBQTRDOzs7QUFFNUM7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBTUE7QUFDRTtBQUFBO0VBRUE7RUFFQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBT0E7RUFPQTtFQUNBOzs7QUFFRjtFQUFpRDs7O0FBQ2pEO0VBQXVEOzs7QUFDdkQ7RUFDRTtFQUNBOzs7QUFFRjtFQUE2RDs7O0FBRTdEO0FBQUE7QUFBQTtBQUdBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0EiLCJmaWxlIjoiYXNzZXRzL2Nzcy9jb21wb25lbnRzL2FkbWluL2FpLWNoYXQtY29udGFpbmVyLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBhaS1jaGF0LWNvbnRhaW5lciAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTEwLTAyVDEyOjI2OjI3WiAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8qIFN1Z2FyIENhbGVuZGFyIOKAlCBjb21wb25lbnRzL2FpLWNoYXQtY29udGFpbmVyLmNzcyAoQUkgY2x1c3RlciBQQVRURVJOKVxuICAgTWlycm9ycyBGaWdtYSBcImFpLWNoYXQtY29udGFpbmVyXCIgKG5vZGUgMTQxNjc6OTI5NjQpLlxuICAgLnNjLWFpLWNoYXQtY29udGFpbmVyIOKAlCB0aGUgZmxvYXRpbmcgQUkgY2hhdCB3aW5kb3c6XG4gICBUb3AgTmF2ICsgKFF1aWNrIEFjdGlvbnMgdmlldzogaGVhZGVyICsgYWN0aW9uIHJvd3MgfCBDb252ZXJzYXRpb24gdmlldzpcbiAgIGhlYWRlciArIHNjcm9sbGluZyBjaGF0ICsgUmVwbHkgU2VjdGlvbikgKyBhIGNvcm5lciByZXNpemUgYWZmb3JkYW5jZS5cbiAgIENvbXBvc2VzIFRvcCBOYXYsIEFJIENoYXQgSGVhZGVyLCBVc2VyIFByb21wdCwgQUkgUmVzcG9uc2UsIFJlcGx5IFNlY3Rpb25cbiAgIChhbmQgdGhlaXIgdHJhbnNpdGl2ZSBkZXBzKSDigJQgc2VlIHRoZSBzdG9yaWVzIGZpbGUgZm9yIHRoZSBDU1MgaW1wb3J0IGxpc3QuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLCB0b2tlbnMvdGV4dC1zdHlsZXMuY3NzLiAqL1xuXG4uc2MtYWktY2hhdC1jb250YWluZXIge1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIHdpZHRoOiA1MDBweDtcbiAgLyogdGhlIHdpbmRvdyByZXNpemVzIGZyZWVseSBhYm92ZSB0aGUgNDAww5c0MjAgZmxvb3Ig4oCUIG5vIHdpZHRoIGNhcCBvblxuICAgICB0aGUgY29udGFpbmVyIGl0c2VsZjsgdGhlIGNvbnRlbnQgY29sdW1ucyAoX19jb250ZW50LCBfX2NoYXQsIFJlcGx5XG4gICAgIFNlY3Rpb24gYm94KSBjYXAgYXQgNzUwcHggYW5kIGNlbnRlciwgc28gYSB3aWRlIHdpbmRvdyBqdXN0IGdhaW5zXG4gICAgIGJyZWF0aGluZyByb29tIChjb25zdW1lciByZXNpemUgd2lyaW5nIGhvbm9ycyB0aGUgZmxvb3IpICovXG4gIG1pbi13aWR0aDogNDAwcHg7XG4gIG1heC13aWR0aDogMTAwJTtcbiAgaGVpZ2h0OiA2MjBweDtcbiAgbWluLWhlaWdodDogNDIwcHg7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC13aGl0ZSk7XG4gIC8qIFRPRE86IGFkZCByYWRpdXMvY2FyZHMgdG8gdG9rZW5zLmNzcyBvbiBuZXh0IHVzZV9maWdtYSByZWdlbiAqL1xuICBib3JkZXItcmFkaXVzOiB2YXIoLS1zYy1yYWRpdXMtY2FyZHMsIHZhcigtLXNjLXJhZGl1cy0xMCkpO1xuICBib3gtc2hhZG93OiB2YXIoLS1zYy1zaGFkb3ctMik7XG4gIG92ZXJmbG93OiBoaWRkZW47XG59XG5cbi8qIGhlYWRlciB6b25lIOKAlCBRdWljayBBY3Rpb25zIGFsc28gc3RhY2tzIHRoZSBhY3Rpb24gcm93cyBpbiBoZXJlICovXG4uc2MtYWktY2hhdC1jb250YWluZXJfX2NvbnRlbnQge1xuICBib3gtc2l6aW5nOiBib3JkZXItYm94O1xuICBmbGV4OiBub25lO1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTIwKTtcbiAgd2lkdGg6IDEwMCU7XG4gIG1heC13aWR0aDogNzUwcHg7XG4gIHBhZGRpbmc6IHZhcigtLXNjLXNwYWNpbmctMjApO1xufVxuXG4vKiBxdWljay1hY3Rpb24gcm93cyDigJQgdHdvLWNvbHVtbiBncmlkIChGaWdtYSBUeXBlPVF1aWNrIEFjdGlvbnMpICovXG4uc2MtYWktY2hhdC1jb250YWluZXJfX2FjdGlvbnMge1xuICBkaXNwbGF5OiBncmlkO1xuICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDFmciAxZnI7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy0xMCk7XG4gIHdpZHRoOiAxMDAlO1xufVxuXG4vKiBxdWljay1hY3Rpb24gcm93IOKAlCA1MnB4IGJ1YmJsZTogaWNvbiB0aWxlICsgdGl0bGUgKi9cbi5zYy1haS1jaGF0LWNvbnRhaW5lcl9fYWN0aW9uIHtcbiAgYm94LXNpemluZzogYm9yZGVyLWJveDtcbiAgZGlzcGxheTogZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbiAgd2lkdGg6IDEwMCU7XG4gIGhlaWdodDogNTJweDtcbiAgcGFkZGluZzogdmFyKC0tc2Mtc3BhY2luZy0xMCk7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC13aGl0ZSk7XG4gIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcik7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy0xMCk7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgdGV4dC1hbGlnbjogbGVmdDtcbiAgYXBwZWFyYW5jZTogbm9uZTtcbiAgLXdlYmtpdC1hcHBlYXJhbmNlOiBub25lO1xuICB0cmFuc2l0aW9uOiBib3gtc2hhZG93IHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKSwgYm9yZGVyLWNvbG9yIHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKTtcbn1cbi8qIGhvdmVyIGxpZnRzIHdpdGggc2hhZG93LTEgKEZpZ21hKSByYXRoZXIgdGhhbiBhIHN1cmZhY2UgY2hhbmdlICovXG4uc2MtYWktY2hhdC1jb250YWluZXJfX2FjdGlvbjpob3ZlciB7IGJveC1zaGFkb3c6IHZhcigtLXNjLXNoYWRvdy0xKTsgfVxuLnNjLWFpLWNoYXQtY29udGFpbmVyX19hY3Rpb246Zm9jdXMgeyBvdXRsaW5lOiBub25lOyB9XG4uc2MtYWktY2hhdC1jb250YWluZXJfX2FjdGlvbjpmb2N1cy12aXNpYmxlIHsgYm9yZGVyLWNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWZpZWxkLWJvcmRlci0tZm9jdXMpOyB9XG5cbi5zYy1haS1jaGF0LWNvbnRhaW5lcl9fYWN0aW9uLWljb24ge1xuICBmbGV4OiBub25lO1xuICBkaXNwbGF5OiBpbmxpbmUtZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7XG4gIHdpZHRoOiAzMnB4O1xuICBoZWlnaHQ6IDMycHg7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbG9yLWJyYW5kLWJsdWUtMCk7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLXNjLXJhZGl1cy10YWJsZSk7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LWxpbmspO1xuICBmb250LXNpemU6IDE2cHg7XG59XG5cbi5zYy1haS1jaGF0LWNvbnRhaW5lcl9fYWN0aW9uLXRleHQge1xuICBmbGV4OiAxIDEgMDtcbiAgbWluLXdpZHRoOiAwO1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7XG59XG4uc2MtYWktY2hhdC1jb250YWluZXJfX2FjdGlvbi10aXRsZSAgICAgICB7IGNvbG9yOiB2YXIoLS1zYy10ZXh0LXByaW1hcnkpOyB9XG4uc2MtYWktY2hhdC1jb250YWluZXJfX2FjdGlvbi1kZXNjcmlwdGlvbiB7IGNvbG9yOiB2YXIoLS1zYy10ZXh0LXRlcnRpYXJ5KTsgfVxuXG4vKiBjb252ZXJzYXRpb24gY29sdW1uIOKAlCBzY3JvbGxzIGJldHdlZW4gdGhlIGhlYWRlciBhbmQgdGhlIFJlcGx5IFNlY3Rpb24uXG4gICBEZWZhdWx0IGNyb3NzLWF4aXMgc3RyZXRjaCBtYWtlcyBlYWNoIG1lc3NhZ2Ugcm93IHNwYW4gdGhlIGNvbHVtbi5cbiAgIENvbnRlbnQgZmFkZXMgb3V0IG92ZXIgdGhlIGxhc3QgNTBweCBpbnN0ZWFkIG9mIGNsaXBwaW5nIGhhcmQgYWdhaW5zdFxuICAgdGhlIGNvbXBvc2VyLiBUaGUgY3VydmUgaXMgZWFzZWQ6IGJhcmVseSBkaW1tZWQgd2hlcmUgdGhlIGZhZGUgc3RhcnRzLFxuICAgZnVsbHkgdHJhbnNwYXJlbnQgb25seSBhdCB0aGUgZWRnZSwgc28gYSBtZXNzYWdlIHJlc3RpbmcgaW4gdGhlIGZhZGVcbiAgIHpvbmUgc3RpbGwgcmVhZHMuIChObyB0b3AgZmFkZSDigJQgdGhlIGhlYWRlciBlZGdlIHN0YXlzIGNyaXNwLikgKi9cbi5zYy1haS1jaGF0LWNvbnRhaW5lcl9fY2hhdCB7XG4gIC8qIGZhZGUgaGVpZ2h0IOKAlCB0aGUgbGFzdCBtZXNzYWdlIHJlc3RzIH4zMHB4IGFib3ZlIHRoZSBlZGdlIChwYWRkaW5nKSxcbiAgICAgaS5lLiBpbiB0aGUgZ2VudGxlIGZpcnN0IHBhcnQgb2YgdGhlIGZhZGUgKi9cbiAgLS1zYy1haS1jaGF0LWNvbnRhaW5lci1mYWRlOiB2YXIoLS1zYy1zcGFjaW5nLTUwKTtcblxuICBib3gtc2l6aW5nOiBib3JkZXItYm94O1xuICBmbGV4OiAxIDEgMDtcbiAgbWluLWhlaWdodDogMDtcbiAgZGlzcGxheTogZmxleDtcbiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTIwKTtcbiAgd2lkdGg6IDEwMCU7XG4gIG1heC13aWR0aDogNzUwcHg7XG4gIHBhZGRpbmc6IHZhcigtLXNjLXNwYWNpbmctMjApIHZhcigtLXNjLXNwYWNpbmctMjApIHZhcigtLXNjLXNwYWNpbmctMzApO1xuICBvdmVyZmxvdy15OiBhdXRvO1xuICAtd2Via2l0LW1hc2staW1hZ2U6IGxpbmVhci1ncmFkaWVudChcbiAgICB0byBib3R0b20sXG4gICAgIzAwMCBjYWxjKDEwMCUgLSB2YXIoLS1zYy1haS1jaGF0LWNvbnRhaW5lci1mYWRlKSksXG4gICAgcmdiKDAgMCAwIC8gMC44NSkgY2FsYygxMDAlIC0gdmFyKC0tc2MtYWktY2hhdC1jb250YWluZXItZmFkZSkgKiAwLjYpLFxuICAgIHJnYigwIDAgMCAvIDAuNCkgY2FsYygxMDAlIC0gdmFyKC0tc2MtYWktY2hhdC1jb250YWluZXItZmFkZSkgKiAwLjIpLFxuICAgIHRyYW5zcGFyZW50IDEwMCVcbiAgKTtcbiAgbWFzay1pbWFnZTogbGluZWFyLWdyYWRpZW50KFxuICAgIHRvIGJvdHRvbSxcbiAgICAjMDAwIGNhbGMoMTAwJSAtIHZhcigtLXNjLWFpLWNoYXQtY29udGFpbmVyLWZhZGUpKSxcbiAgICByZ2IoMCAwIDAgLyAwLjg1KSBjYWxjKDEwMCUgLSB2YXIoLS1zYy1haS1jaGF0LWNvbnRhaW5lci1mYWRlKSAqIDAuNiksXG4gICAgcmdiKDAgMCAwIC8gMC40KSBjYWxjKDEwMCUgLSB2YXIoLS1zYy1haS1jaGF0LWNvbnRhaW5lci1mYWRlKSAqIDAuMiksXG4gICAgdHJhbnNwYXJlbnQgMTAwJVxuICApO1xuICBzY3JvbGxiYXItd2lkdGg6IHRoaW47ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLyogRmlyZWZveCAqL1xuICBzY3JvbGxiYXItY29sb3I6IHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcikgdHJhbnNwYXJlbnQ7XG59XG4uc2MtYWktY2hhdC1jb250YWluZXJfX2NoYXQ6Oi13ZWJraXQtc2Nyb2xsYmFyIHsgd2lkdGg6IDZweDsgfVxuLnNjLWFpLWNoYXQtY29udGFpbmVyX19jaGF0Ojotd2Via2l0LXNjcm9sbGJhci10cmFjayB7IGJhY2tncm91bmQ6IHRyYW5zcGFyZW50OyB9XG4uc2MtYWktY2hhdC1jb250YWluZXJfX2NoYXQ6Oi13ZWJraXQtc2Nyb2xsYmFyLXRodW1iIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLWZ1bGwpO1xufVxuLnNjLWFpLWNoYXQtY29udGFpbmVyX19jaGF0Ojotd2Via2l0LXNjcm9sbGJhci10aHVtYjpob3ZlciB7IGJhY2tncm91bmQ6IHZhcigtLXNjLXRleHQtaWNvbik7IH1cblxuLyogcmVzaXplIGFmZm9yZGFuY2Ug4oCUIHRoZSAxMnB4IGV4cGFuZCBzdHJva2VzIChpbmxpbmUgU1ZHIGluIG1hcmt1cCxcbiAgIHN0cm9rZSA9IGN1cnJlbnRDb2xvcikgaW4gdGhlIHRvcC1sZWZ0IGNvcm5lci4gRHJhZyB3aXJpbmcgaXNcbiAgIGNvbnN1bWVyLW93bmVkOyB0aGUgY29udGFpbmVyIGlzIHVzZXItcmVzaXphYmxlLiAqL1xuLnNjLWFpLWNoYXQtY29udGFpbmVyX19yZXNpemUge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHRvcDogM3B4O1xuICBsZWZ0OiAzcHg7XG4gIHdpZHRoOiAxMnB4O1xuICBoZWlnaHQ6IDEycHg7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgY29sb3I6IHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcik7XG4gIGN1cnNvcjogbndzZS1yZXNpemU7XG59XG4iXX0= */

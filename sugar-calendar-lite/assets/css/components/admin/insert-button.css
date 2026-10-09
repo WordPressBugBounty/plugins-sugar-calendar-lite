@@ -1,0 +1,50 @@
+@charset "UTF-8";
+/* Ported from DS: insert-button */
+/* Source mtime: 2026-08-06T18:24:42Z */
+/* Sugar Calendar — components/insert-button.css (AI cluster)
+   Mirrors Figma ".insert-button" (node 14479:195859).
+   .sc-ai-insert-button — the composer's 20×20 "+" (Insert Event
+   Data) icon-button. Hover/Focus per Figma; Disabled is native.
+   Requires tokens/primitives.css, tokens/tokens.css. */
+.sc-ai-insert-button {
+  box-sizing: border-box;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: var(--sc-radius-4);
+  color: var(--sc-text-icon);
+  font-size: 16px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background var(--sc-transition-normal), color var(--sc-transition-normal), box-shadow var(--sc-transition-normal);
+}
+
+/* hover/focus take the tertiary-button treatment (Figma) */
+.sc-ai-insert-button:hover {
+  background: var(--sc-components-button-tertiary-background);
+  color: var(--sc-components-button-tertiary-text);
+}
+
+.sc-ai-insert-button:focus {
+  outline: none;
+}
+
+.sc-ai-insert-button:focus-visible {
+  background: var(--sc-components-button-tertiary-background);
+  color: var(--sc-components-button-tertiary-text);
+  box-shadow: 0 0 0 2px var(--sc-components-button-tertiary-border);
+}
+
+.sc-ai-insert-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vaW5zZXJ0LWJ1dHRvbi5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTtBQUNBO0FBS0E7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQU1BO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7QUFDQTtFQUNFO0VBQ0E7OztBQUVGO0VBQTZCOzs7QUFDN0I7RUFDRTtFQUNBO0VBQ0E7OztBQUVGO0VBQ0U7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi9pbnNlcnQtYnV0dG9uLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBpbnNlcnQtYnV0dG9uICovXG4vKiBTb3VyY2UgbXRpbWU6IDIwMjYtMDgtMDZUMTg6MjQ6NDJaICovXG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQb3J0ZWQgZnJvbSBEUyAoZG8gbm90IGVkaXQg4oCUIHJlLXBvcnQgaWYgRFMgc291cmNlIGNoYW5nZXMpXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLyogU3VnYXIgQ2FsZW5kYXIg4oCUIGNvbXBvbmVudHMvaW5zZXJ0LWJ1dHRvbi5jc3MgKEFJIGNsdXN0ZXIpXG4gICBNaXJyb3JzIEZpZ21hIFwiLmluc2VydC1idXR0b25cIiAobm9kZSAxNDQ3OToxOTU4NTkpLlxuICAgLnNjLWFpLWluc2VydC1idXR0b24g4oCUIHRoZSBjb21wb3NlcidzIDIww5cyMCBcIitcIiAoSW5zZXJ0IEV2ZW50XG4gICBEYXRhKSBpY29uLWJ1dHRvbi4gSG92ZXIvRm9jdXMgcGVyIEZpZ21hOyBEaXNhYmxlZCBpcyBuYXRpdmUuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLiAqL1xuXG4uc2MtYWktaW5zZXJ0LWJ1dHRvbiB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG4gIGZsZXg6IG5vbmU7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgd2lkdGg6IDIwcHg7XG4gIGhlaWdodDogMjBweDtcbiAgcGFkZGluZzogMDtcbiAgYm9yZGVyOiAwO1xuICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLTQpO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1pY29uKTtcbiAgZm9udC1zaXplOiAxNnB4O1xuICBjdXJzb3I6IHBvaW50ZXI7XG4gIGFwcGVhcmFuY2U6IG5vbmU7XG4gIC13ZWJraXQtYXBwZWFyYW5jZTogbm9uZTtcbiAgdHJhbnNpdGlvbjogYmFja2dyb3VuZCB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCksIGNvbG9yIHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKSwgYm94LXNoYWRvdyB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCk7XG59XG4vKiBob3Zlci9mb2N1cyB0YWtlIHRoZSB0ZXJ0aWFyeS1idXR0b24gdHJlYXRtZW50IChGaWdtYSkgKi9cbi5zYy1haS1pbnNlcnQtYnV0dG9uOmhvdmVyIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tdGVydGlhcnktYmFja2dyb3VuZCk7XG4gIGNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi10ZXJ0aWFyeS10ZXh0KTtcbn1cbi5zYy1haS1pbnNlcnQtYnV0dG9uOmZvY3VzIHsgb3V0bGluZTogbm9uZTsgfVxuLnNjLWFpLWluc2VydC1idXR0b246Zm9jdXMtdmlzaWJsZSB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYnV0dG9uLXRlcnRpYXJ5LWJhY2tncm91bmQpO1xuICBjb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1idXR0b24tdGVydGlhcnktdGV4dCk7XG4gIGJveC1zaGFkb3c6IDAgMCAwIDJweCB2YXIoLS1zYy1jb21wb25lbnRzLWJ1dHRvbi10ZXJ0aWFyeS1ib3JkZXIpO1xufVxuLnNjLWFpLWluc2VydC1idXR0b246ZGlzYWJsZWQge1xuICBvcGFjaXR5OiAwLjU7XG4gIGN1cnNvcjogZGVmYXVsdDtcbiAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG59XG4iXX0= */

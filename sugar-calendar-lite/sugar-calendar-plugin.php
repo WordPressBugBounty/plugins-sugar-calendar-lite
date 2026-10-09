@@ -15,6 +15,7 @@ use Sugar_Calendar\Admin\ScreenOptions;
 use Sugar_Calendar\Admin\Tools\Importers;
 use Sugar_Calendar\Block\Loader;
 use Sugar_Calendar\Migrations\Migrations;
+use Sugar_Calendar\SetupChecklist\Loader as SetupChecklistLoader;
 use Sugar_Calendar\SetupWizard\SetupWizard;
 use Sugar_Calendar\Tasks\Tasks;
 use Sugar_Calendar\UsageTracking\UsageTracking;
@@ -231,6 +232,8 @@ final class Plugin {
 		if ( $this->is_pro() ) {
 			$this->get_pro();
 		}
+
+		$this->get_setup_checklist();
 
 		// Load the Block.
 		$this->get_blocks();
@@ -1161,6 +1164,26 @@ final class Plugin {
 		}
 
 		return $setup_wizard;
+	}
+
+	/**
+	 * Get the Setup Checklist loader.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return SetupChecklistLoader
+	 */
+	public function get_setup_checklist() {
+
+		static $setup_checklist;
+
+		if ( ! isset( $setup_checklist ) ) {
+			$setup_checklist = new SetupChecklistLoader();
+
+			$setup_checklist->init();
+		}
+
+		return $setup_checklist;
 	}
 
 	/**

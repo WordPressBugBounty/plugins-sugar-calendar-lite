@@ -33,24 +33,6 @@ class OAuthRelayClient {
 	}
 
 	/**
-	 * Get the effective license type for relay routing.
-	 *
-	 * Returns 'pro' only when the Pro plugin is active AND the license is valid.
-	 * Pro installs without a valid license fall back to 'lite' so OAuth flows
-	 * keep working on Lite relay endpoints until the license is activated.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return string
-	 */
-	private function get_license_type(): string {
-
-		$context = ProductApi::get( Context::class );
-
-		return ( $context->is_pro() && $context->is_license_valid() ) ? 'pro' : 'lite';
-	}
-
-	/**
 	 * Get the authorization URL to start OAuth flow.
 	 *
 	 * @since 3.12.0
@@ -101,7 +83,7 @@ class OAuthRelayClient {
 
 		$auth_url = add_query_arg(
 			$query_params,
-			$context->get_api_url() . '/oauth-relay/v1/' . $this->get_license_type() . '/auth/start'
+			$context->get_api_url() . '/oauth-relay/v1/' . RelayLicenseType::get() . '/auth/start'
 		);
 
 		return $auth_url;
@@ -137,7 +119,7 @@ class OAuthRelayClient {
 		$hmac_auth = ProductApi::get( HMACAuthStrategy::class );
 
 		$response = ProductApi::client()
-			->post( '/oauth-relay/v1/' . $this->get_license_type() . '/auth/token' )
+			->post( '/oauth-relay/v1/' . RelayLicenseType::get() . '/auth/token' )
 			->json( [ 'code' => $code ] )
 			->auth_strategy( $hmac_auth )
 			->send();
@@ -162,7 +144,7 @@ class OAuthRelayClient {
 		$hmac_auth = ProductApi::get( HMACAuthStrategy::class );
 
 		$response = ProductApi::client()
-			->post( '/oauth-relay/v1/' . $this->get_license_type() . '/auth/refresh' )
+			->post( '/oauth-relay/v1/' . RelayLicenseType::get() . '/auth/refresh' )
 			->json(
 				[
 					'refresh_token' => $refresh_token,
@@ -211,7 +193,7 @@ class OAuthRelayClient {
 			$hmac_auth = ProductApi::get( HMACAuthStrategy::class );
 
 			$response = ProductApi::client()
-				->post( '/oauth-relay/v1/' . $this->get_license_type() . '/webhooks/register' )
+				->post( '/oauth-relay/v1/' . RelayLicenseType::get() . '/webhooks/register' )
 				->json(
 					[
 						'provider'         => $provider,
@@ -262,7 +244,7 @@ class OAuthRelayClient {
 			$hmac_auth = ProductApi::get( HMACAuthStrategy::class );
 
 			$response = ProductApi::client()
-				->post( '/oauth-relay/v1/' . $this->get_license_type() . '/webhooks/unregister' )
+				->post( '/oauth-relay/v1/' . RelayLicenseType::get() . '/webhooks/unregister' )
 				->json(
 					[
 						'provider'         => $provider,

@@ -151,27 +151,36 @@ abstract class EventAbstract extends PageAbstract {
 		}
 
 		if ( Editor\current() === 'block' ) {
-			$this->should_display_hand_holding = false;
-
-			return $this->should_display_hand_holding;
-		}
-
-		$hand_holding_status = get_option( 'sc_hand_holding_status', false );
-
-		if ( empty( $hand_holding_status ) ) {
-			global $wpdb;
-
-			$events_count = absint( $wpdb->get_var( "SELECT COUNT(id) FROM " . $wpdb->prefix . "sc_events" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct count against the custom wp_sc_events table.
-
-			// We will not show if there are existing events.
-			$this->should_display_hand_holding = empty( $events_count );
-		} elseif ( empty( $hand_holding_status['end_time'] ) ) {
-			$this->should_display_hand_holding = true;
-		} elseif ( ! empty( $hand_holding_status['status'] ) && $hand_holding_status['status'] === 'publish' ) {
-			$this->should_display_hand_holding = true;
+			$display = false;
 		} else {
-			$this->should_display_hand_holding = false;
+			$hand_holding_status = get_option( 'sc_hand_holding_status', false );
+
+			if ( empty( $hand_holding_status ) ) {
+				global $wpdb;
+
+				$events_count = absint( $wpdb->get_var( 'SELECT COUNT(id) FROM ' . $wpdb->prefix . 'sc_events' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct count against the custom wp_sc_events table.
+
+				// We will not show if there are existing events.
+				$display = empty( $events_count );
+			} elseif ( empty( $hand_holding_status['end_time'] ) ) {
+				$display = true;
+			} elseif ( ! empty( $hand_holding_status['status'] ) && $hand_holding_status['status'] === 'publish' ) {
+				$display = true;
+			} else {
+				$display = false;
+			}
 		}
+
+		/**
+		 * Filters whether the classic editor shows the hand holding guide.
+		 *
+		 * The Setup Checklist forces it on for its nonce-bound guide launch.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param bool $display Whether the guide is shown.
+		 */
+		$this->should_display_hand_holding = (bool) apply_filters( 'sugar_calendar_admin_pages_event_abstract_should_display_hand_holding', $display );
 
 		return $this->should_display_hand_holding;
 	}
@@ -386,9 +395,7 @@ abstract class EventAbstract extends PageAbstract {
 
 			$hand_holding_status = get_option( 'sc_hand_holding_status', false );
 
-			if (
-				empty( $hand_holding_status ) || empty( $hand_holding_status['status'] )
-			) {
+			if ( empty( $hand_holding_status ) || empty( $hand_holding_status['status'] ) ) {
 				$hand_holding_status = 'start';
 			} else {
 				$hand_holding_status = $hand_holding_status['status'];

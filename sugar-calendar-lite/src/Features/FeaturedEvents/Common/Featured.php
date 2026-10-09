@@ -22,6 +22,29 @@ class Featured {
 	const META_KEY = 'featured';
 
 	/**
+	 * Every featured post id, or null when the answer is not known yet.
+	 *
+	 * A property rather than a static local so it can be dropped: a read after a
+	 * write in the same request has to see the write. Cleared by flush(), which
+	 * Common\Meta hooks to the featured meta key's own writes.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var array|null
+	 */
+	private static $post_ids = null;
+
+	/**
+	 * Forget the memoized featured post ids.
+	 *
+	 * @since 3.15.0
+	 */
+	public static function flush() {
+
+		self::$post_ids = null;
+	}
+
+	/**
 	 * Get the meta_query that restricts an Event_Query to featured events.
 	 *
 	 * @since 3.14.0
@@ -213,10 +236,8 @@ class Featured {
 	 */
 	private static function get_featured_post_ids() {
 
-		static $post_ids = null;
-
-		if ( $post_ids !== null ) {
-			return $post_ids;
+		if ( self::$post_ids !== null ) {
+			return self::$post_ids;
 		}
 
 		global $wpdb;
@@ -233,8 +254,8 @@ class Featured {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-		$post_ids = array_map( 'absint', (array) $results );
+		self::$post_ids = array_map( 'absint', (array) $results );
 
-		return $post_ids;
+		return self::$post_ids;
 	}
 }

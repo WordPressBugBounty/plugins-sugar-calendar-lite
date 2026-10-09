@@ -5,7 +5,9 @@ namespace Sugar_Calendar\Vendor\ProductApi\Events;
 use Sugar_Calendar\Vendor\ProductApi\Context;
 use Sugar_Calendar\Vendor\ProductApi\Http\Client;
 use Sugar_Calendar\Vendor\ProductApi\Http\Middleware\RateLimitMiddleware;
+use Sugar_Calendar\Vendor\ProductApi\Http\Response;
 use Sugar_Calendar\Vendor\ProductApi\Options;
+use WP_Error;
 /**
  * Product Events Event Tracker class.
  *
@@ -56,6 +58,16 @@ class EventTracker
      */
     private static $shutdown_registered = \false;
     /**
+     * Number of events queued without deduplication.
+     *
+     * Suffixes the queue key, so an event cannot displace an identical one.
+     *
+     * @since 1.1.0
+     *
+     * @var int
+     */
+    private static $sequence = 0;
+    /**
      * Constructor.
      *
      * @param Context $context Context instance.
@@ -90,6 +102,23 @@ class EventTracker
         $this->maybe_register_shutdown_hook();
     }
     /**
+     * Queue an event without deduplicating it against the ones already queued.
+     *
+     * track() collapses events that agree on name, properties and context. Two
+     * replayed rows are two real occurrences, so they must not collapse.
+     *
+     * @since 1.1.0
+     *
+     * @param Event $event Event to queue.
+     *
+     * @return void
+     */
+    public function track_each(Event $event)
+    {
+        self::$queued_events[$event->get_key() . '#' . ++self::$sequence] = $event;
+        $this->maybe_register_shutdown_hook();
+    }
+    /**
      * Register shutdown hook if not already registered.
      *
      * @since 1.0.0
@@ -118,14 +147,49 @@ class EventTracker
      */
     private function flush()
     {
+        $this->dispatch(\false, 1);
+    }
+    /**
+     * Send the queued events now and hand the response back.
+     *
+     * Unlike flush(), this blocks and returns what the API answered, so the caller can
+     * read the status code and the body rather than a flattened error. A spent rate
+     * limit never reaches the API and comes back as a WP_Error instead.
+     *
+     * A 2xx means the batch reached the API, not that every event was stored. Failure
+     * does not requeue: the caller owns the retry. The queue is shared, so this also
+     * sends whatever track() queued earlier.
+     *
+     * @since 1.1.0
+     *
+     * @param int $timeout Request timeout in seconds.
+     *
+     * @return Response|WP_Error|null Null when there was nothing to send.
+     */
+    public function send_now($timeout = 5)
+    {
+        return $this->dispatch(\true, $timeout);
+    }
+    /**
+     * Dispatch the queued events.
+     *
+     * @since 1.1.0
+     *
+     * @param bool $blocking Whether to wait for the response.
+     * @param int  $timeout  Request timeout in seconds.
+     *
+     * @return Response|WP_Error|null Null when the queue was empty.
+     */
+    private function dispatch($blocking, $timeout)
+    {
         if (empty(self::$queued_events)) {
-            return;
+            return null;
         }
         $events = array_values(self::$queued_events);
         // Clear queue before dispatch to prevent duplicates.
         self::$queued_events = [];
         $events_data = array_map([$this, 'prepare_event_data'], $events);
-        $this->client->post('/product-events/v1/collect')->middleware(new RateLimitMiddleware('events_collect', $this->options, 60, HOUR_IN_SECONDS), 0)->json($this->prepare_payload($events_data))->timeout(1)->blocking(\false)->send();
+        return $this->client->post('/product-events/v1/collect')->middleware(new RateLimitMiddleware('events_collect', $this->options, 60, HOUR_IN_SECONDS), 0)->json($this->prepare_payload($events_data))->timeout($timeout)->blocking($blocking)->send();
     }
     /**
      * Prepare event data for transmission.

@@ -165,6 +165,13 @@ class Events extends PageAbstract {
 					'link'  => $add_new_url,
 				]
 			);
+
+			/**
+			 * Fires after the Add New Event button in the Events page subheader.
+			 *
+			 * @since 3.15.0
+			 */
+			do_action( 'sugar_calendar_admin_pages_events_subheader_actions' );
 			?>
 
 			<div class="sugar-calendar-admin-subheader-tools">

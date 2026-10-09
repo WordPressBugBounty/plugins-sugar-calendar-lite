@@ -2,11 +2,12 @@
 
 namespace Sugar_Calendar\Admin\Pages;
 
-use Sugar_Calendar\Admin\Tools\WpVibeInstaller;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Integrations\Abilities\Abilities;
+use Sugar_Calendar\PartnerPlugins\Catalog;
+use Sugar_Calendar\PartnerPlugins\Installer;
 
 /**
  * AI Tools tab: 1-click installs the WPVibe.ai MCP plugin and surfaces the
@@ -25,6 +26,13 @@ class ToolsAiTab extends Tools {
 	 * @since 3.13.0
 	 */
 	const DOCS_URL = 'https://sugarcalendar.com/docs/events/using-sugarcalendar-events-with-ai-assistants';
+
+	/**
+	 * WPVibe's `PartnerPlugins\Catalog` key.
+	 *
+	 * @since 3.15.0
+	 */
+	const WPVIBE_KEY = 'wpvibe';
 
 	/**
 	 * Register AI tab hooks.
@@ -74,11 +82,31 @@ class ToolsAiTab extends Tools {
 	 */
 	public function ajax_install_vibe_ai() {
 
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			wp_send_json_error( __( 'You do not have permission.', 'sugar-calendar-lite' ) );
+		$this->run_wpvibe();
+	}
 
-			return;
-		}
+	/**
+	 * Ajax handler: activate an already-installed WPVibe.
+	 *
+	 * @since 3.13.0
+	 */
+	public function ajax_activate_vibe_ai() {
+
+		$this->run_wpvibe();
+	}
+
+	/**
+	 * Install or activate WPVibe, whichever its live state allows, and send the result.
+	 *
+	 * The page reloads on any success and shows an error's message, so both tasks
+	 * share one path; `PartnerPlugins\Installer` owns the capability checks.
+	 *
+	 * @since 3.15.0
+	 */
+	private function run_wpvibe() {
+
+		// Set the current screen to avoid undefined notices.
+		set_current_screen( 'events_page_sc-tools' );
 
 		$credentials_url = esc_url_raw(
 			add_query_arg(
@@ -90,48 +118,15 @@ class ToolsAiTab extends Tools {
 			)
 		);
 
-		$this->send_wpvibe_result( ( new WpVibeInstaller() )->install( $credentials_url ) );
-	}
+		$result = ( new Installer() )->run( ( new Catalog() )->get_target( self::WPVIBE_KEY ), $credentials_url );
 
-	/**
-	 * Ajax handler: activate an already-installed WPVibe.
-	 *
-	 * @since 3.13.0
-	 */
-	public function ajax_activate_vibe_ai() {
-
-		if ( ! current_user_can( 'activate_plugins' ) ) {
-			wp_send_json_error( __( 'Plugin activation is disabled for you on this site.', 'sugar-calendar-lite' ) );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( $result->get_error_message() );
 
 			return;
 		}
 
-		$this->send_wpvibe_result( ( new WpVibeInstaller() )->activate() );
-	}
-
-	/**
-	 * Send a `WpVibeInstaller::install()`/`::activate()` result as the AJAX
-	 * response.
-	 *
-	 * @since 3.13.0
-	 *
-	 * @param array $result Result array — see `WpVibeInstaller::install()`.
-	 */
-	private function send_wpvibe_result( $result ) {
-
-		if ( empty( $result['success'] ) ) {
-			wp_send_json_error( $result['message'] );
-
-			return;
-		}
-
-		wp_send_json_success(
-			[
-				'is_activated' => $result['is_activated'],
-				'basename'     => $result['basename'],
-				'msg'          => $result['message'],
-			]
-		);
+		wp_send_json_success( $result );
 	}
 
 	/**
@@ -231,7 +226,7 @@ class ToolsAiTab extends Tools {
 	 *
 	 * @since 3.13.0
 	 *
-	 * @param string $state WPVibe state, from WpVibeInstaller::get_state().
+	 * @param string $state WPVibe state from `Catalog::get_state()`: 'missing', 'installed' or 'active'.
 	 */
 	protected function display_cta( $state ) {
 
@@ -248,7 +243,7 @@ class ToolsAiTab extends Tools {
 			UI::button(
 				[
 					'text' => esc_html__( 'Setup AI MCP', 'sugar-calendar-lite' ),
-					'link' => add_query_arg( [ 'page' => WpVibeInstaller::PAGE_SLUG ], admin_url( 'admin.php' ) ),
+					'link' => ( new Catalog() )->get_admin_url( self::WPVIBE_KEY ),
 					'type' => 'tertiary',
 					'size' => 'lg',
 				]
@@ -257,7 +252,7 @@ class ToolsAiTab extends Tools {
 			return;
 		}
 
-		if ( $state === 'installed_inactive' ) {
+		if ( $state === 'installed' ) {
 
 			if ( ! $can_activate ) {
 				echo '<p class="sugar-calendar-tools-ai-note">' .
@@ -281,7 +276,7 @@ class ToolsAiTab extends Tools {
 			return;
 		}
 
-		// $state === 'not_installed'.
+		// $state === 'missing'.
 
 		if ( $can_install ) {
 			UI::button(
@@ -301,7 +296,7 @@ class ToolsAiTab extends Tools {
 		UI::button(
 			[
 				'text'   => esc_html__( 'Install from WordPress.org', 'sugar-calendar-lite' ),
-				'link'   => WpVibeInstaller::WPORG_URL,
+				'link'   => ( new Catalog() )->get( self::WPVIBE_KEY )['wporg_url'],
 				'target' => '_blank',
 				'size'   => 'lg',
 			]
@@ -790,7 +785,7 @@ class ToolsAiTab extends Tools {
 	 */
 	protected function display_tab() {
 
-		$state    = ( new WpVibeInstaller() )->get_state();
+		$state    = ( new Catalog() )->get_state( self::WPVIBE_KEY );
 		$docs_url = BaseHelpers\Helpers::get_utm_url(
 			self::DOCS_URL,
 			[

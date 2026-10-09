@@ -6,6 +6,7 @@ use Sugar_Calendar\AddOn\Ticketing\Frontend;
 use Sugar_Calendar\Common\Features\FeatureAbstract;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Area;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
+use Sugar_Calendar\AddOn\Ticketing\UsageTracking\UsageTrackingData;
 use Sugar_Calendar\AddOn\Ticketing\Database;
 use Sugar_Calendar\AddOn\Ticketing\Integrations\Abilities\TicketingSignupMode;
 use Sugar_Calendar\Helpers;
@@ -296,6 +297,8 @@ class Feature extends FeatureAbstract {
 
 		// Instantiate any classes or setup any dependency injections here.
 		new \Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout();
+
+		( new UsageTrackingData() )->hooks();
 
 		$this->handle_pro_addon_integrations();
 	}

@@ -11,9 +11,6 @@ use Sugar_Calendar\Features\Tags\Feature as TagsFeature;
 // Featured Events feature.
 use Sugar_Calendar\Features\FeaturedEvents\Feature as FeaturedEventsFeature;
 
-// Registration Form feature.
-use Sugar_Calendar\Features\RegistrationForm\Feature as RegistrationFormFeature;
-
 /**
  * Loader class for the Features.
  *
@@ -66,7 +63,6 @@ class Loader {
 			[
 				TagsFeature::class,
 				FeaturedEventsFeature::class,
-				RegistrationFormFeature::class,
 			]
 		);
 	}

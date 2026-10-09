@@ -43,8 +43,9 @@ class UsageTracking {
 	 */
 	public function hooks() {
 
-		// Track WP Mail SMTP promo-page install clicks (both editions).
-		( new SmtpProductEvents() )->init();
+		// Product Events a Lite install can fire (both editions).
+		( new ProductEvents() )->init();
+		( new AiProductEvents() )->init();
 
 		// Deregister the action if option is disabled.
 		add_action(
@@ -121,31 +122,24 @@ class UsageTracking {
 		global $wpdb;
 
 		$theme_data = wp_get_theme();
-		$events     = sugar_calendar_get_event_counts();
 
 		$data = array_merge(
 			$this->get_required_data(),
 			$this->get_additional_data(),
 			[
 				// Generic data (environment).
-				'mysql_version'                                 => $wpdb->db_version(),
-				'server_version'                                => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
-				'is_ssl'                                        => is_ssl(),
-				'is_multisite'                                  => is_multisite(),
-				'sites_count'                                   => $this->get_sites_total(),
-				'theme_name'                                    => $theme_data->name,
-				'theme_version'                                 => $theme_data->version,
-				'locale'                                        => get_locale(),
-				'timezone_offset'                               => function_exists( 'wp_timezone_string' ) ? wp_timezone_string() : '',
-				// Sugar Calendar - specific data.
-				'sugar_calendar_version'                        => SC_PLUGIN_VERSION,
-				'sugar_calendar_activated'                      => get_option( 'sugar_calendar_activated_time', 0 ),
-				'sugar_calendar_source'                         => sanitize_title( get_option( 'sugar_calendar_source', '' ) ),
-				'sugar_calendar_settings_general_editor'        => sanitize_title( Options::get( 'editor_type', 'classic' ) ),
-				'sugar_calendar_settings_general_custom_fields' => (bool) Options::get( 'custom_fields', false ),
-				'sugar_calendar_total_events'                   => ! empty( $events['total'] ) ? intval( $events['total'] ) : 0,
-				'sugar_calendar_total_calendars'                => intval( wp_count_terms( sugar_calendar_get_calendar_taxonomy_id() ) ),
-			]
+				'mysql_version'   => $wpdb->db_version(),
+				'server_version'  => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
+				'is_ssl'          => is_ssl(),
+				'is_multisite'    => is_multisite(),
+				'sites_count'     => $this->get_sites_total(),
+				'theme_name'      => $theme_data->name,
+				'theme_version'   => $theme_data->version,
+				'locale'          => get_locale(),
+				'timezone_offset' => function_exists( 'wp_timezone_string' ) ? wp_timezone_string() : '',
+			],
+			// Sugar Calendar - specific data.
+			( new SnapshotData() )->get()
 		);
 
 		/**

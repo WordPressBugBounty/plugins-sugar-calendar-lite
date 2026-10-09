@@ -1,0 +1,60 @@
+@charset "UTF-8";
+/* Ported from DS: questions */
+/* Source mtime: 2026-10-02T12:26:27Z */
+/* Sugar Calendar — components/questions.css (AI cluster PATTERN)
+   Mirrors Figma ".questions" (node 13958:10550).
+   .sc-ai-questions — numbered question text + Response Chips row
+   (+ Input for Type=Other). No divider — the parent (AI Response's
+   Content slot) owns inter-question spacing.
+   Composes Response Chips + Input — requires response-chips.css, input.css.
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-questions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+  width: 100%;
+}
+
+/* "1." + question on one line; the question wraps under itself */
+.sc-ai-questions__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sc-padding-4); /* Figma binds padding/4 here, not a spacing step */
+  width: 100%;
+}
+
+.sc-ai-questions__number {
+  flex: none;
+  margin: 0;
+  color: var(--sc-text-primary);
+}
+
+.sc-ai-questions__question {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--sc-text-primary);
+}
+
+/* chips wrap; the answered (submitted) controls fade + lock */
+.sc-ai-questions__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--sc-padding-8); /* Figma binds padding/8 here, not a spacing step */
+  width: 100%;
+  transition: opacity var(--sc-transition-normal);
+}
+
+.sc-ai-questions__input {
+  width: 100%;
+  transition: opacity var(--sc-transition-normal);
+}
+
+.sc-ai-questions[data-submitted] .sc-ai-questions__chips,
+.sc-ai-questions[data-submitted] .sc-ai-questions__input {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vcXVlc3Rpb25zLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBO0FBQ0E7QUFLQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQVFBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtFQUNFO0VBQ0E7RUFDQTs7O0FBRUY7RUFDRTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7RUFDRTtFQUNBOzs7QUFFRjtBQUFBO0VBRUU7RUFDQSIsImZpbGUiOiJhc3NldHMvY3NzL2NvbXBvbmVudHMvYWRtaW4vcXVlc3Rpb25zLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBxdWVzdGlvbnMgKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0xMC0wMlQxMjoyNjoyN1ogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vKiBTdWdhciBDYWxlbmRhciDigJQgY29tcG9uZW50cy9xdWVzdGlvbnMuY3NzIChBSSBjbHVzdGVyIFBBVFRFUk4pXG4gICBNaXJyb3JzIEZpZ21hIFwiLnF1ZXN0aW9uc1wiIChub2RlIDEzOTU4OjEwNTUwKS5cbiAgIC5zYy1haS1xdWVzdGlvbnMg4oCUIG51bWJlcmVkIHF1ZXN0aW9uIHRleHQgKyBSZXNwb25zZSBDaGlwcyByb3dcbiAgICgrIElucHV0IGZvciBUeXBlPU90aGVyKS4gTm8gZGl2aWRlciDigJQgdGhlIHBhcmVudCAoQUkgUmVzcG9uc2Unc1xuICAgQ29udGVudCBzbG90KSBvd25zIGludGVyLXF1ZXN0aW9uIHNwYWNpbmcuXG4gICBDb21wb3NlcyBSZXNwb25zZSBDaGlwcyArIElucHV0IOKAlCByZXF1aXJlcyByZXNwb25zZS1jaGlwcy5jc3MsIGlucHV0LmNzcy5cbiAgIFJlcXVpcmVzIHRva2Vucy9wcmltaXRpdmVzLmNzcywgdG9rZW5zL3Rva2Vucy5jc3MsIHRva2Vucy90ZXh0LXN0eWxlcy5jc3MuICovXG5cbi5zYy1haS1xdWVzdGlvbnMge1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbiAgd2lkdGg6IDEwMCU7XG59XG5cbi8qIFwiMS5cIiArIHF1ZXN0aW9uIG9uIG9uZSBsaW5lOyB0aGUgcXVlc3Rpb24gd3JhcHMgdW5kZXIgaXRzZWxmICovXG4uc2MtYWktcXVlc3Rpb25zX19yb3cge1xuICBkaXNwbGF5OiBmbGV4O1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1wYWRkaW5nLTQpOyAvKiBGaWdtYSBiaW5kcyBwYWRkaW5nLzQgaGVyZSwgbm90IGEgc3BhY2luZyBzdGVwICovXG4gIHdpZHRoOiAxMDAlO1xufVxuLnNjLWFpLXF1ZXN0aW9uc19fbnVtYmVyIHtcbiAgZmxleDogbm9uZTtcbiAgbWFyZ2luOiAwO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1wcmltYXJ5KTtcbn1cbi5zYy1haS1xdWVzdGlvbnNfX3F1ZXN0aW9uIHtcbiAgZmxleDogMSAxIGF1dG87XG4gIG1pbi13aWR0aDogMDtcbiAgbWFyZ2luOiAwO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1wcmltYXJ5KTtcbn1cblxuLyogY2hpcHMgd3JhcDsgdGhlIGFuc3dlcmVkIChzdWJtaXR0ZWQpIGNvbnRyb2xzIGZhZGUgKyBsb2NrICovXG4uc2MtYWktcXVlc3Rpb25zX19jaGlwcyB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsZXgtd3JhcDogd3JhcDtcbiAgYWxpZ24taXRlbXM6IGZsZXgtc3RhcnQ7XG4gIGdhcDogdmFyKC0tc2MtcGFkZGluZy04KTsgLyogRmlnbWEgYmluZHMgcGFkZGluZy84IGhlcmUsIG5vdCBhIHNwYWNpbmcgc3RlcCAqL1xuICB3aWR0aDogMTAwJTtcbiAgdHJhbnNpdGlvbjogb3BhY2l0eSB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCk7XG59XG4uc2MtYWktcXVlc3Rpb25zX19pbnB1dCB7XG4gIHdpZHRoOiAxMDAlO1xuICB0cmFuc2l0aW9uOiBvcGFjaXR5IHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKTtcbn1cbi5zYy1haS1xdWVzdGlvbnNbZGF0YS1zdWJtaXR0ZWRdIC5zYy1haS1xdWVzdGlvbnNfX2NoaXBzLFxuLnNjLWFpLXF1ZXN0aW9uc1tkYXRhLXN1Ym1pdHRlZF0gLnNjLWFpLXF1ZXN0aW9uc19faW5wdXQge1xuICBvcGFjaXR5OiAwLjU7XG4gIHBvaW50ZXItZXZlbnRzOiBub25lO1xufVxuIl19 */

@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Events\Metaboxes\Details;
 use Sugar_Calendar\Admin\Events\Metaboxes\Event;
 use Sugar_Calendar\Admin\Events\Metaboxes\WalkerCategoryCheckbox;
 use Sugar_Calendar\Common\Editor;
+use Sugar_Calendar\Features\RegistrationForm\Admin\LiteEducationSection;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Plugin;
@@ -380,6 +381,7 @@ class Metaboxes {
 	 * @since 3.1.0 Remove event ticketing education.
 	 * @since 3.5.0 Add event venue education.
 	 * @since 3.7.0 Added RSVP education.
+	 * @since 3.15.0 Added Registration Form education.
 	 *
 	 * @param Event $box
 	 *
@@ -434,6 +436,9 @@ class Metaboxes {
 				'callback' => [ $this, 'event_metabox_rsvp_education' ],
 			]
 		);
+
+		// Registration Form is Pro. This static Lite mock is the upgrade-path education screen.
+		( new LiteEducationSection() )->register_section( $box );
 	}
 
 	/**

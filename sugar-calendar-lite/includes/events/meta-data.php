@@ -285,7 +285,8 @@ function sugar_calendar_copy_event_meta_data( $from_event_id = 0, $to_event_id =
 		// Get the meta value.
 		$meta_value = get_event_meta( $from_event_id, $key, true );
 
-		// Update the meta value.
-		update_event_meta( $to_event_id, $key, $meta_value );
+		// Re-slash: update_metadata() unslashes, so a raw copy loses every
+		// backslash, which corrupts a JSON-valued key.
+		update_event_meta( $to_event_id, $key, wp_slash( $meta_value ) );
 	}
 }

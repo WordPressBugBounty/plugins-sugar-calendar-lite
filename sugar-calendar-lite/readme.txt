@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 6.2
 Tested up to:      7.1
-Stable tag:        3.14.0
+Stable tag:        3.15.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -288,6 +288,12 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.15.0 - 2026-10-08 =
+- Added: **NEW** Gia AI assistant: describe your event in a chat and Gia creates it for you. Gia can also update your existing events and answer questions about them, like registrations or ticket sales.
+- Added: Setup Checklist: a new Sugar Calendar → Setup Checklist page lists the steps to get your calendar running, like creating your first event, adding a calendar to a page and connecting Stripe. Each step is ticked off when you complete it.
+- Fixed: Events with the same start time could be skipped or shown twice in paginated event lists.
+- Fixed: The Event List block's Days of the Week and Time of Day filters missed matching events on later pages.
+
 = 3.14.0 - 2026-09-16 =
 - Added: **NEW** Modern email template: choose a header image and colors, preview every email, and receive it styled to match your site.
 - Added: **NEW** Featured Events: star any event to highlight it in the admin and in the Month, Week and Day views, and filter the Events list by featured.

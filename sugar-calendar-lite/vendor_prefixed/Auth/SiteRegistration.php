@@ -94,6 +94,8 @@ class SiteRegistration
      * Register the site with the Product API.
      *
      * @since 1.0.1
+     * @since 1.2.2 The `include_contact` argument.
+     * @since 1.3.0 The `lite_connect` argument.
      *
      * @param array $args {
      *     Optional registration arguments.
@@ -105,6 +107,14 @@ class SiteRegistration
      *         @type string $first_name Contact first name.
      *         @type string $last_name  Contact last name.
      *     }
+     *     @type bool  $include_contact Whether to send contact info at all. Default true. With false, no
+     *                                  contact info is sent, neither `contact` nor the current user's.
+     *     @type array $lite_connect {
+     *         Lite Connect credentials. For a site the ownership callback cannot reach, Product API accepts them instead.
+     *
+     *         @type string $site_id      Lite Connect site ID.
+     *         @type string $access_token Lite Connect access token.
+     *     }
      * }
      *
      * @return array|WP_Error The credentials array or WP_Error on failure.
@@ -113,7 +123,7 @@ class SiteRegistration
     {
         $action = 'auth_register_site';
         $challenge_secret = new ChallengeSecret($this->options, $action);
-        $response = $this->client->post('/auth/v2/keys')->middleware(new RateLimitMiddleware($action, $this->options, 5, DAY_IN_SECONDS), 0)->middleware(new LockMiddleware($action, $this->options), 20)->timeout(15)->json(array_merge($this->get_site_info($args), ['installation_id' => $this->installation_id->get(), 'site_url' => $this->context->get_site_url(), 'challenge_secret' => $challenge_secret->get()]))->send();
+        $response = $this->client->post('/auth/v2/keys')->middleware(new RateLimitMiddleware($action, $this->options, 5, DAY_IN_SECONDS), 0)->middleware(new LockMiddleware($action, $this->options), 20)->timeout(15)->json(array_merge($this->get_site_info($args), $this->get_lite_connect($args), ['installation_id' => $this->installation_id->get(), 'site_url' => $this->context->get_site_url(), 'challenge_secret' => $challenge_secret->get()]))->send();
         if (is_wp_error($response)) {
             return $response;
         }
@@ -149,14 +159,19 @@ class SiteRegistration
      * Get site info data.
      *
      * @since 1.0.1
+     * @since 1.2.2 Sends no contact info when 'include_contact' is false.
      *
-     * @param array $args Optional arguments with 'contact' key containing email, first_name, last_name.
+     * @param array $args Optional arguments: 'contact' with email, first_name, last_name, and 'include_contact'.
      *
      * @return array
      */
     private function get_site_info(array $args = [])
     {
         $info = ['site_title' => get_bloginfo('name'), 'site_locale' => get_locale(), 'site_timezone' => wp_timezone_string(), 'is_multisite' => is_multisite(), 'environment' => wp_get_environment_type()];
+        // Only an explicit false opts out, so an omitted or malformed value keeps the old behaviour.
+        if (($args['include_contact'] ?? \true) === \false) {
+            return $info;
+        }
         $contact = $this->resolve_contact_info($args['contact'] ?? []);
         if (!empty($contact['email'])) {
             $info['contact_email'] = $contact['email'];
@@ -168,6 +183,28 @@ class SiteRegistration
             $info['contact_last_name'] = $contact['last_name'];
         }
         return $info;
+    }
+    /**
+     * Get the Lite Connect credentials to send, when the caller passed a complete pair.
+     *
+     * @since 1.3.0
+     *
+     * @param array $args Registration arguments.
+     *
+     * @return array
+     */
+    private function get_lite_connect(array $args)
+    {
+        $lite_connect = $args['lite_connect'] ?? null;
+        if (!is_array($lite_connect)) {
+            return [];
+        }
+        $site_id = $lite_connect['site_id'] ?? '';
+        $access_token = $lite_connect['access_token'] ?? '';
+        if (!is_string($site_id) || !is_string($access_token) || $site_id === '' || $access_token === '') {
+            return [];
+        }
+        return ['lite_connect' => ['site_id' => $site_id, 'access_token' => $access_token]];
     }
     /**
      * Resolve contact info from provided data or current user.

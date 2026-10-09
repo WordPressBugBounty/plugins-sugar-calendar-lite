@@ -10,17 +10,36 @@ namespace Sugar_Calendar\Integrations\Abilities\Ability;
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\Event;
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\EventSnapshot;
 use Sugar_Calendar\Integrations\Abilities\Formatter;
-use WP_Error;
 
 /**
- * Get a single event by its Sugar Calendar event ID. Per-event `read_event`
- * permission; missing events are forbidden by design.
+ * Get a single event by its Sugar Calendar event ID, or by the WP post ID its
+ * editor URL carries. Per-event `read_event` permission; a missing event
+ * answers 404, never 403.
  *
  * @since 3.12.0
  */
 class GetEvent extends AbstractAbility {
+
+	/**
+	 * `EventSnapshot::for_event()` keys this ability merges into its output. `signup` and
+	 * `location` are already in the shared shape; other owners add their own key through the
+	 * `sugar_calendar_integrations_abilities_get_event_detail` filter's `$snapshot` argument.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var string[]
+	 */
+	private const DETAIL_KEYS = [
+		'ticketing',
+		'online_link',
+		'online_visibility',
+		'online_provider',
+		'online_join_url',
+	];
 
 	/**
 	 * Ability slug appended to the namespace prefix.
@@ -55,7 +74,7 @@ class GetEvent extends AbstractAbility {
 	 */
 	protected function get_description(): string {
 
-		return esc_html__( 'Get a single event by its Sugar Calendar event ID.', 'sugar-calendar-lite' );
+		return esc_html__( 'Get a single event by its Sugar Calendar event ID, or by the post ID from its editor URL.', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -67,12 +86,23 @@ class GetEvent extends AbstractAbility {
 	 */
 	protected function get_input_schema(): array {
 
+		// No `required`: either id identifies the event, which a single
+		// required key cannot express. run-time validation answers 400 when
+		// neither arrives.
 		return [
 			'type'                 => 'object',
 			'additionalProperties' => false,
-			'required'             => [ 'id' ],
 			'properties'           => [
-				'id' => [ 'type' => 'integer', 'minimum' => 1 ],
+				'id'      => [
+					'type'        => 'integer',
+					'minimum'     => 1,
+					'description' => __( 'Sugar Calendar event id, as returned by sc-events/list-events and sc-events/search-events.', 'sugar-calendar-lite' ),
+				],
+				'post_id' => [
+					'type'        => 'integer',
+					'minimum'     => 1,
+					'description' => __( 'WP post id, the number in the post= parameter of an event editor URL such as /wp-admin/post.php?post=1304&action=edit. Use this when the user names an event by its editor link. It is not the same number as id.', 'sugar-calendar-lite' ),
+				],
 			],
 		];
 	}
@@ -100,20 +130,25 @@ class GetEvent extends AbstractAbility {
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param mixed $input Ability input. Expected key: `id`.
+	 * @param mixed $input Ability input. Expected key: `id` or `post_id`.
 	 *
 	 * @return true|\WP_Error
 	 */
 	public function check_permission( $input = null ) {
 
-		$args      = $this->normalize_input( $input );
-		$id        = absint( $args['id'] ?? 0 );
-		$query     = $id ? $this->events->get_event_query( [ 'id' => $id, 'number' => 1 ] ) : null;
-		$event     = ( $query && ! empty( $query->items ) ) ? $query->items[0] : null;
+		$args = $this->normalize_input( $input );
+		$id   = $this->resolve_event_id_input( $args, 'id' );
+
+		if ( is_wp_error( $id ) ) {
+			return $this->defer_lookup_error( $id, 'read_calendar' );
+		}
+
+		$query     = $this->events->get_event_query( [ 'id' => $id, 'number' => 1 ] );
+		$event     = ! empty( $query->items ) ? $query->items[0] : null;
 		$object_id = $event ? absint( $event->object_id ) : 0;
 
 		if ( ! $object_id ) {
-			return $this->not_found();
+			return $this->defer_lookup_error( $this->not_found(), 'read_calendar' );
 		}
 
 		if ( ! current_user_can( 'read_event', $object_id ) ) {
@@ -123,22 +158,6 @@ class GetEvent extends AbstractAbility {
 		}
 
 		return true;
-	}
-
-	/**
-	 * The event does not exist.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @return \WP_Error
-	 */
-	private function not_found(): WP_Error {
-
-		return new WP_Error(
-			'sc_events_not_found',
-			esc_html__( 'Event not found.', 'sugar-calendar-lite' ),
-			[ 'status' => 404 ]
-		);
 	}
 
 	/**
@@ -153,8 +172,13 @@ class GetEvent extends AbstractAbility {
 	 */
 	public function execute( $input = null ) {
 
-		$args  = $this->normalize_input( $input );
-		$id    = absint( $args['id'] ?? 0 );
+		$args = $this->normalize_input( $input );
+		$id   = $this->resolve_event_id_input( $args, 'id' );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
 		$query = $this->events->get_event_query( [ 'id' => $id, 'number' => 1 ] );
 		$event = $query->items[0] ?? null;
 
@@ -162,8 +186,40 @@ class GetEvent extends AbstractAbility {
 			return $this->not_found();
 		}
 
-		$map = $this->events->resolve_calendar_map( [ (int) $event->object_id ] );
+		$post_ids = [ (int) $event->object_id ];
 
-		return $this->formatter->event( $event, $map );
+		$out = $this->formatter->event( $event, $this->events->resolve_calendar_map( $post_ids ), $this->events->resolve_tag_map( $post_ids ) );
+
+		// read_event is plain `read` on a published event, and the detail carries what the
+		// front end withholds (an attendees-only join URL, the form, capacity), so it takes
+		// the editor's right.
+		if ( ! current_user_can( 'edit_post', (int) $event->object_id ) ) {
+			return $out;
+		}
+
+		$snapshot = EventSnapshot::for_event( (int) $event->id );
+
+		foreach ( self::DETAIL_KEYS as $key ) {
+			if ( array_key_exists( $key, $snapshot ) ) {
+				$out[ $key ] = $snapshot[ $key ];
+			}
+		}
+
+		/**
+		 * Filters get-event's detail output, for a feature adding its own edit-only fields.
+		 *
+		 * Only reached past the `edit_post` gate above, so a filter here sees what the
+		 * public/attendee shape withholds. Takes the resolved snapshot as a third argument,
+		 * so an owner can read its own key back off it instead of re-resolving the event.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param array $out      Output built so far.
+		 * @param Event $event    The event it was built from.
+		 * @param array $snapshot `EventSnapshot::for_event()`'s output for this event.
+		 */
+		$filtered = apply_filters( 'sugar_calendar_integrations_abilities_get_event_detail', $out, $event, $snapshot );
+
+		return is_array( $filtered ) ? $filtered : $out;
 	}
 }

@@ -194,6 +194,16 @@ class ToolsExportTab extends Tools {
 			);
 		}
 
+		/**
+		 * Fires just before the export download starts streaming.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param array  $modules Selected data-type keys.
+		 * @param string $format  Export format slug.
+		 */
+		do_action( 'sugar_calendar_admin_pages_tools_export_tab_before_output', $request->keys(), $request->format() );
+
 		$service->output();
 	}
 

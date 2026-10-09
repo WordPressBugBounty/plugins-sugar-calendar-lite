@@ -1,0 +1,57 @@
+@charset "UTF-8";
+/* Ported from DS: ai-chat-header */
+/* Source mtime: 2026-08-06T18:24:42Z */
+/* Sugar Calendar — components/ai-chat-header.css (AI cluster PATTERN)
+   Mirrors Figma "AI Chat header" (node 14167:93232).
+   .sc-ai-chat-header — Gia mascot + greeting + helper text +
+   suggestion Response Chips. Composes Response Chips — requires
+   response-chips.css.
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-chat-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sc-spacing-10);
+  width: 100%;
+}
+
+/* Gia mascot — brand image supplied by the consumer (avatarSrc).
+   Unset, a neutral rounded placeholder shows. */
+.sc-ai-chat-header__avatar {
+  flex: none;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--sc-surface-background-light);
+}
+
+.sc-ai-chat-header__avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* title 18px medium (page-title class in markup), primary color */
+.sc-ai-chat-header__title {
+  margin: 0;
+  width: 100%;
+  color: var(--sc-text-primary);
+}
+
+.sc-ai-chat-header__description {
+  margin: 0;
+  width: 100%;
+  color: var(--sc-text-secondary);
+}
+
+/* suggestion chips wrap; gap 8 (Figma binds padding/8 here) */
+.sc-ai-chat-header__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--sc-padding-8);
+  width: 100%;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vYWktY2hhdC1oZWFkZXIuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQU9BO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFBQTtBQUVBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFFRjtFQUFpQztFQUFnQjtFQUFhO0VBQWM7OztBQUU1RTtBQUNBO0VBQ0U7RUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0EiLCJmaWxlIjoiYXNzZXRzL2Nzcy9jb21wb25lbnRzL2FkbWluL2FpLWNoYXQtaGVhZGVyLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBhaS1jaGF0LWhlYWRlciAqL1xuLyogU291cmNlIG10aW1lOiAyMDI2LTA4LTA2VDE4OjI0OjQyWiAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8qIFN1Z2FyIENhbGVuZGFyIOKAlCBjb21wb25lbnRzL2FpLWNoYXQtaGVhZGVyLmNzcyAoQUkgY2x1c3RlciBQQVRURVJOKVxuICAgTWlycm9ycyBGaWdtYSBcIkFJIENoYXQgaGVhZGVyXCIgKG5vZGUgMTQxNjc6OTMyMzIpLlxuICAgLnNjLWFpLWNoYXQtaGVhZGVyIOKAlCBHaWEgbWFzY290ICsgZ3JlZXRpbmcgKyBoZWxwZXIgdGV4dCArXG4gICBzdWdnZXN0aW9uIFJlc3BvbnNlIENoaXBzLiBDb21wb3NlcyBSZXNwb25zZSBDaGlwcyDigJQgcmVxdWlyZXNcbiAgIHJlc3BvbnNlLWNoaXBzLmNzcy5cbiAgIFJlcXVpcmVzIHRva2Vucy9wcmltaXRpdmVzLmNzcywgdG9rZW5zL3Rva2Vucy5jc3MsIHRva2Vucy90ZXh0LXN0eWxlcy5jc3MuICovXG5cbi5zYy1haS1jaGF0LWhlYWRlciB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47XG4gIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0O1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xuICB3aWR0aDogMTAwJTtcbn1cblxuLyogR2lhIG1hc2NvdCDigJQgYnJhbmQgaW1hZ2Ugc3VwcGxpZWQgYnkgdGhlIGNvbnN1bWVyIChhdmF0YXJTcmMpLlxuICAgVW5zZXQsIGEgbmV1dHJhbCByb3VuZGVkIHBsYWNlaG9sZGVyIHNob3dzLiAqL1xuLnNjLWFpLWNoYXQtaGVhZGVyX19hdmF0YXIge1xuICBmbGV4OiBub25lO1xuICB3aWR0aDogODJweDtcbiAgaGVpZ2h0OiA4MnB4O1xuICBib3JkZXItcmFkaXVzOiA1MCU7XG4gIG92ZXJmbG93OiBoaWRkZW47XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC1saWdodCk7XG59XG4uc2MtYWktY2hhdC1oZWFkZXJfX2F2YXRhci1pbWcgeyBkaXNwbGF5OiBibG9jazsgd2lkdGg6IDEwMCU7IGhlaWdodDogMTAwJTsgb2JqZWN0LWZpdDogY292ZXI7IH1cblxuLyogdGl0bGUgMThweCBtZWRpdW0gKHBhZ2UtdGl0bGUgY2xhc3MgaW4gbWFya3VwKSwgcHJpbWFyeSBjb2xvciAqL1xuLnNjLWFpLWNoYXQtaGVhZGVyX190aXRsZSB7XG4gIG1hcmdpbjogMDtcbiAgd2lkdGg6IDEwMCU7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LXByaW1hcnkpO1xufVxuXG4uc2MtYWktY2hhdC1oZWFkZXJfX2Rlc2NyaXB0aW9uIHtcbiAgbWFyZ2luOiAwO1xuICB3aWR0aDogMTAwJTtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtc2Vjb25kYXJ5KTtcbn1cblxuLyogc3VnZ2VzdGlvbiBjaGlwcyB3cmFwOyBnYXAgOCAoRmlnbWEgYmluZHMgcGFkZGluZy84IGhlcmUpICovXG4uc2MtYWktY2hhdC1oZWFkZXJfX2NoaXBzIHtcbiAgZGlzcGxheTogZmxleDtcbiAgZmxleC13cmFwOiB3cmFwO1xuICBhbGlnbi1pdGVtczogZmxleC1zdGFydDtcbiAgZ2FwOiB2YXIoLS1zYy1wYWRkaW5nLTgpO1xuICB3aWR0aDogMTAwJTtcbn1cbiJdfQ== */

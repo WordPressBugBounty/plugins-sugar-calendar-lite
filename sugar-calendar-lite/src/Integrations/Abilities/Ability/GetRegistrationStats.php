@@ -14,16 +14,18 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
 use Sugar_Calendar\Integrations\Abilities\AbstractAbility;
+use Sugar_Calendar\Integrations\Abilities\RegistrationScope;
 use Sugar_Calendar\Integrations\Abilities\SignupModes;
 use WP_Error;
 
 /**
- * Site-wide registration and revenue totals for a window, split by signup mode,
+ * Registration and revenue totals for a window, site-wide or for chosen events, split by signup mode,
  * with the change against the preceding window of the same length.
  *
  * Requires `edit_others_events`: the per-event stats abilities gate on the event
  * object, and an aggregate has no object to check, so a site-wide read needs the
- * site-wide capability or it becomes a way around them.
+ * site-wide capability or it becomes a way around them. Calendar, tag, venue and speaker
+ * filters are aggregates and need only this; `event_ids` also needs `edit_post` on each event.
  *
  * @since 3.14.0
  */
@@ -37,6 +39,31 @@ class GetRegistrationStats extends AbstractAbility {
 	 * @var string
 	 */
 	const DEFAULT_START = '-30 days';
+
+	/**
+	 * Filter resolution, built on first use.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var RegistrationScope|null
+	 */
+	private $scope;
+
+	/**
+	 * The filter resolver.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return RegistrationScope
+	 */
+	private function scope(): RegistrationScope {
+
+		if ( $this->scope === null ) {
+			$this->scope = new RegistrationScope( $this->events );
+		}
+
+		return $this->scope;
+	}
 
 	/**
 	 * Ability slug appended to the namespace prefix.
@@ -72,7 +99,7 @@ class GetRegistrationStats extends AbstractAbility {
 	protected function get_description(): string {
 
 		return esc_html__(
-			'Site-wide registration counts and revenue for a date range, split by signup mode, with the change against the preceding range of the same length. The range filters on when each registration was placed, not on when its event runs. A percentage is null when the preceding range held nothing to compare against, which should be reported as having no comparable previous period rather than as no change.',
+			'Registration counts and revenue for a date range, split by signup mode, with the change against the preceding range of the same length. The range filters on when each registration was placed, not on when its event runs. Site-wide unless the id-list filters narrow it: several ids in one filter count events in any of them, each event once, and several filters narrow together. The scope in the result says what was counted. A percentage is null when the preceding range held nothing to compare against, which should be reported as having no comparable previous period rather than as no change.',
 			'sugar-calendar-lite'
 		);
 	}
@@ -89,11 +116,14 @@ class GetRegistrationStats extends AbstractAbility {
 		return [
 			'type'                 => 'object',
 			'additionalProperties' => false,
-			'properties'           => [
-				'start'            => [ 'type' => 'string', 'format' => 'date-time' ],
-				'end'              => [ 'type' => 'string', 'format' => 'date-time' ],
-				'compare_previous' => [ 'type' => 'boolean', 'default' => true ],
-			],
+			'properties'           => array_merge(
+				[
+					'start'            => [ 'type' => 'string', 'format' => 'date-time' ],
+					'end'              => [ 'type' => 'string', 'format' => 'date-time' ],
+					'compare_previous' => [ 'type' => 'boolean', 'default' => true ],
+				],
+				$this->scope()->properties()
+			),
 		];
 	}
 
@@ -118,10 +148,35 @@ class GetRegistrationStats extends AbstractAbility {
 		return [
 			'type'       => 'object',
 			// `previous` and `change` are omitted when compare_previous is false, so
-			// only the three members every response carries can be required.
-			'required'   => [ 'window', 'registrations', 'revenue' ],
+			// only the members every response carries can be required.
+			'required'   => [ 'window', 'scope', 'registrations', 'revenue' ],
 			'properties' => [
 				'window'        => $window,
+				'scope'         => [
+					'type'       => 'object',
+					'required'   => [ 'site_wide', 'filters', 'events', 'uncounted_modes' ],
+					'properties' => [
+						'site_wide'       => [ 'type' => 'boolean' ],
+						'filters'         => [
+							'type'                 => 'object',
+							'additionalProperties' => [
+								'type'  => 'array',
+								'items' => [
+									'type'       => 'object',
+									'properties' => [
+										'id'   => [ 'type' => 'integer' ],
+										'name' => [ 'type' => 'string' ],
+									],
+								],
+							],
+						],
+						'events'          => [ 'type' => [ 'integer', 'null' ] ],
+						'uncounted_modes' => [
+							'type'  => 'array',
+							'items' => [ 'type' => 'string' ],
+						],
+					],
+				],
 				'registrations' => [
 					'type'       => 'object',
 					'required'   => [ 'total', 'by_mode' ],
@@ -199,8 +254,9 @@ class GetRegistrationStats extends AbstractAbility {
 		$end_input   = trim( (string) ( $args['end'] ?? '' ) );
 
 		try {
-			$end   = new DateTimeImmutable( $end_input !== '' ? $end_input : 'now', $utc );
-			$start = new DateTimeImmutable( $start_input !== '' ? $start_input : self::DEFAULT_START, $utc );
+			// An input with its own offset ignores $utc, and the providers compare UTC columns.
+			$end   = ( new DateTimeImmutable( $end_input !== '' ? $end_input : 'now', $utc ) )->setTimezone( $utc );
+			$start = ( new DateTimeImmutable( $start_input !== '' ? $start_input : self::DEFAULT_START, $utc ) )->setTimezone( $utc );
 		} catch ( Exception $e ) {
 			return new WP_Error(
 				'sc_events_invalid_input',
@@ -217,10 +273,25 @@ class GetRegistrationStats extends AbstractAbility {
 			);
 		}
 
-		$current = $this->totals( $start, $end );
+		$scope = $this->scope()->resolve( $args );
+
+		if ( is_wp_error( $scope ) ) {
+			return $scope;
+		}
+
+		$event_ids = $scope['event_ids'];
+
+		$current = $this->totals( $start, $end, $event_ids );
 
 		$out = [
 			'window'        => $this->window( $start, $end ),
+			'scope'         => [
+				'site_wide'       => $event_ids === null,
+				// An object even when empty, so a site-wide result reads `{}`, not `[]`.
+				'filters'         => (object) $scope['filters'],
+				'events'          => $event_ids === null ? null : count( $event_ids ),
+				'uncounted_modes' => $current['uncounted'],
+			],
 			'registrations' => $current['registrations'],
 			'revenue'       => $current['revenue'],
 		];
@@ -235,7 +306,7 @@ class GetRegistrationStats extends AbstractAbility {
 		$length         = $end->getTimestamp() - $start->getTimestamp();
 		$previous_end   = $start;
 		$previous_start = $start->modify( '-' . $length . ' seconds' );
-		$previous       = $this->totals( $previous_start, $previous_end );
+		$previous       = $this->totals( $previous_start, $previous_end, $event_ids );
 
 		$out['previous'] = [
 			'window'              => $this->window( $previous_start, $previous_end ),
@@ -259,17 +330,20 @@ class GetRegistrationStats extends AbstractAbility {
 	 *
 	 * @since 3.14.0
 	 *
-	 * @param DateTimeImmutable $start Window start, inclusive.
-	 * @param DateTimeImmutable $end   Window end, exclusive.
+	 * @param DateTimeImmutable $start     Window start, inclusive.
+	 * @param DateTimeImmutable $end       Window end, exclusive.
+	 * @param int[]|null        $event_ids Events to count, or null for site-wide.
 	 *
 	 * @return array
 	 */
-	private function totals( DateTimeImmutable $start, DateTimeImmutable $end ): array {
+	private function totals( DateTimeImmutable $start, DateTimeImmutable $end, ?array $event_ids ): array {
 
-		$stats = SignupModes::stats(
-			$start->format( 'Y-m-d H:i:s' ),
-			$end->format( 'Y-m-d H:i:s' )
-		);
+		$from = $start->format( 'Y-m-d H:i:s' );
+		$to   = $end->format( 'Y-m-d H:i:s' );
+
+		$stats = $event_ids === null
+			? SignupModes::stats( $from, $to )
+			: SignupModes::scoped_stats( $from, $to, $event_ids );
 
 		$count_by_mode   = [];
 		$revenue_by_mode = [];
@@ -304,13 +378,16 @@ class GetRegistrationStats extends AbstractAbility {
 		return [
 			'registrations' => [
 				'total'   => $total_count,
-				'by_mode' => $count_by_mode,
+				// An object even when empty, so a fully-uncounted window reads `{}`, not `[]`.
+				'by_mode' => (object) $count_by_mode,
 			],
 			'revenue'       => [
 				'total'    => $has_revenue && $single_currency !== null ? round( $total_revenue, 2 ) : null,
 				'currency' => $single_currency,
-				'by_mode'  => $revenue_by_mode,
+				'by_mode'  => (object) $revenue_by_mode,
 			],
+			// A declared mode that did not answer is left out, not read as zero.
+			'uncounted'     => array_values( array_diff( array_keys( SignupModes::available() ), array_keys( $stats ) ) ),
 		];
 	}
 

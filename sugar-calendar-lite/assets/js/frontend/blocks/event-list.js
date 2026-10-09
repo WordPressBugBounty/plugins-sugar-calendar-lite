@@ -70,6 +70,8 @@ SugarCalendarBlocks.EventList = SugarCalendarBlocks.EventList || ( function( doc
 			speakersFilter: this.controls.getSpeakersFilter(),
 			tagsFilter: this.controls.getTagsFilter(),
 			featuredOnly: this.controls.getFeaturedOnly(),
+			daysOfWeek: this.controls.getDaysOfWeek(),
+			timeOfDay: this.controls.getTimeOfDay(),
 			day: parseInt( this.controls.$formContainer.find( 'input[name="sc_day"]' ).val() ),
 			month: parseInt( this.controls.$formContainer.find( 'input[name="sc_month"]' ).val() ),
 			year: parseInt( this.controls.$formContainer.find( 'input[name="sc_year"]' ).val() ),

@@ -10,7 +10,7 @@ use Sugar_Calendar\Helpers\Helpers;
  * A static picture of the Pro editor, not an app: markup mirrors the React
  * app's DOM class-for-class so it inherits the same design-system CSS, every
  * input is disabled, and a transparent overlay links out via the shared
- * education-modal JS. SchemaRepository::save() also refuses Lite writes.
+ * education-modal JS.
  *
  * @since 3.13.0
  */
@@ -29,22 +29,12 @@ class LiteEducationSection {
 	const FEATURE_ID = 'event-registration-form';
 
 	/**
-	 * Register hooks.
-	 *
-	 * Only the section registration; there is no write path on Lite.
-	 *
-	 * @since 3.13.0
-	 */
-	public function hooks() {
-
-		add_action( 'sugar_calendar_admin_meta_box_setup_sections', [ $this, 'register_section' ] );
-	}
-
-	/**
 	 * Register the Registration Form education section on the Event metabox.
 	 *
 	 * Mirrors the id, icon and order of the Pro section so the tab sits in the
 	 * same place in both builds.
+	 *
+	 * Called from Metaboxes::event_metabox_education(), which already skips Pro.
 	 *
 	 * @since 3.13.0
 	 *

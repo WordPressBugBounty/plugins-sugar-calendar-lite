@@ -56,6 +56,17 @@ class EventInputSchema {
 	const LOCATION_MAX = 500;
 
 	/**
+	 * Longest accepted excerpt, in characters.
+	 *
+	 * The storage ceiling: `wp_posts.post_excerpt` is a MySQL TEXT.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var int
+	 */
+	const EXCERPT_MAX = 65535;
+
+	/**
 	 * Most term ids accepted in one calendar or tag list.
 	 *
 	 * @since 3.14.0
@@ -77,6 +88,7 @@ class EventInputSchema {
 	const KNOWN_KEYS = [
 		'title',
 		'description',
+		'excerpt',
 		'location',
 		'start',
 		'end',
@@ -101,13 +113,20 @@ class EventInputSchema {
 
 		$properties = [
 			'title'        => [
-				'type'      => 'string',
-				'minLength' => 1,
-				'maxLength' => self::TITLE_MAX,
+				'type'        => 'string',
+				'minLength'   => 1,
+				'maxLength'   => self::TITLE_MAX,
+				'description' => __( 'The event name shown everywhere, for example Spring Concert.', 'sugar-calendar-lite' ),
 			],
 			'description'  => [
-				'type'      => 'string',
-				'maxLength' => self::DESCRIPTION_MAX,
+				'type'        => 'string',
+				'maxLength'   => self::DESCRIPTION_MAX,
+				'description' => __( 'The full event text shown on the event page. HTML is allowed.', 'sugar-calendar-lite' ),
+			],
+			'excerpt'      => [
+				'type'        => 'string',
+				'maxLength'   => self::EXCERPT_MAX,
+				'description' => __( 'A short summary of the event, separate from the full description.', 'sugar-calendar-lite' ),
 			],
 			'start'        => [
 				'type'        => 'string',
@@ -120,10 +139,14 @@ class EventInputSchema {
 				'description' => __( 'Local end date and time, in the same formats as start. A UTC offset or a trailing Z is refused; name the zone in the timezone field instead.', 'sugar-calendar-lite' ),
 			],
 			'all_day'      => [
-				'type'    => 'boolean',
-				'default' => false,
+				'type'        => 'boolean',
+				'default'     => false,
+				'description' => __( 'True for an event with no start or end time. start and end are then dates only, for example 2026-09-14. Default false.', 'sugar-calendar-lite' ),
 			],
-			'timezone'     => [ 'type' => 'string' ],
+			'timezone'     => [
+				'type'        => 'string',
+				'description' => __( 'A city-based IANA time zone such as America/Chicago or Europe/Kyiv. Leave it out to follow the site\'s time zone. Not stored for all-day events.', 'sugar-calendar-lite' ),
+			],
 			'calendar_ids' => [
 				'type'        => 'array',
 				'maxItems'    => self::TERM_IDS_MAX,
@@ -132,6 +155,7 @@ class EventInputSchema {
 					'type'    => 'integer',
 					'minimum' => 1,
 				],
+				'description' => __( 'The event\'s whole calendar list, for example [3]: an update replaces it, so to add a calendar send the ones the event already has plus the new one. Get them from sc-events/list-calendars; never guess an id. Leave it out to keep the current calendars.', 'sugar-calendar-lite' ),
 			],
 			'tag_ids'      => [
 				'type'        => 'array',
@@ -141,10 +165,12 @@ class EventInputSchema {
 					'type'    => 'integer',
 					'minimum' => 1,
 				],
+				'description' => __( 'The event\'s whole tag list, for example [7, 9]: an update replaces it, so to add a tag send the tag_ids the event already has plus the new one. Get ids from sc-events/list-tags and the current ones from the event; never guess an id.', 'sugar-calendar-lite' ),
 			],
 			'location'     => [
-				'type'      => 'string',
-				'maxLength' => self::LOCATION_MAX,
+				'type'        => 'string',
+				'maxLength'   => self::LOCATION_MAX,
+				'description' => __( 'Free-text place or address shown on the event, for example Central Library, Room 2.', 'sugar-calendar-lite' ),
 			],
 		];
 
@@ -156,7 +182,13 @@ class EventInputSchema {
 			$properties['signup'] = [
 				'type'        => 'string',
 				'enum'        => $enum,
-				'description' => __( 'How people sign up for this event. One method only: an event cannot take both paid tickets and RSVPs.', 'sugar-calendar-lite' ),
+				'description' => trim(
+					sprintf(
+						/* translators: %s: sentence naming each signup mode's detail object. */
+						__( 'How people sign up for this event. One method only: an event cannot take both paid tickets and RSVPs. %s', 'sugar-calendar-lite' ),
+						self::signup_modes_description()
+					)
+				),
 			];
 
 			// No default on the patch variant: a default would make every update
@@ -194,6 +226,45 @@ class EventInputSchema {
 	}
 
 	/**
+	 * Build the sentence naming each signup mode's detail object.
+	 *
+	 * Reads `SignupModes::available()` so the sentence never hard-codes an add-on's
+	 * name: a mode with no detail property is skipped, since it has nothing to name.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return string
+	 */
+	private static function signup_modes_description(): string {
+
+		$names = [];
+
+		foreach ( SignupModes::available() as $slug => $property ) {
+
+			if ( $property === '' ) {
+				continue;
+			}
+
+			$names[] = sprintf(
+				/* translators: 1: signup mode slug, 2: the property its settings go in. */
+				__( '%1$s settings in %2$s', 'sugar-calendar-lite' ),
+				$slug,
+				$property
+			);
+		}
+
+		if ( empty( $names ) ) {
+			return '';
+		}
+
+		return sprintf(
+			/* translators: %s: comma-separated list of "mode settings in property" pairs. */
+			__( "Each method's settings go in the object of the same name: %s. Send the method and its object together.", 'sugar-calendar-lite' ),
+			implode( ', ', $names )
+		);
+	}
+
+	/**
 	 * Normalize validated ability input into the shape SCE stores.
 	 *
 	 * @since 3.14.0
@@ -206,6 +277,7 @@ class EventInputSchema {
 	public static function normalize( array $input, bool $partial = false ) {
 
 		$assumptions = [];
+		$errors      = [];
 		$row         = [];
 		$meta        = [];
 
@@ -224,7 +296,18 @@ class EventInputSchema {
 		}
 
 		if ( isset( $input['description'] ) ) {
-			$row['content'] = wp_kses_post( $input['description'] );
+			$description    = (string) $input['description'];
+			$row['content'] = wp_kses_post( $description );
+
+			if ( self::description_dropped_markup( $description ) ) {
+				$errors[] = __( 'Some HTML in the description was removed (script, iframe or similar). Add it in the event editor if you need it.', 'sugar-calendar-lite' );
+			}
+		}
+
+		// Same kses pass WordPress itself applies to post_excerpt through
+		// wp_insert_post()/wp_update_post() ('pre_post_excerpt' -> wp_filter_post_kses()).
+		if ( isset( $input['excerpt'] ) ) {
+			$row['excerpt'] = wp_kses_post( $input['excerpt'] );
 		}
 
 		if ( isset( $input['location'] ) ) {
@@ -257,8 +340,39 @@ class EventInputSchema {
 			'meta'        => $meta,
 			'terms'       => $terms,
 			'assumptions' => $assumptions,
+			'errors'      => $errors,
 			'extra'       => array_diff_key( $input, array_flip( self::KNOWN_KEYS ) ),
 		];
+	}
+
+	/**
+	 * Whether a raw description names a tag `wp_kses_post()` will refuse.
+	 *
+	 * Checks tag names rather than comparing the sanitized string: a stripped
+	 * `<script>`/`<iframe>` tag leaves its inner text behind (kses only removes
+	 * the tag itself), so a before/after string diff would miss it.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $description Raw input, before sanitizing.
+	 *
+	 * @return bool
+	 */
+	private static function description_dropped_markup( string $description ): bool {
+
+		if ( ! preg_match_all( '/<([a-zA-Z][a-zA-Z0-9-]*)/', $description, $matches ) ) {
+			return false;
+		}
+
+		$allowed = array_keys( wp_kses_allowed_html( 'post' ) );
+
+		foreach ( $matches[1] as $tag ) {
+			if ( ! in_array( strtolower( $tag ), $allowed, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -345,15 +459,12 @@ class EventInputSchema {
 			);
 		}
 
-		if ( ! $has_start ) {
-			return new WP_Error(
-				'sc_events_invalid_input',
-				__( 'An end date cannot be changed without its start date.', 'sugar-calendar-lite' ),
-				[ 'status' => 400 ]
-			);
-		}
-
-		$start = self::wall_clock( $input['start'] );
+		// A partial patch (update) always has its start filled from the stored event by
+		// UpdateEvent::fill_date_group() before this runs, so $has_start is reachable
+		// false here only when that fill could not run (no stored start to fall back on),
+		// which the fill already refused with its own message. Fall through to the
+		// unparseable-start message below rather than blaming the end date for it.
+		$start = self::wall_clock( $input['start'] ?? '' );
 
 		if ( $start === '' ) {
 			return new WP_Error(
@@ -417,8 +528,12 @@ class EventInputSchema {
 	private static function resolve_timezone( array $input, bool $all_day, array &$assumptions ) {
 
 		$timezone = isset( $input['timezone'] ) ? trim( (string) $input['timezone'] ) : '';
+		$timezone = $timezone !== '' ? self::normalize_manual_offset( $timezone ) : $timezone;
 
-		if ( $timezone !== '' && ! self::is_timezone( $timezone ) ) {
+		// PHP's DateTimeZone constructor throws on the manual-offset shape the editor's own
+		// dropdown offers and stores (`UTC+5`, `UTC-3.5`), so is_timezone() alone would refuse
+		// it; sugar_calendar_validate_timezone() is what actually recognizes that family.
+		if ( $timezone !== '' && ! self::is_timezone( $timezone ) && sugar_calendar_validate_timezone( $timezone ) === '' ) {
 			return new WP_Error(
 				'sc_events_invalid_input',
 				__( 'That time zone is not one WordPress recognizes.', 'sugar-calendar-lite' ),
@@ -449,10 +564,56 @@ class EventInputSchema {
 		// Stored empty, which SCE treats as floating: the event shows in
 		// whatever time zone the site is set to.
 		if ( $timezone === '' && ! $all_day ) {
-			$assumptions[] = __( "No time zone was given, so the event follows the site's time zone.", 'sugar-calendar-lite' );
+			$assumptions[] = self::floating_zone_assumption();
 		}
 
 		return $timezone;
+	}
+
+	/**
+	 * Convert `UTC±H:MM` into the manual-offset decimal form Sugar Calendar stores
+	 * (`UTC-3:30` becomes `UTC-3.5`), so a caller can send either shape.
+	 *
+	 * Only the minute values the editor's own dropdown offers (00, 30, 45) convert; any other
+	 * minute is returned unchanged, which the validation that follows refuses (Minor 3).
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $timezone Candidate time zone, already trimmed.
+	 *
+	 * @return string
+	 */
+	private static function normalize_manual_offset( string $timezone ): string {
+
+		if ( ! preg_match( '/^UTC([+-])(\d{1,2}):(\d{2})$/', $timezone, $matches ) ) {
+			return $timezone;
+		}
+
+		$fractions = [
+			'00' => 0.0,
+			'30' => 0.5,
+			'45' => 0.75,
+		];
+
+		if ( ! isset( $fractions[ $matches[3] ] ) ) {
+			return $timezone;
+		}
+
+		$value = ( (int) $matches[2] + $fractions[ $matches[3] ] ) * ( $matches[1] === '-' ? -1 : 1 );
+
+		return 'UTC' . ( $value >= 0 ? '+' : '' ) . $value;
+	}
+
+	/**
+	 * The assumption line for an event left with no time zone.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return string
+	 */
+	public static function floating_zone_assumption(): string {
+
+		return __( "No time zone was given, so the event follows the site's time zone.", 'sugar-calendar-lite' );
 	}
 
 	/**

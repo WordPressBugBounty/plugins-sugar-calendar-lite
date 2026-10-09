@@ -1,0 +1,1 @@
+!function(){"use strict";var a=window.sugar_calendar_gia_ai;a.license_type,a.upgrade,a.usage_url}();

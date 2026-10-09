@@ -32,13 +32,14 @@ class EventRepository {
 
 	/**
 	 * Maximum number of post IDs the calendar-filter resolver will pass into
-	 * Event_Query as `object_id__in`.
+	 * Event_Query as `object_id__in`. Public so `RegistrationScope` can tell a cut-short
+	 * lookup from a small one.
 	 *
 	 * @since 3.12.0
 	 *
 	 * @var int
 	 */
-	private const CALENDAR_FILTER_POST_ID_CAP = 5000;
+	const CALENDAR_FILTER_POST_ID_CAP = 5000;
 
 	/**
 	 * Maximum number of a user's own event post IDs `resolve_own_post_ids()`
@@ -53,6 +54,18 @@ class EventRepository {
 	 * @var int
 	 */
 	private const OWN_EVENTS_SCOPE_CAP = 5000;
+
+	/**
+	 * Maximum number of event ids `resolve_search_title_content_ids()` and
+	 * `resolve_search_location_ids()` will each resolve before search-events unions and
+	 * paginates them. A search term matching more than this many events is not a
+	 * realistic search-events use case.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var int
+	 */
+	private const SEARCH_ID_CAP = 5000;
 
 	/**
 	 * Per-request memoization for resolve_own_post_ids(), keyed by user ID.
@@ -203,8 +216,11 @@ class EventRepository {
 
 		$status = sanitize_text_field( $args['status'] ?? 'publish' );
 
+		// 'any' means every status but trash, as in WP_Query: a trashed event is not one to edit.
 		if ( 'any' !== $status ) {
 			$query_args['status'] = $status;
+		} else {
+			$query_args['status__not_in'] = [ 'trash' ];
 		}
 
 		// Non-public statuses (and 'any', which includes them) are only safe
@@ -266,6 +282,63 @@ class EventRepository {
 	}
 
 	/**
+	 * Resolve the pair of ids an ability may be given to one Sugar Calendar
+	 * event id, or 0 when neither names an event.
+	 *
+	 * An event carries two ids: the Sugar Calendar event id these abilities
+	 * take, and the WP post id its editor URL carries. The post id is the one
+	 * a user can see and paste, so both are accepted. An explicit event id
+	 * wins when both arrive: it is the canonical one, and preferring it keeps
+	 * a contradictory pair from silently editing whichever event the lookup
+	 * happened to reach.
+	 *
+	 * No `object_subtype` is passed, so a recurring event's parent post
+	 * resolves as well as a regular one, and no status filter, so a draft the
+	 * user is editing resolves too. This only maps one id to the other, every
+	 * caller still runs its own per-event capability gate on the result.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int $event_id Sugar Calendar event id, or 0.
+	 * @param int $post_id  WP post id, or 0.
+	 *
+	 * @return int Sugar Calendar event id, or 0 when nothing resolves.
+	 */
+	public function resolve_event_id( int $event_id, int $post_id ): int {
+
+		if ( $event_id > 0 ) {
+			return $event_id;
+		}
+
+		/**
+		 * Filters the WP post id an ability looks up before it's resolved.
+		 *
+		 * A recurring series' editor URL carries a virtual occurrence id; a Pro callback
+		 * maps it to the parent post id here, so every ability that accepts `post_id`
+		 * resolves it the same way.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param int $post_id WP post id, or 0.
+		 */
+		$post_id = (int) apply_filters( 'sugar_calendar_integrations_abilities_event_repository_post_id', $post_id );
+
+		if ( $post_id <= 0 ) {
+			return 0;
+		}
+
+		$query = $this->get_event_query(
+			[
+				'object_id' => $post_id,
+				'number'    => 1,
+			]
+		);
+		$event = $query->items[0] ?? null;
+
+		return $event ? absint( $event->id ) : 0;
+	}
+
+	/**
 	 * Resolve a calendar term ID to a list of event post IDs (capped).
 	 *
 	 * @since 3.12.0
@@ -290,6 +363,118 @@ class EventRepository {
 		}
 
 		return array_values( $ids );
+	}
+
+	/**
+	 * Resolve a tag term ID to a list of event post IDs (capped). Mirrors
+	 * `resolve_calendar_post_ids()` for the tags taxonomy.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int $tag_id Term ID.
+	 *
+	 * @return int[] Post IDs, or empty array if the term has no events.
+	 */
+	public function resolve_tag_post_ids( int $tag_id ): array {
+
+		$ids = get_objects_in_term( $tag_id, TagsHelpers::get_tags_taxonomy_id() );
+
+		if ( is_wp_error( $ids ) || empty( $ids ) ) {
+			return [];
+		}
+
+		$ids = array_filter( array_map( 'absint', $ids ) );
+
+		if ( count( $ids ) > self::CALENDAR_FILTER_POST_ID_CAP ) {
+			$ids = array_slice( $ids, 0, self::CALENDAR_FILTER_POST_ID_CAP );
+		}
+
+		return array_values( $ids );
+	}
+
+	/**
+	 * Sugar Calendar event ids an Event_Query matches, across every status and subtype.
+	 *
+	 * Ids only, so no `Event` is built per row and no post, meta or term cache is primed.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array $query_args Event_Query args, for example `object_id__in` or `venue_id`.
+	 * @param int   $cap        Most ids to return.
+	 *
+	 * @return int[]
+	 */
+	public function resolve_event_ids( array $query_args, int $cap ): array {
+
+		$query_args['number'] = $cap;
+		$query_args['offset'] = 0;
+		$query_args['fields'] = 'ids';
+
+		$query = $this->get_event_query( $query_args );
+
+		return array_map( 'intval', (array) ( $query->items ?? [] ) );
+	}
+
+	/**
+	 * Event ids matching a search term by title or content, ignoring pagination and
+	 * order (search-events unions this with `resolve_search_location_ids()` and applies
+	 * both itself). Base filters (status, dates, `object_id__in`) ride `$query_args` so
+	 * a non-privileged caller's scoping still applies to this half of the match.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $search     Search term.
+	 * @param array  $query_args Base Event_Query args from `build_query_args()`.
+	 *
+	 * @return int[]
+	 */
+	public function resolve_search_title_content_ids( string $search, array $query_args ): array {
+
+		$query_args['search']         = $search;
+		$query_args['search_columns'] = [ 'title', 'content' ];
+		$query_args['number']         = self::SEARCH_ID_CAP;
+		$query_args['offset']         = 0;
+
+		unset( $query_args['orderby'], $query_args['order'] );
+
+		$query = $this->get_event_query( $query_args );
+
+		return array_map( 'intval', wp_list_pluck( (array) ( $query->items ?? [] ), 'id' ) );
+	}
+
+	/**
+	 * Event ids whose `location` event meta matches a search term.
+	 *
+	 * Run through `Event_Query` with the same base args as the title/content half, and a
+	 * `meta_query` LIKE on `location`, rather than a raw `sc_eventmeta` query: the raw query
+	 * capped at `SEARCH_ID_CAP` before any status/date/ownership scoping applied, so on a busy
+	 * site the cap could fill entirely with rows a non-privileged caller cannot see, crowding
+	 * out matches the caller was actually allowed to find (architecture review).
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $search     Search term.
+	 * @param array  $query_args Base Event_Query args from `build_query_args()`.
+	 *
+	 * @return int[]
+	 */
+	public function resolve_search_location_ids( string $search, array $query_args ): array {
+
+		$query_args['meta_query'] = [
+			[
+				'key'     => 'location',
+				'value'   => $search,
+				'compare' => 'LIKE',
+			],
+		];
+		$query_args['number']     = self::SEARCH_ID_CAP;
+		$query_args['offset']     = 0;
+
+		unset( $query_args['orderby'], $query_args['order'] );
+
+		$query = $this->get_event_query( $query_args );
+
+		return array_map( 'intval', wp_list_pluck( (array) ( $query->items ?? [] ), 'id' ) );
 	}
 
 	/**
@@ -351,14 +536,42 @@ class EventRepository {
 	 */
 	public function resolve_calendar_map( array $post_ids ): array {
 
+		return $this->resolve_term_map( $post_ids, sugar_calendar_get_calendar_taxonomy_id() );
+	}
+
+	/**
+	 * Tag terms for a set of event posts, keyed by post_id. Same shape as resolve_calendar_map().
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int[] $post_ids WP post IDs.
+	 *
+	 * @return array<int, WP_Term[]>
+	 */
+	public function resolve_tag_map( array $post_ids ): array {
+
+		return $this->resolve_term_map( $post_ids, TagsHelpers::get_tags_taxonomy_id() );
+	}
+
+	/**
+	 * One taxonomy's terms for a set of event posts, keyed by post_id, in one query.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param int[]  $post_ids WP post IDs.
+	 * @param string $taxonomy Taxonomy name.
+	 *
+	 * @return array<int, WP_Term[]>
+	 */
+	private function resolve_term_map( array $post_ids, string $taxonomy ): array {
+
 		$post_ids = array_filter( array_map( 'absint', $post_ids ) );
 
 		if ( empty( $post_ids ) ) {
 			return [];
 		}
 
-		$taxonomy = sugar_calendar_get_calendar_taxonomy_id();
-		$terms    = wp_get_object_terms(
+		$terms = wp_get_object_terms(
 			$post_ids,
 			$taxonomy,
 			[ 'fields' => 'all_with_object_id' ]

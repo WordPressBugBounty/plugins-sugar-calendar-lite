@@ -1,0 +1,98 @@
+@charset "UTF-8";
+/* Ported from DS: insert-dropdown */
+/* Source mtime: 2026-09-07T10:05:42+05:30 */
+/* Sugar Calendar — components/insert-dropdown.css (AI cluster PATTERN)
+   Mirrors Figma "insert-dropdown" (node 14865:204512).
+   .sc-ai-insert-dropdown — the popover the composer's Insert
+   Button opens. Step=Buttons: menu of insert sources; Step=Selection: back
+   header + search + result rows.
+   Composes the Dropdown's popover (menu / list / item hooks) + Input —
+   requires dropdown.css, input.css. Positioning/toggling is consumer-owned
+   (the panel is position-agnostic).
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+/* root rides on .sc-dropdown-menu (surface, radius, shadow,
+   clip) — this class only pins the AI popover's width */
+.sc-ai-insert-dropdown {
+  width: 220px;
+}
+
+/* Buttons step — the source menu opts its rows into hairline dividers via
+   the Dropdown's published --sc-dropdown-item-divider-color hook */
+.sc-ai-insert-dropdown__menu {
+  --sc-dropdown-item-divider-color: var(--sc-surface-divider);
+}
+
+/* leading glyph in a menu row — 12px, icon grey (row hover darkens text
+   only; the glyph keeps its own color per Figma) */
+.sc-ai-insert-dropdown__item-icon {
+  flex: none;
+  font-size: 12px;
+  color: var(--sc-text-icon);
+}
+
+/* Selection step — light back-header closed by a divider */
+.sc-ai-insert-dropdown__header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--sc-spacing-5);
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--sc-padding-12);
+  background: var(--sc-surface-background-light);
+  border-bottom: 1px solid var(--sc-surface-divider);
+}
+
+/* borderless 20px back icon-button around a 12px glyph */
+.sc-ai-insert-dropdown__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--sc-radius-4);
+  color: var(--sc-text-icon);
+  font-size: 12px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: color var(--sc-transition-normal), box-shadow var(--sc-transition-normal);
+}
+
+.sc-ai-insert-dropdown__back:hover {
+  color: var(--sc-text-icon--hover);
+}
+
+.sc-ai-insert-dropdown__back:focus {
+  outline: none;
+}
+
+.sc-ai-insert-dropdown__back:focus-visible {
+  color: var(--sc-text-icon--hover);
+  box-shadow: 0 0 0 2px var(--sc-surface-divider);
+}
+
+/* title — typography from .sc-field-description-bold in markup */
+.sc-ai-insert-dropdown__title {
+  color: var(--sc-text-secondary);
+}
+
+/* Selection body — vertical 12px rhythm; the search insets 12px while the
+   result rows below run full-bleed (Figma) */
+.sc-ai-insert-dropdown__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sc-spacing-5);
+  width: 100%;
+  padding: var(--sc-padding-12) 0;
+}
+
+.sc-ai-insert-dropdown__search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 var(--sc-padding-12);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vaW5zZXJ0LWRyb3Bkb3duLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBO0FBQ0E7QUFLQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFVQTtBQUFBO0FBRUE7RUFDRTs7O0FBR0Y7QUFBQTtBQUVBO0VBQ0U7OztBQUdGO0FBQUE7QUFFQTtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7O0FBRUY7RUFBcUM7OztBQUNyQztFQUFxQzs7O0FBQ3JDO0VBQ0U7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFOzs7QUFHRjtBQUFBO0FBRUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0E7RUFDQSIsImZpbGUiOiJhc3NldHMvY3NzL2NvbXBvbmVudHMvYWRtaW4vaW5zZXJ0LWRyb3Bkb3duLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiBpbnNlcnQtZHJvcGRvd24gKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0wOS0wN1QxMDowNTo0MiswNTozMCAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8qIFN1Z2FyIENhbGVuZGFyIOKAlCBjb21wb25lbnRzL2luc2VydC1kcm9wZG93bi5jc3MgKEFJIGNsdXN0ZXIgUEFUVEVSTilcbiAgIE1pcnJvcnMgRmlnbWEgXCJpbnNlcnQtZHJvcGRvd25cIiAobm9kZSAxNDg2NToyMDQ1MTIpLlxuICAgLnNjLWFpLWluc2VydC1kcm9wZG93biDigJQgdGhlIHBvcG92ZXIgdGhlIGNvbXBvc2VyJ3MgSW5zZXJ0XG4gICBCdXR0b24gb3BlbnMuIFN0ZXA9QnV0dG9uczogbWVudSBvZiBpbnNlcnQgc291cmNlczsgU3RlcD1TZWxlY3Rpb246IGJhY2tcbiAgIGhlYWRlciArIHNlYXJjaCArIHJlc3VsdCByb3dzLlxuICAgQ29tcG9zZXMgdGhlIERyb3Bkb3duJ3MgcG9wb3ZlciAobWVudSAvIGxpc3QgLyBpdGVtIGhvb2tzKSArIElucHV0IOKAlFxuICAgcmVxdWlyZXMgZHJvcGRvd24uY3NzLCBpbnB1dC5jc3MuIFBvc2l0aW9uaW5nL3RvZ2dsaW5nIGlzIGNvbnN1bWVyLW93bmVkXG4gICAodGhlIHBhbmVsIGlzIHBvc2l0aW9uLWFnbm9zdGljKS5cbiAgIFJlcXVpcmVzIHRva2Vucy9wcmltaXRpdmVzLmNzcywgdG9rZW5zL3Rva2Vucy5jc3MsIHRva2Vucy90ZXh0LXN0eWxlcy5jc3MuICovXG5cbi8qIHJvb3QgcmlkZXMgb24gLnNjLWRyb3Bkb3duLW1lbnUgKHN1cmZhY2UsIHJhZGl1cywgc2hhZG93LFxuICAgY2xpcCkg4oCUIHRoaXMgY2xhc3Mgb25seSBwaW5zIHRoZSBBSSBwb3BvdmVyJ3Mgd2lkdGggKi9cbi5zYy1haS1pbnNlcnQtZHJvcGRvd24ge1xuICB3aWR0aDogMjIwcHg7XG59XG5cbi8qIEJ1dHRvbnMgc3RlcCDigJQgdGhlIHNvdXJjZSBtZW51IG9wdHMgaXRzIHJvd3MgaW50byBoYWlybGluZSBkaXZpZGVycyB2aWFcbiAgIHRoZSBEcm9wZG93bidzIHB1Ymxpc2hlZCAtLXNjLWRyb3Bkb3duLWl0ZW0tZGl2aWRlci1jb2xvciBob29rICovXG4uc2MtYWktaW5zZXJ0LWRyb3Bkb3duX19tZW51IHtcbiAgLS1zYy1kcm9wZG93bi1pdGVtLWRpdmlkZXItY29sb3I6IHZhcigtLXNjLXN1cmZhY2UtZGl2aWRlcik7XG59XG5cbi8qIGxlYWRpbmcgZ2x5cGggaW4gYSBtZW51IHJvdyDigJQgMTJweCwgaWNvbiBncmV5IChyb3cgaG92ZXIgZGFya2VucyB0ZXh0XG4gICBvbmx5OyB0aGUgZ2x5cGgga2VlcHMgaXRzIG93biBjb2xvciBwZXIgRmlnbWEpICovXG4uc2MtYWktaW5zZXJ0LWRyb3Bkb3duX19pdGVtLWljb24ge1xuICBmbGV4OiBub25lO1xuICBmb250LXNpemU6IDEycHg7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LWljb24pO1xufVxuXG4vKiBTZWxlY3Rpb24gc3RlcCDigJQgbGlnaHQgYmFjay1oZWFkZXIgY2xvc2VkIGJ5IGEgZGl2aWRlciAqL1xuLnNjLWFpLWluc2VydC1kcm9wZG93bl9faGVhZGVyIHtcbiAgYm94LXNpemluZzogYm9yZGVyLWJveDtcbiAgZGlzcGxheTogZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTUpO1xuICB3aWR0aDogMTAwJTtcbiAgaGVpZ2h0OiA0MHB4O1xuICBwYWRkaW5nOiAwIHZhcigtLXNjLXBhZGRpbmctMTIpO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1zdXJmYWNlLWJhY2tncm91bmQtbGlnaHQpO1xuICBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbn1cblxuLyogYm9yZGVybGVzcyAyMHB4IGJhY2sgaWNvbi1idXR0b24gYXJvdW5kIGEgMTJweCBnbHlwaCAqL1xuLnNjLWFpLWluc2VydC1kcm9wZG93bl9fYmFjayB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgd2lkdGg6IDIwcHg7XG4gIGhlaWdodDogMjBweDtcbiAgcGFkZGluZzogMDtcbiAgYmFja2dyb3VuZDogdHJhbnNwYXJlbnQ7XG4gIGJvcmRlcjogMDtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLTQpO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1pY29uKTtcbiAgZm9udC1zaXplOiAxMnB4O1xuICBjdXJzb3I6IHBvaW50ZXI7XG4gIGFwcGVhcmFuY2U6IG5vbmU7XG4gIC13ZWJraXQtYXBwZWFyYW5jZTogbm9uZTtcbiAgdHJhbnNpdGlvbjogY29sb3IgdmFyKC0tc2MtdHJhbnNpdGlvbi1ub3JtYWwpLCBib3gtc2hhZG93IHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKTtcbn1cbi5zYy1haS1pbnNlcnQtZHJvcGRvd25fX2JhY2s6aG92ZXIgeyBjb2xvcjogdmFyKC0tc2MtdGV4dC1pY29uLS1ob3Zlcik7IH1cbi5zYy1haS1pbnNlcnQtZHJvcGRvd25fX2JhY2s6Zm9jdXMgeyBvdXRsaW5lOiBub25lOyB9XG4uc2MtYWktaW5zZXJ0LWRyb3Bkb3duX19iYWNrOmZvY3VzLXZpc2libGUge1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1pY29uLS1ob3Zlcik7XG4gIGJveC1zaGFkb3c6IDAgMCAwIDJweCB2YXIoLS1zYy1zdXJmYWNlLWRpdmlkZXIpO1xufVxuXG4vKiB0aXRsZSDigJQgdHlwb2dyYXBoeSBmcm9tIC5zYy1maWVsZC1kZXNjcmlwdGlvbi1ib2xkIGluIG1hcmt1cCAqL1xuLnNjLWFpLWluc2VydC1kcm9wZG93bl9fdGl0bGUge1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1zZWNvbmRhcnkpO1xufVxuXG4vKiBTZWxlY3Rpb24gYm9keSDigJQgdmVydGljYWwgMTJweCByaHl0aG07IHRoZSBzZWFyY2ggaW5zZXRzIDEycHggd2hpbGUgdGhlXG4gICByZXN1bHQgcm93cyBiZWxvdyBydW4gZnVsbC1ibGVlZCAoRmlnbWEpICovXG4uc2MtYWktaW5zZXJ0LWRyb3Bkb3duX19ib2R5IHtcbiAgZGlzcGxheTogZmxleDtcbiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTUpO1xuICB3aWR0aDogMTAwJTtcbiAgcGFkZGluZzogdmFyKC0tc2MtcGFkZGluZy0xMikgMDtcbn1cblxuLnNjLWFpLWluc2VydC1kcm9wZG93bl9fc2VhcmNoIHtcbiAgYm94LXNpemluZzogYm9yZGVyLWJveDtcbiAgd2lkdGg6IDEwMCU7XG4gIHBhZGRpbmc6IDAgdmFyKC0tc2MtcGFkZGluZy0xMik7XG59XG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQbHVnaW4gb3ZlcnJpZGVzIOKAlCBjb25mbGljdHMgYW5kIGZpeGVzIGZvciBUSElTIHBsdWdpblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiJdfQ== */

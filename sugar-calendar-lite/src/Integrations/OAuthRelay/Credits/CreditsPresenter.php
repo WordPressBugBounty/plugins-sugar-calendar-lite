@@ -73,6 +73,18 @@ class CreditsPresenter {
 	}
 
 	/**
+	 * The relay's plan slug, for subclasses that vary by plan.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @return string
+	 */
+	protected function plan(): string {
+
+		return $this->has_data() ? (string) ( $this->credits['plan'] ?? 'lite' ) : 'lite';
+	}
+
+	/**
 	 * Whether there is credit data to render.
 	 *
 	 * @since 3.12.0
@@ -284,22 +296,20 @@ class CreditsPresenter {
 			return [];
 		}
 
-		$total    = (int) $this->credits['total'];
-		$registry = IntegrationCapabilityRegistry::instance();
+		$total = (int) $this->credits['total'];
 
 		$segments = [];
 
 		foreach ( $this->credits['usage'] as $row ) {
-			$slug       = $row['slug'];
-			$index      = (int) ( $row['index'] ?? 0 );
-			$capability = $registry->find( IntegrationCapabilityInterface::class, $slug );
+			$slug  = $row['slug'];
+			$index = (int) ( $row['index'] ?? 0 );
 
 			$segments[] = [
 				'slug'       => $slug,
-				'name'       => $capability ? $capability->get_display_name() : ucwords( str_replace( '_', ' ', $slug ) ),
+				'name'       => $this->segment_name( $slug ),
 				'count'      => (int) $row['count'],
 				'percentage' => $total > 0 ? ( (int) $row['count'] / $total ) * 100 : 0,
-				'color'      => self::PALETTE[ $index % count( self::PALETTE ) ],
+				'color'      => static::PALETTE[ $index % count( static::PALETTE ) ],
 				'index'      => $index,
 			];
 		}
@@ -314,6 +324,23 @@ class CreditsPresenter {
 		);
 
 		return $segments;
+	}
+
+	/**
+	 * Display name for a usage slug: the registered integration's name, or the
+	 * slug humanized. AI credit categories override this with their own labels.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $slug Usage slug.
+	 *
+	 * @return string
+	 */
+	protected function segment_name( string $slug ): string {
+
+		$capability = IntegrationCapabilityRegistry::instance()->find( IntegrationCapabilityInterface::class, $slug );
+
+		return $capability ? $capability->get_display_name() : ucwords( str_replace( '_', ' ', $slug ) );
 	}
 
 	/**

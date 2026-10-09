@@ -238,20 +238,6 @@ abstract class AbstractWriteAbility extends AbstractAbility {
 	}
 
 	/**
-	 * Build the standard invalid-input (400) error.
-	 *
-	 * @since 3.14.0
-	 *
-	 * @param string $message Error message, naming the offending field.
-	 *
-	 * @return WP_Error
-	 */
-	protected function invalid_input( string $message ): WP_Error {
-
-		return new WP_Error( 'sc_events_invalid_input', $message, [ 'status' => 400 ] );
-	}
-
-	/**
 	 * Build the standard write-failure (500) error.
 	 *
 	 * @since 3.14.0
@@ -307,5 +293,24 @@ abstract class AbstractWriteAbility extends AbstractAbility {
 				$mismatch
 			)
 		);
+	}
+
+	/**
+	 * Merge one list-shaped key from the normalizer's output and the writer's result.
+	 *
+	 * Split out to keep run()/payload() under the complexity limit; shared by the create and
+	 * update abilities.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array  $normalized Output of EventInputSchema::normalize().
+	 * @param array  $result     Output of EventWriter::create()/update().
+	 * @param string $key        The key to merge: `errors` or `assumptions`.
+	 *
+	 * @return array
+	 */
+	protected static function collect( array $normalized, array $result, string $key ): array {
+
+		return array_merge( (array) ( $normalized[ $key ] ?? [] ), (array) ( $result[ $key ] ?? [] ) );
 	}
 }

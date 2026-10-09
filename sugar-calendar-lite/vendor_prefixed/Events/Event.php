@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Vendor\ProductApi\Events;
 
+use DateTimeInterface;
 /**
  * Product API Event.
  *
@@ -65,6 +66,34 @@ class Event
     public function context($context)
     {
         $this->context = $context;
+        return $this;
+    }
+    /**
+     * Set the time the event occurred.
+     *
+     * Defaults to construction time, which is wrong for anything replayed from a
+     * buffer. Zero, an empty string and anything unparseable resolve to now rather
+     * than to 1970.
+     *
+     * @since 1.1.0
+     *
+     * @param int|string|DateTimeInterface $time Unix timestamp, a date string parseable
+     *                                             by strtotime(), or a date object. A
+     *                                             bare date string is read as UTC.
+     *
+     * @return self
+     */
+    public function time($time)
+    {
+        if ($time instanceof DateTimeInterface) {
+            $timestamp = $time->getTimestamp();
+        } elseif (is_numeric($time)) {
+            $timestamp = (int) $time;
+        } else {
+            // Concatenating an object without __toString() would be fatal.
+            $timestamp = is_scalar($time) ? strtotime($time . ' UTC') : \false;
+        }
+        $this->time = gmdate('Y-m-d\TH:i:s\Z', $timestamp ? $timestamp : time());
         return $this;
     }
     /**

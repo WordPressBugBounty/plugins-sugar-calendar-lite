@@ -78,6 +78,8 @@ class ListEvents extends AbstractAbility {
 					'default' => 'publish',
 				],
 				'calendar_id'  => [ 'type' => 'integer', 'minimum' => 1 ],
+				'tag_id'       => [ 'type' => 'integer', 'minimum' => 1 ],
+				'venue_id'     => [ 'type' => 'integer', 'minimum' => 1 ],
 				'start_after'  => [ 'type' => 'string', 'format' => 'date-time' ],
 				'start_before' => [ 'type' => 'string', 'format' => 'date-time' ],
 				'orderby'      => [
@@ -159,6 +161,28 @@ class ListEvents extends AbstractAbility {
 			}
 
 			$query_args['object_id__in'] = array_values( $post_ids );
+		}
+
+		if ( ! empty( $args['tag_id'] ) ) {
+			$post_ids = $this->events->resolve_tag_post_ids( absint( $args['tag_id'] ) );
+
+			if ( ! empty( $query_args['object_id__in'] ) ) {
+				// Same reasoning as calendar_id above: intersect, don't overwrite, so
+				// combining filters can only narrow the result, never widen it past
+				// what build_query_args() already scoped a non-privileged caller to.
+				$post_ids = array_intersect( $post_ids, $query_args['object_id__in'] );
+			}
+
+			if ( empty( $post_ids ) ) {
+				return [ 'events' => [], 'total' => 0 ];
+			}
+
+			$query_args['object_id__in'] = array_values( $post_ids );
+		}
+
+		if ( ! empty( $args['venue_id'] ) ) {
+			// venue_id is a wp_sc_events column, so Event_Query filters on it directly.
+			$query_args['venue_id'] = absint( $args['venue_id'] );
 		}
 
 		$query_args['number']  = absint( $args['number'] ?? 20 );

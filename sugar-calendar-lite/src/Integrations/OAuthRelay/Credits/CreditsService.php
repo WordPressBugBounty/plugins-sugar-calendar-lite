@@ -2,9 +2,9 @@
 
 namespace Sugar_Calendar\Integrations\OAuthRelay\Credits;
 
+use Sugar_Calendar\Integrations\OAuthRelay\RelayLicenseType;
 use Sugar_Calendar\Vendor\ProductApi\Auth\HMACAuthStrategy;
 use Sugar_Calendar\Vendor\ProductApi\Auth\SiteRegistration;
-use Sugar_Calendar\Vendor\ProductApi\Context;
 use Sugar_Calendar\Vendor\ProductApi\ProductApi;
 
 /**
@@ -206,7 +206,7 @@ class CreditsService {
 
 		try {
 			$response = ProductApi::client()
-				->get( '/integrations/v1/' . $this->get_license_type() . '/credits' )
+				->get( '/integrations/v1/' . RelayLicenseType::get() . '/credits' )
 				->auth_strategy( $hmac )
 				->send();
 		} catch ( \Throwable $e ) {
@@ -233,165 +233,17 @@ class CreditsService {
 	 */
 	private function format_response( array $response ): array {
 
-		$credits   = $response['credits'];
-		$total     = (int) ( $credits['total'] ?? 0 );
-		$used      = (int) ( $credits['used'] ?? 0 );
-		$remaining = isset( $credits['remaining'] ) ? (int) $credits['remaining'] : max( 0, $total - $used );
-
-		$resets_at = ( ! empty( $credits['resets_at'] ) && strtotime( $credits['resets_at'] ) !== false )
-			? sanitize_text_field( $credits['resets_at'] )
-			: null;
-
 		// Sanitize the relay-supplied plan slug on intake (defense-in-depth):
 		// it is never output today, but sanitize_key() keeps it a safe slug if a
 		// future consumer ever echoes it.
 		$plan = isset( $response['plan'] ) ? sanitize_key( $response['plan'] ) : 'lite';
 
-		$usage = $this->format_usage( $response['usage'] ?? [], $total );
+		$out = [ 'plan' => $plan ] + CreditsPayload::format( $response['credits'] );
 
-		return [
-			'plan'         => $plan,
-			'total'        => $total,
-			'used'         => $used,
-			'remaining'    => $remaining,
-			'resets_at'    => $resets_at,
-			'reset_date'   => $resets_at ? $this->format_reset_date( $resets_at ) : '',
-			'percentage'   => $total > 0 ? min( (int) round( ( $used / $total ) * 100 ), 100 ) : 0,
-			'is_maxed'     => $remaining <= 0 && $total > 0,
-			'show_upgrade' => $plan !== 'elite',
-			'usage'        => $usage,
-		];
-	}
+		$out['show_upgrade'] = $plan !== 'elite';
+		$out['usage']        = UsageBreakdown::rows( $response['usage'] ?? [], $out['total'], self::COLOR_MAP_OPTION );
 
-	/**
-	 * Format per-integration usage into rows with percentages.
-	 *
-	 * The relay sends `usage` as a map keyed by integration slug
-	 * (`{"zoom":1}`) — NOT a list of row objects. Iterate the slug => count
-	 * pairs directly (mirrors the relay's CreditsController + Bookings).
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param mixed $usage Raw usage map (slug => spent count).
-	 * @param int   $total Total credit limit, for the percentage.
-	 *
-	 * @return array[] Each: slug, count, percentage, index. Highest usage first.
-	 */
-	private function format_usage( $usage, int $total ): array {
-
-		if ( empty( $usage ) || ! is_array( $usage ) || $total <= 0 ) {
-			return [];
-		}
-
-		$formatted = [];
-
-		foreach ( $usage as $slug => $count ) {
-			$count = (int) $count;
-
-			if ( $count <= 0 ) {
-				continue;
-			}
-
-			$formatted[] = [
-				'slug'       => sanitize_key( $slug ),
-				'count'      => $count,
-				'percentage' => min( (int) round( ( $count / $total ) * 100 ), 100 ),
-			];
-		}
-
-		// Highest usage first.
-		usort(
-			$formatted,
-			static function ( $a, $b ) {
-
-				return $b['count'] <=> $a['count'];
-			}
-		);
-
-		return $this->assign_color_indexes( $formatted );
-	}
-
-	/**
-	 * Stamp each usage row with its stable palette index.
-	 *
-	 * A slug keeps the same index as the integration set grows: a new slug
-	 * takes `max(existing) + 1` (first slug -> 0), persisted to an option so the
-	 * color is stable across requests. The presenter maps the index to a hex
-	 * color. The option write happens here (fetch/format time), not in the
-	 * presenter, so a render never triggers a DB write.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param array[] $rows Usage rows (each with a `slug`).
-	 *
-	 * @return array[] The rows with an added integer `index`.
-	 */
-	private function assign_color_indexes( array $rows ): array {
-
-		$map = get_option( self::COLOR_MAP_OPTION, [] );
-
-		// Keep only int values: a corrupted option must not break max().
-		$map     = is_array( $map ) ? array_filter( $map, 'is_int' ) : [];
-		$changed = false;
-
-		foreach ( $rows as $row ) {
-			if ( ! isset( $map[ $row['slug'] ] ) ) {
-				$map[ $row['slug'] ] = ! empty( $map ) ? max( $map ) + 1 : 0;
-				$changed             = true;
-			}
-		}
-
-		if ( $changed ) {
-			update_option( self::COLOR_MAP_OPTION, $map, false );
-		}
-
-		foreach ( $rows as &$row ) {
-			$row['index'] = $map[ $row['slug'] ] ?? 0;
-		}
-
-		unset( $row );
-
-		return $rows;
-	}
-
-	/**
-	 * Format an ISO reset date for display, or '' when unparseable.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param string $resets_at Raw reset date.
-	 *
-	 * @return string
-	 */
-	private function format_reset_date( string $resets_at ): string {
-
-		$ts = strtotime( $resets_at );
-
-		if ( $ts === false ) {
-			return '';
-		}
-
-		$formatted = wp_date( get_option( 'date_format' ), $ts );
-
-		return $formatted !== false ? $formatted : '';
-	}
-
-	/**
-	 * Effective license tier for credits routing. Guarded for Lite.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return string 'pro' or 'lite'.
-	 */
-	private function get_license_type(): string {
-
-		$context = $this->safe_get( Context::class );
-
-		if ( $context === null ) {
-			return 'lite';
-		}
-
-		return ( $context->is_pro() && $context->is_license_valid() ) ? 'pro' : 'lite';
+		return $out;
 	}
 
 	/**
@@ -426,6 +278,6 @@ class CreditsService {
 	 */
 	private function get_transient_key(): string {
 
-		return self::TRANSIENT_KEY . '_' . $this->get_license_type();
+		return self::TRANSIENT_KEY . '_' . RelayLicenseType::get();
 	}
 }

@@ -7,6 +7,10 @@ use Sugar_Calendar\Helpers as Sugar_Calendar_Helpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Integrations\Abilities\Abilities;
+use Sugar_Calendar\Integrations\Ai\Availability;
+use Sugar_Calendar\Integrations\Ai\Credits\AiCreditsPresenter;
+use Sugar_Calendar\Integrations\Ai\Credits\AiUsageService;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\UsageCardRenderer;
 
 /**
@@ -96,7 +100,52 @@ class SettingsLicenseUsageTab extends Settings {
 			$license_key_settings ?? $this->display_license_key_settings()
 		);
 
-		( new UsageCardRenderer() )->render();
+		$integration_rendered = ( new UsageCardRenderer() )->render();
+
+		// One heading covers both cards; the AI card only carries it when the
+		// integration card above did not render.
+		$this->display_ai_usage_card( ! $integration_rendered );
+	}
+
+	/**
+	 * The AI usage card. Hidden until the site is registered with the relay,
+	 * since there is no data to show before that, while Gia is turned off, and
+	 * without the Abilities API (WordPress before 6.9), where Gia cannot run.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param bool $show_heading Whether this card renders the section heading.
+	 *
+	 * @return void
+	 */
+	private function display_ai_usage_card( bool $show_heading = false ) {
+
+		if ( ! Availability::is_enabled() || ! Abilities::is_available() || ! Availability::relay_ready() ) {
+			return;
+		}
+
+		$upgrade = AiUsageService::upgrade(
+			[
+				'content' => 'usage-credits-upgrade',
+				'medium'  => 'license-usage',
+			]
+		);
+
+		( new UsageCardRenderer(
+			[
+				'presenter'         => AiCreditsPresenter::from_usage_service( new AiUsageService() ),
+				'label'             => __( 'AI Usage', 'sugar-calendar-lite' ),
+				'icon_svg'          => '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1l1.4 3.6L11 6 7.4 7.4 6 11 4.6 7.4 1 6l3.6-1.4L6 1zm6 6l.8 2.2L15 10l-2.2.8L12 13l-.8-2.2L9 10l2.2-.8L12 7z" fill="#8250DF"/></svg>',
+				'modifier_class'    => 'sugar-calendar-usage-card--ai',
+				'anchor_id'         => 'sugar-calendar-ai-usage',
+				'maxed_text'        => __( "You've used all of this period's AI usage. Gia can't run new requests until it resets or your limit is increased.", 'sugar-calendar-lite' ),
+				// Null means no higher plan: show_upgrade is false, so the button never renders.
+				'upgrade_url'       => $upgrade['url'] ?? '',
+				/* translators: %1$s, %2$s - opening and closing anchor tags linking to the license key field. */
+				'license_note_text' => __( 'Your license isn\'t active, so Gia is using Lite credit limits. %1$sActivate your license%2$s to unlock your Pro credits.', 'sugar-calendar-lite' ),
+				'show_heading'      => $show_heading,
+			]
+		) )->render();
 	}
 
 	/**

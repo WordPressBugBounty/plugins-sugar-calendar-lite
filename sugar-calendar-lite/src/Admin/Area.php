@@ -21,6 +21,7 @@ use Sugar_Calendar\Admin\Pages\SettingsLicenseUsageTab;
 use Sugar_Calendar\Admin\Pages\SettingsMiscTab;
 use Sugar_Calendar\Admin\Pages\SettingsRsvpTab;
 use Sugar_Calendar\Admin\Pages\SettingsZapierTab;
+use Sugar_Calendar\Admin\Pages\SetupChecklist;
 use Sugar_Calendar\Admin\Pages\Tools;
 use Sugar_Calendar\Admin\Pages\ToolsAiTab;
 use Sugar_Calendar\Admin\Pages\ToolsExportTab;
@@ -104,6 +105,7 @@ class Area {
 		'sugar-calendar-addons',
 		'sugar-calendar-calendar-new',
 		'sugar-calendar-rsvp',
+		'sugar-calendar-setup-checklist',
 	];
 
 	/**
@@ -212,6 +214,9 @@ class Area {
 		// to ensure addons register menu items first.
 		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 
+		// Last, so it settles the checklist entry after every add-on has registered.
+		add_action( 'admin_menu', [ SetupChecklist::class, 'place_menu_item' ], PHP_INT_MAX );
+
 		add_filter( 'parent_file', [ $this, 'force_parent_menu' ] );
 
 		// Handle different menu highlighting scenarios.
@@ -234,6 +239,10 @@ class Area {
 
 		// Handle AJAX requests.
 		add_action( 'wp_ajax_' . self::SLUG, [ $this, 'handle_ajax' ] );
+
+		if ( wp_doing_ajax() ) {
+			add_action( 'sugar_calendar_plugin_activated', [ new SMTP(), 'smtp_activated' ] );
+		}
 
 		// Enqueue assets.
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -486,6 +495,18 @@ class Area {
 			Welcome::get_priority()
 		);
 
+		// Registered last: earlier, it would shift the submenu count the siblings
+		// below resolve their numeric positions against.
+		add_submenu_page(
+			self::SLUG,
+			SetupChecklist::get_title(),
+			SetupChecklist::get_menu_title(),
+			SetupChecklist::get_capability(),
+			SetupChecklist::get_slug(),
+			[ $this, 'display' ],
+			SetupChecklist::get_priority()
+		);
+
 		if ( ! Plugin::instance()->is_pro() ) {
 			add_submenu_page(
 				self::SLUG,
@@ -657,6 +678,10 @@ class Area {
 					case SMTP::get_slug():
 						$page_id = 'smtp';
 						break;
+
+					case SetupChecklist::get_slug():
+						$page_id = 'setup_checklist';
+						break;
 				}
 			}
 
@@ -793,6 +818,7 @@ class Area {
 			'rsvp'                   => Rsvp::class,
 			'addons'                 => Addons::class,
 			'smtp'                   => SMTP::class,
+			'setup_checklist'        => SetupChecklist::class,
 		];
 
 		/**
@@ -934,8 +960,15 @@ class Area {
 	 * @since 3.0.0
 	 * @since 3.13.0 The transient is consumed only when the welcome screen actually renders,
 	 *                  and the redirect is offered once per site rather than once per activation.
+	 * @since 3.15.0 Skips AJAX requests.
 	 */
 	public function maybe_redirect_welcome() {
+
+		// admin-ajax.php fires admin_init too: a heartbeat in the activation window would
+		// render the screen into a response nobody sees and spend the site's one chance.
+		if ( wp_doing_ajax() ) {
+			return;
+		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -1020,6 +1053,19 @@ class Area {
 		// Bail if request checks fail.
 		if ( ! check_admin_referer( self::SLUG ) ) {
 			return;
+		}
+
+		// admin-post.php reaches admin_init without WordPress's page-capability
+		// gate, so the page's own capability has to be checked here or a POST
+		// with a self-minted nonce saves settings the user cannot even view.
+		$capability = $this->current_page::get_capability();
+
+		if ( ! current_user_can( $capability ) ) {
+			wp_die(
+				esc_html__( 'Sorry, you are not allowed to change these settings.', 'sugar-calendar-lite' ),
+				'',
+				[ 'response' => 403 ]
+			);
 		}
 
 		// Handle legacy settings.

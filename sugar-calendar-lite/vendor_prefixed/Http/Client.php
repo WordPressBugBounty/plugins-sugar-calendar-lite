@@ -30,11 +30,12 @@ class Client
      */
     protected $site_url;
     /**
-     * License key.
+     * License key, or a callable resolving it when a request is sent.
      *
      * @since 1.0.0
+     * @since 1.2.0 A callable is accepted.
      *
-     * @var string
+     * @var string|callable
      */
     protected $license_key;
     /**
@@ -252,11 +253,30 @@ class Client
         if ($request->get_blocking() !== null) {
             $request_args['blocking'] = $request->get_blocking();
         }
-        if (!empty($this->license_key)) {
-            $headers['X-License-Key'] = $this->license_key;
+        $license_key = $this->resolve_license_key();
+        if ($license_key !== '') {
+            $headers['X-License-Key'] = $license_key;
         }
         $request_args['headers'] = $headers;
         $response = wp_remote_request($url, $request_args);
         return new Response($response);
+    }
+    /**
+     * Resolve the license key for this request.
+     *
+     * A plain string is used as is, a closure or array callable is called, so a key configured
+     * lazily is read at send time rather than at construction.
+     *
+     * @since 1.2.0
+     *
+     * @return string
+     */
+    private function resolve_license_key()
+    {
+        $license_key = $this->license_key;
+        if (!is_string($license_key) && is_callable($license_key)) {
+            $license_key = call_user_func($license_key);
+        }
+        return (string) $license_key;
     }
 }

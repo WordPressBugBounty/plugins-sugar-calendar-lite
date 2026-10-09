@@ -1,0 +1,28 @@
+@charset "UTF-8";
+/* Ported from DS: user-prompt */
+/* Source mtime: 2026-10-02T12:26:27Z */
+/* Sugar Calendar — components/user-prompt.css (AI cluster)
+   Mirrors Figma "user-prompt" (node 13863:69984).
+   .sc-ai-user-prompt — right-aligned message bubble: light surface,
+   heading-dark text, no outline. The only bubble in the
+   conversation: the assistant's replies sit plain on the chat background.
+   One Type (Default); the bubble hugs short prompts and wraps long ones
+   (Figma: 50px left inset in the 460px column).
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-user-prompt {
+  display: flex;
+  justify-content: flex-end;
+  /* the bubble never reaches the left edge (Figma: padding-left 50) */
+  padding-left: var(--sc-spacing-50);
+}
+
+.sc-ai-user-prompt__bubble {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0;
+  padding: var(--sc-padding-16);
+  background: var(--sc-surface-background-light);
+  color: var(--sc-text-heading);
+  border-radius: var(--sc-radius-10);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vdXNlci1wcm9tcHQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUtBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFTQTtFQUNFO0VBQ0E7QUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi91c2VyLXByb21wdC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogdXNlci1wcm9tcHQgKi9cbi8qIFNvdXJjZSBtdGltZTogMjAyNi0xMC0wMlQxMjoyNjoyN1ogKi9cblxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi8vIFBvcnRlZCBmcm9tIERTIChkbyBub3QgZWRpdCDigJQgcmUtcG9ydCBpZiBEUyBzb3VyY2UgY2hhbmdlcylcbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vKiBTdWdhciBDYWxlbmRhciDigJQgY29tcG9uZW50cy91c2VyLXByb21wdC5jc3MgKEFJIGNsdXN0ZXIpXG4gICBNaXJyb3JzIEZpZ21hIFwidXNlci1wcm9tcHRcIiAobm9kZSAxMzg2Mzo2OTk4NCkuXG4gICAuc2MtYWktdXNlci1wcm9tcHQg4oCUIHJpZ2h0LWFsaWduZWQgbWVzc2FnZSBidWJibGU6IGxpZ2h0IHN1cmZhY2UsXG4gICBoZWFkaW5nLWRhcmsgdGV4dCwgbm8gb3V0bGluZS4gVGhlIG9ubHkgYnViYmxlIGluIHRoZVxuICAgY29udmVyc2F0aW9uOiB0aGUgYXNzaXN0YW50J3MgcmVwbGllcyBzaXQgcGxhaW4gb24gdGhlIGNoYXQgYmFja2dyb3VuZC5cbiAgIE9uZSBUeXBlIChEZWZhdWx0KTsgdGhlIGJ1YmJsZSBodWdzIHNob3J0IHByb21wdHMgYW5kIHdyYXBzIGxvbmcgb25lc1xuICAgKEZpZ21hOiA1MHB4IGxlZnQgaW5zZXQgaW4gdGhlIDQ2MHB4IGNvbHVtbikuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLCB0b2tlbnMvdGV4dC1zdHlsZXMuY3NzLiAqL1xuXG4uc2MtYWktdXNlci1wcm9tcHQge1xuICBkaXNwbGF5OiBmbGV4O1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGZsZXgtZW5kO1xuICAvKiB0aGUgYnViYmxlIG5ldmVyIHJlYWNoZXMgdGhlIGxlZnQgZWRnZSAoRmlnbWE6IHBhZGRpbmctbGVmdCA1MCkgKi9cbiAgcGFkZGluZy1sZWZ0OiB2YXIoLS1zYy1zcGFjaW5nLTUwKTtcbn1cblxuLnNjLWFpLXVzZXItcHJvbXB0X19idWJibGUge1xuICBib3gtc2l6aW5nOiBib3JkZXItYm94O1xuICBtYXgtd2lkdGg6IDEwMCU7XG4gIG1hcmdpbjogMDtcbiAgcGFkZGluZzogdmFyKC0tc2MtcGFkZGluZy0xNik7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLXN1cmZhY2UtYmFja2dyb3VuZC1saWdodCk7XG4gIGNvbG9yOiB2YXIoLS1zYy10ZXh0LWhlYWRpbmcpO1xuICBib3JkZXItcmFkaXVzOiB2YXIoLS1zYy1yYWRpdXMtMTApO1xufVxuIl19 */

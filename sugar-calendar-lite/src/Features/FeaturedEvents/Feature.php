@@ -16,6 +16,7 @@ use Sugar_Calendar\Features\FeaturedEvents\Frontend\SingleEvent;
 
 // Block event titles.
 use Sugar_Calendar\Features\FeaturedEvents\Frontend\BlockEventTitle;
+use Sugar_Calendar\Features\FeaturedEvents\Integrations\Abilities\FeaturedContributor;
 
 /**
  * Feature class for the Featured Events feature.
@@ -103,6 +104,9 @@ class Feature extends FeatureAbstract {
 
 		$this->meta->hooks();
 		$this->block_event_title->hooks();
+
+		// Abilities are served over REST and WP-CLI, so this cannot sit behind is_admin().
+		FeaturedContributor::hooks();
 
 		if ( is_admin() ) {
 			$this->admin_area->hooks();

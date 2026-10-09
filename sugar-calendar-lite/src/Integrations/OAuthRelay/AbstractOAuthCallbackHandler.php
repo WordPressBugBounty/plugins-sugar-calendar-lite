@@ -198,6 +198,16 @@ abstract class AbstractOAuthCallbackHandler {
 		// webhook delivery degrades gracefully.
 		$this->maybe_register_webhook( (string) $user['id'] );
 
+		/**
+		 * Fires after an integration connects, reconnects included.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param string $provider Provider slug.
+		 * @param array  $context  Provider details; Stripe passes `mode` (live|sandbox).
+		 */
+		do_action( 'sugar_calendar_integration_connected', $this->get_provider(), [] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		// Redirect with success.
 		$this->redirect_with_success();
 	}

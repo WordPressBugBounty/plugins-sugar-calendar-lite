@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin;
 
 use Sugar_Calendar\Helpers\Helpers;
+use Sugar_Calendar\Integrations\Ai\Admin\ChatShell;
 use Sugar_Calendar\Plugin;
 
 /**
@@ -40,6 +41,11 @@ class FlyoutMenu {
 
 		// Bail if we're not on a Sugar Calendar admin page.
 		if ( ! sugar_calendar()->get_admin()->is_admin_page() ) {
+			return;
+		}
+
+		// The Gia AI bubble replaces the quick links when the assistant is on.
+		if ( ChatShell::is_active() ) {
 			return;
 		}
 

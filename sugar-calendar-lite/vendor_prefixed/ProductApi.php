@@ -110,7 +110,15 @@ final class ProductApi
         });
         $this->container->singleton(Client::class, function () {
             $context = $this->resolve(Context::class);
-            return new Client($context->get_api_url(), ['site_url' => $context->get_site_url(), 'license_key' => $context->get_license_key(), 'user_agent' => $context->get_user_agent()]);
+            return new Client($context->get_api_url(), [
+                'site_url' => $context->get_site_url(),
+                // Read through the context on every request, so a key configured as a
+                // callable reaches the header with its current value, not the boot one.
+                'license_key' => static function () use ($context) {
+                    return $context->get_license_key();
+                },
+                'user_agent' => $context->get_user_agent(),
+            ]);
         });
         $this->container->singleton(AuthManager::class, function () {
             return new AuthManager($this->resolve(Context::class), $this->resolve(Options::class));

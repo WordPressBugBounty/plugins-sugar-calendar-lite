@@ -3,7 +3,6 @@
 namespace Sugar_Calendar\Emails;
 
 use Sugar_Calendar\AddOn\Ticketing\Emails;
-use Sugar_Calendar\Features\RegistrationForm\Frontend\OrderEmailResumeLink;
 use Throwable;
 
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_online_meeting_email_filter;
@@ -73,6 +72,7 @@ class ContentEnrichment {
 	 * Install receipt content enrichments in delivery order.
 	 *
 	 * @since 3.14.0
+	 * @since 3.15.0 Registration content arrives through a filter.
 	 *
 	 * @param int    $order_id            Order id.
 	 * @param int    $event_id            SC event id.
@@ -83,7 +83,25 @@ class ContentEnrichment {
 	public function install_receipt( int $order_id, int $event_id, string $resume_url_override = '' ): void {
 
 		$this->install_ticket( $event_id );
-		$this->store( OrderEmailResumeLink::install( $order_id, $resume_url_override, true ) );
+
+		/**
+		 * Filters the prepared sc_email_message callbacks for one receipt render.
+		 *
+		 * Each callback must be prepared for deferred registration: this class
+		 * binds it to the render frame, it must not add itself to the filter.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param callable[] $callbacks           Prepared callbacks, in delivery order.
+		 * @param int        $order_id            Order id.
+		 * @param int        $event_id            SC event id.
+		 * @param string     $resume_url_override Optional emitted registration URL.
+		 */
+		$callbacks = apply_filters( 'sugar_calendar_emails_receipt_enrichment_callbacks', [], $order_id, $event_id, $resume_url_override );
+
+		foreach ( (array) $callbacks as $callback ) {
+			$this->store( is_callable( $callback ) ? $callback : null );
+		}
 	}
 
 	/**

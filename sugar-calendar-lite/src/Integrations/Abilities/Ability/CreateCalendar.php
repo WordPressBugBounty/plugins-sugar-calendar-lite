@@ -205,7 +205,7 @@ class CreateCalendar extends AbstractWriteAbility {
 		if ( $existing instanceof WP_Term ) {
 			return [
 				'term_id' => (int) $existing->term_id,
-				'name'    => $existing->name,
+				'name'    => $this->decode_name( $existing->name ),
 				'created' => false,
 			];
 		}
@@ -218,7 +218,7 @@ class CreateCalendar extends AbstractWriteAbility {
 			if ( $collision instanceof WP_Term ) {
 				return [
 					'term_id' => (int) $collision->term_id,
-					'name'    => $collision->name,
+					'name'    => $this->decode_name( $collision->name ),
 					'created' => false,
 				];
 			}
@@ -258,6 +258,24 @@ class CreateCalendar extends AbstractWriteAbility {
 		$term    = $term_id > 0 ? get_term( $term_id, $taxonomy ) : null;
 
 		return $term instanceof WP_Term ? $term : null;
+	}
+
+	/**
+	 * Decode an existing term's stored (kses-encoded) name for output.
+	 *
+	 * `list-tags`/`get-tag` and the calendar equivalents already decode via
+	 * `Formatter::text()`; an existing-term reply here has to match, or the same name
+	 * reads `Rock & Roll` on the first call and `Rock &amp; Roll` on a repeat.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $name Stored term name.
+	 *
+	 * @return string
+	 */
+	private function decode_name( string $name ): string {
+
+		return html_entity_decode( $name, ENT_QUOTES, get_bloginfo( 'charset' ) );
 	}
 
 	/**

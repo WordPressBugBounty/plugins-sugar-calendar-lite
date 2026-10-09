@@ -1,0 +1,71 @@
+@charset "UTF-8";
+/* Ported from DS: top-nav */
+/* Source mtime: 2026-08-06T18:24:42Z */
+/* Sugar Calendar — components/top-nav.css (AI cluster)
+   Mirrors Figma "top-nav" (node 14167:71104).
+   .sc-ai-top-nav — the AI Chat Container's title bar: title left,
+   icon-buttons (delete / minimize) right, bottom divider.
+   Requires tokens/primitives.css, tokens/tokens.css, tokens/text-styles.css. */
+.sc-ai-top-nav {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sc-spacing-10);
+  width: 100%;
+  padding: var(--sc-padding-12) var(--sc-padding-20);
+  background: var(--sc-surface-background-white);
+  border-bottom: 1px solid var(--sc-surface-divider);
+}
+
+/* title — typography from .sc-page-title in markup */
+.sc-ai-top-nav__title {
+  margin: 0;
+  min-width: 0;
+  color: var(--sc-text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-ai-top-nav__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sc-spacing-10);
+}
+
+/* borderless 32px icon-button around a 16px glyph */
+.sc-ai-top-nav__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--sc-radius-4);
+  color: var(--sc-text-icon);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: color var(--sc-transition-normal), box-shadow var(--sc-transition-normal);
+}
+
+.sc-ai-top-nav__button:hover {
+  color: var(--sc-text-icon--hover);
+}
+
+.sc-ai-top-nav__button:focus {
+  outline: none;
+}
+
+.sc-ai-top-nav__button:focus-visible {
+  color: var(--sc-text-icon--hover);
+  box-shadow: 0 0 0 2px var(--sc-surface-divider);
+}
+
+.sc-ai-top-nav__icon {
+  font-size: 16px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vdG9wLW5hdi5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTtBQUNBO0FBS0E7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQU1BO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtBQUNBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0E7RUFDQTs7O0FBR0Y7QUFDQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUVGO0VBQStCOzs7QUFDL0I7RUFBK0I7OztBQUMvQjtFQUNFO0VBQ0E7OztBQUdGO0VBQXVCIiwiZmlsZSI6ImFzc2V0cy9jc3MvY29tcG9uZW50cy9hZG1pbi90b3AtbmF2LmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFBvcnRlZCBmcm9tIERTOiB0b3AtbmF2ICovXG4vKiBTb3VyY2UgbXRpbWU6IDIwMjYtMDgtMDZUMTg6MjQ6NDJaICovXG5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4vLyBQb3J0ZWQgZnJvbSBEUyAoZG8gbm90IGVkaXQg4oCUIHJlLXBvcnQgaWYgRFMgc291cmNlIGNoYW5nZXMpXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLyogU3VnYXIgQ2FsZW5kYXIg4oCUIGNvbXBvbmVudHMvdG9wLW5hdi5jc3MgKEFJIGNsdXN0ZXIpXG4gICBNaXJyb3JzIEZpZ21hIFwidG9wLW5hdlwiIChub2RlIDE0MTY3OjcxMTA0KS5cbiAgIC5zYy1haS10b3AtbmF2IOKAlCB0aGUgQUkgQ2hhdCBDb250YWluZXIncyB0aXRsZSBiYXI6IHRpdGxlIGxlZnQsXG4gICBpY29uLWJ1dHRvbnMgKGRlbGV0ZSAvIG1pbmltaXplKSByaWdodCwgYm90dG9tIGRpdmlkZXIuXG4gICBSZXF1aXJlcyB0b2tlbnMvcHJpbWl0aXZlcy5jc3MsIHRva2Vucy90b2tlbnMuY3NzLCB0b2tlbnMvdGV4dC1zdHlsZXMuY3NzLiAqL1xuXG4uc2MtYWktdG9wLW5hdiB7XG4gIGJveC1zaXppbmc6IGJvcmRlci1ib3g7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGp1c3RpZnktY29udGVudDogc3BhY2UtYmV0d2VlbjtcbiAgZ2FwOiB2YXIoLS1zYy1zcGFjaW5nLTEwKTtcbiAgd2lkdGg6IDEwMCU7XG4gIHBhZGRpbmc6IHZhcigtLXNjLXBhZGRpbmctMTIpIHZhcigtLXNjLXBhZGRpbmctMjApO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1zYy1zdXJmYWNlLWJhY2tncm91bmQtd2hpdGUpO1xuICBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbn1cblxuLyogdGl0bGUg4oCUIHR5cG9ncmFwaHkgZnJvbSAuc2MtcGFnZS10aXRsZSBpbiBtYXJrdXAgKi9cbi5zYy1haS10b3AtbmF2X190aXRsZSB7XG4gIG1hcmdpbjogMDtcbiAgbWluLXdpZHRoOiAwO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC10aXRsZSk7XG4gIHdoaXRlLXNwYWNlOiBub3dyYXA7XG4gIG92ZXJmbG93OiBoaWRkZW47XG4gIHRleHQtb3ZlcmZsb3c6IGVsbGlwc2lzO1xufVxuXG4uc2MtYWktdG9wLW5hdl9fYWN0aW9ucyB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBnYXA6IHZhcigtLXNjLXNwYWNpbmctMTApO1xufVxuXG4vKiBib3JkZXJsZXNzIDMycHggaWNvbi1idXR0b24gYXJvdW5kIGEgMTZweCBnbHlwaCAqL1xuLnNjLWFpLXRvcC1uYXZfX2J1dHRvbiB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgd2lkdGg6IDMycHg7XG4gIGhlaWdodDogMzJweDtcbiAgcGFkZGluZzogMDtcbiAgYmFja2dyb3VuZDogdHJhbnNwYXJlbnQ7XG4gIGJvcmRlcjogMDtcbiAgYm9yZGVyLXJhZGl1czogdmFyKC0tc2MtcmFkaXVzLTQpO1xuICBjb2xvcjogdmFyKC0tc2MtdGV4dC1pY29uKTtcbiAgY3Vyc29yOiBwb2ludGVyO1xuICBhcHBlYXJhbmNlOiBub25lO1xuICAtd2Via2l0LWFwcGVhcmFuY2U6IG5vbmU7XG4gIHRyYW5zaXRpb246IGNvbG9yIHZhcigtLXNjLXRyYW5zaXRpb24tbm9ybWFsKSwgYm94LXNoYWRvdyB2YXIoLS1zYy10cmFuc2l0aW9uLW5vcm1hbCk7XG59XG4uc2MtYWktdG9wLW5hdl9fYnV0dG9uOmhvdmVyIHsgY29sb3I6IHZhcigtLXNjLXRleHQtaWNvbi0taG92ZXIpOyB9XG4uc2MtYWktdG9wLW5hdl9fYnV0dG9uOmZvY3VzIHsgb3V0bGluZTogbm9uZTsgfVxuLnNjLWFpLXRvcC1uYXZfX2J1dHRvbjpmb2N1cy12aXNpYmxlIHtcbiAgY29sb3I6IHZhcigtLXNjLXRleHQtaWNvbi0taG92ZXIpO1xuICBib3gtc2hhZG93OiAwIDAgMCAycHggdmFyKC0tc2Mtc3VyZmFjZS1kaXZpZGVyKTtcbn1cblxuLnNjLWFpLXRvcC1uYXZfX2ljb24geyBmb250LXNpemU6IDE2cHg7IH1cbiJdfQ== */

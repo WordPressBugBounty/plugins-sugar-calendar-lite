@@ -21,6 +21,15 @@ class Options {
 	protected static $settings = null;
 
 	/**
+	 * Blog ID that owns the current settings cache.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @var int|null
+	 */
+	protected static $settings_blog_id = null;
+
+	/**
 	 * The name of the option where all settings are stored.
 	 *
 	 * @since 3.0.0
@@ -40,11 +49,14 @@ class Options {
 	 */
 	protected static function populate() {
 
-		if ( ! is_null( static::$settings ) ) {
+		$blog_id = get_current_blog_id();
+
+		if ( ! is_null( static::$settings ) && static::$settings_blog_id === $blog_id ) {
 			return;
 		}
 
-		static::$settings = get_option( static::OPTION_NAME, [] );
+		static::$settings         = get_option( static::OPTION_NAME, [] );
+		static::$settings_blog_id = $blog_id;
 	}
 
 	/**
@@ -93,6 +105,7 @@ class Options {
 			'default_calendar'             => null,
 			'hide_announcements'           => false,
 			'disable_integrations'         => false,
+			'ai_assistant_enabled'         => true,
 			'maps_google_api_key'          => '',
 			'single_event_appearance_mode' => 'light',
 		];

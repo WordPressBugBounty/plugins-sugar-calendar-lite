@@ -250,6 +250,9 @@ class SugarCalendar extends Importer {
 
 		$this->validate_import_action();
 
+		/** This action is documented in src/Admin/Tools/Importers/TheEventCalendar.php */
+		do_action( 'sugar_calendar_importer_started', 'json' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		// The wp_unslash() function breaks upload on Windows.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.NonceVerification.Missing
 		$filename = isset( $_FILES['file']['tmp_name'] ) ? sanitize_text_field( $_FILES['file']['tmp_name'] ) : '';
@@ -267,6 +270,9 @@ class SugarCalendar extends Importer {
 		}
 
 		$this->importer_data = $this->import( $data );
+
+		/** This action is documented in src/Admin/Tools/Importers/TheEventCalendar.php */
+		do_action( 'sugar_calendar_importer_completed', 'json', absint( $this->importer_data['events'] ?? 0 ) ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 	}
 
 	/**

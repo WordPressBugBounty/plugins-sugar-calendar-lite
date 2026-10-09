@@ -112,6 +112,51 @@ class SignupModes {
 		 */
 		$stats = apply_filters( 'sugar_calendar_integrations_abilities_signup_modes_stats', [], $start, $end );
 
+		return self::clean_stats( $stats );
+	}
+
+	/**
+	 * Per-mode registration totals for one window, counted only for the given events.
+	 *
+	 * Its own filter, not a fourth `stats()` argument: a provider that hasn't hooked it is
+	 * reported as uncounted instead of answering with its site-wide totals.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param string $start     Window start, UTC 'Y-m-d H:i:s', inclusive.
+	 * @param string $end       Window end, UTC 'Y-m-d H:i:s', exclusive.
+	 * @param int[]  $event_ids Sugar Calendar event ids. May be empty: a contributor returns zeros.
+	 *
+	 * @return array Map of mode slug => [ 'count' => int, 'revenue' => float|null, 'currency' => string|null ].
+	 */
+	public static function scoped_stats( string $start, string $end, array $event_ids ): array {
+
+		/**
+		 * Filters the per-mode registration totals for a window, counted only for the given events.
+		 *
+		 * @since 3.15.0
+		 *
+		 * @param array  $stats     Map of mode slug => [ count, revenue, currency ].
+		 * @param string $start     Window start, UTC 'Y-m-d H:i:s', inclusive.
+		 * @param string $end       Window end, UTC 'Y-m-d H:i:s', exclusive.
+		 * @param int[]  $event_ids Sugar Calendar event ids. A series' parent id covers all its dates.
+		 */
+		$stats = apply_filters( 'sugar_calendar_integrations_abilities_signup_modes_scoped_stats', [], $start, $end, $event_ids );
+
+		return self::clean_stats( $stats );
+	}
+
+	/**
+	 * Keep only declared modes' contributions, each in the shape callers rely on.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param mixed $stats Filtered map of mode slug => contribution.
+	 *
+	 * @return array
+	 */
+	private static function clean_stats( $stats ): array {
+
 		if ( ! is_array( $stats ) ) {
 			return [];
 		}
@@ -185,6 +230,31 @@ class SignupModes {
 		}
 
 		return '';
+	}
+
+	/**
+	 * The mode whose detail object the input carries, whatever `signup` says.
+	 *
+	 * @since 3.15.0
+	 *
+	 * @param array $input Raw ability input.
+	 *
+	 * @return string Mode slug when exactly one mode's detail property is present, else an empty string.
+	 */
+	public static function detail_mode( array $input ): string {
+
+		$matches = [];
+
+		foreach ( self::available() as $slug => $property ) {
+
+			if ( $property !== '' && isset( $input[ $property ] ) ) {
+				$matches[] = $slug;
+			}
+		}
+
+		// Two detail objects conflict, so there is nothing safe to infer; the
+		// shared mismatch check reports them.
+		return count( $matches ) === 1 ? $matches[0] : '';
 	}
 
 	/**

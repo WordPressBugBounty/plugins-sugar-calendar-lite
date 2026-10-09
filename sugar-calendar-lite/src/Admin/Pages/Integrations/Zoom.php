@@ -8,11 +8,8 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthRelayClient;
+use Sugar_Calendar\Integrations\OAuthRelay\SiteRegistrar;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
-use Sugar_Calendar\Vendor\ProductApi\Auth\AuthOptions;
-use Sugar_Calendar\Vendor\ProductApi\Auth\SiteRegistration;
-use Sugar_Calendar\Vendor\ProductApi\Options;
-use Sugar_Calendar\Vendor\ProductApi\ProductApi;
 
 /**
  * Zoom Integration page.
@@ -503,113 +500,26 @@ class Zoom extends AbstractIntegrationPage {
 	 * Register the installation with the Product API relay if it is not
 	 * already registered.
 	 *
-	 * Mirrors the Bookings IntegrationsController::connect_integration()
-	 * registration core: reset a stale registration if the site URL changed,
-	 * clear the rate-limit transient (admin-initiated connects must not be
-	 * blocked), then register if needed. On failure the error is logged and
-	 * false is returned so the caller can surface the relay-unavailable
-	 * notice instead of starting OAuth.
+	 * Clears the client's rate limit first, because an admin-initiated connect
+	 * must not be blocked. On failure the error is logged and false is returned
+	 * so the caller can surface the relay-unavailable notice instead of starting OAuth.
 	 *
 	 * @since 3.12.0
+	 * @since 3.15.0 Delegates to SiteRegistrar.
 	 *
 	 * @return bool True when the site is registered (already or freshly), false on failure.
 	 */
 	protected function maybe_register_site() {
 
-		// The Product API container is only configured in Pro (includes/pro/Pro.php).
-		// On Lite the Integrations tab still renders, so a Connect click would reach
-		// ProductApi::get() with no configured container and fatal. Degrade to the
-		// relay-unavailable notice (false) instead — matching every other Lite-reachable
-		// ProductApi consumer (CreditsService, IncomingWebhookHandler, register_webhook).
-		try {
-			$registration = ProductApi::get(
-				SiteRegistration::class
-			);
+		$result = ( new SiteRegistrar() )->register( true );
 
-			// Reset stale registration when the site URL has changed.
-			$this->maybe_reset_stale_registration( $registration );
-
-			if ( $registration->is_registered() ) {
-				return true;
-			}
-
-			// Clear the rate limit — admin-initiated connects should not be blocked.
-			ProductApi::get( Options::class )
-				->delete_transient( 'rate_limit_auth_register_site' );
-
-			$result = $registration->register();
-
-			if ( is_wp_error( $result ) ) {
-				error_log( '[SC Zoom] site registration failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
-				return false;
-			}
-
-			return true;
-		} catch ( \Throwable $e ) {
-			error_log( '[SC Zoom] relay unavailable (Product API not configured): ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		if ( is_wp_error( $result ) ) {
+			error_log( '[SC Zoom] site registration failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 
 			return false;
 		}
-	}
 
-	/**
-	 * Reset a stale site registration when the site URL has changed.
-	 *
-	 * When the site URL changes, the relay still associates the old domain
-	 * with the existing installation ID. Clearing the stored credentials and
-	 * generating a fresh installation ID forces a clean re-registration with
-	 * the new domain. Ported from Bookings
-	 * IntegrationsController::maybe_reset_stale_registration().
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param SiteRegistration $registration SiteRegistration instance.
-	 *
-	 * @return void
-	 */
-	protected function maybe_reset_stale_registration( $registration ) {
-
-		// Already registered with the current URL — nothing to do.
-		if ( $registration->is_registered() ) {
-			return;
-		}
-
-		$auth_options = ProductApi::get(
-			AuthOptions::class
-		);
-
-		// No credentials stored — first-time registration, no reset needed.
-		if ( empty( $auth_options->get( 'site_id' ) ) ) {
-			return;
-		}
-
-		// Credentials exist but the current URL isn't registered → domain
-		// changed. Clear auth credentials so register() starts fresh.
-		$auth_options->update(
-			[
-				'site_id'          => '',
-				'signing_secret'   => '',
-				'verification_key' => '',
-				'site_urls'        => [],
-			]
-		);
-
-		// Generate a new installation ID so the relay creates a fresh site
-		// entry instead of returning stale credentials for the old domain.
-		$options = ProductApi::get(
-			Options::class
-		);
-
-		$options->update(
-			[
-				'wp_installation_id' => substr( wp_hash( wp_generate_uuid4() ), 0, 30 ),
-			]
-		);
-
-		// Clear the rate limit so the fresh registration isn't blocked by
-		// previous attempts.
-		$options->delete_transient( 'rate_limit_auth_register_site' );
+		return true;
 	}
 
 	/**
@@ -658,6 +568,16 @@ class Zoom extends AbstractIntegrationPage {
 			// admin may have left a stale row that would otherwise keep the
 			// reconnect notice firing after disconnect.
 			OAuthConnectionModel::delete_by_provider( 'zoom' );
+
+			/**
+			 * Fires after an integration disconnects.
+			 *
+			 * @since 3.15.0
+			 *
+			 * @param string $provider Provider slug.
+			 * @param array  $context  Provider details; Stripe passes `mode` (live|sandbox).
+			 */
+			do_action( 'sugar_calendar_integration_disconnected', 'zoom', [] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 		}
 
 		$redirect = add_query_arg(

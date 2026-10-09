@@ -2471,6 +2471,9 @@ function update_stripe_credentials( $publishable_key, $secret_key, $user_id, $is
 	}
 
 	update_option( 'sc_stripe_connect_account_id', sanitize_text_field( $user_id ), false );
+
+	/** This action is documented in src/Integrations/OAuthRelay/AbstractOAuthCallbackHandler.php */
+	do_action( 'sugar_calendar_integration_connected', 'stripe', [ 'mode' => $is_sandbox === true ? 'sandbox' : 'live' ] ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 }
 
 /**

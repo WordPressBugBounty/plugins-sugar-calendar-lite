@@ -183,7 +183,7 @@ abstract class EventAbstract {
 
 		if ( is_array( $tags ) && ! empty( $tags ) ) {
 			foreach ( $tags as $tag ) {
-				$options .= wp_sprintf( '<option value="%1$s" selected>%2$s XYZ</option>', $tag->term_id, $tag->name );
+				$options .= wp_sprintf( '<option value="%1$s" selected>%2$s</option>', $tag->term_id, $tag->name );
 			}
 		}
 

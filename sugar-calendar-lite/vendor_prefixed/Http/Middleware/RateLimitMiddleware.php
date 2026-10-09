@@ -107,31 +107,64 @@ class RateLimitMiddleware implements MiddlewareInterface
      */
     private function is_rate_limited()
     {
-        $request_count = $this->get_request_count();
-        return $request_count >= $this->max_requests;
-    }
-    /**
-     * Get current request count for the time period.
-     *
-     * @since 1.0.0
-     *
-     * @return int
-     */
-    private function get_request_count()
-    {
-        $transient_key = $this->get_rate_limit_transient_key();
-        return (int) $this->options->get_transient($transient_key, 0);
+        return $this->get_window()['count'] >= $this->max_requests;
     }
     /**
      * Increment request count for the time period.
      *
+     * The window is fixed: it starts with the first request counted and ends one
+     * period later, whatever happens in between. Writing the transient with the full
+     * period on every request made the window slide instead, ending one period after
+     * the last request, so a site sending steadily never got its count back and, once
+     * over the limit, went dark for a whole period from that point.
+     *
      * @since 1.0.0
+     * @since 1.2.1 The window no longer restarts on every request.
      */
     private function increment_request_count()
     {
-        $transient_key = $this->get_rate_limit_transient_key();
-        $current_count = $this->get_request_count();
-        $this->options->set_transient($transient_key, $current_count + 1, $this->period);
+        $window = $this->get_window();
+        ++$window['count'];
+        $this->options->set_transient($this->get_rate_limit_transient_key(), $window, $window['window_start'] + $this->period - time());
+    }
+    /**
+     * Get the current window: how many requests it holds and when it started.
+     *
+     * @since 1.2.1
+     *
+     * @return array
+     */
+    private function get_window()
+    {
+        $stored = $this->options->get_transient($this->get_rate_limit_transient_key(), null);
+        if (is_array($stored) && isset($stored['count'], $stored['window_start'])) {
+            $window = ['count' => (int) $stored['count'], 'window_start' => (int) $stored['window_start']];
+            // The transient expires with the window, but a cache that ignores expirations
+            // or a clock that moved must not leave a spent window in place for good.
+            return $window['window_start'] + $this->period > time() ? $window : $this->new_window();
+        }
+        $window = $this->new_window();
+        // A count written before 1.2.1 has no start. Treating it as a window that starts
+        // now keeps the count and costs at most one more period, once, after an update.
+        // Written back at once, with the period as its expiration: a count already at the
+        // limit refuses every request, so nothing else would ever write it, and on a cache
+        // that ignores expirations the integer would refuse for good.
+        if (is_numeric($stored)) {
+            $window['count'] = (int) $stored;
+            $this->options->set_transient($this->get_rate_limit_transient_key(), $window, $this->period);
+        }
+        return $window;
+    }
+    /**
+     * An empty window starting now.
+     *
+     * @since 1.2.1
+     *
+     * @return array
+     */
+    private function new_window()
+    {
+        return ['count' => 0, 'window_start' => time()];
     }
     /**
      * Get the transient key for storing rate limit count.

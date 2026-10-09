@@ -28,19 +28,21 @@ class Context
      */
     private $site_url;
     /**
-     * License key.
+     * License key, or a callable resolving it when it is read.
      *
      * @since 1.0.0
+     * @since 1.2.0 A callable is accepted.
      *
-     * @var string
+     * @var string|callable
      */
     private $license_key;
     /**
-     * License is valid.
+     * License is valid, or a callable resolving it when it is read.
      *
      * @since 1.0.0
+     * @since 1.2.0 A callable is accepted.
      *
-     * @var bool
+     * @var bool|callable
      */
     private $license_valid;
     /**
@@ -133,24 +135,47 @@ class Context
     /**
      * Get the license key.
      *
+     * Resolved on every read when a callable was configured, so a key the plugin saved after
+     * `configure()` ran, on the request where the user entered it, is what the request carries.
+     *
      * @since 1.0.0
+     * @since 1.2.0 Resolves a callable.
      *
      * @return string
      */
     public function get_license_key()
     {
-        return $this->license_key;
+        return (string) $this->resolve($this->license_key);
     }
     /**
      * Check if the license is valid.
      *
+     * Resolved on every read when a callable was configured, see `get_license_key()`.
+     *
      * @since 1.0.0
+     * @since 1.2.0 Resolves a callable.
      *
      * @return bool
      */
     public function is_license_valid()
     {
-        return $this->license_valid;
+        return (bool) $this->resolve($this->license_valid);
+    }
+    /**
+     * Resolve a value that may have been configured as a callable.
+     *
+     * A plain string is never called, even when a function of that name exists, so a license
+     * key cannot be mistaken for a function name. A closure or an array callable is.
+     *
+     * @since 1.2.0
+     *
+     * @param mixed $value Configured value.
+     *
+     * @return mixed
+     */
+    private function resolve($value)
+    {
+        return !is_string($value) && is_callable($value) ? call_user_func($value) : $value;
     }
     /**
      * Check if the Pro plugin is installed.
