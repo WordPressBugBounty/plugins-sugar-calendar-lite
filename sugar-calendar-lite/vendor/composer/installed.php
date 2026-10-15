@@ -3,7 +3,7 @@
         'name' => 'awesomemotive/sugarcalendar',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '501f4c9018e5d543f0202b665a1d7ef856f1e2b0',
+        'reference' => '99fb63ddb549419fd5c1abccd9512d5275f3f6f3',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'awesomemotive/sugarcalendar' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '501f4c9018e5d543f0202b665a1d7ef856f1e2b0',
+            'reference' => '99fb63ddb549419fd5c1abccd9512d5275f3f6f3',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

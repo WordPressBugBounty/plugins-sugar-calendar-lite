@@ -2,8 +2,8 @@
 
 namespace Sugar_Calendar\Integrations\Zoom;
 
+use Sugar_Calendar\Integrations\AbstractMeetingProvider;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
-use Sugar_Calendar\Integrations\MeetingProviderInterface;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthRelayClient;
@@ -19,19 +19,7 @@ use WP_Error;
  *
  * @since 3.12.0
  */
-class ZoomIntegration implements MeetingProviderInterface {
-
-	/**
-	 * Meta keys this provider stores in wp_sc_eventmeta (the provider's "meeting footprint").
-	 *
-	 * Single source of truth for get_meeting_meta_keys() — ZoomWebhookEventHandler's
-	 * reset-on-delete fallback references this instead of duplicating the literal list.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @var string[]
-	 */
-	public const META_KEYS = [ 'meeting_provider', 'meeting_id', 'join_url', 'meeting_password', 'meeting_settings' ];
+class ZoomIntegration extends AbstractMeetingProvider {
 
 	/**
 	 * Relay client.
@@ -43,22 +31,14 @@ class ZoomIntegration implements MeetingProviderInterface {
 	private $relay;
 
 	/**
-	 * Credits service (gates availability on remaining credits).
+	 * Zoom actions client.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Passed in instead of built here.
 	 *
-	 * @var CreditsService
+	 * @var ZoomActionsClient
 	 */
-	private $credits;
-
-	/**
-	 * Lazily-instantiated Zoom actions client.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @var ZoomActionsClient|null
-	 */
-	private $actions_client = null;
+	private $actions_client;
 
 	/**
 	 * Lazily-instantiated meeting-data builder.
@@ -73,14 +53,18 @@ class ZoomIntegration implements MeetingProviderInterface {
 	 * Constructor.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Takes the actions client.
 	 *
-	 * @param OAuthRelayClient $relay   Relay client.
-	 * @param CreditsService   $credits Credits service.
+	 * @param OAuthRelayClient  $relay          Relay client.
+	 * @param CreditsService    $credits        Credits service.
+	 * @param ZoomActionsClient $actions_client Zoom actions client.
 	 */
-	public function __construct( OAuthRelayClient $relay, CreditsService $credits ) {
+	public function __construct( OAuthRelayClient $relay, CreditsService $credits, ZoomActionsClient $actions_client ) {
 
-		$this->relay   = $relay;
-		$this->credits = $credits;
+		parent::__construct( $credits );
+
+		$this->relay          = $relay;
+		$this->actions_client = $actions_client;
 	}
 
 	/**
@@ -119,21 +103,6 @@ class ZoomIntegration implements MeetingProviderInterface {
 		return __( 'Zoom', 'sugar-calendar-lite' );
 	}
 
-	/**
-	 * Available when an active connection exists AND credits remain.
-	 *
-	 * Credits are read from cache only (no HTTP on this path) and fail open:
-	 * a cold cache does not block, since the relay is the ultimate enforcer.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return bool
-	 */
-	public function is_available(): bool {
-
-		return ! is_wp_error( $this->get_connection() ) && ! $this->credits->is_out_of_credits();
-	}
-
 	// --- MeetingProviderInterface ---
 
 	/**
@@ -159,7 +128,7 @@ class ZoomIntegration implements MeetingProviderInterface {
 			return $meeting_data;
 		}
 
-		$result = $this->get_actions_client()->create_meeting( $connection, $meeting_data );
+		$result = $this->actions_client->create_meeting( $connection, $meeting_data );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -207,22 +176,6 @@ class ZoomIntegration implements MeetingProviderInterface {
 	}
 
 	/**
-	 * Lazily build the Zoom actions client.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return ZoomActionsClient
-	 */
-	private function get_actions_client(): ZoomActionsClient {
-
-		if ( $this->actions_client === null ) {
-			$this->actions_client = new ZoomActionsClient();
-		}
-
-		return $this->actions_client;
-	}
-
-	/**
 	 * Update the Zoom meeting for an event (PATCH the recomputed payload).
 	 *
 	 * SCE sends no invitees, so Bookings' "can't update invitees → recreate"
@@ -256,7 +209,7 @@ class ZoomIntegration implements MeetingProviderInterface {
 			return $meeting_data;
 		}
 
-		$result = $this->get_actions_client()->update_meeting( $connection, $meeting_id, $meeting_data );
+		$result = $this->actions_client->update_meeting( $connection, $meeting_id, $meeting_data );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -294,7 +247,23 @@ class ZoomIntegration implements MeetingProviderInterface {
 			return $connection;
 		}
 
-		return $this->get_actions_client()->delete_meeting( $connection, $meeting_id );
+		return $this->actions_client->delete_meeting( $connection, $meeting_id );
+	}
+
+	/**
+	 * Trash deletes the Zoom meeting; a failed delete still clears the card (orphan tolerated).
+	 *
+	 * @since 3.16.0
+	 *
+	 * @param object $event Event object.
+	 *
+	 * @return bool
+	 */
+	public function trash_meeting( $event ): bool {
+
+		$this->delete_meeting( $event );
+
+		return true;
 	}
 
 	/**
@@ -308,7 +277,7 @@ class ZoomIntegration implements MeetingProviderInterface {
 	 *
 	 * @return ZoomOAuthConnection|WP_Error
 	 */
-	private function get_connection() {
+	protected function get_connection() {
 
 		$row = OAuthConnectionModel::find_active_by_provider( $this->get_provider_slug() );
 
@@ -341,15 +310,5 @@ class ZoomIntegration implements MeetingProviderInterface {
 		return $meeting_id !== ''
 			? 'https://zoom.us/s/' . rawurlencode( $meeting_id )
 			: '';
-	}
-
-	/**
-	 * @since 3.12.0
-	 *
-	 * @return string[]
-	 */
-	public function get_meeting_meta_keys(): array {
-
-		return self::META_KEYS;
 	}
 }

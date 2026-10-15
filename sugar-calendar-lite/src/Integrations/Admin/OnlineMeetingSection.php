@@ -5,7 +5,6 @@ namespace Sugar_Calendar\Integrations\Admin;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\MeetingProviderInterface;
-use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 
 /**
@@ -192,6 +191,7 @@ class OnlineMeetingSection {
 	 * red invalid message is present in the DOM at all.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Connection state read from the provider.
 	 *
 	 * @param array $providers Map of slug => MeetingProviderInterface.
 	 *
@@ -209,7 +209,7 @@ class OnlineMeetingSection {
 
 			// Out of credits = unavailable despite an active connection (the credits
 			// gate is the only site-wide reason a connected provider goes unavailable).
-			if ( ! $provider->is_available() && OAuthConnectionModel::find_active_by_provider( $slug ) !== null ) {
+			if ( ! $provider->is_available() && $provider->is_connected() ) {
 				return true;
 			}
 		}
@@ -225,6 +225,7 @@ class OnlineMeetingSection {
 	 * provider becomes unavailable).
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Connection state read from the provider.
 	 *
 	 * @param array  $providers Map of slug => MeetingProviderInterface.
 	 * @param string $slug      Provider slug to test (may be '' or unknown).
@@ -233,12 +234,13 @@ class OnlineMeetingSection {
 	 */
 	private function is_provider_out_of_credits( $providers, $slug ) {
 
-		if ( IntegrationsDisabler::is_disabled() || $slug === '' || ! isset( $providers[ $slug ] ) ) {
+		$provider = $providers[ $slug ] ?? null;
+
+		if ( IntegrationsDisabler::is_disabled() || ! $provider ) {
 			return false;
 		}
 
-		return ! $providers[ $slug ]->is_available()
-			&& OAuthConnectionModel::find_active_by_provider( $slug ) !== null;
+		return $provider->is_connected() && ! $provider->is_available();
 	}
 
 	/**
@@ -253,6 +255,7 @@ class OnlineMeetingSection {
 	 * drop online_provider on an unrelated save.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Connection state read from the provider.
 	 *
 	 * @param string $slug     Provider slug.
 	 * @param object $provider MeetingProviderInterface instance.
@@ -269,7 +272,7 @@ class OnlineMeetingSection {
 		// Connection state drives both the label and selectability. Skip the
 		// lookup under the kill-switch — read-only disables regardless, and the
 		// option stays the plain provider name (no connect/credit hints).
-		$connected = $read_only ? false : ( OAuthConnectionModel::find_active_by_provider( $slug ) !== null );
+		$connected = ! $read_only && $provider->is_connected();
 
 		if ( ! $read_only && ! $available && ! $connected ) {
 			/* translators: %s - provider display name. */

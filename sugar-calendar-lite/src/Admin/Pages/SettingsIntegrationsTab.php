@@ -6,6 +6,7 @@ use Sugar_Calendar\Helpers as Sugar_Calendar_Helpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
+use Sugar_Calendar\Admin\Pages\Integrations\GoogleCalendar;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsSignalRenderer;
@@ -127,6 +128,7 @@ class SettingsIntegrationsTab extends Settings {
 	 * set in the URL.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Registers the Google Calendar page.
 	 *
 	 * @return array<string, object>
 	 */
@@ -136,8 +138,9 @@ class SettingsIntegrationsTab extends Settings {
 
 		if ( $integrations === null ) {
 			$integrations = [
-				'google-maps' => new Integrations\GoogleMaps(),
-				'zoom'        => new Integrations\Zoom(),
+				'google-maps'     => new Integrations\GoogleMaps(),
+				'zoom'            => new Integrations\Zoom(),
+				'google-calendar' => new GoogleCalendar(),
 			];
 
 			/**
@@ -168,6 +171,7 @@ class SettingsIntegrationsTab extends Settings {
 	 * filterable integrations array because they have no behavior.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Google Calendar is no longer a placeholder.
 	 *
 	 * @return array<int, array{slug:string,name:string,icon:string}>
 	 */
@@ -176,11 +180,6 @@ class SettingsIntegrationsTab extends Settings {
 		$image_base = SC_PLUGIN_ASSETS_URL . 'images/integrations/';
 
 		return [
-			[
-				'slug' => 'google-calendar',
-				'name' => esc_html__( 'Google Calendar / Meets', 'sugar-calendar-lite' ),
-				'icon' => $image_base . 'integration-google-calendar.png',
-			],
 			[
 				'slug' => 'sms',
 				'name' => esc_html__( 'SMS', 'sugar-calendar-lite' ),
@@ -818,6 +817,7 @@ class SettingsIntegrationsTab extends Settings {
 	 * loads based on the resolved active integration's slug.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 The active page enqueues its own assets.
 	 *
 	 * @return void
 	 */
@@ -870,49 +870,11 @@ class SettingsIntegrationsTab extends Settings {
 				Sugar_Calendar_Helpers::get_asset_version()
 			);
 
-			if ( $slug === 'zoom' ) {
-				$this->enqueue_zoom_disconnect_confirm();
+			if ( method_exists( $active, 'enqueue_assets' ) ) {
+				$active->enqueue_assets();
 			}
 		}
 	}
-
-	/**
-	 * Enqueue the Zoom "Remove" (disconnect) confirmation dialog assets.
-	 *
-	 * Disconnecting is destructive, so the Remove link is gated behind a styled
-	 * jQuery-Confirm dialog before it navigates. Scoped to the Zoom panel only.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return void
-	 */
-	private function enqueue_zoom_disconnect_confirm() {
-
-		wp_enqueue_style( 'sugar-calendar-admin-confirm' );
-
-		wp_enqueue_script(
-			'sugar-calendar-admin-integration-zoom',
-			SC_PLUGIN_ASSETS_URL . 'js/admin-integration-zoom' . WP::asset_min() . '.js',
-			[ 'jquery', 'sugar-calendar-vendor-jquery-confirm' ],
-			Sugar_Calendar_Helpers::get_asset_version(),
-			true
-		);
-
-		wp_localize_script(
-			'sugar-calendar-admin-integration-zoom',
-			'sugar_calendar_admin_integration_zoom',
-			[
-				'icon_url' => SC_PLUGIN_ASSETS_URL . 'images/icons/exclamation-circle.svg',
-				'text'     => [
-					'title'   => esc_html__( 'Remove Zoom connection?', 'sugar-calendar-lite' ),
-					'message' => esc_html__( "Links on existing events stay active. New online events won't get Zoom links until you reconnect.", 'sugar-calendar-lite' ),
-					'confirm' => esc_html__( 'Remove', 'sugar-calendar-lite' ),
-					'cancel'  => esc_html__( 'Cancel', 'sugar-calendar-lite' ),
-				],
-			]
-		);
-	}
-
 	/**
 	 * Filter the help URL on the Integrations tab.
 	 *

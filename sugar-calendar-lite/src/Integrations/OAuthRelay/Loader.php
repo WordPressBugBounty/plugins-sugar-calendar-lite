@@ -13,6 +13,25 @@ use Sugar_Calendar\Integrations\Frontend\OnlineEventSchemaProvider;
 use Sugar_Calendar\Integrations\Frontend\OnlineMeetingDisplay;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
+use Sugar_Calendar\Integrations\Google\GoogleActionsClient;
+use Sugar_Calendar\Integrations\Google\GoogleDescription;
+use Sugar_Calendar\Integrations\Google\GoogleEventBuilder;
+use Sugar_Calendar\Integrations\Google\GoogleItemMapper;
+use Sugar_Calendar\Integrations\Google\GoogleLinkRepository;
+use Sugar_Calendar\Integrations\Google\GoogleOAuthCallbackHandler;
+use Sugar_Calendar\Integrations\Google\GoogleRrule;
+use Sugar_Calendar\Integrations\Google\GoogleTimezone;
+use Sugar_Calendar\Integrations\Google\GoogleDeferredPush;
+use Sugar_Calendar\Integrations\Google\GoogleMeetIntegration;
+use Sugar_Calendar\Integrations\Google\GoogleEventMatcher;
+use Sugar_Calendar\Integrations\Google\GooglePulledEventWriter;
+use Sugar_Calendar\Integrations\Google\GooglePullApplier;
+use Sugar_Calendar\Integrations\Google\GooglePullScheduler;
+use Sugar_Calendar\Integrations\Google\GooglePusher;
+use Sugar_Calendar\Integrations\Google\GooglePushListener;
+use Sugar_Calendar\Integrations\Google\GoogleWatchManager;
+use Sugar_Calendar\Integrations\Google\GoogleWebhookEventHandler;
+use Sugar_Calendar\Integrations\Zoom\ZoomActionsClient;
 use Sugar_Calendar\Integrations\Zoom\ZoomIntegration;
 use Sugar_Calendar\Integrations\Zoom\ZoomWebhookEventHandler;
 use Sugar_Calendar\Vendor\ProductApi\ProductApi;
@@ -38,6 +57,7 @@ class Loader {
 	 * Register hooks.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Boots the Google callback handler.
 	 */
 	public function init() {
 
@@ -65,8 +85,15 @@ class Loader {
 		// callback handler it wires only acts on admin_init.
 		$relay   = new OAuthRelayClient();
 		$credits = new Credits\CreditsService();
+		$zoom    = new ZoomActionsClient();
+		$google  = new GoogleActionsClient();
 
-		( new ZoomIntegration( $relay, $credits ) )->init();
+		( new ZoomIntegration( $relay, $credits, $zoom ) )->init();
+
+		( new GoogleOAuthCallbackHandler( $relay ) )->init();
+
+		// Google Meet: registers the capability so "Google Meet" shows in the Online Platform dropdown.
+		( new GoogleMeetIntegration( $credits, $google ) )->init();
 
 		// Zoom webhook event handler capability (3a). Registered on every
 		// request — IncomingWebhookHandler resolves it on unauthenticated
@@ -80,6 +107,25 @@ class Loader {
 		$registry = IntegrationCapabilityRegistry::instance();
 		$manager  = new EventMeetingManager( $registry, $credits );
 		$manager->hooks();
+
+		// Google push: create / update on editor saves and cron publishes, delete on permanent delete.
+		$links    = new GoogleLinkRepository();
+		$timezone = new GoogleTimezone();
+		$rrule    = new GoogleRrule( $timezone );
+		$builder  = new GoogleEventBuilder( $links, $rrule, $timezone, new GoogleDescription() );
+		$mapper   = new GoogleItemMapper( $rrule, $timezone );
+		$pusher   = new GooglePusher( $credits, $google, $links, $builder );
+
+		( new GooglePushListener( $pusher, new GoogleDeferredPush( $pusher, $builder ), $links ) )->hooks();
+
+		// Google pull: the relay forwards "calendar changed"; the handler queues a background pull.
+		IntegrationCapabilityRegistry::instance()->register( new GoogleWebhookEventHandler() );
+		$applier = new GooglePullApplier( new GoogleEventMatcher( $links, $mapper, $builder ), $mapper, new GooglePulledEventWriter( $links, $builder ), $pusher );
+
+		( new GooglePullScheduler( $google, $applier ) )->hooks();
+
+		// Lite "Disable Integrations" deletes the rows; the channels must stop while a token still exists.
+		add_action( 'sugar_calendar_integrations_before_disable', [ new GoogleWatchManager( $google ), 'disable' ] );
 
 		// Explicit "Create {Provider} Meeting" AJAX endpoint (admin-ajax). Shares the
 		// manager's provision path so the button and the lifecycle agree.

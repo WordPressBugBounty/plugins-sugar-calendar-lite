@@ -86,6 +86,7 @@ class Options {
 	 * Default settings.
 	 *
 	 * @since 3.0.0
+	 * @since 3.16.0 Google Calendar defaults added.
 	 *
 	 * @return array
 	 */
@@ -107,6 +108,10 @@ class Options {
 			'disable_integrations'         => false,
 			'ai_assistant_enabled'         => true,
 			'maps_google_api_key'          => '',
+			'google_calendar_id'           => '',
+			'google_calendar_name'         => '',
+			'google_calendar_sync_enabled' => true,
+			'google_sync_direction'        => 'both',
 			'single_event_appearance_mode' => 'light',
 		];
 

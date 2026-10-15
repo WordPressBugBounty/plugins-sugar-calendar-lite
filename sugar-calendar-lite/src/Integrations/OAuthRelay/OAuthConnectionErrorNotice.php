@@ -25,6 +25,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class OAuthConnectionErrorNotice {
 
 	/**
+	 * Providers whose Settings page slug differs from the provider slug.
+	 *
+	 * @since 3.16.0
+	 */
+	const PROVIDER_PAGE_SLUGS = [
+		'google' => 'google-calendar',
+	];
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 3.12.0
@@ -110,6 +119,7 @@ class OAuthConnectionErrorNotice {
 	 * Display the error notice linking to the integrations settings page.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Reconnect URL resolved through PROVIDER_PAGE_SLUGS.
 	 *
 	 * @param array<int, array> $connections Errored connection rows.
 	 * @param bool              $inline      Whether to add the `inline` class so
@@ -130,7 +140,7 @@ class OAuthConnectionErrorNotice {
 		// first errored provider. The page itself surfaces the per-provider
 		// Reconnect CTA.
 		$first_provider = (string) ( $connections[0]['provider'] ?? 'zoom' );
-		$reconnect_url  = SettingsIntegrationsTab::get_integration_url( $first_provider );
+		$reconnect_url  = SettingsIntegrationsTab::get_integration_url( self::PROVIDER_PAGE_SLUGS[ $first_provider ] ?? $first_provider );
 
 		$message = sprintf(
 			/* translators: %1$s - comma-separated provider names; %2$s - URL to Integrations settings page. */

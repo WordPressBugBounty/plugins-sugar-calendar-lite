@@ -60,8 +60,12 @@ class SnapshotData {
 			'sugar_calendar_total_recurring_events'       => Counts::events_where( "recurrence != ''" ),
 			'sugar_calendar_recurring_advanced_used'      => $this->has_advanced_recurrence(),
 			'sugar_calendar_integrations_google_maps_connected' => trim( (string) Options::get( 'maps_google_api_key', '' ) ) !== '',
-			'sugar_calendar_integrations_zoom_status'     => $this->get_zoom_status(),
+			'sugar_calendar_integrations_zoom_status'     => $this->get_integration_status( 'zoom' ),
 			'sugar_calendar_events_with_online_meeting_zoom' => Counts::events_with_meta( 'meeting_provider', 'zoom' ),
+			'sugar_calendar_integrations_google_status'   => $this->get_integration_status( 'google' ),
+			'sugar_calendar_events_with_online_meeting_google' => Counts::events_with_meta( 'meeting_provider', 'google' ),
+			'sugar_calendar_settings_integrations_google_calendar' => $this->get_google_calendar_choice(),
+			'sugar_calendar_settings_integrations_google_sync_direction' => sanitize_key( Options::get( 'google_sync_direction', 'both' ) ),
 			'sugar_calendar_events_with_online_meeting_custom' => Counts::events_with_meta( 'online_provider', OnlineMeeting::PROVIDER_CUSTOM ),
 			'sugar_calendar_tec_migration_completed'      => $this->is_tec_migration_completed(),
 		];
@@ -88,15 +92,34 @@ class SnapshotData {
 	}
 
 	/**
-	 * Zoom connection status as stored site-wide, or 'not_connected' when no row exists.
+	 * What the Google "Sync Events On" dropdown holds: a calendar, "Don't Sync Events", or nothing yet.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @return string One of set|off|none.
+	 */
+	private function get_google_calendar_choice() {
+
+		if ( trim( (string) Options::get( 'google_calendar_id', '' ) ) !== '' ) {
+			return 'set';
+		}
+
+		return Options::get( 'google_calendar_sync_enabled', true ) ? 'none' : 'off';
+	}
+
+	/**
+	 * A relay integration's connection status as stored site-wide, or 'not_connected' when no row exists.
 	 *
 	 * @since 3.15.0
+	 * @since 3.16.0 Takes the provider; was get_zoom_status().
+	 *
+	 * @param string $provider Provider slug on the connection row.
 	 *
 	 * @return string One of not_connected|active|auth_error.
 	 */
-	private function get_zoom_status() {
+	private function get_integration_status( $provider ) {
 
-		$row = OAuthConnectionModel::find_by_provider( 'zoom' );
+		$row = OAuthConnectionModel::find_by_provider( $provider );
 
 		if ( empty( $row['status'] ) ) {
 			return 'not_connected';

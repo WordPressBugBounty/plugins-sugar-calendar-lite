@@ -340,19 +340,26 @@ abstract class AbstractOAuthCallbackHandler {
 	}
 
 	/**
-	 * Redirect with relay-unavailable error notice.
+	 * Redirect with an error notice.
+	 *
+	 * Partial consent gets its own notice because it is the one failure the user
+	 * can fix themselves; every other code stays generic, since the relay's
+	 * internal codes mean nothing to a site owner.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Routes scopes_missing to its own notice.
 	 *
-	 * @param string $error_code Error code for the failure (reserved for callers; not surfaced to the user).
+	 * @param string $error_code Error code for the failure.
 	 */
 	protected function redirect_with_error( string $error_code ): void {
 
-		unset( $error_code );
+		$notice = strpos( $error_code, 'scopes_missing' ) !== false
+			? '_scopes_missing'
+			: '_relay_unavailable';
 
 		$url = add_query_arg(
 			'sc_notice',
-			$this->get_provider() . '_relay_unavailable',
+			$this->get_provider() . $notice,
 			$this->get_redirect_url()
 		);
 

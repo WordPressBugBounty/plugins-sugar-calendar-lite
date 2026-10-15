@@ -15,6 +15,18 @@ use WP_Error;
 interface MeetingProviderInterface extends IntegrationCapabilityInterface {
 
 	/**
+	 * Whether the editor can create meetings against this provider's connection.
+	 *
+	 * Unlike is_available(), this ignores credits: a connected provider that is out of credits
+	 * answers true here and false there.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @return bool
+	 */
+	public function is_connected(): bool;
+
+	/**
 	 * Create the provider-side meeting for an event.
 	 *
 	 * @since 3.12.0
@@ -63,6 +75,17 @@ interface MeetingProviderInterface extends IntegrationCapabilityInterface {
 	 * @return true|WP_Error
 	 */
 	public function delete_meeting( $event );
+
+	/**
+	 * The event was trashed. Return true when the meeting is gone and its meta must be cleared.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @param object $event Event object.
+	 *
+	 * @return bool
+	 */
+	public function trash_meeting( $event ): bool;
 
 	/**
 	 * "Start as host" link for the event's meeting, or '' when none exists.

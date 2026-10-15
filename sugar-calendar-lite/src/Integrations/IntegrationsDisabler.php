@@ -42,10 +42,20 @@ class IntegrationsDisabler {
 	 * Disconnect every stored OAuth connection and stop usage tracking.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Fires sugar_calendar_integrations_before_disable.
 	 *
 	 * @return void
+	 *
+	 * @phpstan-ignore sugarCalendar.methodLength
 	 */
 	public function disable() {
+
+		/**
+		 * Fires before the stored connections are deleted, while their tokens can still reach the relay.
+		 *
+		 * @since 3.16.0
+		 */
+		do_action( 'sugar_calendar_integrations_before_disable' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 		foreach ( OAuthConnectionModel::get_all() as $connection ) {
 

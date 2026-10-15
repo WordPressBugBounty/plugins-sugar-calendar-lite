@@ -305,6 +305,7 @@
 		 * Create the meeting via AJAX, then inject the returned card in place.
 		 *
 		 * @since 3.12.0
+		 * @since 3.16.0 Removes the previous meeting card before inserting the new one.
 		 *
 		 * @param {Event} e Click event.
 		 */
@@ -412,6 +413,11 @@
 					// slot; the link stays hidden (a meeting now exists).
 					$loadingCard.remove();
 					$btn.removeClass( 'is-busy' );
+
+					// A provider switch leaves the old card in place; only one meeting card may show.
+					this.$el
+						.find( '.sugar-calendar-metabox__online-meeting' )
+						.remove();
 
 					this.$onlineProvider
 						.closest( '.sugar-calendar-metabox__field-row' )

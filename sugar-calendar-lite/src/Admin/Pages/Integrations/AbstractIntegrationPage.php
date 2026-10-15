@@ -2,22 +2,25 @@
 
 namespace Sugar_Calendar\Admin\Pages\Integrations;
 
+use Sugar_Calendar\Integrations\OAuthRelay\SiteRegistrar;
+
 /**
  * Base class for a Settings → Integrations detail page.
  *
  * Implements IntegrationPageInterface's 5 required methods as abstract (every
- * subclass must define them) and gives the 4 optional hooks SettingsIntegrationsTab
+ * subclass must define them) and gives the 5 optional hooks SettingsIntegrationsTab
  * probes via method_exists() sensible no-op defaults, so a subclass only
  * overrides what it actually needs:
  *
- * - hooks()        — register admin_init/other handlers. Default: no-op.
- * - handle_post()  — persist settings posted from the panel form. Default: no-op.
- * - get_help_url() — docs link for the tab's help button. Default: null (the
- *                    dispatcher falls back to the generic Integrations docs URL).
- * - is_local()     — exempt from the Lite "Disable Integrations" kill-switch.
- *                    Default: false.
+ * - hooks()           — register admin_init/other handlers. Default: no-op.
+ * - handle_post()     — persist settings posted from the panel form. Default: no-op.
+ * - get_help_url()    — docs link for the tab's help button. Default: null (the
+ *                       dispatcher falls back to the generic Integrations docs URL).
+ * - is_local()        — exempt from the Lite "Disable Integrations" kill-switch.
+ *                       Default: false.
+ * - enqueue_assets()  — scripts and styles for this page only. Default: no-op.
  *
- * SettingsIntegrationsTab still guards these 4 with method_exists() rather than
+ * SettingsIntegrationsTab still guards these 5 with method_exists() rather than
  * an instanceof check against this class, so a third-party integration added
  * via the `sugar_calendar_admin_settings_integrations` filter is not required
  * to extend this class — only the 5 IntegrationPageInterface methods are a
@@ -74,5 +77,39 @@ abstract class AbstractIntegrationPage implements IntegrationPageInterface {
 	public function is_local() {
 
 		return false;
+	}
+
+	/**
+	 * Enqueue scripts and styles this page needs. The tab calls it after the shared assets.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets() {}
+
+	/**
+	 * Register the installation with the Product API relay if it is not
+	 * already registered.
+	 *
+	 * Clears the client's rate limit first, because an admin-initiated connect
+	 * must not be blocked. On failure false is returned so the caller can
+	 * surface the relay-unavailable notice instead of starting OAuth.
+	 *
+	 * @since 3.12.0
+	 * @since 3.16.0 Delegates to SiteRegistrar.
+	 * @since 3.16.0 Moved here from the Zoom page so every OAuth-relay page shares it.
+	 *
+	 * @return bool True when the site is registered (already or freshly), false on failure.
+	 */
+	protected function maybe_register_site() {
+
+		$result = ( new SiteRegistrar() )->register( true );
+
+		if ( is_wp_error( $result ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

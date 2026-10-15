@@ -1,13 +1,13 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Sugar Calendar (Lite) 3.15.0\n"
+"Project-Id-Version: Sugar Calendar (Lite) 3.16.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sugar-calendar-lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T23:00:00+00:00\n"
+"POT-Creation-Date: 2026-10-15T15:30:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: sugar-calendar-lite\n"
@@ -1486,6 +1486,7 @@ msgstr ""
 
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:1104
 #: includes/common/Features/EventTicketing/includes/admin/settings.php:1195
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:295
 #: src/Admin/Pages/Integrations/GoogleMaps.php:343
 #: src/Admin/Pages/SettingsGeneralTab.php:412
 #: src/Admin/Pages/SettingsMiscTab.php:229
@@ -2521,7 +2522,8 @@ msgstr ""
 #: includes/common/Features/EventTicketing/includes/front-end/modal.php:368
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:677
 #: includes/common/Features/EventTicketing/src/Admin/Pages/OrderEdit.php:699
-#: src/Admin/Pages/SettingsIntegrationsTab.php:910
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:234
+#: src/Admin/Pages/Integrations/Zoom.php:106
 #: src/Admin/Pages/SettingsMiscTab.php:68
 #: src/Admin/Pages/SetupChecklist.php:248
 #: src/Admin/Tools/Importers.php:162
@@ -2530,7 +2532,7 @@ msgstr ""
 #: src/Features/Tags/Admin/Pages/EventAbstract.php:153
 #: src/Features/Tags/Admin/Pages/Events.php:313
 #: src/Integrations/Ai/Admin/ChatShell.php:439
-#: assets/js/admin-event-metabox.js:508
+#: assets/js/admin-event-metabox.js:514
 msgid "Cancel"
 msgstr ""
 
@@ -3135,8 +3137,8 @@ msgid "%d available"
 msgstr ""
 
 #: includes/common/Features/GoogleMaps/Feature.php:78
-#: src/Admin/Pages/Integrations/Zoom.php:449
-#: src/Admin/Pages/Integrations/Zoom.php:545
+#: src/Admin/Pages/Integrations/AbstractOAuthIntegrationPage.php:428
+#: src/Admin/Pages/Integrations/AbstractOAuthIntegrationPage.php:482
 #: src/SetupWizard/RestApi.php:156
 msgid "Insufficient permissions."
 msgstr ""
@@ -4346,6 +4348,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: src/Admin/Events/Tables/Base.php:2041
+#: src/Integrations/Google/GoogleItemMapper.php:179
 msgid "(No title)"
 msgstr ""
 
@@ -4714,7 +4717,7 @@ msgstr ""
 
 #: src/Admin/Pages/CalendarAbstract.php:312
 #: src/Admin/Pages/SettingsGeneralTab.php:167
-#: src/Integrations/Admin/OnlineMeetingSection.php:149
+#: src/Integrations/Admin/OnlineMeetingSection.php:148
 msgid "None"
 msgstr ""
 
@@ -4901,6 +4904,145 @@ msgstr ""
 msgid "feature"
 msgstr ""
 
+#: src/Admin/Pages/Integrations/AbstractOAuthIntegrationPage.php:301
+msgid "Account Connection"
+msgstr ""
+
+#. translators: %s - date the account was connected.
+#: src/Admin/Pages/Integrations/AbstractOAuthIntegrationPage.php:375
+#, php-format
+msgid "Connected on %s"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/AbstractOAuthIntegrationPage.php:384
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:233
+#: src/Admin/Pages/Integrations/Zoom.php:105
+#: src/Integrations/Admin/OnlineMeetingSection.php:366
+#: assets/js/admin-event-metabox.js:509
+msgid "Remove"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:79
+msgid "Google Calendar / Meets"
+msgstr ""
+
+#. translators: %s - Documentation link URL.
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:116
+#, php-format
+msgid "Connect your Google Calendar account to automatically sync new events there and host online events via Meets. Events will be synced to your selected calendar. If you need help, please refer to <a href=\"%s\" target=\"_blank\" rel=\"noopener\">our documentation</a>."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:128
+msgid "Connect with Google"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:141
+msgid "Google connected successfully."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:142
+msgid "Google disconnected."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:143
+msgid "Could not connect to Google. Please try again."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:144
+#: src/Admin/Pages/Integrations/Zoom.php:171
+msgid "Some permissions were not approved. Connect again and accept all of them."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:145
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:288
+msgid "Could not start the Google sync. Please try again."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:146
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:287
+msgid "The Google Calendar mapping snippet points at a calendar that could not be synced. Check the snippet."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:231
+msgid "Remove Google connection?"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:232
+msgid "Links on existing events stay active. New online events won't get Google Meet links until you reconnect."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:235
+msgid "Pick a calendar to enable"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:328
+msgid "Google Calendar permissions were not approved. To use this feature, please reconnect and approve them."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendar.php:332
+msgid "Google Meet permissions were not approved. To use this feature, please reconnect and approve them."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:50
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:53
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:93
+msgid "Sync Events On"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:50
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:51
+msgid "Calendar permissions not approved"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:51
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:54
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:237
+msgid "Sync Settings"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:53
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:54
+msgid "Settings overridden by custom mapping"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:87
+msgid "Select the calendar on which new events will be added"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:201
+msgid "Sync both ways"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:202
+msgid "Sync from Sugar Calendar to Google Calendar"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:203
+msgid "Sync from Google Calendar to Sugar Calendar"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:230
+msgid "Select how you want the sync between Sugar Calendar and Google to function"
+msgstr ""
+
+#. translators: %s: Sugar Calendar Pro upgrade URL.
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsFields.php:264
+#, php-format
+msgid "Sugar Calendar Lite saves a recurring Google event as a single event on its first date. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Upgrade to Sugar Calendar Pro</a> to sync every date in the series."
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsForm.php:134
+msgid "Select Calendar"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsForm.php:135
+msgid "Don't Sync Events"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/GoogleCalendarSettingsForm.php:281
+msgid "Could not load your Google calendars. Please try again."
+msgstr ""
+
 #: src/Admin/Pages/Integrations/GoogleMaps.php:56
 msgid "Google Maps"
 msgstr ""
@@ -4951,48 +5093,39 @@ msgstr ""
 msgid "Google returned an unexpected response while we checked this key. Please check that your maps load correctly on your site."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:107
-#: src/Integrations/Zoom/ZoomIntegration.php:119
+#: src/Admin/Pages/Integrations/Zoom.php:62
+#: src/Integrations/Zoom/ZoomIntegration.php:103
 #: src/Integrations/Zoom/ZoomWebhookEventHandler.php:60
 msgid "Zoom"
 msgstr ""
 
+#: src/Admin/Pages/Integrations/Zoom.php:103
+msgid "Remove Zoom connection?"
+msgstr ""
+
+#: src/Admin/Pages/Integrations/Zoom.php:104
+msgid "Links on existing events stay active. New online events won't get Zoom links until you reconnect."
+msgstr ""
+
 #. translators: %s - Documentation link URL.
-#: src/Admin/Pages/Integrations/Zoom.php:210
+#: src/Admin/Pages/Integrations/Zoom.php:122
 #, php-format
 msgid "Connect your Zoom account to automatically generate meeting links for your online events. If you need help, please refer to <a href=\"%s\" target=\"_blank\" rel=\"noopener\">our documentation</a>."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:297
-msgid "Account Connection"
-msgstr ""
-
-#: src/Admin/Pages/Integrations/Zoom.php:319
+#: src/Admin/Pages/Integrations/Zoom.php:134
 msgid "Connect with Zoom"
 msgstr ""
 
-#. translators: %s - date the Zoom account was connected.
-#: src/Admin/Pages/Integrations/Zoom.php:374
-#, php-format
-msgid "Connected on %s"
-msgstr ""
-
-#: src/Admin/Pages/Integrations/Zoom.php:383
-#: src/Admin/Pages/SettingsIntegrationsTab.php:909
-#: src/Integrations/Admin/OnlineMeetingSection.php:363
-#: assets/js/admin-event-metabox.js:503
-msgid "Remove"
-msgstr ""
-
-#: src/Admin/Pages/Integrations/Zoom.php:606
+#: src/Admin/Pages/Integrations/Zoom.php:168
 msgid "Zoom connected successfully."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:607
+#: src/Admin/Pages/Integrations/Zoom.php:169
 msgid "Zoom disconnected."
 msgstr ""
 
-#: src/Admin/Pages/Integrations/Zoom.php:608
+#: src/Admin/Pages/Integrations/Zoom.php:170
 msgid "Could not connect to Zoom. Please try again."
 msgstr ""
 
@@ -5075,7 +5208,7 @@ msgstr ""
 #: src/Admin/Pages/Settings.php:68
 #: src/Admin/Pages/Settings.php:229
 #: src/Admin/Pages/SettingsFeedsTab.php:132
-#: src/Admin/Pages/SettingsIntegrationsTab.php:301
+#: src/Admin/Pages/SettingsIntegrationsTab.php:300
 #: src/Admin/Pages/SettingsLicenseUsageTab.php:169
 #: src/Admin/Pages/SettingsRsvpTab.php:107
 #: src/Admin/Pages/SettingsZapierTab.php:62
@@ -5095,7 +5228,7 @@ msgid "Solve common email deliverability issues for good. <a target=\"_blank\" h
 msgstr ""
 
 #: src/Admin/Pages/Settings.php:249
-#: src/Admin/Pages/SettingsIntegrationsTab.php:778
+#: src/Admin/Pages/SettingsIntegrationsTab.php:777
 msgid "Save Settings"
 msgstr ""
 
@@ -5219,6 +5352,7 @@ msgid "Select the feeds to show on Calendars, Event Archives, and Single Events.
 msgstr ""
 
 #: src/Admin/Pages/SettingsFeedsTab.php:171
+#: src/Integrations/Google/GoogleWebhookEventHandler.php:36
 msgid "Google Calendar"
 msgstr ""
 
@@ -5351,86 +5485,74 @@ msgstr ""
 msgid "Attempts to update theme-side Event times according to visitor web browser location. Depends on client-side browser support. May not work for all visitors."
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:51
+#: src/Admin/Pages/SettingsIntegrationsTab.php:52
 msgid "Integrations"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:181
-msgid "Google Calendar / Meets"
-msgstr ""
-
-#: src/Admin/Pages/SettingsIntegrationsTab.php:186
+#: src/Admin/Pages/SettingsIntegrationsTab.php:185
 msgid "SMS"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:191
+#: src/Admin/Pages/SettingsIntegrationsTab.php:190
 msgid "WhatsApp"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:196
+#: src/Admin/Pages/SettingsIntegrationsTab.php:195
 #: src/Admin/Pages/SettingsZapierTab.php:37
 #: src/Admin/Pages/SettingsZapierTab.php:72
 #: src/SetupChecklist/Config.php:410
 msgid "Zapier"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:330
+#: src/Admin/Pages/SettingsIntegrationsTab.php:329
 msgid "Configure Integrations"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:333
+#: src/Admin/Pages/SettingsIntegrationsTab.php:332
 msgid "Connect Zoom, calendar, and automation tools to streamline your event workflow."
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:417
+#: src/Admin/Pages/SettingsIntegrationsTab.php:416
 msgid "Integrations are disabled"
 msgstr ""
 
 #. translators: %s - Settings > Misc URL.
-#: src/Admin/Pages/SettingsIntegrationsTab.php:422
+#: src/Admin/Pages/SettingsIntegrationsTab.php:421
 #, php-format
 msgid "Please enable Integrations from <a href=\"%s\">Settings &gt; Misc</a> to connect Sugar Calendar Events with your favorite tools!"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:464
+#: src/Admin/Pages/SettingsIntegrationsTab.php:463
 msgid "No integrations available."
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:592
+#: src/Admin/Pages/SettingsIntegrationsTab.php:591
 msgid "Out of usage"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:650
+#: src/Admin/Pages/SettingsIntegrationsTab.php:649
 msgid "Coming Soon"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:690
+#: src/Admin/Pages/SettingsIntegrationsTab.php:689
 msgid "Connected"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:695
+#: src/Admin/Pages/SettingsIntegrationsTab.php:694
 msgid "Reconnect required"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:700
+#: src/Admin/Pages/SettingsIntegrationsTab.php:699
 msgid "Connection lost"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:705
-#: src/Admin/Pages/SettingsIntegrationsTab.php:811
+#: src/Admin/Pages/SettingsIntegrationsTab.php:704
+#: src/Admin/Pages/SettingsIntegrationsTab.php:810
 msgid "Not Connected"
 msgstr ""
 
-#: src/Admin/Pages/SettingsIntegrationsTab.php:762
+#: src/Admin/Pages/SettingsIntegrationsTab.php:761
 msgid "Out of Tokens"
-msgstr ""
-
-#: src/Admin/Pages/SettingsIntegrationsTab.php:907
-msgid "Remove Zoom connection?"
-msgstr ""
-
-#: src/Admin/Pages/SettingsIntegrationsTab.php:908
-msgid "Links on existing events stay active. New online events won't get Zoom links until you reconnect."
 msgstr ""
 
 #: src/Admin/Pages/SettingsLicenseUsageTab.php:47
@@ -8341,27 +8463,27 @@ msgstr ""
 msgid "This filter matches %s or more events, which is more than one call can count. Adding another filter does not help. Ask site-wide, or use a narrower filter instead of this one."
 msgstr ""
 
-#: src/Integrations/Admin/CreateMeetingAjax.php:99
+#: src/Integrations/Admin/CreateMeetingAjax.php:101
 #: src/Integrations/Admin/RemoveMeetingAjax.php:87
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: src/Integrations/Admin/CreateMeetingAjax.php:106
+#: src/Integrations/Admin/CreateMeetingAjax.php:108
 msgid "Unknown online platform."
 msgstr ""
 
-#: src/Integrations/Admin/CreateMeetingAjax.php:113
-#: src/Integrations/Admin/CreateMeetingAjax.php:171
-#: assets/js/admin-event-metabox.js:329
+#: src/Integrations/Admin/CreateMeetingAjax.php:115
+#: src/Integrations/Admin/CreateMeetingAjax.php:177
+#: assets/js/admin-event-metabox.js:330
 msgid "Add a title and start date/time before creating the meeting."
 msgstr ""
 
-#: src/Integrations/Admin/CreateMeetingAjax.php:164
+#: src/Integrations/Admin/CreateMeetingAjax.php:170
 msgid "Could not create the event record."
 msgstr ""
 
 #. translators: %s - online meeting provider name (e.g. Zoom).
-#: src/Integrations/Admin/CreateMeetingAjax.php:187
+#: src/Integrations/Admin/CreateMeetingAjax.php:193
 #, php-format
 msgid "Connect %s"
 msgstr ""
@@ -8372,91 +8494,91 @@ msgstr ""
 msgid "The %1$s meeting for this event was deleted in %1$s, so this event's online platform was reset to None. Choose a platform and create a new meeting to host online again."
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:146
-#: src/Integrations/Admin/OnlineMeetingSection.php:330
+#: src/Integrations/Admin/OnlineMeetingSection.php:145
+#: src/Integrations/Admin/OnlineMeetingSection.php:333
 #: src/Integrations/Ai/Funnels.php:238
 #: src/Integrations/OnlineMeeting.php:104
 msgid "Online"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:155
+#: src/Integrations/Admin/OnlineMeetingSection.php:154
 msgid "Custom Link"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:158
+#: src/Integrations/Admin/OnlineMeetingSection.php:157
 msgid "Choose your online platform where the event will be hosted."
 msgstr ""
 
 #. translators: %1$s - opening anchor tag to Settings → Usage; %2$s - closing anchor tag.
-#: src/Integrations/Admin/OnlineMeetingSection.php:166
+#: src/Integrations/Admin/OnlineMeetingSection.php:165
 #, php-format
 msgid "You are out of Integration usage credits. Click %1$shere%2$s to learn more"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:177
+#: src/Integrations/Admin/OnlineMeetingSection.php:176
 msgid "Create Meeting"
 msgstr ""
 
 #. translators: %s - provider display name.
-#: src/Integrations/Admin/OnlineMeetingSection.php:276
+#: src/Integrations/Admin/OnlineMeetingSection.php:279
 #, php-format
 msgid "%s (not connected)"
 msgstr ""
 
 #. translators: %s - online meeting provider name (e.g. Zoom).
-#: src/Integrations/Admin/OnlineMeetingSection.php:349
+#: src/Integrations/Admin/OnlineMeetingSection.php:352
 #, php-format
 msgid "%s Meeting Created!"
 msgstr ""
 
 #. translators: %s - provider meeting id.
-#: src/Integrations/Admin/OnlineMeetingSection.php:356
+#: src/Integrations/Admin/OnlineMeetingSection.php:359
 #, php-format
 msgid "ID: %s"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:369
+#: src/Integrations/Admin/OnlineMeetingSection.php:372
 msgid "Host Link"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:372
+#: src/Integrations/Admin/OnlineMeetingSection.php:375
 msgid "Join Link"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:375
+#: src/Integrations/Admin/OnlineMeetingSection.php:378
 msgid "Password"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:416
+#: src/Integrations/Admin/OnlineMeetingSection.php:419
 msgid "This online meeting link is shared across all occurrences of this event."
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:445
+#: src/Integrations/Admin/OnlineMeetingSection.php:448
 msgid "Event Link"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:449
+#: src/Integrations/Admin/OnlineMeetingSection.php:452
 msgid "Add your link here"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:450
-#: src/Integrations/Admin/OnlineMeetingSection.php:540
+#: src/Integrations/Admin/OnlineMeetingSection.php:453
+#: src/Integrations/Admin/OnlineMeetingSection.php:543
 msgid "Copy"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:488
+#: src/Integrations/Admin/OnlineMeetingSection.php:491
 msgid "Show to"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:493
+#: src/Integrations/Admin/OnlineMeetingSection.php:496
 msgid "Everyone"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:497
+#: src/Integrations/Admin/OnlineMeetingSection.php:500
 msgid "Only Attendees"
 msgstr ""
 
-#: src/Integrations/Admin/OnlineMeetingSection.php:501
+#: src/Integrations/Admin/OnlineMeetingSection.php:504
 msgid "Selecting 'Only Attendees' will restrict the link to ticket and RSVP attendees."
 msgstr ""
 
@@ -9405,8 +9527,24 @@ msgstr ""
 msgid "Link Title to Event"
 msgstr ""
 
-#: src/Integrations/EventMeetingManager.php:301
+#: src/Integrations/EventMeetingManager.php:343
 msgid "You're out of integration credits."
+msgstr ""
+
+#: src/Integrations/Google/GoogleMeetIntegration.php:75
+msgid "Google Meet"
+msgstr ""
+
+#: src/Integrations/Google/GoogleMeetIntegration.php:114
+msgid "Google Meet returned an invalid response."
+msgstr ""
+
+#: src/Integrations/Google/GoogleMeetIntegration.php:223
+msgid "No active Google connection."
+msgstr ""
+
+#: src/Integrations/Google/GoogleMeetIntegration.php:229
+msgid "Google Meet permissions were not approved."
 msgstr ""
 
 #. translators: %1$d - percentage of integration credits used.
@@ -9528,12 +9666,12 @@ msgid "Credits: %s"
 msgstr ""
 
 #. translators: %1$s - comma-separated provider names; %2$s - URL to Integrations settings page.
-#: src/Integrations/OAuthRelay/OAuthConnectionErrorNotice.php:137
+#: src/Integrations/OAuthRelay/OAuthConnectionErrorNotice.php:147
 #, php-format
 msgid "Your %1$s connection has lost authorization. Please visit %2$s to reconnect your account."
 msgstr ""
 
-#: src/Integrations/OAuthRelay/OAuthConnectionErrorNotice.php:139
+#: src/Integrations/OAuthRelay/OAuthConnectionErrorNotice.php:149
 msgid "Integrations Settings"
 msgstr ""
 
@@ -9649,15 +9787,15 @@ msgstr ""
 msgid "Languages"
 msgstr ""
 
-#: src/Integrations/Zoom/ZoomIntegration.php:169
+#: src/Integrations/Zoom/ZoomIntegration.php:138
 msgid "Zoom API returned an invalid response."
 msgstr ""
 
-#: src/Integrations/Zoom/ZoomIntegration.php:250
+#: src/Integrations/Zoom/ZoomIntegration.php:203
 msgid "No Zoom meeting to update."
 msgstr ""
 
-#: src/Integrations/Zoom/ZoomIntegration.php:316
+#: src/Integrations/Zoom/ZoomIntegration.php:285
 msgid "No active Zoom connection."
 msgstr ""
 
@@ -10302,78 +10440,78 @@ msgid "Click on create link, to generate the %s meeting for this event."
 msgstr ""
 
 #. translators: %s is the online meeting provider name, e.g. "Zoom".
-#: assets/js/admin-event-metabox.js:357
+#: assets/js/admin-event-metabox.js:358
 #, js-format
 msgid "Creating %s Meeting…"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:376
+#: assets/js/admin-event-metabox.js:377
 msgid "Couldn’t create the meeting — try again."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:386
+#: assets/js/admin-event-metabox.js:387
 msgid "Connect"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:459
+#: assets/js/admin-event-metabox.js:465
 msgid "online"
 msgstr ""
 
 #. translators: %s is the online meeting provider name, e.g. "Zoom".
-#: assets/js/admin-event-metabox.js:463
+#: assets/js/admin-event-metabox.js:469
 #, js-format
 msgid "Remove %s meeting?"
 msgstr ""
 
 #. translators: %s is the online meeting provider name, e.g. "Zoom".
-#: assets/js/admin-event-metabox.js:468
+#: assets/js/admin-event-metabox.js:474
 #, js-format
 msgid "This deletes the meeting from %s and switches this event’s online location to None. Existing link will no longer work."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:545
-#: assets/js/admin-event-metabox.js:563
+#: assets/js/admin-event-metabox.js:551
+#: assets/js/admin-event-metabox.js:569
 msgid "Couldn’t remove the meeting — try again."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:895
+#: assets/js/admin-event-metabox.js:901
 msgid "Please add an event link"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:896
+#: assets/js/admin-event-metabox.js:902
 msgid "Please enter a valid URL, for example https://example.com"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:898
+#: assets/js/admin-event-metabox.js:904
 msgid "The event link is incomplete. Please review the Location tab before saving."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:933
+#: assets/js/admin-event-metabox.js:939
 msgid "Please add a start date and time"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:934
+#: assets/js/admin-event-metabox.js:940
 msgid "Please add a start date"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:936
+#: assets/js/admin-event-metabox.js:942
 msgid "The start of this event is incomplete. Please review the Duration tab before saving."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:951
+#: assets/js/admin-event-metabox.js:957
 msgid "The end of this event is incomplete. Please review the Duration tab before saving."
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:992
+#: assets/js/admin-event-metabox.js:998
 msgid "Please add an end date and time"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:993
+#: assets/js/admin-event-metabox.js:999
 msgid "Please add an end date"
 msgstr ""
 
-#: assets/js/admin-event-metabox.js:994
-#: assets/js/admin-event-metabox.js:999
+#: assets/js/admin-event-metabox.js:1000
+#: assets/js/admin-event-metabox.js:1005
 msgid "End date and time cannot be before the start date and time."
 msgstr ""
 

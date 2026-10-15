@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Tools\Importers\TheEventCalendar;
 use Sugar_Calendar\Admin\Tools\Smtp;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
+use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionsTableMigration;
 use Sugar_Calendar\Options;
 use Sugar_Calendar\PartnerPlugins\Catalog;
 
@@ -324,6 +325,10 @@ class CompletionDetector {
 	 */
 	private function has_saved_event() {
 
+		if ( ! get_option( 'wpdb_sc_events_version' ) ) {
+			return false;
+		}
+
 		$events = sugar_calendar_get_events(
 			[
 				'object_type'    => 'post',
@@ -389,7 +394,7 @@ class CompletionDetector {
 	 */
 	private function has_active_zoom_connection() {
 
-		if ( IntegrationsDisabler::is_disabled() ) {
+		if ( IntegrationsDisabler::is_disabled() || OAuthConnectionsTableMigration::get_current_version() === 0 ) {
 			return false;
 		}
 

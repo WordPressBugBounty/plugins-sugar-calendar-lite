@@ -7,6 +7,7 @@ use Sugar_Calendar\Admin\Pages\SettingsIntegrationsTab;
 use Sugar_Calendar\Integrations\EventMeetingManager;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
 use Sugar_Calendar\Integrations\MeetingProviderInterface;
+use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionErrorNotice;
 
 /**
  * Explicit "Create Zoom Meeting" AJAX endpoint.
@@ -86,6 +87,7 @@ class CreateMeetingAjax {
 	 * Handle the create request.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Creates the new meeting before deleting the old one on a provider switch.
 	 *
 	 * @return void
 	 */
@@ -127,6 +129,10 @@ class CreateMeetingAjax {
 		wp_update_post( $update );
 
 		$event = EventMeetingManager::resolve_event_for_post( $post_id );
+
+		// Switching providers: remember the old meeting so it is deleted only after the new one exists.
+		$old_provider_slug = ! empty( $event->id ) ? (string) get_event_meta( $event->id, 'meeting_provider', true ) : '';
+		$old_meeting_id    = ! empty( $event->id ) ? (string) get_event_meta( $event->id, 'meeting_id', true ) : '';
 
 		// online_visibility: same default logic as OnlineMeetingSection::save() —
 		// defaults to 'attendees' when not posted (radio is only rendered after the
@@ -181,7 +187,7 @@ class CreateMeetingAjax {
 			// connect without hunting for the page. Provider-agnostic: matches
 			// any "{slug}_no_connection" error code (e.g. zoom_no_connection).
 			if ( strpos( $result->get_error_code(), 'no_connection' ) !== false ) {
-				$error['settings_url']  = SettingsIntegrationsTab::get_integration_url( $slug );
+				$error['settings_url']  = SettingsIntegrationsTab::get_integration_url( OAuthConnectionErrorNotice::PROVIDER_PAGE_SLUGS[ $slug ] ?? $slug );
 				$error['settings_text'] = sprintf(
 					/* translators: %s - online meeting provider name (e.g. Zoom). */
 					esc_html__( 'Connect %s', 'sugar-calendar-lite' ),
@@ -190,6 +196,10 @@ class CreateMeetingAjax {
 			}
 
 			wp_send_json_error( $error );
+		}
+
+		if ( $old_provider_slug !== '' && $old_provider_slug !== $slug ) {
+			$this->manager->delete_previous_meeting( $event, $old_provider_slug, $old_meeting_id );
 		}
 
 		// Re-fetch so the renderer reads the freshly-written meeting meta.

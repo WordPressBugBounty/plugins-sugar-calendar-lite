@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Integrations;
 
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\Webhooks\IncomingWebhookHandler;
+use Throwable;
 
 /**
  * Event meeting lifecycle dispatcher (Segment 2b: full keep-in-sync).
@@ -22,7 +23,8 @@ use Sugar_Calendar\Integrations\OAuthRelay\Webhooks\IncomingWebhookHandler;
  *              (dormant until a 2nd provider exists).
  *   removal  — Online -> None; delete + clear meta.
  *
- * On before_delete_post / wp_trash_post, cleanup() deletes the meeting. Core
+ * On wp_trash_post, trash() asks the provider (trash_meeting()): Zoom deletes, Meet keeps.
+ * On before_delete_post, cleanup() deletes the meeting. Core
  * deletes the event row on the same hook at priority 999, so the meeting meta is
  * still readable at the default 10.
  *
@@ -31,6 +33,8 @@ use Sugar_Calendar\Integrations\OAuthRelay\Webhooks\IncomingWebhookHandler;
  * (3a) so a provider-originated change never bounces back to the provider.
  *
  * @since 3.12.0
+ *
+ * @phpstan-ignore sugarCalendar.classMethods
  */
 class EventMeetingManager {
 
@@ -84,12 +88,13 @@ class EventMeetingManager {
 	 * Register hooks.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Trash now calls trash() instead of cleanup().
 	 */
 	public function hooks() {
 
 		add_action( 'save_post', [ $this, 'sync' ], 20, 2 );
 		add_action( 'before_delete_post', [ $this, 'cleanup' ], 10, 1 );
-		add_action( 'wp_trash_post', [ $this, 'cleanup' ], 10, 1 );
+		add_action( 'wp_trash_post', [ $this, 'trash' ], 10, 1 );
 	}
 
 	/**
@@ -101,6 +106,7 @@ class EventMeetingManager {
 	 * through one call site.
 	 *
 	 * @since 3.13.0
+	 * @since 3.16.0 Delegates to EventSaveGuard.
 	 *
 	 * @param int $post_id WP post id.
 	 *
@@ -108,17 +114,14 @@ class EventMeetingManager {
 	 */
 	public static function resolve_event_for_post( $post_id ) {
 
-		return sugar_calendar_get_event_by_object(
-			$post_id,
-			'post',
-			[ 'object_subtype' => get_post_type( $post_id ) ]
-		);
+		return EventSaveGuard::resolve_event_for_post( $post_id );
 	}
 
 	/**
 	 * Reconcile the event's meeting against the selected provider on save.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Save guard moved to EventSaveGuard.
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post object.
@@ -133,7 +136,7 @@ class EventMeetingManager {
 			return;
 		}
 
-		if ( ! $this->can_sync( $post_id, $post ) ) {
+		if ( ! EventSaveGuard::is_editor_save( $post_id, $post ) ) {
 			return;
 		}
 
@@ -153,14 +156,15 @@ class EventMeetingManager {
 			// removal: Online -> None.
 			if ( $existing && ! $current ) {
 				$this->remove( $existing, $event );
+				$this->fire_changed( $event );
 
 				return;
 			}
 
-			// switch: provider changed (dormant until a 2nd provider exists).
+			// switch: remove the old provider's meeting; the new one is created by the Create button only.
 			if ( $existing && $current && $existing !== $current ) {
 				$this->remove( $existing, $event );
-				$this->create( $current, $event );
+				$this->fire_changed( $event );
 
 				return;
 			}
@@ -254,6 +258,43 @@ class EventMeetingManager {
 	}
 
 	/**
+	 * Let the provider decide what trash does to its meeting; clear the meta only when it is gone.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return void
+	 */
+	public function trash( $post_id ) {
+
+		if ( IncomingWebhookHandler::is_processing() ) {
+			return;
+		}
+
+		if ( ! post_type_supports( get_post_type( $post_id ), 'events' ) ) {
+			return;
+		}
+
+		try {
+			$event = self::resolve_event_for_post( $post_id );
+
+			if ( empty( $event->id ) ) {
+				return;
+			}
+
+			$provider = $this->get_provisioned_provider( $event );
+
+			if ( $provider && $provider->trash_meeting( $event ) ) {
+				$this->clear_meta( $provider, $event );
+			}
+		} catch ( Throwable $e ) {
+			// Swallow: a provider failure must never block the trash.
+			unset( $e );
+		}
+	}
+
+	/**
 	 * Resolve the provider currently provisioned for an event: meeting_provider
 	 * + meeting_id are both set and the slug resolves via the capability
 	 * registry.
@@ -288,6 +329,7 @@ class EventMeetingManager {
 	 * can decide whether to log it (sync) or surface it to the user (AJAX).
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Fires sugar_calendar_online_meeting_changed.
 	 *
 	 * @param MeetingProviderInterface $provider Resolved provider.
 	 * @param object                   $event    SCE Event object.
@@ -320,6 +362,8 @@ class EventMeetingManager {
 		// breadcrumb so a stale editor notice does not linger.
 		delete_event_meta( $event->id, self::REMOVED_NOTICE_META_KEY );
 
+		$this->fire_changed( $event );
+
 		return true;
 	}
 
@@ -337,6 +381,7 @@ class EventMeetingManager {
 	 * always ends in "no meeting here."
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Fires sugar_calendar_online_meeting_changed.
 	 *
 	 * @param object $event SCE Event object.
 	 *
@@ -358,23 +403,30 @@ class EventMeetingManager {
 		}
 
 		delete_event_meta( $event->id, 'online_provider' );
+
+		$this->fire_changed( $event );
 	}
 
 	/**
-	 * Internal create used by the switch branch — provisions and logs on failure.
+	 * Delete the meeting a provider switch replaced, after the new one was created.
 	 *
-	 * @since 3.12.0
+	 * @since 3.16.0
 	 *
-	 * @param MeetingProviderInterface $provider Resolved provider.
-	 * @param object                   $event    SCE Event object.
+	 * @param object $event             SCE Event object.
+	 * @param string $old_provider_slug Slug of the provider being replaced.
+	 * @param string $old_meeting_id    The replaced meeting id.
 	 *
 	 * @return void
 	 */
-	private function create( MeetingProviderInterface $provider, $event ) {
+	public function delete_previous_meeting( $event, string $old_provider_slug, string $old_meeting_id ) {
 
-		// Failure is intentionally silent: online_provider stays set, so the next
-		// save retries provisioning (credits/transient-error recovery).
-		$this->provision_meeting( $provider, $event );
+		$provider = $this->registry->find( MeetingProviderInterface::class, $old_provider_slug );
+
+		if ( ! $provider instanceof MeetingProviderInterface ) {
+			return;
+		}
+
+		$this->delete_old_meeting( $provider, $event, $old_meeting_id );
 	}
 
 	/**
@@ -412,6 +464,7 @@ class EventMeetingManager {
 	 * Delete the provider meeting and clear local meta (orphan-tolerant).
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Meta reset moved into clear_meta().
 	 *
 	 * @param MeetingProviderInterface $provider Resolved provider.
 	 * @param object                   $event    SCE Event object.
@@ -426,6 +479,21 @@ class EventMeetingManager {
 		// Clear local meta regardless of the delete result: the user's intent is
 		// "no meeting here"; an orphaned remote meeting is harmless (matches the
 		// disconnect orphan-meta philosophy).
+		$this->clear_meta( $provider, $event );
+	}
+
+	/**
+	 * Clear the meeting meta the provider owns, plus the manager's hash and kind.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @param MeetingProviderInterface $provider Resolved provider.
+	 * @param object                   $event    SCE Event object.
+	 *
+	 * @return void
+	 */
+	private function clear_meta( MeetingProviderInterface $provider, $event ) {
+
 		foreach ( $provider->get_meeting_meta_keys() as $key ) {
 			delete_event_meta( $event->id, $key );
 		}
@@ -492,41 +560,25 @@ class EventMeetingManager {
 	}
 
 	/**
-	 * Whether this save is a genuine SCE event-editor save we should react to.
+	 * Tell listeners a person created, removed or switched the event's meeting.
 	 *
-	 * Mirrors Metaboxes::can_save_meta_box() so the manager only fires for the
-	 * same editor saves that wrote the online_provider meta — not autosaves,
-	 * revisions, bulk edits, or programmatic saves.
+	 * @since 3.16.0
 	 *
-	 * @since 3.12.0
+	 * @param object $event SCE Event object.
 	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post    Post object.
-	 *
-	 * @return bool
+	 * @return void
 	 */
-	private function can_sync( $post_id, $post ): bool {
+	private function fire_changed( $event ) {
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( empty( $_POST['sc_mb_nonce'] ) || ! wp_verify_nonce( $_POST['sc_mb_nonce'], 'sugar_calendar_nonce' ) ) {
-			return false;
-		}
-
-		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || isset( $_REQUEST['bulk_edit'] ) ) {
-			return false;
-		}
-		// phpcs:enable
-
-		if ( ! is_a( $post, 'WP_Post' ) || ! post_type_supports( $post->post_type, 'events' ) ) {
-			return false;
-		}
-
-		if ( wp_is_post_revision( $post_id ) ) {
-			return false;
-		}
-
-		$pto = get_post_type_object( $post->post_type );
-
-		return ! empty( $pto ) && current_user_can( $pto->cap->edit_post, $post_id );
+		/**
+		 * Fires after the online meeting of an event was created, removed or switched in the editor.
+		 *
+		 * Not fired on trash or delete.
+		 *
+		 * @since 3.16.0
+		 *
+		 * @param object $event SCE Event object.
+		 */
+		do_action( 'sugar_calendar_online_meeting_changed', $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 	}
 }

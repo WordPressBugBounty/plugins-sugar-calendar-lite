@@ -62,7 +62,7 @@ class ProductEvents extends AbstractProductEvents {
 	 *
 	 * @since 3.15.0
 	 */
-	const INTEGRATION_PROVIDERS = [ 'zoom', 'google_maps', 'stripe' ];
+	const INTEGRATION_PROVIDERS = [ 'zoom', 'google', 'google_maps', 'stripe' ];
 
 	/**
 	 * Stripe modes.

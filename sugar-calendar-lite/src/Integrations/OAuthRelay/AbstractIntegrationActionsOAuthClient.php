@@ -21,34 +21,58 @@ use WP_Error;
 abstract class AbstractIntegrationActionsOAuthClient {
 
 	/**
-	 * Product API client with HMAC auth configured.
+	 * Product API client with HMAC auth configured, built on first request.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Built lazily so the object is safe to construct at boot.
 	 *
-	 * @var Client
+	 * @var Client|null
 	 */
-	private $client;
+	private $client = null;
 
 	/**
-	 * OAuth relay client for token refresh.
+	 * OAuth relay client for token refresh, built on first request.
 	 *
 	 * @since 3.12.0
+	 * @since 3.16.0 Built lazily so the object is safe to construct at boot.
 	 *
-	 * @var OAuthRelayClient
+	 * @var OAuthRelayClient|null
 	 */
-	private $oauth_relay_client;
+	private $oauth_relay_client = null;
 
 	/**
-	 * Constructor.
+	 * Product API client with HMAC auth.
 	 *
-	 * @since 3.12.0
+	 * @since 3.16.0
+	 *
+	 * @return Client
 	 */
-	public function __construct() {
+	private function client(): Client {
 
-		$this->client = ProductApi::client()
-			->auth_strategy( ProductApi::get( HMACAuthStrategy::class ) );
+		if ( $this->client === null ) {
+			$this->client = ProductApi::client()
+				->auth_strategy( ProductApi::get( HMACAuthStrategy::class ) );
+		}
 
-		$this->oauth_relay_client = new OAuthRelayClient();
+		return $this->client;
+	}
+
+	/**
+	 * Token middleware for one connection.
+	 *
+	 * @since 3.16.0
+	 *
+	 * @param OAuthConnectionInterface $connection OAuth connection.
+	 *
+	 * @return OAuthTokenMiddleware
+	 */
+	private function middleware( OAuthConnectionInterface $connection ): OAuthTokenMiddleware {
+
+		if ( $this->oauth_relay_client === null ) {
+			$this->oauth_relay_client = new OAuthRelayClient();
+		}
+
+		return new OAuthTokenMiddleware( $connection, $this->oauth_relay_client );
 	}
 
 	/**
@@ -63,8 +87,8 @@ abstract class AbstractIntegrationActionsOAuthClient {
 	 */
 	protected function post( string $path, OAuthConnectionInterface $connection ): Request {
 
-		return $this->client
-			->middleware( new OAuthTokenMiddleware( $connection, $this->oauth_relay_client ) )
+		return $this->client()
+			->middleware( $this->middleware( $connection ) )
 			->post( $this->get_base_path() . $path );
 	}
 
@@ -80,8 +104,8 @@ abstract class AbstractIntegrationActionsOAuthClient {
 	 */
 	protected function delete( string $path, OAuthConnectionInterface $connection ): Request {
 
-		return $this->client
-			->middleware( new OAuthTokenMiddleware( $connection, $this->oauth_relay_client ) )
+		return $this->client()
+			->middleware( $this->middleware( $connection ) )
 			->delete( $this->get_base_path() . $path );
 	}
 
@@ -97,8 +121,8 @@ abstract class AbstractIntegrationActionsOAuthClient {
 	 */
 	protected function get( string $path, OAuthConnectionInterface $connection ): Request {
 
-		return $this->client
-			->middleware( new OAuthTokenMiddleware( $connection, $this->oauth_relay_client ) )
+		return $this->client()
+			->middleware( $this->middleware( $connection ) )
 			->get( $this->get_base_path() . $path );
 	}
 
@@ -121,8 +145,7 @@ abstract class AbstractIntegrationActionsOAuthClient {
 		$request = new Request( 'PATCH', $full_path );
 
 		return $request->client(
-			$this->client
-				->middleware( new OAuthTokenMiddleware( $connection, $this->oauth_relay_client ) )
+			$this->client()->middleware( $this->middleware( $connection ) )
 		);
 	}
 
