@@ -5,6 +5,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
+use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
 use Sugar_Calendar\Helpers as BaseHelpers;
@@ -320,12 +321,51 @@ class OrderEdit {
 		<?php
 		UI::form_table_row_close();
 
+		$this->render_discount_rows( OrderDiscount::from_order( $this->order ) );
+
 		UI::form_table_row_open( __( 'Total', 'sugar-calendar-lite' ) );
 		echo esc_html( Functions\display_price( $this->order->total ) );
 		UI::form_table_row_close();
 
 		UI::form_table_close();
 		UI::postbox_close();
+	}
+
+	/**
+	 * The Subtotal and Discount rows of an order that used a coupon.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param OrderDiscount $discount The order's stored discount.
+	 */
+	private function render_discount_rows( OrderDiscount $discount ) {
+
+		if ( ! $discount->applies() ) {
+			return;
+		}
+
+		UI::form_table_row_open( __( 'Subtotal', 'sugar-calendar-lite' ) );
+		echo esc_html( $discount->subtotal() );
+		UI::form_table_row_close();
+
+		$code_html = null;
+
+		if ( $discount->code() !== '' ) {
+
+			/**
+			 * Filters the coupon code markup in the Discount row of Order Details.
+			 *
+			 * @since 3.17.0
+			 *
+			 * @param string $code_html The escaped coupon code.
+			 * @param object $order     The order row.
+			 */
+			$code_html = (string) apply_filters( 'sugar_calendar_ticketing_order_discount_code_html', esc_html( $discount->code() ), $this->order ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName -- Public sugar_calendar_ticketing_* name that Pro answers; the class-derived prefix would hide it from add-ons.
+		}
+
+		UI::form_table_row_open( __( 'Discount', 'sugar-calendar-lite' ) );
+		echo wp_kses_post( $discount->line( $code_html ) );
+		UI::form_table_row_close();
 	}
 
 	/**

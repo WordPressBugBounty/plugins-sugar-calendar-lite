@@ -79,6 +79,15 @@ final class Order_Schema extends Schema {
 			'sortable'   => false
 		),
 
+		// discount_code.
+		[
+			'name'     => 'discount_code',
+			'type'     => 'varchar',
+			'length'   => '100',
+			'default'  => '',
+			'sortable' => false,
+		],
+
 		// email
 		array(
 			'name'       => 'email',

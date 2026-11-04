@@ -17,6 +17,7 @@ use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\EditorPreview;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\TicketPageTemplate;
 use Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout;
+use Sugar_Calendar\AddOn\Ticketing\Gateways\Stripe;
 use Sugar_Calendar\Event;
 
 /**
@@ -285,7 +286,7 @@ function enqueue() {
 			'sc_et_stripe_vars',
 			[
 				'currency'   => Functions\get_currency(),
-				'min_charge' => 100,
+				'min_charge' => Stripe::MIN_CHARGE,
 			]
 		)
 	);

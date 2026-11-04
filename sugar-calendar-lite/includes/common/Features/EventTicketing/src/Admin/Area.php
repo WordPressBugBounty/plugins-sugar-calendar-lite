@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\AddOn\Ticketing\Admin;
 
+use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\CouponsEducationTab;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\OrderEdit;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\OrdersTab;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Pages\Tickets;
@@ -100,18 +101,15 @@ class Area {
 			$page_id = 'tickets_order_edit';
 		} elseif ( $page_id === 'tickets' ) {
 
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$section = $_GET['tab'] ?? 'tickets';
+			$tabs = [
+				'tickets' => 'tickets_tickets',
+				'orders'  => 'tickets_orders',
+				'coupons' => 'tickets_coupons',
+			];
 
-			switch ( $section ) {
-				case 'tickets':
-					$page_id = 'tickets_tickets';
-					break;
-
-				case 'orders':
-					$page_id = 'tickets_orders';
-					break;
-			}
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.NonceVerification.Recommended
+			$section = sanitize_key( $_GET['tab'] ?? 'tickets' );
+			$page_id = $tabs[ $section ] ?? $page_id;
 		}
 
 		return $page_id;
@@ -129,6 +127,7 @@ class Area {
 		$pages['tickets']            = Tickets::class;
 		$pages['tickets_tickets']    = TicketsTab::class;
 		$pages['tickets_orders']     = OrdersTab::class;
+		$pages['tickets_coupons']    = CouponsEducationTab::class;
 		$pages['tickets_order_edit'] = OrderEdit::class;
 
 		return $pages;

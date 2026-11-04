@@ -114,16 +114,28 @@
 					'last_name': this.$el.$checkoutForm.find( '#sc-event-ticketing-last-name' ).val(),
 					'event_id': this.$el.$checkoutForm.find( '#sc_et_event_id' ).val(),
 					'quantity': this.$el.$checkoutForm.find( '#sc_et_quantity' ).val(),
+					sc_et_coupon_code: this.$el.$checkoutForm.find( '[name="sc_et_coupon_code"]' ).val() || '',
+					sc_et_coupon_hold: this.$el.$checkoutForm.find( '[name="sc_et_coupon_hold"]' ).val() || '',
 				},
 				function ( res ) {
 
 					if ( ! res.success ) {
 						that.hideSpinner();
 
+						if ( res.data.coupon_error ) {
+							$( 'body' ).trigger( 'sc_et_coupon_rejected', [ res.data.error_msg ] );
+
+							return;
+						}
+
 						that.$el.$errorContainer
 							.append( '<div class="sc-et-error alert alert-danger" role="alert">' + res.data.error_msg + '</div>' );
 
 						return;
+					}
+
+					if ( res.data.coupon_hold ) {
+						that.$el.$checkoutForm.find( '[name="sc_et_coupon_hold"]' ).val( res.data.coupon_hold );
 					}
 
 					if ( res.data.is_free_event ) {

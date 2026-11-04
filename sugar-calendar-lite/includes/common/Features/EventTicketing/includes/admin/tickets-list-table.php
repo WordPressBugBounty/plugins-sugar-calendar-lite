@@ -6,6 +6,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Database as Database;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\AddOn\Ticketing\Admin\ListTableAbstract;
 use Sugar_Calendar\Helper;
 
 // Include the main list table class if it's not included
@@ -16,7 +17,12 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 // No list table class, so something went very wrong
 if ( class_exists( '\WP_List_Table' ) ) :
 
-class List_Table extends \WP_List_Table {
+/**
+ * Tickets list table.
+ *
+ * @since 1.0.0
+ */
+class List_Table extends ListTableAbstract {
 
 	public $per_page    = 30;
 	public $total_count = 0;
@@ -24,15 +30,6 @@ class List_Table extends \WP_List_Table {
 	public $should_show_trashed_tickets = true;
 	public $should_show_cb = true;
 	public $should_enable_sorting = true;
-
-	/**
-	 * User saved preferences.
-	 *
-	 * @since 3.8.0
-	 *
-	 * @var array
-	 */
-	public $user_saved_pref = false;
 
 	/**
 	 * Get things started.
@@ -126,134 +123,27 @@ class List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Display the bulk actions dropdown.
+	 * Value of the hidden `tab` input in the list form.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @param string $which The location of the bulk actions: 'top' or 'bottom'.
+	 * @return string
 	 */
-	protected function bulk_actions( $which = '' ) {
+	protected function get_hidden_tab() {
 
-		if ( is_null( $this->_actions ) ) {
-			$this->_actions = $this->get_bulk_actions();
-		}
-
-		if ( empty( $this->_actions ) ) {
-			return;
-		}
-
-		?>
-		<label for="bulk-action-selector-<?php echo esc_attr( $which ); ?>" class="screen-reader-text"><?php echo esc_html__( 'Select bulk action', 'sugar-calendar-lite' ); ?></label>
-		<select name="action<?php echo $which === 'bottom' ? '2' : ''; ?>" id="bulk-action-selector-<?php echo esc_attr( $which ); ?>">
-			<option value="-1"><?php echo esc_html__( 'Bulk actions', 'sugar-calendar-lite' ); ?></option>
-			<?php foreach ( $this->_actions as $key => $value ) : ?>
-				<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $value ); ?></option>
-			<?php endforeach; ?>
-		</select>
-
-		<?php
-		submit_button(
-			__( 'Apply', 'sugar-calendar-lite' ),
-			'action',
-			'',
-			false,
-			[
-				'id' => 'doaction' . ( $which === 'bottom' ? '2' : '' ),
-			]
-		);
+		return 'tickets';
 	}
 
 	/**
-	 * Displays extra controls between bulk actions and pagination.
+	 * Placeholder of the search input.
 	 *
-	 * @since 3.7.0
+	 * @since 3.17.0
 	 *
-	 * @param string $which Whether top or bottom.
+	 * @return string
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function get_search_placeholder() {
 
-		if ( $which !== 'top' ) {
-			return;
-		}
-
-		$option = '';
-
-		if ( ! empty( $_GET['event_id'] ) ) {
-			$event = sugar_calendar_get_event( absint( $_GET['event_id'] ) );
-
-			if ( ! empty( $event ) ) {
-				$option = sprintf(
-					'<option selected value="%1$d">%2$s</option>',
-					absint( $_GET['event_id'] ),
-					esc_html( $event->title )
-				);
-			}
-		}
-		?>
-		<div class="sugar-calendar-ticketing__admin__list__actions alignleft actions">
-			<span class="sugar-calendar-ticketing__admin__list__actions__choices-events choicesjs-select-wrap">
-				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select" multiple>
-					<?php
-						echo wp_kses(
-							$option,
-							[
-								'option' => [
-									'selected' => [],
-									'value'    => [],
-								],
-							]
-						);
-					?>
-				</select>
-			</span>
-			<?php
-			printf(
-				'<input type="submit" class="button" value="%1$s">',
-				esc_attr__( 'Filter', 'sugar-calendar-lite' )
-			);
-			?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Show the search field.
-	 *
-	 * @since 1.0.0
-	 * @since 3.8.0 Fixed the search submit button.
-	 *
-	 * @param string $text     Label for the search box.
-	 * @param string $input_id ID of the search box.
-	 */
-	public function search_box( $text, $input_id ) {
-
-		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
-			return;
-		}
-
-		$input_id = $input_id . '-search-input';
-
-		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			echo '<input type="hidden" name="orderby" value="' . esc_attr( $_REQUEST['orderby'] ) . '" />';
-		}
-
-		if ( ! empty( $_REQUEST['order'] ) ) {
-			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
-		}
-		?>
-		<p class="search-box">
-			<?php do_action( 'sc_event_tickets_list_table_search_box' ); ?>
-			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
-			<input
-				type="search"
-				id="<?php echo esc_attr( $input_id ); ?>"
-				name="s"
-				value="<?php _admin_search_query(); ?>"
-				placeholder="<?php echo esc_attr__( 'Search Attendee...', 'sugar-calendar-lite' ); ?>" />
-			<input type="hidden" name="tab" value="tickets" />
-			<input type="submit" id="search-submit" class="button" value="<?php esc_html_e( 'Search', 'sugar-calendar-lite' ); ?>">
-		</p>
-		<?php
+		return __( 'Search Attendee...', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -263,16 +153,10 @@ class List_Table extends \WP_List_Table {
 	 */
 	public function display_search_reset() {
 
-		if ( empty( $_GET['s'] ) ) {
-			return;
-		}
-
-		Helper::display_search_reset(
-			$this->total_count,
-			strtolower( esc_html__( 'ticket', 'sugar-calendar-lite' ) ),
-			strtolower( esc_html__( 'tickets', 'sugar-calendar-lite' ) ),
-			esc_html__( 'Tickets', 'sugar-calendar-lite' ),
-			admin_url( 'admin.php?page=sc-event-ticketing&tab=tickets' )
+		$this->display_tab_search_reset(
+			esc_html__( 'ticket', 'sugar-calendar-lite' ),
+			esc_html__( 'tickets', 'sugar-calendar-lite' ),
+			esc_html__( 'Tickets', 'sugar-calendar-lite' )
 		);
 	}
 
@@ -694,21 +578,7 @@ class List_Table extends \WP_List_Table {
 	public function prepare_items() {
 
 		// Columns and hidden columns based on user preferences (cogwheel UI).
-		$columns  = $this->get_columns();
-		$sortable = $this->get_sortable_columns();
-
-		$active_columns = get_user_meta( get_current_user_id(), 'sugar_calendar_table_tickets_active_columns', true );
-		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $columns );
-
-		// Always include required columns.
-		$required_columns = [ 'cb', 'attendee', 'order' ];
-		$active_columns   = array_unique( array_merge( $required_columns, $active_columns ) );
-
-		// Compute hidden columns and ensure required are never hidden.
-		$hidden = array_diff( array_keys( $columns ), $active_columns );
-		$hidden = array_diff( $hidden, $required_columns );
-
-		$this->_column_headers = [ $columns, $hidden, $sortable ];
+		$this->set_column_headers( 'tickets', [ 'cb', 'attendee', 'order' ] );
 
 		// Sanitize status.
 		$status = ! empty( $_GET['status'] )
@@ -721,13 +591,7 @@ class List_Table extends \WP_List_Table {
 			: '';
 
 		// Set the per page limit.
-		if ( ! empty( $this->user_saved_pref['pagination_per_page'] ) ) {
-			$per_page = absint( $this->user_saved_pref['pagination_per_page'] );
-
-			if ( ! empty( $per_page ) ) {
-				$this->per_page = $per_page;
-			}
-		}
+		$this->apply_saved_per_page();
 
 		// Sanitize orderby..
 		$orderby = ! empty( $_GET['orderby'] )
@@ -874,20 +738,6 @@ class List_Table extends \WP_List_Table {
 		}
 
 		return $actions;
-	}
-
-	/**
-	 * Generates the tbody element for the list table.
-	 *
-	 * @since 3.8.0
-	 */
-	public function display_rows_or_placeholder() {
-
-		if ( $this->has_items() ) {
-			$this->display_rows();
-		} else {
-			$this->no_items();
-		}
 	}
 
 	/**

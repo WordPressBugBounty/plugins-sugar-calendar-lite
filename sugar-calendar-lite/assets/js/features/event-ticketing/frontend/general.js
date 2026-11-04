@@ -15,8 +15,61 @@ jQuery( document ).ready( function( $ ) {
 
 	$modal.modal( 'handleUpdate' );
 
-	$modal.on( 'show.bs.modal', function () {
+	// Answers of older price requests are ignored, so the Total follows the last click.
+	let latestPriceRequest = 0;
 
+	/**
+	 * Request the price for a quantity and show it in the Total.
+	 *
+	 * The coupon code is the explicit one given by a coupon event, otherwise the
+	 * hidden field the coupon UI keeps (absent on Lite, so empty).
+	 *
+	 * @param {number} quantity Ticket quantity.
+	 * @param {string} [code]   Coupon code to send instead of the hidden field's.
+	 */
+	function requestPrice( quantity, code ) {
+		const requestId = ++latestPriceRequest,
+			isApply = typeof code === 'string' && code !== '',
+			isLatest = () => requestId === latestPriceRequest;
+
+		$.ajax({
+			type: "POST",
+			url: sc_event_ticket_vars.ajaxurl,
+			data: {
+				action : 'sc_et_get_price',
+				event_id: $eventIdField.val(),
+				quantity,
+				sc_et_coupon_code: typeof code === 'undefined' ? $( '[name="sc_et_coupon_code"]', $checkoutForm ).val() || '' : code,
+			},
+			dataType: 'json',
+			success: function( response ) {
+				if ( ! isLatest() ) {
+					return;
+				}
+
+				$( '#sc-event-ticketing-checkout-total' ).html( response.data.data.price );
+
+				if ( response.data.data.coupon ) {
+					$( 'body' ).trigger( 'sc_et_coupon_quote', [ response.data.data.coupon ] );
+				}
+			},
+			error() {
+				if ( isApply && isLatest() ) {
+					$( 'body' ).trigger( 'sc_et_coupon_failed' );
+				}
+			}
+		});
+	}
+
+	$( 'body' ).on( 'sc_et_coupon_apply', function( event, code ) {
+		requestPrice( parseInt( $( '#sc_et_quantity' ).val() ) || 1, String( code ) );
+	} );
+
+	$( 'body' ).on( 'sc_et_coupon_remove', function() {
+		requestPrice( parseInt( $( '#sc_et_quantity' ).val() ) || 1, '' );
+	} );
+
+	$modal.on( 'show.bs.modal', function() {
 		// Ticket quantity.
 		const qty = parseInt( $quantityField.val() );
 
@@ -24,26 +77,14 @@ jQuery( document ).ready( function( $ ) {
 		$( '.sc-et-error', $checkoutForm ).remove();
 
 		// Get initial price.
-		$.ajax({
-			type: "POST",
-			url: sc_event_ticket_vars.ajaxurl,
-			data: {
-				action : 'sc_et_get_price',
-				event_id: $eventIdField.val(),
-				quantity: qty
-			},
-			dataType: 'json',
-			success: function( response ) {
-				$( '#sc-event-ticketing-checkout-total' ).html( response.data.data.price );
-			}
-		});
+		requestPrice( qty );
 
 		$( '#sc-event-ticketing-quantity-span' ).text( qty );
 
+		// The Stripe step charges this field, so it must follow the visible quantity.
+		$( '#sc_et_quantity' ).val( qty );
+
 		if ( qty > 1 ) {
-
-			$( '#sc_et_quantity' ).val( qty );
-
 			// Attendee index count.
 			let attendeeIndex = 1;
 
@@ -279,20 +320,8 @@ jQuery( document ).ready( function( $ ) {
 			$( '#sc_et_quantity, #sc-event-ticketing-quantity' ).val( qty + 1 );
 			$( '#sc-event-ticketing-quantity-span' ).text( qty + 1 );
 
-			// Get new price
-			$.ajax({
-				type: "POST",
-				url: sc_event_ticket_vars.ajaxurl,
-				data: {
-					action : 'sc_et_get_price',
-					event_id: $eventIdField.val(),
-					quantity: $( 'input#sc_et_quantity' ).val()
-				},
-				dataType: 'json',
-				success: function( response ) {
-					$( '#sc-event-ticketing-checkout-total' ).html( response.data.data.price );
-				}
-			});
+			// Get new price.
+			requestPrice( $( 'input#sc_et_quantity' ).val() );
 		}
 	);
 
@@ -324,20 +353,8 @@ jQuery( document ).ready( function( $ ) {
 		$( '#sc_et_quantity, #sc-event-ticketing-quantity' ).val( qty );
 		$( '#sc-event-ticketing-quantity-span' ).text( qty );
 
-		// Get new price
-		$.ajax({
-			type: "POST",
-			url: sc_event_ticket_vars.ajaxurl,
-			data: {
-				action : 'sc_et_get_price',
-				event_id: $( 'input#sc_et_event_id' ).val(),
-				quantity: qty
-			},
-			dataType: 'json',
-			success: function( response ) {
-				$( '#sc-event-ticketing-checkout-total' ).html( response.data.data.price );
-			}
-		});
+		// Get new price.
+		requestPrice( qty );
 	});
 
 	$( '#sc-event-ticketing-copy-billing-attendee' ).on( 'click', function (event) {

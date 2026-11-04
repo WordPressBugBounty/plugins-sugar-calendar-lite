@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 6.2
 Tested up to:      7.1
-Stable tag:        3.16.0
+Stable tag:        3.17.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -230,12 +230,27 @@ Visit <a href="http://www.wpbeginner.com/" rel="friend" title="WPBeginner">WPBeg
 
 == Screenshots ==
 
-1. Frontend monthly calendar view using our WP block
-2. Frontend weekly calendar view with filters using our WP block
-3. Admin calendar view of all events
-4. Event edit screen
-5. Admin view of all calendars
-6. Main plugin settings
+1. Show your events anywhere with a clean monthly calendar, color coded by calendar.
+2. Week view with filters for featured events, calendars, days, times, speakers, venues and tags.
+3. Manage every event from the admin calendar in month, week or day view.
+4. Create events faster with Gia, the built-in AI assistant.
+5. Event editor with dates, times, featured events and calendars in one place.
+6. Advanced recurring events that repeat daily, weekly, monthly or yearly (Pro).
+7. Online and hybrid events with automatic Zoom meeting links.
+8. Custom registration forms to collect attendee details at checkout (Pro).
+9. Attendees fill in registration details when they RSVP (Pro).
+10. Sell tickets with Stripe and manage every order.
+11. Ticket purchase receipt page.
+12. Ticket details page with QR code and registration answers.
+13. Venue pages with a map and upcoming events (Pro).
+14. Speaker profiles with upcoming events (Pro).
+15. Organize events into color-coded calendars with subscribable feeds (feeds are Pro).
+16. Admin week view.
+17. Admin day view.
+18. General settings for date and time formats, editor and time zones.
+19. Payment settings to connect Stripe and set your currency.
+20. Sync events with Google Calendar and add Google Meet links.
+21. Email settings with Modern and Plain Text templates, header image and brand colors.
 
 == Frequently Asked Questions ==
 
@@ -282,6 +297,11 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.17.0 - 2026-11-04 =
+- Added: Polylang support: translate events, calendars and tags with the Polylang plugin.
+- Fixed: Timed events set to a different time zone than the calendar were missing from the admin Week and Day views.
+- Fixed: Gia AI can add tickets to events and report ticket sales without the Event Ticketing add-on.
+
 = 3.16.0 - 2026-10-15 =
 - Added: **NEW** Google Calendar integration: sync events to and from your Google calendar.
 - Added: **NEW** Google Meet integration: add a Google Meet link to any online event with a click of a button.

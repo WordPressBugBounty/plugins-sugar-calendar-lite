@@ -124,6 +124,17 @@ class OnlineMeetingSection {
 	 */
 	public function display( $event ) {
 
+		/**
+		 * Filters the event whose online meeting the section shows. Another event's meeting shows read-only.
+		 *
+		 * @since 3.17.0
+		 *
+		 * @param object $event SCE Event object.
+		 */
+		$shown     = apply_filters( 'sugar_calendar_integrations_admin_online_meeting_section_event', $event );
+		$read_only = $shown !== $event;
+		$event     = $shown;
+
 		$event_id  = ! empty( $event->id ) ? $event->id : 0;
 		$current   = $event_id ? (string) get_event_meta( $event_id, 'online_provider', true ) : '';
 		$providers = IntegrationCapabilityRegistry::instance()->get( MeetingProviderInterface::class );
@@ -140,7 +151,7 @@ class OnlineMeetingSection {
 		$current_out_of_credits = $this->is_provider_out_of_credits( $providers, $current );
 		?>
 		<?php // Wrapper (display:contents, layout-transparent) so the Pro "Add New Venue" flow can hide the whole Online section as one element. ?>
-		<div class="sugar-calendar-metabox__online-section">
+		<fieldset class="sugar-calendar-metabox__online-section" <?php disabled( $read_only ); ?>>
 		<div class="sugar-calendar-metabox__field-row sugar-calendar-metabox__field-row--online">
 			<label for="online_provider"><?php esc_html_e( 'Online', 'sugar-calendar-lite' ); ?></label>
 			<div class="sugar-calendar-metabox__field">
@@ -180,7 +191,7 @@ class OnlineMeetingSection {
 		<?php $this->render_meeting_details( $event ); ?>
 		<?php $this->render_custom_link_field( $event ); ?>
 		<?php $this->render_visibility_field( $event ); ?>
-		</div><?php // .sugar-calendar-metabox__online-section ?>
+		</fieldset><?php // .sugar-calendar-metabox__online-section ?>
 		<?php
 	}
 

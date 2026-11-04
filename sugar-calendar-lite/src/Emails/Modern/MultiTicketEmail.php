@@ -78,6 +78,8 @@ class MultiTicketEmail {
 			[ __( 'Purchaser', 'sugar-calendar-lite' ), $purchaser['name'] ],
 			[ __( 'Email', 'sugar-calendar-lite' ), $purchaser['email'] ],
 			[ __( 'Purchase Date', 'sugar-calendar-lite' ), $order['date'] ],
+			[ __( 'Subtotal', 'sugar-calendar-lite' ), $order['discount']['subtotal'] ?? '' ],
+			[ __( 'Discount', 'sugar-calendar-lite' ), $order['discount']['amount'] ?? '' ],
 			[ $order['amount_paid']['label'], $order['amount_paid']['value'] ],
 			[ __( 'Transaction ID', 'sugar-calendar-lite' ), $order['transaction_id'] ],
 		];

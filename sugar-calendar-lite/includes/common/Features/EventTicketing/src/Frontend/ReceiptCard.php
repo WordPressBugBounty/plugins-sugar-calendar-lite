@@ -117,8 +117,13 @@ class ReceiptCard {
 			self::item( esc_html__( 'Purchaser', 'sugar-calendar-lite' ), esc_html( $data->purchaser ) );
 			self::item( esc_html__( 'Email', 'sugar-calendar-lite' ), esc_html( $data->email ) );
 			self::item( esc_html__( 'Purchase Date', 'sugar-calendar-lite' ), esc_html( $data->purchase_date ) );
+			if ( $data->discount !== '' ) {
+				self::item( esc_html__( 'Subtotal', 'sugar-calendar-lite' ), esc_html( $data->subtotal ) );
+				self::item( esc_html__( 'Discount', 'sugar-calendar-lite' ), esc_html( $data->discount ) );
+			}
+
 			self::item( esc_html__( 'Amount Paid', 'sugar-calendar-lite' ), esc_html( $data->amount ) );
-			self::item( esc_html__( 'Transaction ID', 'sugar-calendar-lite' ), esc_html( $data->transaction_id ) );
+			self::item( esc_html__( 'Transaction ID', 'sugar-calendar-lite' ), $data->transaction_id !== '' ? esc_html( $data->transaction_id ) : esc_html__( 'N/A', 'sugar-calendar-lite' ) );
 			// No title means the event is gone; a bare separator and "at" would be worse than no line.
 			if ( $data->event_title !== '' ) {
 				self::item( esc_html__( 'Event', 'sugar-calendar-lite' ), self::event_value( $data ), true );

@@ -113,7 +113,8 @@ class Renderer {
 			return;
 		}
 
-		$this->event = $event;
+		/** This filter is documented in includes/common/Features/EventTicketing/src/Frontend/Loader.php */
+		$this->event = apply_filters( 'sugar_calendar_add_on_ticketing_frontend_loader_event_object', $event ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
 
 		if ( empty( $post_id ) ) {
 			$this->post_id = $event->object_id;

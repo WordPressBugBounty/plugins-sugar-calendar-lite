@@ -11,6 +11,7 @@ use Sugar_Calendar\Integrations\Abilities\Abilities;
 use Sugar_Calendar\Integrations\Ai\Availability;
 use Sugar_Calendar\Integrations\Ai\Credits\AiCreditsPresenter;
 use Sugar_Calendar\Integrations\Ai\Credits\AiUsageService;
+use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\UsageCardRenderer;
 
 /**
@@ -100,7 +101,7 @@ class SettingsLicenseUsageTab extends Settings {
 			$license_key_settings ?? $this->display_license_key_settings()
 		);
 
-		$integration_rendered = ( new UsageCardRenderer() )->render();
+		$integration_rendered = ! IntegrationsDisabler::is_disabled() && ( new UsageCardRenderer() )->render();
 
 		// One heading covers both cards; the AI card only carries it when the
 		// integration card above did not render.

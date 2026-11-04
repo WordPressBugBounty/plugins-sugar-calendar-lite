@@ -20,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 3.7.0
  * @since 3.11.1 Added optional `has_password` arg.
  * @since 3.14.0 Added optional `featured` arg.
+ * @since 3.17.0 Added optional `block_query` arg.
  *
  * @param array $args Arguments.
  *        DateTimeInterface $start_range  Start date range.
@@ -35,6 +36,7 @@ defined( 'ABSPATH' ) || exit;
  *                                         lacks edit_posts. Omit (default) to
  *                                         preserve behavior for non-block callers.
  *        bool              $featured     Pass `true` to return only featured events.
+ *        bool              $block_query  Pass `true` when a block runs the query.
  *
  * @return array Array of event objects.
  */
@@ -107,6 +109,11 @@ function sugar_calendar_get_events_within_range( $args = [] ) { // phpcs:ignore 
 	if ( ! empty( $args['featured'] ) ) {
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One JOIN on two indexed columns.
 		$query_args['meta_query'] = Featured::get_meta_query();
+	}
+
+	// Let event query filters tell block queries apart.
+	if ( ! empty( $args['block_query'] ) ) {
+		$query_args['block_query'] = true;
 	}
 
 	// When the caller opted in (`has_password => false`) and the current

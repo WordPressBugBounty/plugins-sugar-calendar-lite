@@ -1420,6 +1420,22 @@ class Helpers {
 			}
 		}
 
+		/**
+		 * Filters the WHERE clause of the upcoming events query.
+		 *
+		 * @since 3.17.0
+		 *
+		 * @param string $where_query The WHERE clause.
+		 * @param array  $args        The arguments to get the events.
+		 * @param array  $attributes  The block attributes.
+		 */
+		$where_query = (string) apply_filters(
+			'sugar_calendar_helpers_upcoming_events_where',
+			$where_query,
+			$args,
+			$attributes
+		);
+
 		if ( ! empty( $args['show_past_only'] ) ) {
 			$order_column    = $wpdb->prefix . 'sc_events.`end`';
 		} else {

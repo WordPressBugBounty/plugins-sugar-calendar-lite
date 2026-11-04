@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Integrations;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthRelayClient;
 use Sugar_Calendar\Options;
+use Sugar_Calendar\UsageTracking\CalendarEmbedBackfillTask;
 use Sugar_Calendar\UsageTracking\SendUsageTask;
 
 /**
@@ -46,7 +47,7 @@ class IntegrationsDisabler {
 	 *
 	 * @return void
 	 *
-	 * @phpstan-ignore sugarCalendar.methodLength
+	 * @phpstan-ignore sugarCalendar.methodLength (ordered teardown steps around two hooks)
 	 */
 	public function disable() {
 
@@ -71,12 +72,13 @@ class IntegrationsDisabler {
 			OAuthConnectionModel::delete( (int) $connection['id'] );
 		}
 
-		// Cancel the scheduled usage-tracking task. This is REQUIRED, not a
+		// Cancel the scheduled usage-tracking tasks. This is REQUIRED, not a
 		// backup: is_enabled() (derived from disable_integrations) only gates
-		// whether SendUsageTask is RE-registered at the next boot — it does NOT
-		// unschedule an already-scheduled action. This cancel() is the only
-		// thing that stops the pending task, on both the Misc and wizard paths.
-		// Do not remove it.
+		// whether the tasks are RE-registered at the next boot — it does NOT
+		// unschedule an already-scheduled action. These cancel() calls are the only
+		// thing that stops the pending tasks, on both the Misc and wizard paths.
+		// Do not remove them.
 		( new SendUsageTask() )->cancel();
+		( new CalendarEmbedBackfillTask() )->cancel();
 	}
 }

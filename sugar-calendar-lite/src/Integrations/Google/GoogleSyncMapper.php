@@ -27,17 +27,14 @@ class GoogleSyncMapper {
 	/**
 	 * The mapping rows, sanitised: google_calendar_id (string), sce_calendar_id (int), sync_direction (string).
 	 *
-	 * `sce_calendar_id` is a calendar term id. 0 means the default behaviour: every event pushes,
-	 * pulled events land in the Default Event Calendar setting.
-	 *
-	 * Empty without an active connection that holds the calendar scopes; push, pull and the
-	 * watch channel all read this list, so that one check keeps every path off, snippet included.
+	 * `sce_calendar_id` 0 means the default behaviour: every event pushes, pulled events land in the default calendar.
+	 * Empty without calendar scopes, so that one check keeps push, pull and the watch channel off, snippet included.
 	 *
 	 * @since 3.16.0
 	 *
 	 * @return array[]
 	 *
-	 * @phpstan-ignore sugarCalendar.methodLength
+	 * @phpstan-ignore sugarCalendar.methodLength (one list of sync rows every path reads)
 	 */
 	public static function rows(): array {
 

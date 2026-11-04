@@ -13,6 +13,7 @@ use Stripe\Customer;
 use Stripe\PaymentIntent;
 use Stripe\Refund;
 use Stripe\Stripe as StripeSDK;
+use Sugar_Calendar\AddOn\Ticketing\Checkout\CouponBridge;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\Helper;
 use Sugar_Calendar\Helpers;
@@ -54,6 +55,15 @@ class Stripe extends Checkout implements GatewayInterface {
 	 * @var string
 	 */
 	const ERROR_INVALID_STRIPE_INTENT = 'sc_et_validate_transaction_invalid_intent';
+
+	/**
+	 * Smallest card charge, in minor units.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var int
+	 */
+	const MIN_CHARGE = 100;
 
 	/**
 	 * Initialize the Stripe checkout.
@@ -247,19 +257,21 @@ class Stripe extends Checkout implements GatewayInterface {
 			$name .= ' ' . sanitize_text_field( wp_unslash( $_POST['last_name'] ) );
 		}
 
-		$ticket_price = $this->get_ticket_price( $event_id );
+		// The free decision follows the charged amount, so a full-value coupon takes the $0 path.
+		$amount = $this->get_amount( $event_id, $quantity );
+		$hold   = CouponBridge::hold( $event_id );
 
-		if ( $ticket_price <= 0 ) {
-			wp_send_json_success(
-				[
-					'is_free_event' => true,
-				]
-			);
+		if ( is_wp_error( $hold ) ) {
+			wp_send_json_error( CouponBridge::error_response( $hold ) );
+		}
+
+		if ( $amount <= 0 ) {
+			wp_send_json_success( CouponBridge::payment_response( [ 'is_free_event' => true ], $hold ) );
 		}
 
 		$data = $this->create_payment_intent(
 			$event,
-			$this->get_amount( $event_id, $quantity ),
+			$amount,
 			[
 				'name'  => trim( $name ),
 				'email' => sanitize_email( wp_unslash( $_POST['email'] ) ),
@@ -267,6 +279,8 @@ class Stripe extends Checkout implements GatewayInterface {
 		);
 
 		if ( is_wp_error( $data ) ) {
+			CouponBridge::release( $hold );
+
 			wp_send_json_error(
 				[
 					'error_msg' => sprintf(
@@ -278,7 +292,15 @@ class Stripe extends Checkout implements GatewayInterface {
 			);
 		}
 
-		wp_send_json_success( $data );
+		$bound = CouponBridge::bind_payment( $hold, (string) ( $data['payment_intent_id'] ?? '' ) );
+
+		if ( is_wp_error( $bound ) ) {
+			CouponBridge::release( $hold );
+
+			wp_send_json_error( CouponBridge::error_response( $bound ) );
+		}
+
+		wp_send_json_success( CouponBridge::payment_response( $data, $hold ) );
 	}
 
 	/**
@@ -360,6 +382,7 @@ class Stripe extends Checkout implements GatewayInterface {
 		}
 
 		return [
+			'payment_intent_id'            => $payment_intent->id,
 			'payment_intent_client_secret' => $payment_intent->client_secret,
 			'amount'                       => $payment_intent->amount,
 			'currency'                     => $payment_intent->currency,
@@ -433,8 +456,8 @@ class Stripe extends Checkout implements GatewayInterface {
 		// Transaction ID — NULL (not '') when there is no payment intent, so the
 		// UNIQUE index on transaction_id treats no-transaction orders as absent
 		// (MySQL allows unlimited NULLs but only one '').
-		$order_data['transaction_id'] = ! empty( $_POST['sc_et_payment_intent'] )
-			? sanitize_text_field( $_POST['sc_et_payment_intent'] )
+		$order_data['transaction_id'] = CouponBridge::posted( CouponBridge::INTENT_FIELD, CouponBridge::INTENT_PATTERN ) !== ''
+			? CouponBridge::posted( CouponBridge::INTENT_FIELD, CouponBridge::INTENT_PATTERN )
 			: null;
 
 		// Currency
@@ -515,12 +538,13 @@ class Stripe extends Checkout implements GatewayInterface {
 
 			// If we're here, the order has a non-zero total, so it's not free.
 
-			if ( empty( $_POST['sc_et_payment_intent'] ) ) {
+			// A non-string or malformed id counts as missing: PaymentIntent::retrieve() accepts an array.
+			if ( CouponBridge::posted( CouponBridge::INTENT_FIELD, CouponBridge::INTENT_PATTERN ) === '' ) {
 				$return_val = new WP_Error(
 					self::ERROR_MISSING_STRIPE_INTENT,
 					__( 'Missing Stripe Intent.', 'sugar-calendar-lite' )
 				);
-			} elseif ( ! $this->is_valid_intent( $_POST['sc_et_payment_intent'], $order_data ) ) {
+			} elseif ( ! $this->is_valid_intent( CouponBridge::posted( CouponBridge::INTENT_FIELD, CouponBridge::INTENT_PATTERN ), $order_data ) ) {
 				$return_val = new WP_Error(
 					self::ERROR_INVALID_STRIPE_INTENT,
 					__( 'Invalid transaction!', 'sugar-calendar-lite' )

@@ -84,7 +84,7 @@ class GoogleMeetIntegration extends AbstractMeetingProvider {
 	 *
 	 * @return array|WP_Error
 	 *
-	 * @phpstan-ignore sugarCalendar.methodLength
+	 * @phpstan-ignore sugarCalendar.methodLength (one API call with its error branches)
 	 */
 	public function create_meeting( $event ) {
 

@@ -6,6 +6,7 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\Integrations\Abilities\Abilities;
+use Sugar_Calendar\Integrations\Abilities\SignupModes;
 use Sugar_Calendar\PartnerPlugins\Catalog;
 use Sugar_Calendar\PartnerPlugins\Installer;
 
@@ -471,14 +472,8 @@ class ToolsAiTab extends Tools {
 	}
 
 	/**
-	 * Whether `get-registration-stats` is registered — display signal for the
-	 * Registrations card. Mirrors the ability's own gate, which registers it
-	 * only when at least one signup mode declared itself
-	 * (`SignupModes::available()`); ticketing and RSVP are the two that can.
-	 * Asking the same question a second way rather than calling
-	 * `SignupModes::available()` keeps this consistent with the sibling card
-	 * checks, which resolve through the filter so a module that is present but
-	 * unlicensed reads as inactive.
+	 * Whether `get-registration-stats` is registered: mirrors its gate, any declared signup mode.
+	 * Core declares ticketing on every plan, so the add-ons need not answer the capability filter.
 	 *
 	 * @since 3.14.0
 	 *
@@ -486,7 +481,7 @@ class ToolsAiTab extends Tools {
 	 */
 	protected function is_signup_stats_active() {
 
-		return $this->is_ticketing_active() || $this->is_rsvp_active();
+		return SignupModes::available() !== [];
 	}
 
 	/**

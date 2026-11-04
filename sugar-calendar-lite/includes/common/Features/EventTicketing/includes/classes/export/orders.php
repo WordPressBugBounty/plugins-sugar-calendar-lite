@@ -60,6 +60,7 @@ class Orders_Export extends CSV_Export {
 			'currency'         => esc_html__( 'Currency', 'sugar-calendar-lite' ),
 			'subtotal'         => esc_html__( 'Subtotal', 'sugar-calendar-lite' ),
 			'discount'         => esc_html__( 'Discount', 'sugar-calendar-lite' ),
+			'discount_code'    => esc_html__( 'Coupon Code', 'sugar-calendar-lite' ),
 			'tax'              => esc_html__( 'Tax', 'sugar-calendar-lite' ),
 			'total'            => esc_html__( 'Total', 'sugar-calendar-lite' ),
 
@@ -158,6 +159,7 @@ class Orders_Export extends CSV_Export {
 				'currency'         => $order->currency,
 				'subtotal'         => $order->subtotal,
 				'discount'         => $order->discount,
+				'discount_code'    => $order->discount_code,
 				'tax'              => $order->tax,
 				'total'            => $order->total,
 

@@ -7,6 +7,7 @@ use Sugar_Calendar\AddOn\Ticketing\Database\Attendee;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order;
 use Sugar_Calendar\AddOn\Ticketing\Database\Ticket;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
+use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 
@@ -83,6 +84,24 @@ final class ReceiptCardData {
 	 * @var string
 	 */
 	public string $amount = '';
+
+	/**
+	 * Formatted subtotal before the coupon, or '' when the order has no discount.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	public string $subtotal = '';
+
+	/**
+	 * Formatted discount line such as "-$8.00 (SCHOOL25)", or '' when the order has no discount.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	public string $discount = '';
 
 	/**
 	 * Gateway transaction id.
@@ -226,6 +245,10 @@ final class ReceiptCardData {
 		$data->transaction_id = (string) $order->transaction_id;
 		$data->tickets        = self::tickets( $order );
 		$data->read_only      = $read_only;
+
+		$discount       = OrderDiscount::from_order( $order );
+		$data->subtotal = $discount->subtotal();
+		$data->discount = $discount->line();
 
 		// A deleted or unpublished event leaves the event line and meeting row out; the order still shows.
 		if ( ! $event instanceof Event || ! is_post_publicly_viewable( $event->object_id ) ) {

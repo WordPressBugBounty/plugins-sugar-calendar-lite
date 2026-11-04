@@ -57,7 +57,7 @@ class SnapshotData {
 			'sugar_calendar_total_events'                 => ! empty( $events['total'] ) ? intval( $events['total'] ) : 0,
 			'sugar_calendar_total_calendars'              => intval( wp_count_terms( sugar_calendar_get_calendar_taxonomy_id() ) ),
 			'sugar_calendar_total_tags'                   => intval( wp_count_terms( TagsHelpers::get_tags_taxonomy_id() ) ),
-			'sugar_calendar_total_recurring_events'       => Counts::events_where( "recurrence != ''" ),
+			'sugar_calendar_total_recurring_events'       => Counts::events_where( "recurrence != '' AND status != 'trash'" ),
 			'sugar_calendar_recurring_advanced_used'      => $this->has_advanced_recurrence(),
 			'sugar_calendar_integrations_google_maps_connected' => trim( (string) Options::get( 'maps_google_api_key', '' ) ) !== '',
 			'sugar_calendar_integrations_zoom_status'     => $this->get_integration_status( 'zoom' ),

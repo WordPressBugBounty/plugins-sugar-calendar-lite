@@ -11,8 +11,8 @@ namespace Sugar_Calendar\AddOn\Ticketing\Integrations\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\Integrations\Abilities\AbstractEventFieldContributor;
-use Sugar_Calendar_Event_Ticketing\Integrations\Abilities\TicketRepository;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\count_orders;
+use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_currency;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\sanitize_amount;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\ticketing_provider_available_for_admin;
 
@@ -49,22 +49,14 @@ class TicketingSignupMode extends AbstractEventFieldContributor {
 	/**
 	 * Register the hooks.
 	 *
-	 * A mode that cannot read its own numbers must not declare itself: `TicketRepository`
-	 * ships in the separate sc-event-ticketing plugin, and without it
-	 * `SignupModes::available()` stays non-empty on a site where nothing can answer, so
-	 * `Abilities::build_abilities()` advertises `get-registration-stats` and it returns
-	 * zeros. All the hooks go together because `add_schema()` adds the `ticketing`
-	 * property independently of `declare_mode()`.
+	 * Declared wherever core's Event Ticketing feature boots, on every plan: core counts the
+	 * orders itself (`TicketOrderTotals`), so nothing depends on the add-on.
 	 *
 	 * @since 3.14.0
 	 *
 	 * @return void
 	 */
 	public static function hooks() {
-
-		if ( ! class_exists( TicketRepository::class ) ) {
-			return;
-		}
 
 		parent::hooks();
 
@@ -73,12 +65,8 @@ class TicketingSignupMode extends AbstractEventFieldContributor {
 		add_filter( 'sugar_calendar_integrations_abilities_signup_modes_in_use', [ self::class, 'in_use' ], 10, 3 );
 		add_filter( 'sugar_calendar_integrations_ai_funnels_event_properties', [ self::class, 'add_funnel_property' ], 5 );
 		add_filter( 'sugar_calendar_integrations_ai_funnels_ask_properties', [ self::class, 'add_ask_property' ], 5 );
-
-		// Add-on 1.6.0 has the class but not this method. Without it, the mode is reported
-		// as uncounted instead of fataling.
-		if ( method_exists( TicketRepository::class, 'window_totals' ) ) {
-			add_filter( 'sugar_calendar_integrations_abilities_signup_modes_stats', [ self::class, 'stats' ], 10, 3 );
-		}
+		add_filter( 'sugar_calendar_integrations_abilities_signup_modes_stats', [ self::class, 'stats' ], 10, 3 );
+		add_filter( 'sugar_calendar_integrations_abilities_signup_modes_scoped_stats', [ self::class, 'scoped_stats' ], 10, 4 );
 	}
 
 	/**
@@ -262,22 +250,50 @@ class TicketingSignupMode extends AbstractEventFieldContributor {
 	 */
 	public static function stats( $stats, string $start, string $end ): array {
 
-		$stats = is_array( $stats ) ? $stats : [];
+		$stats  = is_array( $stats ) ? $stats : [];
+		$totals = ( new TicketOrderTotals() )->window_totals( $start, $end );
 
-		// Unreachable through the filter — `hooks()` declines to register when the
-		// class is missing. Kept because this method is public and callable directly.
-		if ( ! class_exists( TicketRepository::class ) ) {
-			return $stats;
-		}
+		$stats[ self::MODE ] = self::row( $totals );
 
-		$repository = new TicketRepository();
-		$totals     = $repository->window_totals( $start, $end );
+		return $stats;
+	}
 
-		$stats[ self::MODE ] = [
+	/**
+	 * The `tickets` stats row for a set of totals.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param array $totals Paid-order totals: count (int) and revenue (float).
+	 *
+	 * @return array
+	 */
+	private static function row( array $totals ): array {
+
+		return [
 			'count'    => $totals['count'],
 			'revenue'  => $totals['revenue'],
-			'currency' => $repository->get_currency(),
+			'currency' => (string) get_currency(),
 		];
+	}
+
+	/**
+	 * Contribute paid-order totals for the given events.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param mixed  $stats     Totals contributed so far, keyed by mode slug.
+	 * @param string $start     Window start, UTC 'Y-m-d H:i:s', inclusive.
+	 * @param string $end       Window end, UTC 'Y-m-d H:i:s', exclusive.
+	 * @param array  $event_ids Sugar Calendar event ids.
+	 *
+	 * @return array
+	 */
+	public static function scoped_stats( $stats, string $start, string $end, array $event_ids ): array {
+
+		$stats  = is_array( $stats ) ? $stats : [];
+		$totals = ( new TicketOrderTotals() )->window_totals_for_events( $start, $end, $event_ids );
+
+		$stats[ self::MODE ] = self::row( $totals );
 
 		return $stats;
 	}

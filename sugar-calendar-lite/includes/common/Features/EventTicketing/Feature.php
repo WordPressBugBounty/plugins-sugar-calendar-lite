@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Common\Features\EventTicketing;
 
+use Sugar_Calendar\AddOn\Ticketing\Checkout\CouponCheckout;
 use Sugar_Calendar\AddOn\Ticketing\Frontend;
 use Sugar_Calendar\Common\Features\FeatureAbstract;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Area;
@@ -159,12 +160,6 @@ class Feature extends FeatureAbstract {
 		require_once $dir . 'database/attendees/class-schema.php';
 		require_once $dir . 'database/attendees/class-table-attendees.php';
 
-		// Discounts Databases.
-		require_once $dir . 'database/discounts/class-query.php';
-		require_once $dir . 'database/discounts/class-row.php';
-		require_once $dir . 'database/discounts/class-schema.php';
-		require_once $dir . 'database/discounts/class-table-discounts.php';
-
 		// Orders Databases.
 		require_once $dir . 'database/orders/class-query.php';
 		require_once $dir . 'database/orders/class-row.php';
@@ -288,15 +283,17 @@ class Feature extends FeatureAbstract {
 
 		// Database tables.
 		new Database\Attendees_Table();
-		new Database\Discounts_Table();
+		$discounts_table = new Database\Discounts_Table();
 		$orders_table = new Database\Orders_Table();
 		new Database\Tickets_Table();
 
 		// Make sure that upgrades also happen in front-end (to account for auto-upgrades and WP_CLI upgrade).
 		add_action( 'init', [ $orders_table, 'maybe_upgrade' ], 5 );
+		add_action( 'init', [ $discounts_table, 'maybe_upgrade' ], 5 );
 
 		// Instantiate any classes or setup any dependency injections here.
 		new \Sugar_Calendar\AddOn\Ticketing\Gateways\Checkout();
+		( new CouponCheckout() )->hooks();
 
 		( new UsageTrackingData() )->hooks();
 

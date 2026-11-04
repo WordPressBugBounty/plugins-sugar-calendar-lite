@@ -36,6 +36,15 @@ final class Discount_Query extends Query {
 	 */
 	protected $table_schema = __NAMESPACE__ . '\\Discount_Schema';
 
+	/**
+	 * Name of class used to shape each row.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	protected $item_shape = __NAMESPACE__ . '\\Discount';
+
 	/** Item ******************************************************************/
 
 	/**
@@ -127,5 +136,66 @@ final class Discount_Query extends Query {
 	 */
 	public function __construct( $query = array() ) {
 		parent::__construct( $query );
+	}
+
+	/**
+	 * The lookup form stored in `code_key`: trimmed and lower-cased.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param string $code Code as typed.
+	 *
+	 * @return string
+	 */
+	public static function code_key( $code ) {
+
+		return strtolower( trim( (string) $code ) );
+	}
+
+	/**
+	 * Add a discount, deriving `code_key` from `code`.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param array $data Column values.
+	 *
+	 * @return int|false
+	 */
+	public function add_item( $data = [] ) {
+
+		return parent::add_item( $this->with_code_key( $data ) );
+	}
+
+	/**
+	 * Update a discount, deriving `code_key` when `code` changes.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param int   $item_id Discount id.
+	 * @param array $data    Column values.
+	 *
+	 * @return bool
+	 */
+	public function update_item( $item_id = 0, $data = [] ) {
+
+		return parent::update_item( $item_id, $this->with_code_key( $data ) );
+	}
+
+	/**
+	 * Set `code_key` from `code` when the data carries a code.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param array $data Column values.
+	 *
+	 * @return array
+	 */
+	private function with_code_key( $data ) {
+
+		if ( is_array( $data ) && isset( $data['code'] ) ) {
+			$data['code_key'] = self::code_key( $data['code'] );
+		}
+
+		return $data;
 	}
 }

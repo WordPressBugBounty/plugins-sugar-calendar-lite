@@ -258,6 +258,17 @@ abstract class CalendarAbstract extends PageAbstract {
 
 					<?php do_meta_boxes( static::get_slug(), 'normal', null ); ?>
 
+					<?php
+					/**
+					 * Fires after the calendar form's boxes, before its submit button.
+					 *
+					 * @since 3.17.0
+					 *
+					 * @param string $slug Page slug.
+					 */
+					do_action( 'sugar_calendar_admin_pages_calendar_abstract_display_after_meta_boxes', static::get_slug() );
+					?>
+
 					<?php static::form_submit(); ?>
 				</form>
 			</div>

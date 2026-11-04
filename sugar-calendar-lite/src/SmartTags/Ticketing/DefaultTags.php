@@ -52,6 +52,8 @@ class DefaultTags {
 			new CallbackSmartTag( 'ticket_url', esc_html__( 'Ticket URL', 'sugar-calendar-lite' ), 'ticket', '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_ticket_url' ),
 			new CallbackSmartTag( 'attendee_name', esc_html__( 'Attendee Name', 'sugar-calendar-lite' ), 'attendee', '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_name' ),
 			new CallbackSmartTag( 'attendee_email', esc_html__( 'Attendee Email', 'sugar-calendar-lite' ), 'attendee', '\Sugar_Calendar\\AddOn\\Ticketing\\Common\\Functions\\get_email_tag_attendee_email' ),
+			new CallbackSmartTag( 'order_discount', esc_html__( 'Order Discount', 'sugar-calendar-lite' ), 'order', [ OrderDiscountTags::class, 'order_discount' ] ),
+			new CallbackSmartTag( 'coupon_code', esc_html__( 'Coupon Code', 'sugar-calendar-lite' ), 'order', [ OrderDiscountTags::class, 'coupon_code' ] ),
 		];
 	}
 

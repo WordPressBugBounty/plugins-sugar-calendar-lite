@@ -33,8 +33,6 @@ use Throwable;
  * (3a) so a provider-originated change never bounces back to the provider.
  *
  * @since 3.12.0
- *
- * @phpstan-ignore sugarCalendar.classMethods
  */
 class EventMeetingManager {
 

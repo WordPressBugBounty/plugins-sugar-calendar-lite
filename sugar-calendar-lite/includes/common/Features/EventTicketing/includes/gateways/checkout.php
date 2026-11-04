@@ -7,6 +7,8 @@ namespace Sugar_Calendar\AddOn\Ticketing\Gateways;
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\AddOn\Ticketing\Checkout\CheckoutDiscount;
+use Sugar_Calendar\AddOn\Ticketing\Checkout\CouponBridge;
 use Sugar_Calendar\AddOn\Ticketing\Common\CapacityLock;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
@@ -127,6 +129,7 @@ class Checkout {
 	 * Get the price for the event.
 	 *
 	 * @since 3.6.0
+	 * @since 3.17.0 Adds the coupon payload when a coupon provider priced one.
 	 *
 	 * @param int $event_id Event ID.
 	 * @param int $quantity Quantity.
@@ -139,10 +142,20 @@ class Checkout {
 		$price = Functions\sanitize_amount( $price );
 		$price = $price * max( 1, absint( $quantity ) );
 
-		return [
+		$response = [
 			'price'     => Functions\display_price( $price ),
 			'price_raw' => $price,
 		];
+
+		$coupon = CouponBridge::quote_payload( (int) $event_id, CheckoutDiscount::minor( $price ) );
+
+		if ( $coupon !== null ) {
+			$response['price']     = $coupon['total'];
+			$response['price_raw'] = $coupon['total_raw'];
+			$response['coupon']    = $coupon;
+		}
+
+		return $response;
 	}
 
 	/**

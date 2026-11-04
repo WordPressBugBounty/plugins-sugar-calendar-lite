@@ -47,29 +47,31 @@ class UsageTracking {
 		( new ProductEvents() )->init();
 		( new AiProductEvents() )->init();
 
-		// Deregister the action if option is disabled.
-		add_action(
-			'sugar_calendar_options_set_after',
-			function () {
-
-				if ( ! $this->is_enabled() ) {
-					( new SendUsageTask() )->cancel();
-				}
-			}
-		);
+		// Snapshot keys kept current on save (both editions).
+		( new EventActivityData() )->hooks();
+		( new SiteSetupData() )->hooks();
 
 		// Register the action handler only if enabled.
 		if ( $this->is_enabled() ) {
-			add_filter(
-				'sugar_calendar_tasks_get_tasks',
-				static function ( $tasks ) {
-
-					$tasks[] = SendUsageTask::class;
-
-					return $tasks;
-				}
-			);
+			add_filter( 'sugar_calendar_tasks_get_tasks', [ $this, 'add_tasks' ] );
 		}
+	}
+
+	/**
+	 * Add the weekly send and embed backfill tasks to the registered tasks.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param array $tasks Task class names.
+	 *
+	 * @return array
+	 */
+	public function add_tasks( $tasks ) {
+
+		$tasks[] = SendUsageTask::class;
+		$tasks[] = CalendarEmbedBackfillTask::class;
+
+		return $tasks;
 	}
 
 	/**
@@ -139,7 +141,7 @@ class UsageTracking {
 				'timezone_offset' => function_exists( 'wp_timezone_string' ) ? wp_timezone_string() : '',
 			],
 			// Sugar Calendar - specific data.
-			( new SnapshotData() )->get()
+			$this->get_snapshot_data()
 		);
 
 		/**
@@ -150,6 +152,23 @@ class UsageTracking {
 		 * @param array $data Usage tracking data.
 		 */
 		return apply_filters( 'sugar_calendar_usage_tracking_get_data', $data ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+	}
+
+	/**
+	 * Get the Sugar Calendar specific snapshot keys.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @return array
+	 */
+	private function get_snapshot_data() {
+
+		return array_merge(
+			( new SnapshotData() )->get(),
+			( new EventActivityData() )->get(),
+			( new SiteSetupData() )->get(),
+			( new FeatureUseData() )->get()
+		);
 	}
 
 	/**

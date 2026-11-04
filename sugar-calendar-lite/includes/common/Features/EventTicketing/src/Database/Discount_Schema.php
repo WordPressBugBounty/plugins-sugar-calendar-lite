@@ -45,11 +45,29 @@ final class Discount_Schema extends Schema {
 			'name'       => 'code',
 			'type'       => 'varchar',
 			'length'     => '100',
-			'unsigned'   => true,
 			'default'    => '',
 			'sortable'   => true,
 			'searchable' => true
 		),
+
+		// code_key.
+		[
+			'name'       => 'code_key',
+			'type'       => 'varchar',
+			'length'     => '100',
+			'default'    => '',
+			'sortable'   => false,
+			'searchable' => false,
+		],
+
+		// name.
+		[
+			'name'       => 'name',
+			'type'       => 'varchar',
+			'length'     => '255',
+			'default'    => '',
+			'searchable' => true,
+		],
 
 		// amount
 		array(
@@ -65,17 +83,53 @@ final class Discount_Schema extends Schema {
 			'name'       => 'type',
 			'type'       => 'varchar',
 			'length'     => '20',
-			'unsigned'   => true,
 			'default'    => 'percentage',
 			'sortable'   => true
 		),
+
+		// start_date.
+		[
+			'name'       => 'start_date',
+			'type'       => 'date',
+			'default'    => null,
+			'allow_null' => true,
+			'sortable'   => true,
+		],
+
+		// end_date.
+		[
+			'name'       => 'end_date',
+			'type'       => 'date',
+			'default'    => null,
+			'allow_null' => true,
+			'sortable'   => true,
+		],
+
+		// usage_limit.
+		[
+			'name'     => 'usage_limit',
+			'type'     => 'int',
+			'length'   => '10',
+			'unsigned' => true,
+			'default'  => '0',
+			'sortable' => true,
+		],
+
+		// paused.
+		[
+			'name'     => 'paused',
+			'type'     => 'tinyint',
+			'length'   => '1',
+			'unsigned' => true,
+			'default'  => '0',
+		],
 
 		// date_created
 		array(
 			'name'       => 'date_created',
 			'type'       => 'datetime',
 			'default'    => '0000-00-00 00:00:00',
-			'modified'   => true,
+			'created'    => true,
 			'date_query' => true,
 			'sortable'   => true
 		),

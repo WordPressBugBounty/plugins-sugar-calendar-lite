@@ -349,6 +349,17 @@ function display() {
 											);
 											?>
 										</p>
+										<?php
+										/**
+										 * Fires inside the Order Summary, after the ticket lines and before the Total.
+										 *
+										 * @since 3.17.0
+										 *
+										 * @param Event $event          The event object.
+										 * @param bool  $is_ticket_free Whether the ticket is free.
+										 */
+										do_action( 'sugar_calendar_ticketing_checkout_order_summary_before_total', $event, $is_ticket_free );
+										?>
 										<p id="sc-event-ticketing-checkout-totals-total-wrap">
 											<span><?php esc_html_e( 'Total:', 'sugar-calendar-lite' ); ?>&nbsp;</span>
 											<strong>

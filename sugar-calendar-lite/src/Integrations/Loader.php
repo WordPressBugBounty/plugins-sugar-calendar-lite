@@ -6,6 +6,7 @@ use Sugar_Calendar\Integrations\Abilities\Abilities;
 use Sugar_Calendar\Integrations\Ai\Loader as AiLoader;
 use Sugar_Calendar\Integrations\Elementor\Elementor;
 use Sugar_Calendar\Integrations\OAuthRelay\Loader as OAuthRelayLoader;
+use Sugar_Calendar\Integrations\Polylang\Polylang;
 use Sugar_Calendar\Integrations\WPBakery\WPBakery;
 use Sugar_Calendar\Integrations\Wpml\Wpml;
 
@@ -31,6 +32,7 @@ class Loader {
 		WPBakery::class,
 		OAuthRelayLoader::class,
 		Wpml::class,
+		Polylang::class,
 	];
 
 	/**

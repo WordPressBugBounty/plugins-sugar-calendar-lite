@@ -238,7 +238,7 @@ class EventRecentTicketsTable extends List_Table {
 		$this->items = $this->query->items;
 
 		$total_items = count_tickets( $args );
-		$total_pages = ceil( $total_items / $this->per_page );
+		$total_pages = (int) ceil( $total_items / $this->per_page );
 
 		// Set total count.
 		$this->total_count = $total_items;

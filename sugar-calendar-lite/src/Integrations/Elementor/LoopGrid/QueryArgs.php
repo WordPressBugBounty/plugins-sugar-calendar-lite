@@ -217,6 +217,7 @@ class QueryArgs {
 		// sc_recurring_event would otherwise extend that pre-existing gap to
 		// recurring events. See BaseHelpers::should_filter_password_protected_events().
 		$sce_args['has_password'] = false;
+		$sce_args['block_query']  = true;
 
 		return $sce_args;
 	}

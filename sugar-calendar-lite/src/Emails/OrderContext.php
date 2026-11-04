@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Emails;
 
+use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\Event;
 
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\display_price;
@@ -179,17 +180,46 @@ class OrderContext {
 				'name'  => trim( $order->first_name . ' ' . $order->last_name ),
 				'email' => (string) $order->email,
 			],
-			'order'     => [
-				'id'             => (int) $order->id,
-				'date'           => self::order_date( $order->date_created ),
-				'transaction_id' => (string) $order->transaction_id,
-				'amount_paid'    => [
-					'label' => __( 'Amount Paid', 'sugar-calendar-lite' ),
-					'value' => display_price( $order->total ),
+			'order'     => array_merge(
+				[
+					'id'             => (int) $order->id,
+					'date'           => self::order_date( $order->date_created ),
+					'transaction_id' => (string) $order->transaction_id,
+					'amount_paid'    => [
+						'label' => __( 'Amount Paid', 'sugar-calendar-lite' ),
+						'value' => display_price( $order->total ),
+					],
 				],
-			],
+				self::discount_values( $order )
+			),
 			'tickets'   => $tickets,
 		];
+	}
+
+	/**
+	 * The optional `order.discount` entry, empty when the order has no discount.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param object $order Order row.
+	 *
+	 * @return array
+	 */
+	private static function discount_values( $order ): array {
+
+		$discount = OrderDiscount::from_order( $order );
+
+		// Both strings are '' for an order without a discount, so the filters drop the key.
+		return array_filter(
+			[
+				'discount' => array_filter(
+					[
+						'subtotal' => $discount->subtotal(),
+						'amount'   => $discount->line(),
+					]
+				),
+			]
+		);
 	}
 
 	/**

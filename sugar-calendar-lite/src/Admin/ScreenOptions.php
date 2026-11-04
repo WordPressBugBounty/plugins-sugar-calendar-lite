@@ -70,6 +70,29 @@ class ScreenOptions {
 	}
 
 	/**
+	 * Add the standard items-per-page option.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param string $label Label of the number input.
+	 */
+	public function add_pagination_option( $label ) {
+
+		$this->add_option(
+			'pagination',
+			[
+				'label'      => $label,
+				'option'     => 'per_page',
+				'default'    => 20,
+				'input_type' => 'number',
+				'value_type' => 'int',
+				'min'        => 1,
+				'max'        => 999,
+			]
+		);
+	}
+
+	/**
 	 * Get the screen options ID.
 	 *
 	 * @since 3.12.0

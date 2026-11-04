@@ -46,8 +46,29 @@ class UsageTrackingData {
 		$data['sugar_calendar_ticketing_total_attendees']   = Counts::rows( 'sc_attendees' );
 		$data['sugar_calendar_ticketing_total_discounts']   = Counts::rows( 'sc_discounts' );
 		$data['sugar_calendar_ticketing_emails_customized'] = $this->emails_customized();
+		$data['sugar_calendar_tickets_last_sold_at']        = $this->tickets_last_sold_at();
 
 		return $data;
+	}
+
+	/**
+	 * GMT Unix creation time of the newest paid or refunded order, 0 when none.
+	 *
+	 * Checkout never writes date_paid, so date_created is the only usable column.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @return int
+	 */
+	private function tickets_last_sold_at() {
+
+		global $wpdb;
+
+		$created = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			"SELECT MAX( date_created ) FROM {$wpdb->prefix}sc_orders WHERE status IN ( 'paid', 'refunded' )" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		return $created ? (int) strtotime( $created . ' UTC' ) : 0;
 	}
 
 	/**

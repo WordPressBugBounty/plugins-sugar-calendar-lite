@@ -144,6 +144,7 @@ class Tickets extends PageAbstract {
 	 * @since 1.0.0
 	 * @since 3.8.0 Add export tab button.
 	 * @since 3.8.2 Add column options tab.
+	 * @since 3.17.0 Add the Coupons tab for administrators.
 	 *
 	 * @return array
 	 */
@@ -159,9 +160,17 @@ class Tickets extends PageAbstract {
 				'name' => esc_html__( 'Orders', 'sugar-calendar-lite' ),
 				'url'  => admin_url( 'admin.php?page=sc-event-ticketing&tab=orders' ),
 			],
-			'export'         => $this->get_export_tab_args(),
-			'column_options' => $this->get_column_options_tab_args(),
 		];
+
+		if ( current_user_can( 'manage_options' ) ) {
+			$tabs['coupons'] = [
+				'name' => esc_html__( 'Coupons', 'sugar-calendar-lite' ),
+				'url'  => admin_url( 'admin.php?page=sc-event-ticketing&tab=coupons' ),
+			];
+		}
+
+		$tabs['export']         = $this->get_export_tab_args();
+		$tabs['column_options'] = $this->get_column_options_tab_args();
 
 		// Filter the tabs.
 		$tabs = apply_filters( 'sc_event_tickets_admin_nav', $tabs );

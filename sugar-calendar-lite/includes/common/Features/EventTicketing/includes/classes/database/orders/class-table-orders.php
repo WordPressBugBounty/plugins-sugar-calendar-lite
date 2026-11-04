@@ -33,8 +33,9 @@ final class Orders_Table extends Table {
 	 * @since 3.11.1 Updated to `202605070001`.
 	 * @since 3.12.0 Updated to `202607020001`.
 	 * @since 3.12.0 Updated to `202607080001`.
+	 * @since 3.17.0 Updated to `202610300001`.
 	 */
-	protected $version = 202609010001;
+	protected $version = 202610300001;
 
 	/**
 	 * @var string Table schema
@@ -51,6 +52,7 @@ final class Orders_Table extends Table {
 	 * @since 3.11.1 Added `202605070001` upgrade.
 	 * @since 3.12.0 Added `202607020001` upgrade.
 	 * @since 3.12.0 Added `202607080001` upgrade.
+	 * @since 3.17.0 Added `202610300001` upgrade.
 	 */
 	protected $upgrades = [
 		'202010270001' => 202010270001,
@@ -62,6 +64,7 @@ final class Orders_Table extends Table {
 		'202607020001' => 202607020001,
 		'202607080001' => 202607080001,
 		'202609010001' => 202609010001,
+		'202610300001' => 202610300001,
 	];
 
 	/**
@@ -69,6 +72,7 @@ final class Orders_Table extends Table {
 	 *
 	 * @since 1.0.0
 	 * @since 3.6.0 Added `occurrence_id` column.
+	 * @since 3.17.0 Added `discount_code` column and `discount_id` key.
 	 */
 	protected function set_schema() {
 
@@ -77,6 +81,7 @@ final class Orders_Table extends Table {
 			status varchar(20) NOT NULL default '',
 			currency varchar(20) NOT NULL default '',
 			discount_id bigint(20) unsigned NOT NULL default '0',
+			discount_code varchar(100) NOT NULL default '',
 			email varchar(254) NOT NULL default '',
 			first_name varchar(100) NOT NULL default '',
 			last_name varchar(100) NOT NULL default '',
@@ -96,6 +101,7 @@ final class Orders_Table extends Table {
 			gateway varchar(20) NOT NULL default 'stripe',
 			PRIMARY KEY (id),
 			KEY `email` (email),
+			KEY `discount_id` (discount_id),
 			UNIQUE KEY `transaction_id` (`transaction_id`)";
 	}
 
@@ -470,5 +476,32 @@ final class Orders_Table extends Table {
 		$reindexed = $db->query( "ALTER TABLE {$table} ADD INDEX `email` (`email`(191))" );
 
 		return $this->is_success( $reindexed );
+	}
+
+	/**
+	 * Upgrade to version 202610300001
+	 * - Add the `discount_code` column and the `discount_id` key.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @return boolean
+	 */
+	protected function __202610300001() { // phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.MethodDoubleUnderscore
+
+		$db = $this->get_db();
+
+		if ( ! $this->column_exists( 'discount_code' ) ) {
+			$added = $db->query( "ALTER TABLE {$this->table_name} ADD COLUMN `discount_code` varchar(100) NOT NULL default '' AFTER `discount_id`" );
+
+			if ( $added === false ) {
+				return $this->is_success( false );
+			}
+		}
+
+		if ( $this->index_exists( 'discount_id' ) ) {
+			return $this->is_success( true );
+		}
+
+		return $this->is_success( $db->query( "ALTER TABLE {$this->table_name} ADD INDEX `discount_id` (`discount_id`)" ) );
 	}
 }

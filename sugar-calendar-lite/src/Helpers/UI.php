@@ -1721,7 +1721,7 @@ class UI {
 	 * @since 3.14.0
 	 *
 	 * @param string $text  Label text.
-	 * @param string $color Label color: `blue` or `grey`.
+	 * @param string $color Label color: `blue`, `grey`, `green`, `red` or `yellow`.
 	 * @param string $title Tooltip text. Defaults to the label text.
 	 *
 	 * @return string Escaped markup, or an empty string when there is no text.
@@ -1732,7 +1732,7 @@ class UI {
 			return '';
 		}
 
-		if ( ! in_array( $color, [ 'blue', 'grey' ], true ) ) {
+		if ( ! in_array( $color, [ 'blue', 'grey', 'green', 'red', 'yellow' ], true ) ) {
 			$color = 'grey';
 		}
 
@@ -1750,7 +1750,7 @@ class UI {
 	 * @since 3.14.0
 	 *
 	 * @param string $text  Label text.
-	 * @param string $color Label color: `blue` or `grey`.
+	 * @param string $color Label color: `blue`, `grey`, `green`, `red` or `yellow`.
 	 * @param string $title Tooltip text. Defaults to the label text.
 	 */
 	public static function print_label( string $text, string $color = 'grey', string $title = '' ) {
@@ -1825,6 +1825,7 @@ class UI {
 	 * - string table_name: The identifier name of the table.
 	 * - array table_columns: The default columns of the table.
 	 * - array table_required_columns: The required columns of the table that cannot be hidden.
+	 * - array table_default_columns: The columns active until the user saves a choice. Defaults to every column.
 	 */
 	public static function table_screen_options( $args ) {
 
@@ -1837,7 +1838,7 @@ class UI {
 		$table_required_columns = empty( $args['table_required_columns'] ) ? [] : $args['table_required_columns'];
 
 		$active_columns = get_user_meta( get_current_user_id(), $table_name . '_active_columns', true );
-		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $table_columns );
+		$active_columns = is_array( $active_columns ) ? $active_columns : ( $args['table_default_columns'] ?? array_keys( $table_columns ) );
 
 		?>
 		<div class="sugar-calendar-screen-options sugar-calendar-table-screen-options">

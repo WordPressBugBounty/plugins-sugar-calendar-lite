@@ -96,7 +96,19 @@ class GooglePusher {
 		}
 
 		try {
-			$this->push_to_targets( $post_id, $post );
+			/**
+			 * Filters the post whose Google copy a push of this post updates.
+			 *
+			 * @since 3.17.0
+			 *
+			 * @param WP_Post|null $push_post Post to push, null to push nothing. Default: the post itself.
+			 * @param WP_Post      $post      Post being pushed.
+			 */
+			$push_post = apply_filters( 'sugar_calendar_integrations_google_pusher_push_post', $post, $post );
+
+			if ( $push_post instanceof WP_Post ) {
+				$this->push_to_targets( $push_post->ID, $push_post );
+			}
 		} catch ( Throwable $e ) {
 			// Swallow: a Google failure must never block the post save.
 			unset( $e );
@@ -172,7 +184,8 @@ class GooglePusher {
 	/**
 	 * Re-push one link when the pull found Sugar Calendar's copy newer than Google's.
 	 *
-	 * Keeps the same gates as a save: an unpublished or unpushable event never reaches Google.
+	 * Keeps the same gates as a save: an unpublished or unpushable event never reaches Google,
+	 * and a copy whose pushes go to another post's copy is no longer updated.
 	 *
 	 * @since 3.16.0
 	 *
@@ -193,6 +206,13 @@ class GooglePusher {
 		}
 
 		if ( $post->post_status !== 'publish' || ! $this->builder->is_pushable( $event ) ) {
+			return false;
+		}
+
+		/** This filter is documented in src/Integrations/Google/GooglePusher.php */
+		$push_post = apply_filters( 'sugar_calendar_integrations_google_pusher_push_post', $post, $post );
+
+		if ( ! $push_post instanceof WP_Post || $push_post->ID !== $post->ID ) {
 			return false;
 		}
 

@@ -123,7 +123,7 @@ class GoogleRrule {
 	 *
 	 * @return array|null
 	 *
-	 * @phpstan-ignore sugarCalendar.methodLength
+	 * @phpstan-ignore sugarCalendar.methodLength (RRULE to Google field mapping, one table of cases)
 	 */
 	public function rule_fields( array $rules, string $tz ) {
 

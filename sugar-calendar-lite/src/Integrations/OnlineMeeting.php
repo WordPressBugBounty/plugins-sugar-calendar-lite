@@ -57,7 +57,7 @@ class OnlineMeeting {
 	 */
 	public static function for_event( $event ) {
 
-		$event_id = is_object( $event ) && ! empty( $event->id ) ? (int) $event->id : 0;
+		$event_id = self::get_meeting_event_id( $event );
 
 		if ( $event_id === 0 ) {
 			return null;
@@ -125,7 +125,7 @@ class OnlineMeeting {
 	 */
 	public static function visibility( $event ) {
 
-		$event_id = is_object( $event ) && ! empty( $event->id ) ? (int) $event->id : 0;
+		$event_id = self::get_meeting_event_id( $event );
 
 		$value = $event_id ? (string) get_event_meta( $event_id, 'online_visibility', true ) : '';
 
@@ -145,5 +145,28 @@ class OnlineMeeting {
 
 		return self::visibility( $event ) === self::VISIBILITY_EVERYONE
 			&& self::for_event( $event ) !== null;
+	}
+
+	/**
+	 * Get the ID of the event that holds an event's meeting.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param object $event SCE Event object.
+	 *
+	 * @return int
+	 */
+	private static function get_meeting_event_id( $event ) {
+
+		/**
+		 * Filters the event that holds an event's online meeting.
+		 *
+		 * @since 3.17.0
+		 *
+		 * @param object $event SCE Event object.
+		 */
+		$event = apply_filters( 'sugar_calendar_integrations_online_meeting_event', $event );
+
+		return is_object( $event ) && ! empty( $event->id ) ? (int) $event->id : 0;
 	}
 }

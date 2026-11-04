@@ -119,6 +119,7 @@ class Day implements InterfaceBaseView {
 				'tags'         => $block_tags,
 				'speakers'     => $block_speakers,
 				'has_password' => false,
+				'block_query'  => true,
 				'featured'     => $featured_only,
 			]
 		);

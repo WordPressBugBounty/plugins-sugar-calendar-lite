@@ -158,6 +158,7 @@ class Renderer {
 			|| ! isset( $context['order']['amount_paid'] )
 			|| ! is_array( $context['order']['amount_paid'] )
 			|| ! self::has_string_values( $context['order']['amount_paid'], [ 'label', 'value' ] )
+			|| ! self::has_valid_discount( $context['order'] )
 		) {
 			return false;
 		}
@@ -173,6 +174,24 @@ class Renderer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the optional order discount is absent or well formed.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param array $order Order values.
+	 *
+	 * @return bool
+	 */
+	private static function has_valid_discount( array $order ): bool {
+
+		if ( ! array_key_exists( 'discount', $order ) ) {
+			return true;
+		}
+
+		return is_array( $order['discount'] ) && self::has_string_values( $order['discount'], [ 'subtotal', 'amount' ] );
 	}
 
 	/**

@@ -251,15 +251,12 @@ class Grid extends Base {
 
 		// Short events (30 minutes or less) lack the vertical room to stack the
 		// title and time, so they switch to the compact layout that places the
-		// time beside the title. strtotime() returns false on an unparseable
-		// (but non-empty) date, so guard before the arithmetic — otherwise
-		// false - false casts to 0 and silently mislabels the duration.
-		$start_ts = strtotime( $event->start );
-		$end_ts   = strtotime( $event->end );
-
-		$duration_minutes = ( $start_ts !== false && $end_ts !== false )
-			? (int) round( ( $end_ts - $start_ts ) / 60 )
-			: 0;
+		// time beside the title. The duration uses the same frame as the card's
+		// height, or an event with different start and end zones gets one size
+		// from its stored times and the other from its real length.
+		$duration_minutes = (int) round(
+			( CellTime::timestamp( $event, 'end', $this->get_timezone() ) - CellTime::timestamp( $event, 'start', $this->get_timezone() ) ) / 60
+		);
 		$wrap_classes     = 'sugar-calendar-event-entry-wrap sugar-calendar-event-entry-wrap--multi-hour';
 
 		if ( ( $duration_minutes > 0 ) && ( $duration_minutes <= self::COMPACT_CARD_MAX_MINUTES ) ) {
@@ -306,8 +303,8 @@ class Grid extends Base {
 			return false;
 		}
 
-		$start_ts = (int) strtotime( $item->start );
-		$end_ts   = (int) strtotime( $item->end );
+		$start_ts = CellTime::timestamp( $item, 'start', $this->get_timezone() );
+		$end_ts   = CellTime::timestamp( $item, 'end', $this->get_timezone() );
 
 		if ( $end_ts <= $start_ts ) {
 			return false;
@@ -340,7 +337,7 @@ class Grid extends Base {
 
 		$cell_start  = (int) $this->get_current_cell( 'start' );
 		$cell_end    = (int) $this->get_current_cell( 'end' );
-		$event_start = (int) strtotime( $item->start );
+		$event_start = CellTime::timestamp( $item, 'start', $this->get_timezone() );
 
 		return $event_start >= $cell_start && $event_start <= $cell_end;
 	}
@@ -378,8 +375,8 @@ class Grid extends Base {
 	 */
 	protected function get_intra_day_event_style( $item ) {
 
-		$start_ts = (int) strtotime( $item->start );
-		$end_ts   = (int) strtotime( $item->end );
+		$start_ts = CellTime::timestamp( $item, 'start', $this->get_timezone() );
+		$end_ts   = CellTime::timestamp( $item, 'end', $this->get_timezone() );
 
 		// Height is 1px per minute (matches the .column min-height of 60px).
 		$height = max( 0, (int) round( ( $end_ts - $start_ts ) / 60 ) );
@@ -484,8 +481,8 @@ class Grid extends Base {
 			foreach ( $day_events as $event ) {
 				$items[] = [
 					'ref'   => $event,
-					'start' => ( new DateTimeImmutable( '@' . (int) strtotime( $event->start ) ) ),
-					'end'   => ( new DateTimeImmutable( '@' . (int) strtotime( $event->end ) ) ),
+					'start' => ( new DateTimeImmutable( '@' . CellTime::timestamp( $event, 'start', $this->get_timezone() ) ) ),
+					'end'   => ( new DateTimeImmutable( '@' . CellTime::timestamp( $event, 'end', $this->get_timezone() ) ) ),
 				];
 			}
 
@@ -504,7 +501,7 @@ class Grid extends Base {
 	 * Group this view's multi-hour intra-day events by start day.
 	 *
 	 * Excludes all-day and multi-day events; both render outside the hour grid.
-	 * Day key is the UTC start date, matching the grid's gmdate-based placement.
+	 * Day key is the start date in the cells' time zone, matching the grid's placement.
 	 *
 	 * @since 3.12.0
 	 *
@@ -528,7 +525,7 @@ class Grid extends Base {
 				continue;
 			}
 
-			$day_key = gmdate( 'Y-m-d', (int) strtotime( $item->start ) );
+			$day_key = gmdate( 'Y-m-d', CellTime::timestamp( $item, 'start', $this->get_timezone() ) );
 
 			if ( ! isset( $by_day[ $day_key ] ) ) {
 				$by_day[ $day_key ] = [];

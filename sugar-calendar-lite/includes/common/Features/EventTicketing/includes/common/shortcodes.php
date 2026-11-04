@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Database\Order_Query;
+use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\DetailsCard;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\DetailsCardData;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\EditorPreview;
@@ -611,6 +612,8 @@ function render_legacy_receipt_body( $order, $event, $read_only = false ) {
 	$link = get_permalink( $page );
 	$home = home_url();
 
+	$discount = OrderDiscount::from_order( $order );
+
 	ob_start(); ?>
 
 	<div id="sc-event-ticketing-ticket-details">
@@ -625,6 +628,20 @@ function render_legacy_receipt_body( $order, $event, $read_only = false ) {
 				<td><?php echo esc_html( $order->first_name . ' ' . $order->last_name ) . ' (' . esc_html( $order->email ) . ')'; ?></td>
 				<td><?php echo esc_html( $order->date_created ); ?></td>
 			</tr>
+			<?php if ( $discount->applies() ) : ?>
+				<tr>
+					<th colspan="3"><?php esc_html_e( 'Subtotal', 'sugar-calendar-lite' ); ?></th>
+				</tr>
+				<tr>
+					<td colspan="3"><?php echo esc_html( $discount->subtotal() ); ?></td>
+				</tr>
+				<tr>
+					<th colspan="3"><?php esc_html_e( 'Discount', 'sugar-calendar-lite' ); ?></th>
+				</tr>
+				<tr>
+					<td colspan="3"><?php echo esc_html( $discount->line() ); ?></td>
+				</tr>
+			<?php endif; ?>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Amount', 'sugar-calendar-lite' ); ?></th>
 			</tr>
@@ -635,7 +652,7 @@ function render_legacy_receipt_body( $order, $event, $read_only = false ) {
 				<th colspan="3"><?php esc_html_e( 'Transaction ID', 'sugar-calendar-lite' ); ?></th>
 			</tr>
 			<tr>
-				<td colspan="3"><?php echo esc_html( (string) $order->transaction_id ); ?></td>
+				<td colspan="3"><?php echo (string) $order->transaction_id !== '' ? esc_html( $order->transaction_id ) : esc_html__( 'N/A', 'sugar-calendar-lite' ); ?></td>
 			</tr>
 			<tr>
 				<th colspan="3"><?php esc_html_e( 'Status', 'sugar-calendar-lite' ); ?></th>

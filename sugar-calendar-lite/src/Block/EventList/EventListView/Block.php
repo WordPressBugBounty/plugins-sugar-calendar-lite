@@ -560,6 +560,9 @@ class Block extends AbstractBlock {
 		// edit_posts. See Helpers::should_filter_password_protected_events().
 		$args['has_password'] = false;
 
+		// Mark the query as coming from a block.
+		$args['block_query'] = true;
+
 		$upcoming_events = Helpers::get_upcoming_events_list_with_recurring(
 			$args,
 			$this->get_attributes()

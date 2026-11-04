@@ -2,11 +2,7 @@
 
 namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
-use Sugar_Calendar\Helpers\WP;
-use Sugar_Calendar\Helpers as BaseHelpers;
 use Sugar_Calendar\AddOn\Ticketing\Admin\Orders\List_Table;
-use Sugar_Calendar\Helpers\UI;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Assets\get_url;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\trash_order;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\delete_order;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\restore_order;
@@ -16,7 +12,7 @@ use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\restore_order;
  *
  * @since 1.2.0
  */
-class OrdersTab extends Tickets {
+class OrdersTab extends ListTabAbstract {
 
 	/**
 	 * Screen options ID.
@@ -28,40 +24,40 @@ class OrdersTab extends Tickets {
 	const SCREEN_OPTIONS_ID = 'sugar_calendar_orders_admin_list';
 
 	/**
-	 * The performed action.
+	 * Table name of the column chooser.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
 	 * @var string
 	 */
-	private $performed_action = false;
+	const TABLE_NAME = 'sugar_calendar_table_orders';
 
 	/**
-	 * The affected count.
+	 * Columns the column chooser never hides.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @var int
+	 * @var string[]
 	 */
-	private $affected_count = 0;
+	const REQUIRED_COLUMNS = [ 'total', 'status', 'date' ];
 
 	/**
-	 * The result of the performed action.
+	 * Docs URL of the help link.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @var mixed
+	 * @var string
 	 */
-	private $performed_action_result;
+	const HELP_URL = 'https://sugarcalendar.com/docs/events/event-ticketing-addon/#orders-overview';
 
 	/**
-	 * The list table.
+	 * Medium of the help link.
 	 *
-	 * @since 3.8.2
+	 * @since 3.17.0
 	 *
-	 * @var List_Table
+	 * @var string
 	 */
-	private $wp_list_table;
+	const HELP_MEDIUM = 'orders-list';
 
 	/**
 	 * Page tab slug.
@@ -85,46 +81,6 @@ class OrdersTab extends Tickets {
 	public static function get_title() {
 
 		return esc_html__( 'Orders', 'sugar-calendar-lite' );
-	}
-
-	/**
-	 * Early init.
-	 *
-	 * @since 3.8.0
-	 */
-	public function early_init() {
-
-		$this->setup_admin_screen_options();
-	}
-
-	/**
-	 * Setup the admin screen options.
-	 *
-	 * @since 3.8.0
-	 */
-	private function setup_admin_screen_options() {
-
-		$admin_screen_options = sugar_calendar()->get_admin_screen_options();
-
-		if ( ! $admin_screen_options ) {
-			return;
-		}
-
-		$admin_screen_options->set_screen_options_id( self::SCREEN_OPTIONS_ID );
-		$admin_screen_options->add_option(
-			'pagination',
-			[
-				'label'      => esc_html__( 'Number of items per page:', 'sugar-calendar-lite' ),
-				'option'     => 'per_page',
-				'default'    => 20,
-				'input_type' => 'number',
-				'value_type' => 'int',
-				'min'        => 1,
-				'max'        => 999,
-			]
-		);
-
-		$admin_screen_options->hooks();
 	}
 
 	/**
@@ -391,90 +347,19 @@ class OrdersTab extends Tickets {
 				break;
 		}
 
-		if ( ! empty( $message ) ) {
-			printf(
-				'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
-				esc_attr( $notice_type ),
-				esc_html( $message )
-			);
-		}
+		$this->print_notice( $notice_type, $message );
 	}
 
 	/**
-	 * Filter the help URL in the Tickets page -> Orders tab.
+	 * Create the list table.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @param string $help_url The help URL.
-	 *
-	 * @return string
+	 * @return List_Table
 	 */
-	public function help_url( $help_url ) {
+	protected function create_list_table() {
 
-		return BaseHelpers\Helpers::get_utm_url(
-			'https://sugarcalendar.com/docs/events/event-ticketing-addon/#orders-overview',
-			[
-				'content' => 'Help',
-				'medium'  => 'orders-list',
-			]
-		);
-	}
-
-	/**
-	 * Display before tab.
-	 *
-	 * @since 3.8.2
-	 */
-	protected function before_display_tab() {
-
-		$this->wp_list_table = new List_Table();
-
-		$this->wp_list_table->user_saved_pref = get_user_option( self::SCREEN_OPTIONS_ID . '_screen_options' );
-
-		$this->wp_list_table->prepare_items();
-	}
-
-	/**
-	 * Display column options.
-	 *
-	 * @since 3.8.2
-	 */
-	public function display_column_options() {
-
-		// Output the cogwheel (table column chooser) UI.
-		UI::table_screen_options(
-			[
-				'table_name'             => 'sugar_calendar_table_orders',
-				'table_columns'          => $this->wp_list_table->get_columns(),
-				'table_required_columns' => [ 'total', 'status', 'date' ],
-			]
-		);
-	}
-
-	/**
-	 * Display a tab's content.
-	 *
-	 * @since 1.2.0
-	 */
-	protected function display_tab() {
-
-		$this->wp_list_table->display_search_reset();
-
-		// Query for orders/tickets.
-		$this->wp_list_table->views();
-		?>
-
-        <form id="posts-filter" method="get">
-
-			<?php $this->wp_list_table->search_box( 'Search', 'sc_event_tickets_search' ); ?>
-
-            <input type="hidden" name="page" value="sc-event-ticketing"/>
-
-			<?php $this->wp_list_table->display(); ?>
-
-        </form>
-
-		<?php
+		return new List_Table();
 	}
 
 	/**
@@ -486,38 +371,6 @@ class OrdersTab extends Tickets {
 	 */
 	public function enqueue_assets() {
 
-		wp_enqueue_style(
-			'sugar-calendar-ticketing-admin-orders',
-			get_url( 'css' ) . '/admin-orders' . WP::asset_min() . '.css',
-			[],
-			BaseHelpers::get_asset_version()
-		);
-
-		// Enqueue admin ticketing script.
-		wp_enqueue_script(
-			'sugar-calendar-ticketing-admin',
-			SC_PLUGIN_ASSETS_URL . 'admin/js/sc-admin-ticketing' . WP::asset_min() . '.js',
-			[ 'jquery', 'sugar-calendar-vendor-choices' ],
-			BaseHelpers::get_asset_version(),
-			true
-		);
-
-		// Enqueue column control (cogwheel) behavior.
-		wp_enqueue_script( 'sugar-calendar-admin-column-control' );
-
-		// Localize script.
-		wp_localize_script(
-			'sugar-calendar-ticketing-admin',
-			'sc_admin_ticketing',
-			[
-				'ajaxurl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'sc-admin-ticketing-list' ),
-				'action'  => 'fetch_ticketing_orders_events_choices',
-				'strings' => [
-					'select_event'    => esc_html__( 'Event', 'sugar-calendar-lite' ),
-					'no_results_text' => esc_html__( 'No results found', 'sugar-calendar-lite' ),
-				],
-			]
-		);
+		$this->enqueue_list_assets( 'orders', 'fetch_ticketing_orders_events_choices' );
 	}
 }

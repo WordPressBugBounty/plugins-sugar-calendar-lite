@@ -708,13 +708,15 @@ class PreviewDocument {
 			}
 
 			$tags += [
-				'{name}'         => $context['purchaser']['name'],
-				'{email}'        => $context['purchaser']['email'],
-				'{order_id}'     => (string) $context['order']['id'],
-				'{order_amount}' => $context['order']['amount_paid']['value'],
-				'{order_date}'   => $context['order']['date'],
-				'{receipt_url}'  => $context['order']['receipt_url'],
-				'{tickets}'      => '<ul>' . implode( '', $ticket_lines ) . '</ul>',
+				'{name}'           => $context['purchaser']['name'],
+				'{email}'          => $context['purchaser']['email'],
+				'{order_id}'       => (string) $context['order']['id'],
+				'{order_amount}'   => $context['order']['amount_paid']['value'],
+				'{order_date}'     => $context['order']['date'],
+				'{receipt_url}'    => $context['order']['receipt_url'],
+				'{tickets}'        => '<ul>' . implode( '', $ticket_lines ) . '</ul>',
+				'{order_discount}' => '',
+				'{coupon_code}'    => '',
 			];
 		}
 

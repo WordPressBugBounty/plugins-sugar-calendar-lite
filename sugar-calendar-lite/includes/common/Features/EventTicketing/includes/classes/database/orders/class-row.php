@@ -28,4 +28,40 @@ final class Order extends Row {
 	 * @var int
 	 */
 	public $id;
+
+	/**
+	 * Subtotal before discount and tax.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	public $subtotal;
+
+	/**
+	 * Discount amount.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	public $discount;
+
+	/**
+	 * Discount (coupon) ID, 0 for none.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var int
+	 */
+	public $discount_id;
+
+	/**
+	 * Coupon code as used at checkout.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @var string
+	 */
+	public $discount_code;
 }

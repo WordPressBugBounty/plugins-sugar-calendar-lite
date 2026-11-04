@@ -62,7 +62,7 @@ class GoogleOAuthCallbackHandler extends AbstractOAuthCallbackHandler {
 	 *
 	 * @return int|\WP_Error
 	 *
-	 * @phpstan-ignore sugarCalendar.methodLength
+	 * @phpstan-ignore sugarCalendar.methodLength (OAuth callback override with ordered steps)
 	 */
 	protected function store_connection( array $tokens, array $user, int $app_id ) {
 

@@ -6,6 +6,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Database as Database;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\AddOn\Ticketing\Admin\ListTableAbstract;
+use Sugar_Calendar\AddOn\Ticketing\Admin\OrdersDiscountColumn;
 use Sugar_Calendar\Helper;
 
 // Include the main list table class if it's not included
@@ -16,7 +18,12 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 // No list table class, so something went very wrong
 if ( class_exists( '\WP_List_Table' ) ) :
 
-class List_Table extends \WP_List_Table {
+/**
+ * Orders list table.
+ *
+ * @since 1.0.0
+ */
+class List_Table extends ListTableAbstract {
 
 	public $per_page       = 30;
 	public $total_count    = 0;
@@ -26,13 +33,13 @@ class List_Table extends \WP_List_Table {
 	public $query;
 
 	/**
-	 * User saved preferences.
+	 * Discount column.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @var array
+	 * @var OrdersDiscountColumn
 	 */
-	public $user_saved_pref = false;
+	private $discount_column;
 
 	/**
 	 * Get things started.
@@ -47,6 +54,8 @@ class List_Table extends \WP_List_Table {
 			'plural'    => 'event-tickets',
 			'ajax'      => false
 		) );
+
+		$this->discount_column = new OrdersDiscountColumn();
 
 		$this->get_ticket_counts();
 	}
@@ -181,100 +190,27 @@ class List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Displays extra controls between bulk actions and pagination.
+	 * Value of the hidden `tab` input in the list form.
 	 *
-	 * @since 3.8.0
+	 * @since 3.17.0
 	 *
-	 * @param string $which Whether top or bottom.
+	 * @return string
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function get_hidden_tab() {
 
-		if ( $which !== 'top' ) {
-			return;
-		}
-
-		$option = '';
-
-		if ( ! empty( $_GET['event_id'] ) ) {
-			$event = sugar_calendar_get_event( absint( $_GET['event_id'] ) );
-
-			if ( ! empty( $event ) ) {
-				$option = sprintf(
-					'<option selected value="%1$d">%2$s</option>',
-					absint( $_GET['event_id'] ),
-					esc_html( $event->title )
-				);
-			}
-		}
-		?>
-		<div class="sugar-calendar-ticketing__admin__list__actions alignleft actions">
-			<span class="sugar-calendar-ticketing__admin__list__actions__choices-events choicesjs-select-wrap">
-				<select id="sugar-calendar-ticketing-event" name="event_id" class="choicesjs-select" multiple>
-					<?php
-						echo wp_kses(
-							$option,
-							[
-								'option' => [
-									'selected' => [],
-									'value'    => [],
-								],
-							]
-						);
-					?>
-				</select>
-			</span>
-			<?php
-			printf(
-				'<input type="submit" class="button" value="%1$s">',
-				esc_attr__( 'Filter', 'sugar-calendar-lite' )
-			);
-			?>
-		</div>
-		<?php
+		return 'orders';
 	}
 
 	/**
-	 * Show the search field.
+	 * Placeholder of the search input.
 	 *
-	 * @since 1.0.0
-	 * @since 3.8.0 Add placeholder to search box.
+	 * @since 3.17.0
 	 *
-	 * @param string $text Label for the search box
-	 * @param string $input_id ID of the search box
+	 * @return string
 	 */
-	public function search_box( $text = '', $input_id = '' ) {
+	protected function get_search_placeholder() {
 
-		// Bail if no items
-		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
-			return;
-		}
-
-		// Setup input ID
-		$input_id = $input_id . '-search-input';
-
-		// Hidden orderby
-		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			echo '<input type="hidden" name="orderby" value="' . esc_attr( $_REQUEST['orderby'] ) . '" />';
-		}
-
-		// Hidden order
-		if ( ! empty( $_REQUEST['order'] ) ) {
-			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
-		} ?>
-
-		<p class="search-box">
-			<?php do_action( 'sc_event_tickets_list_table_search_box' ); ?>
-			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
-			<input
-				type="search"
-				id="<?php echo esc_attr( $input_id ); ?>"
-				name="s"
-				value="<?php _admin_search_query(); ?>"
-				placeholder="<?php esc_attr_e( 'Search Customer...', 'sugar-calendar-lite' ); ?>"
-			/>
-			<input type="hidden" name="tab" value="orders" />
-			<?php submit_button( $text, 'button', false, false, [ 'id' => 'search-submit' ] ); ?>
-		</p><?php
+		return __( 'Search Customer...', 'sugar-calendar-lite' );
 	}
 
 	/**
@@ -284,16 +220,10 @@ class List_Table extends \WP_List_Table {
 	 */
 	public function display_search_reset() {
 
-		if ( empty( $_GET['s'] ) ) {
-			return;
-		}
-
-		Helper::display_search_reset(
-			$this->total_count,
-			strtolower( esc_html__( 'order', 'sugar-calendar-lite' ) ),
-			strtolower( esc_html__( 'orders', 'sugar-calendar-lite' ) ),
-			esc_html__( 'Orders', 'sugar-calendar-lite' ),
-			admin_url( 'admin.php?page=sc-event-ticketing&tab=orders' )
+		$this->display_tab_search_reset(
+			esc_html__( 'order', 'sugar-calendar-lite' ),
+			esc_html__( 'orders', 'sugar-calendar-lite' ),
+			esc_html__( 'Orders', 'sugar-calendar-lite' )
 		);
 	}
 
@@ -450,6 +380,20 @@ class List_Table extends \WP_List_Table {
 	}
 
 	/**
+	 * Discount column.
+	 *
+	 * @since 3.17.0
+	 *
+	 * @param Order $item Order object.
+	 *
+	 * @return string
+	 */
+	public function column_discount( $item = null ) {
+
+		return $this->discount_column->cell( $item );
+	}
+
+	/**
 	 * Total column.
 	 *
 	 * @since 1.0.0
@@ -580,44 +524,6 @@ class List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Display the bulk actions dropdown.
-	 *
-	 * @since 3.8.0
-	 *
-	 * @param string $which The location of the bulk actions: 'top' or 'bottom'.
-	 */
-	protected function bulk_actions( $which = '' ) {
-		if ( is_null( $this->_actions ) ) {
-			$this->_actions = $this->get_bulk_actions();
-		}
-
-		if ( empty( $this->_actions ) ) {
-			return;
-		}
-
-		?>
-		<label for="bulk-action-selector-<?php echo esc_attr( $which ); ?>" class="screen-reader-text"><?php echo esc_html__( 'Select bulk action', 'sugar-calendar-lite' ); ?></label>
-		<select name="action<?php echo $which === 'bottom' ? '2' : ''; ?>" id="bulk-action-selector-<?php echo esc_attr( $which ); ?>">
-			<option value="-1"><?php echo esc_html__( 'Bulk actions', 'sugar-calendar-lite' ); ?></option>
-			<?php foreach ( $this->_actions as $key => $value ) : ?>
-				<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $value ); ?></option>
-			<?php endforeach; ?>
-		</select>
-		<input type="hidden" name="tab" value="orders" />
-
-		<?php
-		submit_button(
-			__( 'Apply', 'sugar-calendar-lite' ),
-			'action',
-			'',
-			false,
-			[
-				'id' => 'doaction' . ( $which === 'bottom' ? '2' : '' ),
-			]
-		);
-	}
-
-	/**
 	 * Get bulk actions.
 	 *
 	 * @since 3.8.0
@@ -665,6 +571,8 @@ class List_Table extends \WP_List_Table {
 			'event'    => esc_html__( 'Event',      'sugar-calendar-lite' ),
 			'date'     => esc_html__( 'Order Date', 'sugar-calendar-lite' ),
 		);
+
+		$columns = $this->discount_column->insert( $columns );
 
 		// Filter & Return
 		return apply_filters( 'sc_event_tickets_list_table_columns', $columns );
@@ -780,22 +688,10 @@ class List_Table extends \WP_List_Table {
 	 */
 	public function prepare_items() {
 
+		$this->discount_column->apply_user_default( get_current_user_id() );
+
 		// Columns and hidden columns based on user preferences (cogwheel UI).
-		$columns  = $this->get_columns();
-		$sortable = $this->get_sortable_columns();
-
-		$active_columns = get_user_meta( get_current_user_id(), 'sugar_calendar_table_orders_active_columns', true );
-		$active_columns = is_array( $active_columns ) ? $active_columns : array_keys( $columns );
-
-		// Always include required columns.
-		$required_columns = [ 'cb', 'total', 'status', 'date' ];
-		$active_columns   = array_unique( array_merge( $required_columns, $active_columns ) );
-
-		// Compute hidden columns and ensure required are never hidden.
-		$hidden = array_diff( array_keys( $columns ), $active_columns );
-		$hidden = array_diff( $hidden, $required_columns );
-
-		$this->_column_headers = [ $columns, $hidden, $sortable ];
+		$this->set_column_headers( 'orders', [ 'cb', 'total', 'status', 'date' ] );
 
 		// Sanitize status.
 		$status = isset( $_GET['status'] )
@@ -808,13 +704,7 @@ class List_Table extends \WP_List_Table {
 			: '';
 
 		// Set the per page limit.
-		if ( ! empty( $this->user_saved_pref['pagination_per_page'] ) ) {
-			$per_page = absint( $this->user_saved_pref['pagination_per_page'] );
-
-			if ( ! empty( $per_page ) ) {
-				$this->per_page = $per_page;
-			}
-		}
+		$this->apply_saved_per_page();
 
 		// Default arguments..
 		$args = [
@@ -897,20 +787,6 @@ class List_Table extends \WP_List_Table {
 				'total_pages' => ceil( $total_items / $this->per_page ),
 			]
 		);
-	}
-
-	/**
-	 * Generates the tbody element for the list table.
-	 *
-	 * @since 3.8.0
-	 */
-	public function display_rows_or_placeholder() {
-
-		if ( $this->has_items() ) {
-			$this->display_rows();
-		} else {
-			$this->no_items();
-		}
 	}
 
 	/**
