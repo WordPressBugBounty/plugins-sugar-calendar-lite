@@ -12,6 +12,8 @@
 	const SELECTOR_ID = 'sugar-calendar-checklist-page-selector';
 	// Group toggles only show or hide content, so they stay usable during an install.
 	const LOCKABLE = 'button:not(.sugar-calendar-checklist__group-toggle), a.sc-button';
+	// Add-on refusals a retry gets again until the page shows the add-on's new decision.
+	const ADDON_REFUSALS = [ 'checklist_addon_stale_action', 'checklist_addon_incompatible' ];
 	const settings = window.sugar_calendar_admin_setup_checklist || {};
 	const text = settings.text || {};
 	let currentSnapshot = JSON.stringify( settings.snapshot || {} );
@@ -146,6 +148,7 @@
 		if ( control.tagName === 'BUTTON' ) {
 			control.disabled = pending ||
 				control.dataset.reconciledActive === 'true' ||
+				control.dataset.refused === 'true' ||
 				control.classList.contains( 'sugar-calendar-checklist__tool-action--installed' );
 		} else {
 			control.setAttribute( 'aria-disabled', pending ? 'true' : 'false' );
@@ -392,6 +395,13 @@
 
 		if ( handleDismissed( error ) ) {
 			return;
+		}
+
+		// An add-on row offers what its decision says, not what its state says: a missing add-on can
+		// have nothing to install. Keep the control off; the reloaded page shows the new decision.
+		if ( ADDON_REFUSALS.includes( error.code ) ) {
+			action.pluginState = '';
+			control.dataset.refused = 'true';
 		}
 
 		const pageId = error.code === 'checklist_page_editor_unsupported' ?

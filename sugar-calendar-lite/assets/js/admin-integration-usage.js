@@ -1,23 +1,37 @@
 ( function () {
 	'use strict';
 
-	function initPopover() {
-		var toggle = document.querySelector( '[data-credits-toggle]' );
-		var popover = document.getElementById( 'sugar-calendar-credits-popover' );
-		if ( ! toggle || ! popover ) {
+	/**
+	 * Toggle the usage popover. Delegated, so markup the Dashboard's credits refresh swaps in keeps working.
+	 *
+	 * @param {Event} e Click event.
+	 */
+	function onDocumentClick( e ) {
+		const popover = document.getElementById( 'sugar-calendar-credits-popover' );
+
+		if ( ! popover ) {
 			return;
 		}
-		toggle.addEventListener( 'click', function ( e ) {
+
+		const toggle = document.querySelector( '[data-credits-toggle]' );
+
+		if ( toggle && toggle.contains( e.target ) ) {
 			e.preventDefault();
-			var open = popover.classList.toggle( 'is-visible' );
+
+			const open = popover.classList.toggle( 'is-visible' );
+
 			toggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
-		} );
-		document.addEventListener( 'click', function ( e ) {
-			if ( ! popover.contains( e.target ) && ! toggle.contains( e.target ) ) {
-				popover.classList.remove( 'is-visible' );
+
+			return;
+		}
+
+		if ( ! popover.contains( e.target ) ) {
+			popover.classList.remove( 'is-visible' );
+
+			if ( toggle ) {
 				toggle.setAttribute( 'aria-expanded', 'false' );
 			}
-		} );
+		}
 	}
 
 	function initTooltips() {
@@ -66,8 +80,9 @@
 		} );
 	}
 
+	document.addEventListener( 'click', onDocumentClick );
+
 	document.addEventListener( 'DOMContentLoaded', function () {
-		initPopover();
 		initTooltips();
 	} );
 } )();

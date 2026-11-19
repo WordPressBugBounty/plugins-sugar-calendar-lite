@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Integrations\OAuthRelay\Credits;
 
+use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\RelayLicenseType;
 use Sugar_Calendar\Vendor\ProductApi\Auth\HMACAuthStrategy;
 use Sugar_Calendar\Vendor\ProductApi\Auth\SiteRegistration;
@@ -11,18 +12,18 @@ use Sugar_Calendar\Vendor\ProductApi\ProductApi;
  * Integration credits service.
  *
  * Reads aggregate credit usage from the Product API relay
- * (`/integrations/v1/{tier}/credits`), formats it, and caches it. Credit
- * accounting is server-side — the plugin never tracks per-call cost.
+ * (`/integrations/v1/{tier}/credits`), formats it, and stores the last read per
+ * tier in an autoloaded option. Credit accounting is server-side: the plugin
+ * never tracks per-call cost.
  *
- * Two read modes, deliberately split by latency:
- *   - get_credits()        — fresh (API-first, cache fallback); fires the
- *                            low-credit alert. Used ONLY by the Settings panel.
- *   - get_cached_credits()
- *     / is_out_of_credits() — transient-only, no HTTP; used by the gate
- *                            (is_available / editor / save). Fail-open.
+ * Two read modes:
+ *   - get_credits( $force ) fetches when forced or out of date, and fires the
+ *     low-credit alert on success.
+ *   - get_cached_credits() / is_out_of_credits() read the stored option, no HTTP.
+ *     Display only: the relay refuses a create the account cannot pay for.
  *
  * Defensive: every ProductApi access is wrapped so an unconfigured relay
- * (e.g. configure() failed) degrades to null — no panel, no gate, no alert —
+ * (e.g. configure() failed) degrades to null (no panel, no notice, no alert)
  * instead of fataling. The relay is configured on BOTH editions (Pro in
  * includes/pro/Pro.php; Lite in Integrations\OAuthRelay\Loader), with the tier
  * resolving to 'lite' on free installs.
@@ -32,13 +33,13 @@ use Sugar_Calendar\Vendor\ProductApi\ProductApi;
 class CreditsService {
 
 	/**
-	 * Base transient key (suffixed with the license tier).
+	 * Base option key for the stored read (suffixed with the license tier).
 	 *
-	 * @since 3.12.0
+	 * @since 3.18.0
 	 *
 	 * @var string
 	 */
-	const TRANSIENT_KEY = 'sugar_calendar_integration_credits';
+	const OPTION_KEY = 'sugar_calendar_integration_credits';
 
 	/**
 	 * Option storing the stable slug -> palette-index map.
@@ -53,13 +54,31 @@ class CreditsService {
 	const COLOR_MAP_OPTION = 'sugar_calendar_integration_credit_colors';
 
 	/**
-	 * Cache duration (5 minutes).
+	 * How long a successful read stays current for a non-forced call.
 	 *
-	 * @since 3.12.0
+	 * @since 3.18.0
 	 *
 	 * @var int
 	 */
-	const CACHE_TTL = 5 * MINUTE_IN_SECONDS;
+	const REFRESH_INTERVAL = DAY_IN_SECONDS;
+
+	/**
+	 * How long a non-forced call waits after the last fetch attempt, successful or not.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @var int
+	 */
+	const RETRY_INTERVAL = HOUR_IN_SECONDS;
+
+	/**
+	 * How long after a successful fetch the event editor acts on an out-of-credits read.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @var int
+	 */
+	const RECENT_READ_WINDOW = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * Per-request memo. False = not yet resolved.
@@ -71,66 +90,79 @@ class CreditsService {
 	private $credits_memo = false;
 
 	/**
-	 * Fresh credits read (API-first, cache fallback). Fires the alert.
+	 * Credits read: the stored read, or a relay fetch when forced or out of date.
 	 *
-	 * Returns null (callers hide the UI / the gate fails open) when the site
-	 * is unregistered, ProductApi is unconfigured (Lite), or the relay returns
-	 * nothing usable and no cache exists.
+	 * Out of date: older than a day or past its reset date, with no fetch attempt in
+	 * the last hour. Null when the site is unregistered, the relay is unconfigured,
+	 * Lite's Disable Integrations switch is on, or nothing is stored yet.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Stores the read in an option, fetches only when forced or out of date, and never while Lite's Disable Integrations switch is on.
+	 *
+	 * @param bool $force Fetch whatever the stored read's age.
 	 *
 	 * @return array|null
 	 */
-	public function get_credits(): ?array {
+	public function get_credits( bool $force = false ): ?array {
 
-		if ( $this->credits_memo !== false ) {
+		if ( ! $force && $this->credits_memo !== false ) {
 			return $this->credits_memo;
 		}
 
-		// Under the E2E relay test mode the whole relay — including site
-		// registration — is stubbed, so skip the registration gate and let
-		// fetch_credits() resolve the seeded stub body. Mirrors the test-mode
-		// short-circuits in OAuthRelayClient and Zoom::handle_connect().
-		if ( ! ( defined( 'SC_OAUTH_RELAY_TEST_MODE' ) && SC_OAUTH_RELAY_TEST_MODE ) ) {
-			$registration = $this->safe_get( SiteRegistration::class );
+		// The switch leaves the relay registration in place, so the registration check below does not stop the call.
+		if ( IntegrationsDisabler::is_disabled() ) {
+			return null;
+		}
 
-			if ( $registration === null || ! $registration->is_registered() ) {
-				return $this->credits_memo = null;
+		if ( ! $this->is_registered() ) {
+			// A stored read must not outlive the site's registration (a domain move, a staging clone).
+			if ( get_option( $this->get_option_key(), null ) !== null ) {
+				delete_option( $this->get_option_key() );
 			}
+
+			$this->credits_memo = null;
+
+			return null;
 		}
 
-		$fresh = $this->fetch_credits();
+		$record = $this->get_record();
+		$fresh  = ( $force || $this->needs_fetch( $record ) ) ? $this->fetch_credits( $record ) : null;
 
-		if ( $fresh !== null ) {
-			return $this->credits_memo = $fresh;
-		}
+		$this->credits_memo = $fresh ?? $this->get_cached_credits();
 
-		$cached = get_transient( $this->get_transient_key() );
-
-		return $this->credits_memo = ( $cached !== false ? $cached : null );
+		return $this->credits_memo;
 	}
 
 	/**
-	 * Cached credits read (transient only, no HTTP).
+	 * The stored read for the current tier (no HTTP), or null once its reset date has passed: it
+	 * then describes a finished period, so no surface shows it as current.
+	 *
+	 * Null while Lite's Disable Integrations switch is on: no fetch replaces the read then, and a
+	 * Lite read never resets, so it would show as current for as long as the switch stays on.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Reads the stored option instead of the transient, drops a read past its reset date, and returns null while Lite's Disable Integrations switch is on.
 	 *
 	 * @return array|null
 	 */
 	public function get_cached_credits(): ?array {
 
-		$cached = get_transient( $this->get_transient_key() );
+		if ( IntegrationsDisabler::is_disabled() ) {
+			return null;
+		}
 
-		return $cached !== false ? $cached : null;
+		$credits = $this->get_record()['credits'];
+
+		return is_array( $credits ) && ! $this->has_reset_passed( $credits ) ? $credits : null;
 	}
 
 	/**
-	 * Whether the account is out of credits, from cached data only.
+	 * Whether the stored read says the account is out of credits (no HTTP).
 	 *
-	 * Fail-open: a cold/missing cache returns false (the relay remains the
-	 * ultimate enforcer), so the gate never blocks on absent data.
+	 * A maxed read whose reset date has passed no longer counts: get_cached_credits() drops it.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Reads the stored option and ignores a read past its reset date.
 	 *
 	 * @return bool
 	 */
@@ -142,27 +174,66 @@ class CreditsService {
 	}
 
 	/**
-	 * Fetch fresh credits, cache them, and fire the alert.
+	 * Whether a read fetched in the last five minutes says the account is out of credits (no HTTP).
+	 *
+	 * The relay's create check reads the account balance, which this read never sees, so an
+	 * older "out" could block a create the relay would accept.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return bool
+	 */
+	public function is_recently_out_of_credits(): bool {
+
+		return $this->is_out_of_credits()
+			&& time() - $this->get_record()['fetched_at'] < self::RECENT_READ_WINDOW;
+	}
+
+	/**
+	 * Whether a non-forced read would reach the relay now (no HTTP).
+	 *
+	 * The Dashboard asks for a background refresh only then.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return bool
+	 */
+	public function is_refresh_due(): bool {
+
+		return ! IntegrationsDisabler::is_disabled() && $this->is_registered() && $this->needs_fetch( $this->get_record() );
+	}
+
+	/**
+	 * Fetch fresh credits, store them, and fire the alert.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Stores the read in the per-tier option instead of a transient.
 	 *
-	 * @return array|null
+	 * @param array $record The stored record. A failed fetch keeps its read and starts the retry wait.
+	 *
+	 * @return array|null Null when the fetch failed.
 	 */
-	private function fetch_credits(): ?array {
+	private function fetch_credits( array $record ): ?array {
 
 		$body = $this->request_credits_body();
 
-		if (
-			! is_array( $body ) ||
-			! isset( $body['credits'] ) ||
-			empty( $body['credits']['total'] )
-		) {
+		// No body, no credits or a zero total: not a read.
+		if ( empty( $body['credits']['total'] ) ) {
+			$this->save_record( array_merge( $record, [ 'attempted_at' => time() ] ) );
+
 			return null;
 		}
 
 		$formatted = $this->format_response( $body );
+		$now       = time();
 
-		set_transient( $this->get_transient_key(), $formatted, self::CACHE_TTL );
+		$this->save_record(
+			[
+				'credits'      => $formatted,
+				'fetched_at'   => $now,
+				'attempted_at' => $now,
+			]
+		);
 
 		$email = apply_filters( 'sugar_calendar_credit_alert_email', new CreditAlertEmail() );
 
@@ -177,7 +248,7 @@ class CreditsService {
 	 * Get the raw relay response body (or the E2E stub under test mode).
 	 *
 	 * The test seam provides the relay BODY (not a fabricated success shape),
-	 * so format_response()/the gate/the alert all run for real on it (Rule 12).
+	 * so format_response()/the stored read/the alert all run for real on it.
 	 *
 	 * @since 3.12.0
 	 *
@@ -223,7 +294,7 @@ class CreditsService {
 	}
 
 	/**
-	 * Shape the relay body into the array the UI / gate / email consume.
+	 * Shape the relay body into the array the UI / notice / email consume.
 	 *
 	 * @since 3.12.0
 	 *
@@ -270,14 +341,116 @@ class CreditsService {
 	}
 
 	/**
-	 * Transient key scoped by tier (prevents lite/pro cache poisoning).
+	 * Whether a non-forced call should reach the relay.
 	 *
-	 * @since 3.12.0
+	 * @since 3.18.0
+	 *
+	 * @param array $record Stored record from get_record().
+	 *
+	 * @return bool
+	 */
+	private function needs_fetch( array $record ): bool {
+
+		$now = time();
+
+		$is_current = $record['credits'] !== null
+			&& $now - $record['fetched_at'] < self::REFRESH_INTERVAL
+			&& ! $this->has_reset_passed( $record['credits'] );
+
+		// Any attempt, not only a failure: a read already past its reset date would
+		// otherwise refetch on every load.
+		$is_backing_off = $record['attempted_at'] > 0
+			&& $now - $record['attempted_at'] < self::RETRY_INTERVAL;
+
+		return ! $is_current && ! $is_backing_off;
+	}
+
+	/**
+	 * Whether a read's reset date has passed. A lifetime read never resets.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param array $credits Formatted credits.
+	 *
+	 * @return bool
+	 */
+	private function has_reset_passed( array $credits ): bool {
+
+		if ( empty( $credits['resets_at'] ) ) {
+			return false;
+		}
+
+		$resets_at = strtotime( $credits['resets_at'] );
+
+		return $resets_at !== false && $resets_at <= time();
+	}
+
+	/**
+	 * The stored record for the current tier, with every key present.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return array
+	 */
+	private function get_record(): array {
+
+		$record = get_option( $this->get_option_key(), [] );
+		$record = is_array( $record ) ? $record : [];
+
+		return [
+			'credits'      => isset( $record['credits'] ) && is_array( $record['credits'] ) ? $record['credits'] : null,
+			'fetched_at'   => (int) ( $record['fetched_at'] ?? 0 ),
+			'attempted_at' => (int) ( $record['attempted_at'] ?? 0 ),
+		];
+	}
+
+	/**
+	 * Save the record for the current tier.
+	 *
+	 * Autoloaded, because the out-of-credits notice reads it on every admin page.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param array $record Record to store.
+	 *
+	 * @return void
+	 */
+	private function save_record( array $record ) {
+
+		update_option( $this->get_option_key(), $record, true );
+	}
+
+	/**
+	 * Option key scoped by tier, so a Lite read and a Pro read never mix.
+	 *
+	 * @since 3.18.0
 	 *
 	 * @return string
 	 */
-	private function get_transient_key(): string {
+	private function get_option_key(): string {
 
-		return self::TRANSIENT_KEY . '_' . RelayLicenseType::get();
+		return self::OPTION_KEY . '_' . RelayLicenseType::get();
+	}
+
+	/**
+	 * Whether the site is registered with the relay (options only, no HTTP).
+	 *
+	 * The E2E relay test mode stubs the whole relay, registration included, so the
+	 * site counts as registered. Mirrors the test-mode short-circuits in
+	 * OAuthRelayClient and Zoom::handle_connect().
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return bool
+	 */
+	private function is_registered(): bool {
+
+		if ( defined( 'SC_OAUTH_RELAY_TEST_MODE' ) && SC_OAUTH_RELAY_TEST_MODE ) {
+			return true;
+		}
+
+		$registration = $this->safe_get( SiteRegistration::class );
+
+		return $registration !== null && $registration->is_registered();
 	}
 }

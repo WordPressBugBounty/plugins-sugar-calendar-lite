@@ -74,6 +74,27 @@ class WP {
 	}
 
 	/**
+	 * The key of a submenu entry with a slug, in a `$submenu` parent's list.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param array  $items A `$submenu[ parent ]` list.
+	 * @param string $slug  The entry's menu slug.
+	 *
+	 * @return int|string|null Null when the list has no such entry (the user cannot see it).
+	 */
+	public static function find_submenu_key( array $items, $slug ) {
+
+		foreach ( $items as $key => $item ) {
+			if ( isset( $item[2] ) && $item[2] === $slug ) {
+				return $key;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * True if WP is processing an AJAX call.
 	 *
 	 * @since 3.0.0

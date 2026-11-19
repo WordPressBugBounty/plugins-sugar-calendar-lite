@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Admin;
 
+use Sugar_Calendar\Admin\Dashboard\Loader as DashboardLoader;
 use Sugar_Calendar\Admin\Events\Events as AdminEvents;
 use Sugar_Calendar\Admin\Events\Metaboxes;
 use Sugar_Calendar\Admin\FlyoutMenu;
@@ -9,6 +10,7 @@ use Sugar_Calendar\Admin\Pages\Addons;
 use Sugar_Calendar\Admin\Pages\CalendarEdit;
 use Sugar_Calendar\Admin\Pages\CalendarNew;
 use Sugar_Calendar\Admin\Pages\Calendars;
+use Sugar_Calendar\Admin\Pages\Dashboard;
 use Sugar_Calendar\Admin\Pages\EventEdit;
 use Sugar_Calendar\Admin\Pages\EventNew;
 use Sugar_Calendar\Admin\Pages\Events;
@@ -106,6 +108,7 @@ class Area {
 		'sugar-calendar-calendar-new',
 		'sugar-calendar-rsvp',
 		'sugar-calendar-setup-checklist',
+		'sugar-calendar-dashboard',
 	];
 
 	/**
@@ -216,6 +219,9 @@ class Area {
 
 		// Last, so it settles the checklist entry after every add-on has registered.
 		add_action( 'admin_menu', [ SetupChecklist::class, 'place_menu_item' ], PHP_INT_MAX );
+
+		// After the line above: the Dashboard moves to the front only once every entry is placed.
+		( new DashboardLoader() )->hooks();
 
 		add_filter( 'parent_file', [ $this, 'force_parent_menu' ] );
 
@@ -507,6 +513,17 @@ class Area {
 			SetupChecklist::get_priority()
 		);
 
+		// After the checklist, for the same reason; LandingPage::place_menu_item() may move it to the front.
+		add_submenu_page(
+			self::SLUG,
+			Dashboard::get_title(),
+			Dashboard::get_title(),
+			Dashboard::get_capability(),
+			Dashboard::get_slug(),
+			[ $this, 'display' ],
+			Dashboard::get_priority()
+		);
+
 		if ( ! Plugin::instance()->is_pro() ) {
 			add_submenu_page(
 				self::SLUG,
@@ -682,6 +699,10 @@ class Area {
 					case SetupChecklist::get_slug():
 						$page_id = 'setup_checklist';
 						break;
+
+					case Dashboard::get_slug():
+						$page_id = 'dashboard';
+						break;
 				}
 			}
 
@@ -819,6 +840,7 @@ class Area {
 			'addons'                 => Addons::class,
 			'smtp'                   => SMTP::class,
 			'setup_checklist'        => SetupChecklist::class,
+			'dashboard'              => Dashboard::class,
 		];
 
 		/**

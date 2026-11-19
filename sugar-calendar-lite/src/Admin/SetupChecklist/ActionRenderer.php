@@ -53,6 +53,9 @@ class ActionRenderer {
 				$this->render_notice_action( $action );
 				break;
 
+			case 'none':
+				break;
+
 			default:
 				$this->render_button_action( $item_id, $action );
 		}

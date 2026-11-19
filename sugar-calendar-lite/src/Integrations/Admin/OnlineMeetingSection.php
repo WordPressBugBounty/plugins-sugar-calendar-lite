@@ -5,6 +5,7 @@ namespace Sugar_Calendar\Integrations\Admin;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\MeetingProviderInterface;
+use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OnlineMeeting;
 
 /**
@@ -196,13 +197,14 @@ class OnlineMeetingSection {
 	}
 
 	/**
-	 * Whether any meeting provider is connected but out of credits.
+	 * Whether any meeting provider is connected while a recent credits read is out.
 	 *
 	 * Resolved before the <select> renders to decide whether the (selection-aware)
 	 * red invalid message is present in the DOM at all.
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Connection state read from the provider.
+	 * @since 3.18.0 Reads a credits read fetched in the last five minutes instead of inferring it from is_available().
 	 *
 	 * @param array $providers Map of slug => MeetingProviderInterface.
 	 *
@@ -212,15 +214,12 @@ class OnlineMeetingSection {
 
 		// Integrations switched off (Lite kill-switch): providers render read-only,
 		// so the out-of-credits state never applies.
-		if ( IntegrationsDisabler::is_disabled() ) {
+		if ( IntegrationsDisabler::is_disabled() || ! ( new CreditsService() )->is_recently_out_of_credits() ) {
 			return false;
 		}
 
-		foreach ( $providers as $slug => $provider ) {
-
-			// Out of credits = unavailable despite an active connection (the credits
-			// gate is the only site-wide reason a connected provider goes unavailable).
-			if ( ! $provider->is_available() && $provider->is_connected() ) {
+		foreach ( $providers as $provider ) {
+			if ( $provider->is_connected() ) {
 				return true;
 			}
 		}
@@ -229,14 +228,11 @@ class OnlineMeetingSection {
 	}
 
 	/**
-	 * Whether a specific provider slug is connected but out of credits.
-	 *
-	 * "Out of credits" = an active connection exists yet the provider is not
-	 * available (the credits gate is the only site-wide reason a connected
-	 * provider becomes unavailable).
+	 * Whether a specific provider slug is connected while a recent credits read is out.
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Connection state read from the provider.
+	 * @since 3.18.0 Reads a credits read fetched in the last five minutes instead of inferring it from is_available().
 	 *
 	 * @param array  $providers Map of slug => MeetingProviderInterface.
 	 * @param string $slug      Provider slug to test (may be '' or unknown).
@@ -251,7 +247,7 @@ class OnlineMeetingSection {
 			return false;
 		}
 
-		return $provider->is_connected() && ! $provider->is_available();
+		return $provider->is_connected() && ( new CreditsService() )->is_recently_out_of_credits();
 	}
 
 	/**
@@ -261,12 +257,13 @@ class OnlineMeetingSection {
 	 * create a meeting without one) or when the Lite "Disable Integrations"
 	 * kill-switch is on. A connected-but-out-of-credits provider stays SELECTABLE
 	 * (labelled plainly, flagged with data-out-of-credits so the editor JS shows
-	 * the invalid state and blocks creation). The CURRENT selection is never
+	 * the invalid state and hides the Create link). The CURRENT selection is never
 	 * disabled — a disabled selected option is not submitted, which would silently
 	 * drop online_provider on an unrelated save.
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Connection state read from the provider.
+	 * @since 3.18.0 Out of credits comes from a credits read fetched in the last five minutes.
 	 *
 	 * @param string $slug     Provider slug.
 	 * @param object $provider MeetingProviderInterface instance.
@@ -276,7 +273,6 @@ class OnlineMeetingSection {
 	 */
 	private function render_provider_option( $slug, $provider, $current ) {
 
-		$available = $provider->is_available();
 		$label     = $provider->get_display_name();
 		$read_only = IntegrationsDisabler::is_disabled();
 
@@ -285,14 +281,14 @@ class OnlineMeetingSection {
 		// option stays the plain provider name (no connect/credit hints).
 		$connected = ! $read_only && $provider->is_connected();
 
-		if ( ! $read_only && ! $available && ! $connected ) {
+		if ( ! $read_only && ! $connected ) {
 			/* translators: %s - provider display name. */
 			$label = sprintf( esc_html__( '%s (not connected)', 'sugar-calendar-lite' ), $label );
 		}
 
-		// Out of credits = connected but unavailable. Stays selectable; the plain
-		// label + data-out-of-credits drive the invalid state (Figma 11521-11229).
-		$out_of_credits = ! $read_only && ! $available && $connected;
+		// Out of credits = connected while a recent credits read is out. Stays
+		// selectable; data-out-of-credits drives the red message and hides the Create link.
+		$out_of_credits = $connected && ( new CreditsService() )->is_recently_out_of_credits();
 
 		// Disabled when the kill-switch is on OR there is no connection to create
 		// against — but never the current selection (see method docblock).

@@ -16,11 +16,11 @@ use Sugar_Calendar\Integrations\OAuthRelay\SiteRegistrar;
  * - handle_post()     — persist settings posted from the panel form. Default: no-op.
  * - get_help_url()    — docs link for the tab's help button. Default: null (the
  *                       dispatcher falls back to the generic Integrations docs URL).
- * - is_local()        — exempt from the Lite "Disable Integrations" kill-switch.
- *                       Default: false.
+ * - is_local()        — exempt from the Lite "Disable Integrations" kill-switch and the
+ *                       relay credits. Default: true; AbstractOAuthIntegrationPage returns false.
  * - enqueue_assets()  — scripts and styles for this page only. Default: no-op.
  *
- * SettingsIntegrationsTab still guards these 5 with method_exists() rather than
+ * SettingsIntegrationsTab and IntegrationPageRegistry still guard these 5 with method_exists() rather than
  * an instanceof check against this class, so a third-party integration added
  * via the `sugar_calendar_admin_settings_integrations` filter is not required
  * to extend this class — only the 5 IntegrationPageInterface methods are a
@@ -29,6 +29,13 @@ use Sugar_Calendar\Integrations\OAuthRelay\SiteRegistrar;
  * @since 3.12.0
  */
 abstract class AbstractIntegrationPage implements IntegrationPageInterface {
+
+	/**
+	 * What is_local() answers. A relay integration sets it to false.
+	 *
+	 * @since 3.18.0
+	 */
+	const IS_LOCAL = true;
 
 	/**
 	 * Register hooks for this page. Override when the integration needs
@@ -68,15 +75,16 @@ abstract class AbstractIntegrationPage implements IntegrationPageInterface {
 
 	/**
 	 * Whether this is a local (non Product-API) integration, exempt from the
-	 * Lite "Disable Integrations" kill-switch.
+	 * Lite "Disable Integrations" kill-switch and the relay credits.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Defaults to true: only a relay integration opts in, as AbstractOAuthIntegrationPage does.
 	 *
 	 * @return bool
 	 */
 	public function is_local() {
 
-		return false;
+		return static::IS_LOCAL;
 	}
 
 	/**

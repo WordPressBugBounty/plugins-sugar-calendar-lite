@@ -9,6 +9,7 @@ namespace Sugar_Calendar;
 
 use Sugar_Calendar\Admin\Addons\Addons;
 use Sugar_Calendar\Admin\Area;
+use Sugar_Calendar\Admin\Dashboard\CardEpisodeListeners;
 use Sugar_Calendar\Admin\Events\EventPreview;
 use Sugar_Calendar\Admin\Notifications;
 use Sugar_Calendar\Admin\ScreenOptions;
@@ -255,6 +256,12 @@ final class Plugin {
 			10,
 			2
 		);
+
+		// Stripe can connect outside the admin too (the Setup Wizard's REST route), so this is not in Admin\Area.
+		// On Pro the Pro listener, booted from Pro.php, carries these hooks.
+		if ( ! $this->is_pro() ) {
+			( new CardEpisodeListeners() )->hooks();
+		}
 
 		if ( is_admin() ) {
 			$this->get_admin();

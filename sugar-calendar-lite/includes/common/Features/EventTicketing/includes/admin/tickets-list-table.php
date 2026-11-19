@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 use Sugar_Calendar\AddOn\Ticketing\Database as Database;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Admin\ListTableAbstract;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers;
 use Sugar_Calendar\Helper;
 
 // Include the main list table class if it's not included
@@ -347,16 +348,7 @@ class List_Table extends ListTableAbstract {
 		// View Order.
 		$actions['view_order'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					[
-						'page'     => 'sc-event-ticketing',
-						'view'     => 'order',
-						'order_id' => $item->order_id,
-					],
-					admin_url( 'admin.php' )
-				)
-			),
+			esc_url( Helpers::get_order_admin_url( $item->order_id ) ),
 			esc_html__( 'View Order Details', 'sugar-calendar-lite' )
 		);
 

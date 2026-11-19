@@ -110,7 +110,7 @@ class Speakers extends SpeakersAbstract {
 			esc_html__( 'Multiple Speakers per Event', 'sugar-calendar-lite' ),
 			esc_html__( 'Detailed Speaker Profile Page', 'sugar-calendar-lite' ),
 			esc_html__( 'Upcoming Speaker Events List', 'sugar-calendar-lite' ),
-			esc_html__( 'Frontend Submission Support', 'sugar-calendar-lite' ),
+			esc_html__( 'Speakers in Community Events', 'sugar-calendar-lite' ),
 		];
 		?>
 			<div id="sugar-calendar-speakers-education" class="wrap sugar-calendar-admin-wrap">

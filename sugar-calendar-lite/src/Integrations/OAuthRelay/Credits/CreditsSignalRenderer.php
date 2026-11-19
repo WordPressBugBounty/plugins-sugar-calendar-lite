@@ -6,7 +6,7 @@ use Sugar_Calendar\Helpers\Helpers;
 
 /**
  * Renders the usage indicator pill + popover shown in the Settings →
- * Integrations page header.
+ * Integrations page header and the Dashboard's Integrations widget.
  *
  * Extracted from SettingsIntegrationsTab for SRP — this widget is a
  * self-contained CreditsPresenter consumer with no tab-chrome concerns of
@@ -22,12 +22,16 @@ class CreditsSignalRenderer {
 	 * Render the indicator. No-op when there is no credits data.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Renders a given presenter; without one, does a forced read as before. Takes the Upgrade link's UTM medium.
+	 *
+	 * @param CreditsPresenter|null $presenter Credits to show. Null reads them fresh.
+	 * @param string                $medium    UTM medium of the Upgrade link.
 	 *
 	 * @return void
 	 */
-	public function render() {
+	public function render( ?CreditsPresenter $presenter = null, string $medium = 'integrations' ) {
 
-		$presenter = CreditsPresenter::from_service( new CreditsService() );
+		$presenter = $presenter ?? CreditsPresenter::from_service( new CreditsService() );
 
 		if ( ! $presenter->has_data() ) {
 			return;
@@ -81,7 +85,7 @@ class CreditsSignalRenderer {
 						$upgrade_url = Helpers::get_upgrade_link(
 							[
 								'content' => 'usage-popover',
-								'medium'  => 'integrations',
+								'medium'  => $medium,
 							]
 						);
 						?>

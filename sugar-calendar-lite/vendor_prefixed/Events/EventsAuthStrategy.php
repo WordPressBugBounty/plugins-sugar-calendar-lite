@@ -12,6 +12,7 @@ use Sugar_Calendar\Vendor\ProductApi\Auth\InstallationId;
 use Sugar_Calendar\Vendor\ProductApi\Auth\AbstractAuthStrategy;
 use Sugar_Calendar\Vendor\ProductApi\Http\Middleware\LockMiddleware;
 use Sugar_Calendar\Vendor\ProductApi\Http\Middleware\RateLimitMiddleware;
+use Sugar_Calendar\Vendor\ProductApi\Http\Middleware\RefusalPauseMiddleware;
 /**
  * Events Authentication Strategy.
  *
@@ -114,6 +115,7 @@ class EventsAuthStrategy extends AbstractAuthStrategy
      * Register site.
      *
      * @since 1.0.0
+     * @since 1.3.1 Pauses for a day after a 422, until the license key or the site URL changes.
      *
      * @return string|WP_Error The authentication token or WP_Error on failure.
      */
@@ -121,7 +123,8 @@ class EventsAuthStrategy extends AbstractAuthStrategy
     {
         $action = 'events_register_site';
         $challenge_secret = new ChallengeSecret($this->options, $action);
-        $response = $this->client->post('/product-events/v1/sites/register')->middleware(new RateLimitMiddleware($action, $this->options, 5, DAY_IN_SECONDS), 0)->middleware(new LockMiddleware($action, $this->options), 20)->timeout(15)->json(array_merge($this->get_site_info(), ['installation_id' => $this->installation_id->get(), 'challenge_secret' => $challenge_secret->get()]))->send();
+        $fingerprint = md5($this->context->get_license_key() . '|' . $this->clear_site_url($this->context->get_site_url()));
+        $response = $this->client->post('/product-events/v1/sites/register')->middleware(new RefusalPauseMiddleware($action, $this->options, $fingerprint, DAY_IN_SECONDS), -10)->middleware(new RateLimitMiddleware($action, $this->options, 5, DAY_IN_SECONDS), 0)->middleware(new LockMiddleware($action, $this->options), 20)->timeout(15)->json(array_merge($this->get_site_info(), ['installation_id' => $this->installation_id->get(), 'challenge_secret' => $challenge_secret->get()]))->send();
         if (is_wp_error($response)) {
             return $response;
         }

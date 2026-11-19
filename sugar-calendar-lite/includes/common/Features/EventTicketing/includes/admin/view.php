@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers;
 
 /**
  * Render the order details page
@@ -40,13 +41,7 @@ function view( $order_id = 0 ) {
 	$payment_url = 'https://dashboard.stripe.com/' . $test . 'payments/' . $order->transaction_id;
 
 	// Form action
-	$form_action = add_query_arg(
-		array(
-			'page'     => 'sc-event-ticketing',
-			'order_id' => $order_id
-		),
-		admin_url( 'admin.php' )
-	);
+	$form_action = Helpers::get_order_admin_url( $order_id );
 
 	// Event
 	$event  = sugar_calendar_get_event( $order->event_id );
@@ -477,14 +472,12 @@ function apply_order_status_change( $order, $order_id, $status ) {
  */
 function redirect_with_order_notice( $order_id, $notice_id, $notice_type ) {
 
-	$url = add_query_arg(
-		array(
-			'page'           => 'sc-event-ticketing',
-			'order_id'       => $order_id,
+	$url = Helpers::get_order_admin_url(
+		$order_id,
+		[
 			'sc-notice-id'   => $notice_id,
 			'sc-notice-type' => $notice_type,
-		),
-		admin_url( 'admin.php' )
+		]
 	);
 
 	wp_safe_redirect( $url );

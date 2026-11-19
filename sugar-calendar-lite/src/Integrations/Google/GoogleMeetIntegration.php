@@ -4,7 +4,6 @@ namespace Sugar_Calendar\Integrations\Google;
 
 use Sugar_Calendar\Integrations\AbstractMeetingProvider;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
-use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use WP_Error;
 
@@ -28,13 +27,11 @@ class GoogleMeetIntegration extends AbstractMeetingProvider {
 	 * Constructor.
 	 *
 	 * @since 3.16.0
+	 * @since 3.18.0 No credits service: availability means a connection.
 	 *
-	 * @param CreditsService      $credits Credits service.
-	 * @param GoogleActionsClient $client  Actions client.
+	 * @param GoogleActionsClient $client Actions client.
 	 */
-	public function __construct( CreditsService $credits, GoogleActionsClient $client ) {
-
-		parent::__construct( $credits );
+	public function __construct( GoogleActionsClient $client ) {
 
 		$this->client = $client;
 	}

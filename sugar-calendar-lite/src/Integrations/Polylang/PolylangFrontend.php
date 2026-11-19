@@ -35,6 +35,7 @@ class PolylangFrontend {
 
 		add_filter( 'sugar_calendar_database_query_default_variables', [ $this, 'add_language_query_var' ], 10, 2 );
 		add_filter( 'sugar_calendar_get_events_args', [ $this, 'set_block_query_language' ] );
+		add_filter( 'sugar_calendar_get_events_args', [ $this, 'set_events_feed_language' ] );
 		add_filter( 'sugar_calendar_event_query_parse_where_query_clauses', [ $this, 'add_language_query_clause' ], 10, 2 );
 
 		add_filter( 'sugar_calendar_helpers_upcoming_events_tag_ids', [ $this, 'map_term_ids' ] );
@@ -140,6 +141,40 @@ class PolylangFrontend {
 		}
 
 		return $query_args;
+	}
+
+	/**
+	 * Put the page language on the all-events ICS feed's queries.
+	 *
+	 * A calendar feed already lists one language through its translated calendar; the all-events feed has no term to scope by.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param array $query_args Event query arguments.
+	 *
+	 * @return array
+	 */
+	public function set_events_feed_language( $query_args ) {
+
+		$language = $this->get_current_language();
+
+		if ( ! empty( $language ) && $this->is_events_feed() ) {
+			$query_args[ self::QUERY_VAR ] = $language->slug;
+		}
+
+		return $query_args;
+	}
+
+	/**
+	 * Whether this request is the all-events ICS feed, `/events/ics/`.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return bool
+	 */
+	private function is_events_feed() {
+
+		return get_query_var( 'ics', false ) !== false && is_post_type_archive( sugar_calendar_get_event_post_type_id() );
 	}
 
 	/**

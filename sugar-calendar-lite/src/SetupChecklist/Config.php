@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Pages\EventNew;
 use Sugar_Calendar\Admin\Pages\SettingsGeneralTab;
 use Sugar_Calendar\Admin\Pages\SettingsIntegrationsTab;
 use Sugar_Calendar\Admin\Pages\ToolsMigrateTab;
+use Sugar_Calendar\Helpers\ApplicationFee;
 use Sugar_Calendar\Helpers\Helpers;
 
 /**
@@ -327,7 +328,11 @@ class Config {
 			self::ITEM_CONNECT_STRIPE => [
 				'title'       => __( 'Securely Accept Credit Card Payments', 'sugar-calendar-lite' ),
 				'description' => __( 'Accept credit card payments, Apple Pay, Google Pay, ACH, and more with Sugar Calendar Events Stripe integration.', 'sugar-calendar-lite' ),
-				'note'        => __( 'Note: 3% platform fees apply. Remove them with the Event Ticketing addon, available on', 'sugar-calendar-lite' ),
+				'note'        => sprintf(
+					/* translators: %s - the platform fee, e.g. 3%. */
+					__( 'Note: %s platform fees apply. Remove them with the Event Ticketing addon, available on', 'sugar-calendar-lite' ),
+					ApplicationFee::PERCENT . '%'
+				),
 				'note_link'   => [
 					'label' => __( 'Plus and higher plans', 'sugar-calendar-lite' ),
 					'url'   => Helpers::get_upgrade_link(
@@ -357,60 +362,103 @@ class Config {
 
 		return [
 			[
+				'key'         => 'recurring-events',
 				'title'       => __( 'Recurring Events', 'sugar-calendar-lite' ),
 				'description' => __( 'Schedule daily, weekly, or monthly repeats.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--repeat]',
 			],
 			[
+				'key'         => 'event-ticketing',
 				'title'       => __( 'Advanced Event Ticketing', 'sugar-calendar-lite' ),
 				'description' => __( 'Sell multiple ticket types per event with 0% fees.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--ticket]',
 			],
 			[
+				'key'         => 'rsvp',
 				'title'       => __( 'RSVP', 'sugar-calendar-lite' ),
 				'description' => __( 'Let attendees RSVP and track your headcount.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--user-check]',
 			],
 			[
+				'key'         => 'community-events',
 				'title'       => __( 'Community Events', 'sugar-calendar-lite' ),
 				'description' => __( 'Let visitors submit their own events from your site.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--users]',
 			],
 			[
+				'key'         => 'registration-forms',
 				'title'       => __( 'Registration Forms', 'sugar-calendar-lite' ),
 				'description' => __( 'Collect attendee details with registration forms.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--clipboard-list]',
 			],
 			[
+				'key'         => 'integration-credits',
 				'title'       => __( 'More Integration Credits', 'sugar-calendar-lite' ),
 				'description' => __( 'Get more credits for Zoom and other integrations.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--plug]',
 			],
 			[
+				'key'         => 'speakers',
 				'title'       => __( 'Speakers', 'sugar-calendar-lite' ),
 				'description' => __( 'Add speaker profiles and pages to your events.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--microphone]',
 			],
 			[
+				'key'         => 'venues',
 				'title'       => __( 'Venues', 'sugar-calendar-lite' ),
 				'description' => __( 'Manage venues with maps, details, and pages.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--location-dot]',
 			],
 			[
+				'key'         => 'calendar-feeds',
 				'title'       => __( 'Calendar Feeds', 'sugar-calendar-lite' ),
 				'description' => __( 'Let visitors subscribe via Google or iCal.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--rss]',
 			],
 			[
+				'key'         => 'priority-support',
 				'title'       => __( 'Priority Support', 'sugar-calendar-lite' ),
 				'description' => __( 'Get help from our events experts.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--headset]',
 			],
 			[
+				'key'         => 'zapier',
 				'title'       => __( 'Zapier', 'sugar-calendar-lite' ),
 				'description' => __( 'Connect your events to 8,000+ apps.', 'sugar-calendar-lite' ),
 				'icon'        => 'sc:icon-[fa6-solid--bolt]',
 			],
+		];
+	}
+
+	/**
+	 * What a Growth Tool's control offers for a catalogue state. The checklist's tiles and the
+	 * Dashboard's read it, so the two screens agree.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param string $catalog_state One of `missing`, `installed` or `active`, from `Catalog::get_state()`.
+	 *
+	 * @return array `state` (`install`, `activate` or `installed`) and its `label`.
+	 */
+	public static function get_growth_tool_action( $catalog_state ) {
+
+		if ( $catalog_state === 'active' ) {
+			return [
+				'state' => 'installed',
+				'label' => __( 'Installed', 'sugar-calendar-lite' ),
+			];
+		}
+
+		if ( $catalog_state === 'installed' ) {
+			return [
+				'state' => 'activate',
+				'label' => __( 'Activate', 'sugar-calendar-lite' ),
+			];
+		}
+
+		return [
+			'state' => 'install',
+			'label' => __( 'Install', 'sugar-calendar-lite' ),
 		];
 	}
 

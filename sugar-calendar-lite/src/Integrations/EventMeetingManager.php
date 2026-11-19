@@ -2,9 +2,9 @@
 
 namespace Sugar_Calendar\Integrations;
 
-use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\Webhooks\IncomingWebhookHandler;
 use Throwable;
+use WP_Error;
 
 /**
  * Event meeting lifecycle dispatcher (Segment 2b: full keep-in-sync).
@@ -60,26 +60,16 @@ class EventMeetingManager {
 	private $registry;
 
 	/**
-	 * Credits service (gates meeting creation when out of credits).
-	 *
-	 * @since 3.12.0
-	 *
-	 * @var CreditsService
-	 */
-	private $credits;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 No credits service: creation is not gated locally.
 	 *
 	 * @param IntegrationCapabilityRegistry $registry Capability registry.
-	 * @param CreditsService                $credits  Credits service.
 	 */
-	public function __construct( IntegrationCapabilityRegistry $registry, CreditsService $credits ) {
+	public function __construct( IntegrationCapabilityRegistry $registry ) {
 
 		$this->registry = $registry;
-		$this->credits  = $credits;
 	}
 
 	/**
@@ -323,27 +313,29 @@ class EventMeetingManager {
 	 *
 	 * Public so the explicit Create-Meeting AJAX endpoint can drive the exact
 	 * same path the lifecycle dispatcher uses. Returns true on success, or a
-	 * WP_Error (out-of-credits, or the provider's create failure) so the caller
-	 * can decide whether to log it (sync) or surface it to the user (AJAX).
+	 * WP_Error (the provider's create failure, or `out_of_credits` when the relay
+	 * refuses it for credits) so the caller can decide whether to log it (sync)
+	 * or surface it to the user (AJAX).
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Fires sugar_calendar_online_meeting_changed.
+	 * @since 3.18.0 Always calls the provider; the relay's credits refusal gets the plugin's message.
 	 *
 	 * @param MeetingProviderInterface $provider Resolved provider.
 	 * @param object                   $event    SCE Event object.
 	 *
-	 * @return true|\WP_Error
+	 * @return true|WP_Error
 	 */
 	public function provision_meeting( MeetingProviderInterface $provider, $event ) {
-
-		// Create-only credits gate (updates/deletes are never gated).
-		if ( $this->credits->is_out_of_credits() ) {
-			return new \WP_Error( 'out_of_credits', esc_html__( "You're out of integration credits.", 'sugar-calendar-lite' ) );
-		}
 
 		$result = $provider->create_meeting( $event );
 
 		if ( is_wp_error( $result ) ) {
+			// The relay's refusal text is English only. Plain text: the editor inserts it as a text node.
+			if ( $result->get_error_code() === 'insufficient_credits' ) {
+				return new WP_Error( 'out_of_credits', __( "You're out of integration credits.", 'sugar-calendar-lite' ) );
+			}
+
 			return $result;
 		}
 

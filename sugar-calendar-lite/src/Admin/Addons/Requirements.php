@@ -145,14 +145,6 @@ class Requirements {
 	private const SUGAR_CALENDAR_DEV_VERSION_IN_ADDON = '{SC_PLUGIN_VERSION}';
 
 	/**
-	 * Plus, Pro and Top level licenses.
-	 * Must be a list separated by comma and space.
-	 *
-	 * @since 3.7.0
-	 */
-	private const PLUS_PRO_AND_TOP = [ 'plus', 'pro', 'elite', 'agency', 'ultimate' ];
-
-	/**
 	 * Pro and Top level licenses.
 	 * Must be a list separated by comma and space.
 	 *
@@ -179,7 +171,7 @@ class Requirements {
 		self::PHP            => '7.4',
 		self::WP             => '5.9',
 		self::SUGAR_CALENDAR => self::SUGAR_CALENDAR_DEV_VERSION_IN_ADDON,
-		self::LICENSE        => self::PLUS_PRO_AND_TOP,
+		self::LICENSE        => LicenseRequirement::DEFAULT_PLANS,
 		self::PRIORITY       => 10,
 	];
 
@@ -822,13 +814,7 @@ class Requirements {
 	 */
 	private function validate_license(): bool {
 
-		$license = $this->normalize_array_requirement( self::LICENSE );
-
-		if ( empty( $license ) ) {
-			return true;
-		}
-
-		if ( ! in_array( sugar_calendar()->get_license_type(), $license, true ) ) {
+		if ( ! LicenseRequirement::is_met( $this->normalize_array_requirement( self::LICENSE ) ) ) {
 			$this->not_validated[ $this->basename ][] = self::LICENSE;
 
 			return false;

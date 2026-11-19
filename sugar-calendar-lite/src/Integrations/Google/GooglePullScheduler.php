@@ -128,6 +128,15 @@ class GooglePullScheduler {
 			return;
 		}
 
+		/**
+		 * Fires before a Google pull run writes events.
+		 *
+		 * Usage tracking listens so pulled events are not reported as created by the site owner.
+		 *
+		 * @since 3.18.0
+		 */
+		do_action( 'sugar_calendar_google_pull_started' ); // phpcs:ignore WPForms.PHP.ValidateHooks.InvalidHookName
+
 		$this->pull_locked( $row, $calendar_id );
 	}
 

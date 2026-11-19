@@ -97,6 +97,7 @@ class Markup {
 			'admin-list'     => self::STAR_CLASS . '--admin-list',
 			'calendar-chip'  => self::STAR_CLASS . '--calendar-chip',
 			'pointer-header' => self::STAR_CLASS . '--pointer-header',
+			'dashboard'      => self::STAR_CLASS . '--dashboard',
 			'block'          => '',
 		];
 

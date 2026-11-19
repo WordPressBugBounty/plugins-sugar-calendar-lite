@@ -5,6 +5,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Helpers;
 use DateTime;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
+use Sugar_Calendar\Helpers\WP;
 
 /**
  * Helper functions for the Event Ticketing feature.
@@ -86,6 +87,27 @@ class Helpers {
 				'quantity'    => 1,
 			],
 			wc_get_cart_url()
+		);
+	}
+
+	/**
+	 * The order's admin screen, which opens on `order_id` alone.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $args     Extra query arguments, such as a notice.
+	 *
+	 * @return string
+	 */
+	public static function get_order_admin_url( $order_id, array $args = [] ) {
+
+		return add_query_arg(
+			[
+				'page'     => 'sc-event-ticketing',
+				'order_id' => (int) $order_id,
+			] + $args,
+			WP::admin_url( 'admin.php' )
 		);
 	}
 

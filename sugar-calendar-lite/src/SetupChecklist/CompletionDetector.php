@@ -234,7 +234,7 @@ class CompletionDetector {
 		}
 
 		$checks = [
-			Config::ITEM_CREATE_EVENT               => [ $this, 'has_saved_event' ],
+			Config::ITEM_CREATE_EVENT               => [ self::class, 'has_saved_event' ],
 			Config::ITEM_IMPORT_THE_EVENTS_CALENDAR => [ $this, 'has_finished_the_events_calendar_import' ],
 			Config::ITEM_DATE_TIME_SETTINGS         => [ $this, 'has_saved_date_time_settings' ],
 			Config::ITEM_TIMEZONE                   => [ $this, 'has_saved_timezone' ],
@@ -317,13 +317,13 @@ class CompletionDetector {
 	}
 
 	/**
-	 * Whether at least one saved event exists.
+	 * Whether at least one saved event exists; the Dashboard's Setup Notice reads it too.
 	 *
 	 * @since 3.15.0
 	 *
 	 * @return bool
 	 */
-	private function has_saved_event() {
+	public static function has_saved_event() {
 
 		if ( ! get_option( 'wpdb_sc_events_version' ) ) {
 			return false;
@@ -492,7 +492,7 @@ class CompletionDetector {
 	 */
 	private function has_the_events_calendar_import() {
 
-		return TheEventCalendar::is_migration_possible() || $this->has_finished_the_events_calendar_import();
+		return $this->has_finished_the_events_calendar_import() || TheEventCalendar::is_migration_possible();
 	}
 
 	/**

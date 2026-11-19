@@ -9,6 +9,7 @@ use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Frontend\EditorPreview;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\AddOn\Ticketing\Settings as Settings;
+use Sugar_Calendar\Helpers\ApplicationFee;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Admin\Area;
@@ -1342,7 +1343,7 @@ function add_lite_education() {
 					$description = sprintf(
 						/* translators: %1$s - fee percentage, %2$s - SugarCalendar.com Upgrade page URL. */
 						__( '%1$s fee per-transaction + Stripe fees. <a href="%2$s">Upgrade to Pro</a> to remove additional fees and unlock powerful features.', 'sugar-calendar-lite' ),
-						'3%',
+						ApplicationFee::PERCENT . '%',
 						Helpers::get_utm_url(
 							'https://sugarcalendar.com/lite-upgrade/',
 							[

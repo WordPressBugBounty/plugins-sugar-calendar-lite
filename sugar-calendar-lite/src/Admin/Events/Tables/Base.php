@@ -6,6 +6,7 @@ use Sugar_Calendar\Admin\Area;
 use Sugar_Calendar\Event;
 use Sugar_Calendar\Event_Query;
 use Sugar_Calendar\Helper;
+use Sugar_Calendar\Helpers\TimezoneFormat;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelper;
 use WP_List_Table;
@@ -3140,19 +3141,15 @@ class Base extends WP_List_Table {
 		$etz = '';
 
 		// Strip time zone formats from date & time formats.
-		$df = $this->strip_timezone_format( $this->date_format );
-		$tf = $this->strip_timezone_format( $this->time_format );
+		$df = TimezoneFormat::strip( $this->date_format );
+		$tf = TimezoneFormat::strip( $this->time_format );
 
 		// Start time zone.
 		if ( ! empty( $event->start_tz ) ) {
 
 			// Maybe show the original date, time, and zone.
 			if ( ! empty( $this->timezone ) && ( $this->timezone !== $event->start_tz ) ) {
-				$to = sprintf( /* translators: %1$s - Datetime; %2$s - Timezone. */
-					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar-lite' ),
-					sugar_calendar_format_date_i18n( $tf, $event->start, $event->start_tz ),
-					sugar_calendar_format_timezone( $event->start_tz, true )
-				);
+				$to = TimezoneFormat::append( sugar_calendar_format_date_i18n( $tf, $event->start, $event->start_tz ), $event->start_tz );
 
 				// Single time zone.
 			} else {
@@ -3168,11 +3165,7 @@ class Base extends WP_List_Table {
 
 			// Maybe show the original date, time, and zone.
 			if ( ! empty( $this->timezone ) && ( $this->timezone !== $event->end_tz ) ) {
-				$to = sprintf( /* translators: %1$s - Datetime; %2$s - Timezone. */
-					esc_html_x( '%1$s %2$s', 'Time Time Zone', 'sugar-calendar-lite' ),
-					sugar_calendar_format_date_i18n( $tf, $event->end, $event->end_tz ),
-					sugar_calendar_format_timezone( $event->end_tz, true )
-				);
+				$to = TimezoneFormat::append( sugar_calendar_format_date_i18n( $tf, $event->end, $event->end_tz ), $event->end_tz );
 
 				// Single time zone.
 			} else {
@@ -4872,26 +4865,6 @@ class Base extends WP_List_Table {
 
 		// Return the output buffer.
 		return ob_get_clean();
-	}
-
-	/**
-	 * Strip timezone formatting from a DateTime format string.
-	 *
-	 * Used to avoid duplicate time zone output in the specific places where
-	 * we manually always output a formatted time zone string.
-	 *
-	 * @since 2.1.2
-	 *
-	 * @param string $format Timezone format.
-	 *
-	 * @return string
-	 */
-	private function strip_timezone_format( $format = '' ) {
-
-		// Time zone formats to remove.
-		$tz_formats = [ 'e', 'I', 'O', 'P', 'T', 'Z' ];
-
-		return str_replace( $tz_formats, '', $format );
 	}
 
 	/**

@@ -18,7 +18,7 @@ class OAuthConnectionModel {
 	 * Request-scoped cache for find_active_by_provider(), keyed by provider slug.
 	 *
 	 * The active connection is read repeatedly within a single request (the
-	 * editor's provider dropdown, the create-gate, and each meeting CRUD op).
+	 * editor's provider dropdown and each meeting CRUD op).
 	 * Every write (insert/update/delete) flushes this, so a read-after-write in
 	 * the same request still returns the fresh row.
 	 *

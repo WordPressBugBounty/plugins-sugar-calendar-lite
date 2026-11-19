@@ -1,0 +1,49 @@
+@charset "UTF-8";
+/* Ported from DS: badges/label */
+/* Source mtime: 2026-09-28T14:13:32.211Z */
+.sc-label {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  gap: var(--sc-spacing-5);
+  padding: 0 var(--sc-padding-8);
+  border-radius: var(--sc-radius-badge);
+  font-family: var(--sc-typography-font-family-sans);
+  font-weight: var(--sc-typography-font-weight-medium);
+  font-size: var(--sc-typography-font-size-12);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Icon sub-element — 11px pairs with the 12px label text on the cap-line. */
+.sc-label__icon {
+  font-size: 11px;
+}
+
+.sc-label--green {
+  background: var(--sc-components-badge-green-background);
+  color: var(--sc-components-badge-green-text);
+}
+
+/* Grey maps onto the neutral badge slots — platinum surface + titanium text —
+   so the whole palette reads from --components-badge-*. Mirrors Figma 6650:7101. */
+.sc-label--grey {
+  background: var(--sc-components-badge-platinum-background);
+  color: var(--sc-components-badge-titanium-text);
+}
+
+.sc-label--red {
+  background: var(--sc-components-badge-red-background);
+  color: var(--sc-components-badge-red-text);
+}
+
+.sc-label--yellow {
+  background: var(--sc-components-badge-yellow-background);
+  color: var(--sc-components-badge-yellow-text);
+}
+
+.sc-label--blue {
+  background: var(--sc-components-badge-blue-background);
+  color: var(--sc-components-badge-blue-text);
+}
+/*# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFzc2V0cy9zY3NzL2NvbXBvbmVudHMvYWRtaW4vYmFkZ2VzL2xhYmVsLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBO0FBQ0E7QUFLQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7OztBQUdGO0FBQ0E7RUFBa0I7OztBQUVsQjtFQUNFO0VBQ0E7OztBQUdGO0FBQUE7QUFFQTtFQUNFO0VBQ0E7OztBQUdGO0VBQ0U7RUFDQTs7O0FBR0Y7RUFDRTtFQUNBOzs7QUFHRjtFQUNFO0VBQ0EiLCJmaWxlIjoiYXNzZXRzL2Nzcy9jb21wb25lbnRzL2FkbWluL2JhZGdlcy9sYWJlbC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBQb3J0ZWQgZnJvbSBEUzogYmFkZ2VzL2xhYmVsICovXG4vKiBTb3VyY2UgbXRpbWU6IDIwMjYtMDktMjhUMTQ6MTM6MzIuMjExWiAqL1xuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUG9ydGVkIGZyb20gRFMgKGRvIG5vdCBlZGl0IOKAlCByZS1wb3J0IGlmIERTIHNvdXJjZSBjaGFuZ2VzKVxuLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbi5zYy1sYWJlbCB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBoZWlnaHQ6IDI0cHg7XG4gIGdhcDogdmFyKC0tc2Mtc3BhY2luZy01KTtcbiAgcGFkZGluZzogMCB2YXIoLS1zYy1wYWRkaW5nLTgpO1xuICBib3JkZXItcmFkaXVzOiB2YXIoLS1zYy1yYWRpdXMtYmFkZ2UpO1xuICBmb250LWZhbWlseTogdmFyKC0tc2MtdHlwb2dyYXBoeS1mb250LWZhbWlseS1zYW5zKTtcbiAgZm9udC13ZWlnaHQ6IHZhcigtLXNjLXR5cG9ncmFwaHktZm9udC13ZWlnaHQtbWVkaXVtKTtcbiAgZm9udC1zaXplOiB2YXIoLS1zYy10eXBvZ3JhcGh5LWZvbnQtc2l6ZS0xMik7XG4gIGxpbmUtaGVpZ2h0OiAxO1xuICB3aGl0ZS1zcGFjZTogbm93cmFwO1xufVxuXG4vKiBJY29uIHN1Yi1lbGVtZW50IOKAlCAxMXB4IHBhaXJzIHdpdGggdGhlIDEycHggbGFiZWwgdGV4dCBvbiB0aGUgY2FwLWxpbmUuICovXG4uc2MtbGFiZWxfX2ljb24geyBmb250LXNpemU6IDExcHg7IH1cblxuLnNjLWxhYmVsLS1ncmVlbiB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYmFkZ2UtZ3JlZW4tYmFja2dyb3VuZCk7XG4gIGNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJhZGdlLWdyZWVuLXRleHQpO1xufVxuXG4vKiBHcmV5IG1hcHMgb250byB0aGUgbmV1dHJhbCBiYWRnZSBzbG90cyDigJQgcGxhdGludW0gc3VyZmFjZSArIHRpdGFuaXVtIHRleHQg4oCUXG4gICBzbyB0aGUgd2hvbGUgcGFsZXR0ZSByZWFkcyBmcm9tIC0tY29tcG9uZW50cy1iYWRnZS0qLiBNaXJyb3JzIEZpZ21hIDY2NTA6NzEwMS4gKi9cbi5zYy1sYWJlbC0tZ3JleSB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYmFkZ2UtcGxhdGludW0tYmFja2dyb3VuZCk7XG4gIGNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJhZGdlLXRpdGFuaXVtLXRleHQpO1xufVxuXG4uc2MtbGFiZWwtLXJlZCB7XG4gIGJhY2tncm91bmQ6IHZhcigtLXNjLWNvbXBvbmVudHMtYmFkZ2UtcmVkLWJhY2tncm91bmQpO1xuICBjb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1iYWRnZS1yZWQtdGV4dCk7XG59XG5cbi5zYy1sYWJlbC0teWVsbG93IHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1iYWRnZS15ZWxsb3ctYmFja2dyb3VuZCk7XG4gIGNvbG9yOiB2YXIoLS1zYy1jb21wb25lbnRzLWJhZGdlLXllbGxvdy10ZXh0KTtcbn1cblxuLnNjLWxhYmVsLS1ibHVlIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tc2MtY29tcG9uZW50cy1iYWRnZS1ibHVlLWJhY2tncm91bmQpO1xuICBjb2xvcjogdmFyKC0tc2MtY29tcG9uZW50cy1iYWRnZS1ibHVlLXRleHQpO1xufVxuXG4vLyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuLy8gUGx1Z2luIG92ZXJyaWRlcyDigJQgY29uZmxpY3RzIGFuZCBmaXhlcyBmb3IgVEhJUyBwbHVnaW5cbi8vID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4iXX0= */

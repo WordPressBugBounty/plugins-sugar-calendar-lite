@@ -5,7 +5,6 @@ namespace Sugar_Calendar\Integrations\Zoom;
 use Sugar_Calendar\Integrations\AbstractMeetingProvider;
 use Sugar_Calendar\Integrations\IntegrationCapabilityRegistry;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
-use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthRelayClient;
 use WP_Error;
 
@@ -54,14 +53,12 @@ class ZoomIntegration extends AbstractMeetingProvider {
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Takes the actions client.
+	 * @since 3.18.0 No credits service: availability means a connection.
 	 *
 	 * @param OAuthRelayClient  $relay          Relay client.
-	 * @param CreditsService    $credits        Credits service.
 	 * @param ZoomActionsClient $actions_client Zoom actions client.
 	 */
-	public function __construct( OAuthRelayClient $relay, CreditsService $credits, ZoomActionsClient $actions_client ) {
-
-		parent::__construct( $credits );
+	public function __construct( OAuthRelayClient $relay, ZoomActionsClient $actions_client ) {
 
 		$this->relay          = $relay;
 		$this->actions_client = $actions_client;

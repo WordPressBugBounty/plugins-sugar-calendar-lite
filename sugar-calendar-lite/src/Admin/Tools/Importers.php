@@ -3,6 +3,7 @@
 namespace Sugar_Calendar\Admin\Tools;
 
 use Sugar_Calendar\Admin\Tools\Importers\ImporterInterface;
+use Sugar_Calendar\Admin\Tools\Importers\TheEventCalendar;
 
 /**
  * Importers class.
@@ -156,6 +157,7 @@ class Importers {
 					'migrated_categories'      => esc_html__( 'Categories migrated:', 'sugar-calendar-lite' ),
 					'migrated_tags'            => esc_html__( 'Tags migrated:', 'sugar-calendar-lite' ),
 					'migrated_attendees'       => esc_html__( 'Attendees migrated:', 'sugar-calendar-lite' ),
+					'migrated_rsvps'           => esc_html__( 'RSVPs migrated:', 'sugar-calendar-lite' ),
 					'migrated_failed'          => esc_html__( 'An error occurred during the migration ', 'sugar-calendar-lite' ),
 					'heads_up'                 => esc_html__( 'Heads up!', 'sugar-calendar-lite' ),
 					'yes'                      => esc_html__( 'Yes', 'sugar-calendar-lite' ),
@@ -251,12 +253,32 @@ class Importers {
 
 		wp_send_json_success(
 			[
-				'importer'      => $importers[ $importer_slug ]->run( $total_number_to_import ),
+				'importer'      => $this->run_importer( $importers[ $importer_slug ], $total_number_to_import, ! empty( $_POST['from_start'] ) ),
 				'importer_slug' => $importer_slug,
 			]
 		);
 	}
 
+	/**
+	 * Run one request of an importer.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param ImporterInterface $importer               The importer.
+	 * @param array             $total_number_to_import The total per step that the caller already knows.
+	 * @param bool              $from_start             Whether this is the first request after the Migrate button was clicked.
+	 *
+	 * @return array
+	 */
+	private function run_importer( ImporterInterface $importer, $total_number_to_import, $from_start ) {
+
+		// Only the TEC migration resumes from a step; the other importers keep the released signature.
+		if ( $importer instanceof TheEventCalendar ) {
+			return $importer->run( $total_number_to_import, $from_start );
+		}
+
+		return $importer->run( $total_number_to_import );
+	}
 
 	/**
 	 * Get loaded importers/migrators.

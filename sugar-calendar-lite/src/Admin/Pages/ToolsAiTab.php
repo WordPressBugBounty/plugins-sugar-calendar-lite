@@ -106,9 +106,6 @@ class ToolsAiTab extends Tools {
 	 */
 	private function run_wpvibe() {
 
-		// Set the current screen to avoid undefined notices.
-		set_current_screen( 'events_page_sc-tools' );
-
 		$credentials_url = esc_url_raw(
 			add_query_arg(
 				[

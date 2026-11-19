@@ -4,6 +4,7 @@ namespace Sugar_Calendar\AddOn\Ticketing\Admin\Pages;
 
 use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers;
 use Sugar_Calendar\AddOn\Ticketing\Helpers\UI;
 use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\AddOn\Ticketing\Settings;
@@ -151,13 +152,7 @@ class OrderEdit {
 		}
 
 		// Form action.
-		$form_action = add_query_arg(
-			[
-				'page'     => 'sc-event-ticketing',
-				'order_id' => $this->order->id,
-			],
-			admin_url( 'admin.php' )
-		);
+		$form_action = Helpers::get_order_admin_url( $this->order->id );
 
 		// Event.
 		$event   = sugar_calendar_get_event( $this->order->event_id );

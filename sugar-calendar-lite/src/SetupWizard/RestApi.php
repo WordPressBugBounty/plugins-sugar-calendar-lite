@@ -205,7 +205,8 @@ class RestApi {
 	 */
 	public function tec_import() {
 
-		$result = ( new TheEventCalendar() )->run();
+		// The wizard sends no first-request mark, so each request looks from the first step.
+		$result = ( new TheEventCalendar() )->run( [], true );
 		$result = ! empty( $result ) ? $result : [];
 
 		return $this->response( $result );

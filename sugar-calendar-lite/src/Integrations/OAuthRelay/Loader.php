@@ -75,7 +75,7 @@ class Loader {
 			( new OAuthConnectionErrorNotice() )->init();
 
 			// Global out-of-credits notice — renders on every admin page from the
-			// cached (no-HTTP) credits gate; dismissal is per-user, per-period.
+			// stored (no-HTTP) credits read; dismissal is per-user, per-period.
 			( new OutOfCreditsNotice() )->hooks();
 		}
 
@@ -88,12 +88,12 @@ class Loader {
 		$zoom    = new ZoomActionsClient();
 		$google  = new GoogleActionsClient();
 
-		( new ZoomIntegration( $relay, $credits, $zoom ) )->init();
+		( new ZoomIntegration( $relay, $zoom ) )->init();
 
 		( new GoogleOAuthCallbackHandler( $relay ) )->init();
 
 		// Google Meet: registers the capability so "Google Meet" shows in the Online Platform dropdown.
-		( new GoogleMeetIntegration( $credits, $google ) )->init();
+		( new GoogleMeetIntegration( $google ) )->init();
 
 		// Zoom webhook event handler capability (3a). Registered on every
 		// request — IncomingWebhookHandler resolves it on unauthenticated
@@ -105,7 +105,8 @@ class Loader {
 		// Event meeting lifecycle (update / switch / removal on save + trash/delete
 		// cleanup). Create is now explicit (the Create-Meeting AJAX endpoint).
 		$registry = IntegrationCapabilityRegistry::instance();
-		$manager  = new EventMeetingManager( $registry, $credits );
+		$manager  = new EventMeetingManager( $registry );
+
 		$manager->hooks();
 
 		// Google push: create / update on editor saves and cron publishes, delete on permanent delete.

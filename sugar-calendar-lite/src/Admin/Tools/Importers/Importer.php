@@ -3,10 +3,10 @@
 namespace Sugar_Calendar\Admin\Tools\Importers;
 
 use DateTime;
+use Sugar_Calendar\Features\FeaturedEvents\Common\Featured;
+use Sugar_Calendar\AddOn\Ticketing\Migrate\TicketingWriter;
 use Sugar_Calendar\Helpers;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_attendee;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_order;
-use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\add_ticket;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\get_attendees;
 
 /**
@@ -24,10 +24,12 @@ abstract class Importer implements ImporterInterface {
 	 * @var array
 	 */
 	protected $errors = [
-		'events'    => [],
-		'calendars' => [],
-		'tickets'   => [],
-		'orders'    => [],
+		'events'       => [],
+		'calendars'    => [],
+		'tickets'      => [],
+		'orders'       => [],
+		'RSVPs'        => [],
+		'Repeat rules' => [],
 	];
 
 	/**
@@ -152,16 +154,7 @@ abstract class Importer implements ImporterInterface {
 			$old_id = $data['post_id'];
 		}
 
-		// Insert the post.
-		$post_id = wp_insert_post(
-			[
-				'post_title'   => $data['title'],
-				'post_content' => $data['content'],
-				'post_status'  => $data['status'],
-				'post_type'    => sugar_calendar_get_event_post_type_id(),
-				'post_author'  => get_current_user_id(),
-			]
-		);
+		$post_id = wp_insert_post( ( new EventPostArgs() )->get_post_args( $data ) );
 
 		if ( empty( $post_id ) ) {
 
@@ -258,6 +251,10 @@ abstract class Importer implements ImporterInterface {
 			}
 		}
 
+		if ( ! empty( $data['featured'] ) ) {
+			$event_data[ Featured::META_KEY ] = '1';
+		}
+
 		// Sanitize the color.
 		$event_data['color'] = ! empty( $event_data['color'] ) ? sanitize_hex_color( $event_data['color'] ) : sugar_calendar_get_event_color( $post_id );
 
@@ -305,6 +302,7 @@ abstract class Importer implements ImporterInterface {
 			'sc_event_post_id' => $post_id,
 		];
 	}
+
 
 	/**
 	 * Update the event.
@@ -463,28 +461,7 @@ abstract class Importer implements ImporterInterface {
 	 */
 	protected function update_event_wp_post( $old_event_instance, $event_data ) {
 
-		// Map event data fields to post data fields.
-		$field_map = [
-			'title'   => 'post_title',
-			'content' => 'post_content',
-		];
-
-		$post_data = [];
-
-		// Loop through field mappings and update post data if changed.
-		foreach ( $field_map as $event_field => $post_field ) {
-
-			// Check if the event field exists and has been modified:
-			// 1. The event data field must not be empty.
-			// 2. The event data field value must be different from the old event instance value.
-			if (
-				! empty( $event_data[ $event_field ] )
-				&&
-				$event_data[ $event_field ] !== $old_event_instance->$event_field
-			) {
-				$post_data[ $post_field ] = $event_data[ $event_field ];
-			}
-		}
+		$post_data = ( new EventPostArgs() )->get_update_post_args( $old_event_instance, $event_data );
 
 		// Update post if we have changes.
 		if ( empty( $post_data ) ) {
@@ -591,17 +568,7 @@ abstract class Importer implements ImporterInterface {
 	 */
 	protected function update_sc_event_ticket_meta( $sc_event_id, $ticket_price, $ticket_capacity ) {
 
-		$ticket_capacity = (int) $ticket_capacity;
-
-		if ( $ticket_capacity === -1 ) {
-			$ticket_capacity = 9999;
-		} elseif ( $ticket_capacity < 0 ) {
-			$ticket_capacity = 0;
-		}
-
-		update_event_meta( $sc_event_id, 'tickets', 1 );
-		update_event_meta( $sc_event_id, 'ticket_price', $ticket_price );
-		update_event_meta( $sc_event_id, 'ticket_quantity', $ticket_capacity );
+		( new TicketingWriter() )->set_event_ticket( $sc_event_id, $ticket_price, $ticket_capacity );
 	}
 
 	/**
@@ -901,7 +868,7 @@ abstract class Importer implements ImporterInterface {
 			$new_order_data['date_paid'] = $order_data['date_created'];
 		}
 
-		$sc_order_id = add_order( $new_order_data );
+		$sc_order_id = ( new TicketingWriter() )->add_order( $new_order_data );
 
 		if ( empty( $sc_order_id ) ) {
 
@@ -957,7 +924,7 @@ abstract class Importer implements ImporterInterface {
 			$ticket_data['last_name']
 		);
 
-		$ticket = add_ticket(
+		$ticket = ( new TicketingWriter() )->add_seat(
 			[
 				'attendee_id' => (int) $attendee_id,
 				'event_date'  => $event_start_date,
@@ -1120,6 +1087,7 @@ abstract class Importer implements ImporterInterface {
 				break;
 
 			case 'tickets':
+			case 'RSVPs':
 				$label = __( 'Attendee', 'sugar-calendar-lite' );
 				break;
 

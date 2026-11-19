@@ -11,10 +11,9 @@ use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
  * Global dismissible notice shown on every admin page when integration
  * credits are exhausted.
  *
- * The gate reads the CACHED (transient-only, fail-open) credits state, so the
- * notice never makes an HTTP call on a page render — it surfaces only once the
- * Settings panel (License & Usage / Integrations) has warmed the tier-scoped
- * transient with a maxed reading.
+ * It reads the stored credits (an option), so a page render never makes an HTTP
+ * call. It surfaces once a fresh read (a Settings visit or the Dashboard's daily
+ * refresh) has stored a maxed reading.
  *
  * Dismissal is per-user, keyed on the credit period token (`resets_at`, or
  * `'lifetime'` for flat/Lite). A new period yields a different token, so a
@@ -79,7 +78,7 @@ class OutOfCreditsNotice {
 
 		$service = new CreditsService();
 
-		// Cached, fail-open read — no HTTP on every admin page.
+		// Stored read (an option; no HTTP on every admin page).
 		if ( ! $service->is_out_of_credits() ) {
 			return;
 		}
@@ -138,14 +137,13 @@ class OutOfCreditsNotice {
 		}
 
 		// Use the period token the notice was rendered with, passed through the
-		// dismiss URL. Recomputing here would read get_cached_credits() afresh; if
-		// the transient expired between render and click it returns null and the
-		// presenter falls back to 'lifetime' — storing the wrong token so the
-		// dismissal would not stick.
+		// dismiss URL. Recomputing here would read get_cached_credits() afresh; a
+		// fresh read between render and click can change resets_at, storing a
+		// token that no longer matches, so the dismissal would not stick.
 		$period = isset( $_REQUEST['period'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['period'] ) ) : '';
 
 		if ( $period === '' ) {
-			// Fallback: recompute from cache (may be 'lifetime' if expired).
+			// Fallback: recompute from the stored read.
 			$period = ( new CreditsPresenter( ( new CreditsService() )->get_cached_credits() ) )->period_token();
 		}
 

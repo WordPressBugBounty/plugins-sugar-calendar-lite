@@ -17,10 +17,10 @@ interface MeetingProviderInterface extends IntegrationCapabilityInterface {
 	/**
 	 * Whether the editor can create meetings against this provider's connection.
 	 *
-	 * Unlike is_available(), this ignores credits: a connected provider that is out of credits
-	 * answers true here and false there.
+	 * Credits play no part: the relay refuses a create the account cannot pay for.
 	 *
 	 * @since 3.16.0
+	 * @since 3.18.0 No longer differs from is_available() on credits.
 	 *
 	 * @return bool
 	 */

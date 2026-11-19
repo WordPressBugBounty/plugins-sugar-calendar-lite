@@ -4,6 +4,7 @@ namespace Sugar_Calendar\Admin\EmailNotifications;
 
 use Sugar_Calendar\AddOn\Ticketing\Admin\Tickets\List_Table;
 use Sugar_Calendar\AddOn\Ticketing\Database\Ticket_Query;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers as TicketingHelpers;
 use Sugar_Calendar\Helpers\UI;
 use function Sugar_Calendar\AddOn\Ticketing\Common\Functions\count_tickets;
 
@@ -119,16 +120,7 @@ class EventRecentTicketsTable extends List_Table {
 		// View Order.
 		$actions['view_order'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url(
-				add_query_arg(
-					[
-						'page'     => 'sc-event-ticketing',
-						'view'     => 'order',
-						'order_id' => $item->order_id,
-					],
-					admin_url( 'admin.php' )
-				)
-			),
+			esc_url( TicketingHelpers::get_order_admin_url( $item->order_id ) ),
 			esc_html__( 'View Order Details', 'sugar-calendar-lite' )
 		);
 

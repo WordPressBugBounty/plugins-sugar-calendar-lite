@@ -2,6 +2,7 @@
 
 namespace Sugar_Calendar\Emails;
 
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers as TicketingHelpers;
 use Sugar_Calendar\AddOn\Ticketing\Orders\OrderDiscount;
 use Sugar_Calendar\Event;
 
@@ -148,13 +149,7 @@ class OrderContext {
 
 		$values['order']['date_only'] = $dates['date'];
 		$values['order']['time']      = $dates['time'];
-		$values['order']['admin_url'] = add_query_arg(
-			[
-				'page'     => 'sc-event-ticketing',
-				'order_id' => (int) $order->id,
-			],
-			admin_url( 'admin.php' )
-		);
+		$values['order']['admin_url'] = TicketingHelpers::get_order_admin_url( (int) $order->id );
 
 		return self::build( $values, (string) $receipt_url );
 	}

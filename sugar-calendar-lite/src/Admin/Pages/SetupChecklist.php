@@ -106,35 +106,25 @@ class SetupChecklist extends PageAbstract {
 	 * Settle the Setup Checklist's place in the submenu and tag its link.
 	 *
 	 * It follows the parent's entry, not first: core links the top-level menu to the first
-	 * submenu entry. admin-menu.scss lifts it above Events with flex `order` instead.
+	 * submenu entry. admin-menu.scss lifts it to the top with flex `order` instead.
 	 *
 	 * @since 3.15.0
 	 */
-	public static function place_menu_item() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh -- two small scans of $submenu; splitting them would read worse.
+	public static function place_menu_item() {
 
 		global $submenu;
 
-		if ( empty( $submenu[ Area::SLUG ] ) ) {
-			return;
-		}
-
-		$items = $submenu[ Area::SLUG ];
-		$ours  = null;
-
-		foreach ( $items as $key => $item ) {
-			if ( isset( $item[2] ) && $item[2] === self::get_slug() ) {
-				$ours = $item;
-
-				unset( $items[ $key ] );
-
-				break;
-			}
-		}
+		$items = $submenu[ Area::SLUG ] ?? [];
+		$key   = WP::find_submenu_key( $items, self::get_slug() );
 
 		// Absent for anyone without the capability to see it.
-		if ( $ours === null ) {
+		if ( $key === null ) {
 			return;
 		}
+
+		$ours = $items[ $key ];
+
+		unset( $items[ $key ] );
 
 		if ( sugar_calendar()->get_setup_checklist()->get_state()->is_dismissed() ) {
 			$submenu[ Area::SLUG ] = array_values( $items ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -147,15 +137,7 @@ class SetupChecklist extends PageAbstract {
 			: $ours[4] . ' ' . self::MENU_ITEM_CLASS;
 
 		$items    = array_values( $items );
-		$position = 1;
-
-		foreach ( $items as $key => $item ) {
-			if ( isset( $item[2] ) && $item[2] === Area::SLUG ) {
-				$position = $key + 1;
-
-				break;
-			}
-		}
+		$position = ( WP::find_submenu_key( $items, Area::SLUG ) ?? 0 ) + 1;
 
 		array_splice( $items, $position, 0, [ $ours ] );
 

@@ -16,7 +16,7 @@ use Stripe\Stripe as StripeSDK;
 use Sugar_Calendar\AddOn\Ticketing\Checkout\CouponBridge;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions;
 use Sugar_Calendar\Helper;
-use Sugar_Calendar\Helpers;
+use Sugar_Calendar\Helpers\ApplicationFee;
 use WP_Error;
 
 /**
@@ -364,8 +364,8 @@ class Stripe extends Checkout implements GatewayInterface {
 			'statement_descriptor'      => $statement,
 		];
 
-		if ( ! Helpers::is_license_valid() || ! sugar_calendar()->is_pro() || Helpers::is_application_fee_supported() ) {
-			$args['application_fee_amount'] = (int) round( $amount * 0.03, 2 );
+		if ( ApplicationFee::is_charged() ) {
+			$args['application_fee_amount'] = (int) round( $amount * ( ApplicationFee::PERCENT / 100 ), 2 );
 		}
 
 		$stripe_customer  = $this->get_customer( $customer['email'], $customer['name'] );

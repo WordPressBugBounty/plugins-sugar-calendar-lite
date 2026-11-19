@@ -11,6 +11,7 @@ use Sugar_Calendar\Helpers\WP;
 use Sugar_Calendar\Features\Tags\Common\Helpers as TagsHelpers;
 use Sugar_Calendar\Features\FeaturedEvents\Common\Featured;
 use Sugar_Calendar\Helpers\Helpers as CommonHelpers;
+use Sugar_Calendar\Helpers\UpcomingEventsSql;
 
 /**
  * Class with all the misc helper functions that don't belong elsewhere.
@@ -74,6 +75,10 @@ class Helpers {
 	 * @return bool
 	 */
 	public static function is_application_fee_supported() {
+
+		// Before WP 6.8 core loads plugin.php only in admin and AJAX requests; the Dashboard's
+		// card listeners reach this on any request, including the cron license check.
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		if (
 			! class_exists( 'Sugar_Calendar\AddOn\Ticketing\Plugin' ) ||
@@ -1170,12 +1175,15 @@ class Helpers {
 	 * @since 3.11.0 Added support to `show_past_only` args.
 	 * @since 3.11.1 Added optional `has_password` arg.
 	 * @since 3.14.0 Added optional `featured` arg.
+	 * @since 3.18.0 Added optional `starting_from_today` arg.
 	 *
 	 * @param array $args       The arguments to get the events.
 	 *                          Pass `'has_password' => false` to exclude password-protected
 	 *                          events when the current user lacks the `edit_posts` capability.
 	 *                          Omit (default) to preserve current behavior for non-block callers.
 	 *                          Pass `'featured' => true` to return only featured events.
+	 *                          Pass `'starting_from_today' => true` to leave out events that
+	 *                          started before today and are still running.
 	 * @param array $attributes The block attributes.
 	 *
 	 * @return Event[]
@@ -1183,15 +1191,16 @@ class Helpers {
 	public static function get_upcoming_events_list_with_recurring( $args, $attributes ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
 		$default_args = [
-			'number'         => 5,
-			'calendar_ids'   => [],
-			'search'         => '',
-			'offset'         => 0,
-			'show_past_only' => false,
-			'event_order'    => 'asc',
-			'featured'       => false,
-			'days_of_week'   => [],
-			'time_of_day'    => [],
+			'number'              => 5,
+			'calendar_ids'        => [],
+			'search'              => '',
+			'offset'              => 0,
+			'show_past_only'      => false,
+			'event_order'         => 'asc',
+			'featured'            => false,
+			'days_of_week'        => [],
+			'time_of_day'         => [],
+			'starting_from_today' => false,
 		];
 
 		$args = wp_parse_args(
@@ -1312,8 +1321,7 @@ class Helpers {
 			$select_query .= ' ' . $calendars_left_join;
 		}
 
-		$tz  = sugar_calendar_get_timezone_type() === 'off' ? 'UTC' : sugar_calendar_get_timezone();
-		$now = sugar_calendar_get_request_time( 'mysql', $tz );
+		$now = UpcomingEventsSql::get_now();
 
 		// Date filter: past events use `end < NOW()`, upcoming uses `end >= NOW()`.
 		$date_operator = ! empty( $args['show_past_only'] ) ? '<' : '>=';
@@ -1323,6 +1331,8 @@ class Helpers {
 			. $wpdb->prefix . 'sc_events.`end` ' . $date_operator . ' %s', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Whitelisted comparison operator (< or >=), not user input.
 			$now
 		);
+
+		$where_query .= UpcomingEventsSql::starting_from_today( $args, $now, $wpdb->prefix . 'sc_events.`start`' );
 
 		// Exclude password-protected events when the caller opted in.
 		if ( $filter_password_protected ) {

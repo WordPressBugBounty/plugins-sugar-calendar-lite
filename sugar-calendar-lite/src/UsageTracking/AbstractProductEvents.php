@@ -55,10 +55,12 @@ abstract class AbstractProductEvents {
 	 *
 	 * @since 3.12.0
 	 * @since 3.15.0 Listens for the importer marker.
+	 * @since 3.18.0 Listens for the Google pull marker.
 	 */
 	public function init() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
 		add_action( 'sugar_calendar_importer_started', [ $this, 'mark_importing' ] );
+		add_action( 'sugar_calendar_google_pull_started', [ $this, 'mark_importing' ] );
 
 		$this->hooks();
 	}

@@ -31,6 +31,24 @@ class GoogleLinkRepository {
 	const GOOGLE_ID_META_KEY = 'google_event_id';
 
 	/**
+	 * Option holding the GMT Unix time a link was last stored, for the usage-tracking snapshot.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @var string
+	 */
+	const LAST_STORED_OPTION = 'sugar_calendar_google_link_last_stored_at';
+
+	/**
+	 * Whether the last-stored stamp was already written in this request.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @var bool
+	 */
+	private static $stamped = false;
+
+	/**
 	 * Stored links for an event, keyed by Google calendar id.
 	 *
 	 * @since 3.16.0
@@ -194,6 +212,28 @@ class GoogleLinkRepository {
 		if ( ! in_array( $google_event_id, $flat, true ) ) {
 			add_event_meta( $event_id, self::GOOGLE_ID_META_KEY, $google_event_id );
 		}
+
+		$this->stamp_last_stored();
+	}
+
+	/**
+	 * Record now as the last time a link was stored, once per request.
+	 *
+	 * Push and pull both end in store_link(), so one write per request is enough.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return void
+	 */
+	private function stamp_last_stored() {
+
+		if ( self::$stamped ) {
+			return;
+		}
+
+		self::$stamped = true;
+
+		update_option( self::LAST_STORED_OPTION, time(), false );
 	}
 
 	/**

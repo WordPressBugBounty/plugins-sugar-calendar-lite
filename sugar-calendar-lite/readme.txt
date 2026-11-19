@@ -9,7 +9,7 @@ Tags:              events, calendar, event calendar, event management, event tic
 Requires PHP:      7.4
 Requires at least: 6.2
 Tested up to:      7.1
-Stable tag:        3.17.0
+Stable tag:        3.18.0
 
 Easily manage events and sell tickets on your WordPress site. Sugar Calendar is easy-to-use, reliable, and exceptionally powerful. See for yourself.
 
@@ -19,7 +19,7 @@ We believe event management should be simple\! Sugar Calendar is a powerful yet 
 
 With Sugar Calendar, you get just the features you need for handling events of all types without a complicated setup or slow interface. You can easily manage in-person, virtual, one-time, and recurring events with just a few clicks.
 
-**Want recurring events, venues, RSVPs, frontend submissions, and more?** [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-top)
+**Want recurring events, venues, RSVPs, community events, and more?** [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-top)
 
 ## Key Features at a Glance
 
@@ -137,11 +137,11 @@ Assign venues to events to display rich location information (and a Google Map) 
 
 Easily add speaker or performer profiles to your events. Include names, titles, bios, photos, and social links to highlight who will be featured, enhancing your event listings.
 
-### Frontend Event Submissions
+### Community Events
 
-Accept event submissions from your community or team without giving them backend access. Sugar Calendar Pro integrates with popular form plugins (WPForms, Gravity Forms, Formidable Forms) to allow frontend event submission forms.
+Accept event submissions from your community or team without giving them backend access. Sugar Calendar Pro works with the form plugin you already use (WPForms, Gravity Forms, Formidable Forms) for the submission form.
 
-Visitors can submit events through a form on your site, and you can review/publish them at your convenience. Perfect for community calendars and user-submitted events.
+Visitors submit events through a form on your site, and each one can wait for your review or go live right away. Moving from The Events Calendar? This is what it calls Community Events, and submitted events come across when you migrate.
 
 ### Event Duplication
 
@@ -159,7 +159,7 @@ Need to send an event to an external page or ticketing site? Pro lets you set a 
 
 Get access to our top-notch support team with prioritized email support for Pro users. Need help or have questions? [Pro license holders](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=premium-sugar-calendar-license) receive fast, dedicated support from the Sugar Calendar team via email
 
-**Take Your Events to the Next Level\!** Get recurring events, event venues, speakers, frontend submissions, and automatic calendar imports with Sugar Calendar Pro. [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-bottom)
+**Take Your Events to the Next Level\!** Get recurring events, event venues, speakers, community events, and automatic calendar imports with Sugar Calendar Pro. [Get Sugar Calendar Pro Today →](https://sugarcalendar.com/pricing/?utm_source=wp-readme&utm_medium=link&utm_campaign=liteplugin&utm_content=get-sugar-calendar-pro-today-bottom)
 
 ## Sugar Calendar Pro Addons
 
@@ -297,6 +297,12 @@ Yes, you can display a Google Maps map of the event location on the event detail
 If you are getting these types of errors when viewing an event page, you may need to resave your permalink structure. Go to Settings > Permalinks and click “Save Changes”. Then try viewing the page again.
 
 == Changelog ==
+= 3.18.0 - 2026-11-19 =
+- Added: **NEW** Dashboard: a one-page overview of your events, with upcoming events, ticket sales, new attendees and setup progress all in one place.
+- Fixed: Migrating from The Events Calendar now keeps time zones, all-day events, tickets, orders and RSVPs.
+- Fixed: Tools » Migrate can be run again to bring over events added in The Events Calendar since the last migration.
+- Fixed: Polylang: the all-events ICS feed showed each event once per language, and calendar translations Polylang created on its own had no color.
+
 = 3.17.0 - 2026-11-04 =
 - Added: Polylang support: translate events, calendars and tags with the Polylang plugin.
 - Fixed: Timed events set to a different time zone than the calendar were missing from the admin Week and Day views.

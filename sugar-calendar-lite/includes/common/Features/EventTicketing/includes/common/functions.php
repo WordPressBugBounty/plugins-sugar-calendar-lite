@@ -1230,7 +1230,7 @@ function sanitize_boolean( $value ) {
  * @since 1.0.0
  * @since 3.3.0 Added default `$amount` value which is `0`.
  *
- * @param string $amount Amount to format.
+ * @param string|float|int $amount Amount to format.
  *
  * @return string $amount Newly sanitized amount
  */
@@ -1294,8 +1294,8 @@ function sanitize_amount( $amount ) {
  *
  * @since 1.0.0
  *
- * @param string $amount   Price amount to format
- * @param string $decimals Whether or not to use decimals.  Useful when set to false for non-currency numbers.
+ * @param string|float|int $amount   Price amount to format.
+ * @param bool             $decimals Whether or not to use decimals.  Useful when set to false for non-currency numbers.
  *
  * @return string $amount Newly formatted amount or Price Not Available
  */
@@ -1429,7 +1429,7 @@ function is_zero_decimal_currency() {
  * @since 1.0.0
  * @since 3.3.0 Handle empty `$amount`.
  *
- * @param string $amount The amount.
+ * @param string|float|int $amount The amount.
  *
  * @return string $currency Currencies displayed correctly
  */

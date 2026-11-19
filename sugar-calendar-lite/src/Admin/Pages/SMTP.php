@@ -181,9 +181,6 @@ class SMTP extends PageAbstract {
 	 */
 	private function run_smtp() {
 
-		// Set the current screen to avoid undefined notices.
-		set_current_screen( 'events_page_sugar-calendar-smtp' );
-
 		$credentials_url = esc_url_raw(
 			add_query_arg(
 				[

@@ -421,18 +421,10 @@ class Checklist {
 		$tools = Config::get_growth_tools();
 
 		foreach ( $tools as $key => $tool ) {
-			$state = $this->catalog->get_state( $key );
+			$action = Config::get_growth_tool_action( $this->catalog->get_state( $key ) );
 
-			if ( $state === 'active' ) {
-				$tools[ $key ]['action_state'] = 'installed';
-				$tools[ $key ]['action_label'] = __( 'Installed', 'sugar-calendar-lite' );
-			} elseif ( $state === 'installed' ) {
-				$tools[ $key ]['action_state'] = 'activate';
-				$tools[ $key ]['action_label'] = __( 'Activate', 'sugar-calendar-lite' );
-			} else {
-				$tools[ $key ]['action_state'] = 'install';
-				$tools[ $key ]['action_label'] = __( 'Install', 'sugar-calendar-lite' );
-			}
+			$tools[ $key ]['action_state'] = $action['state'];
+			$tools[ $key ]['action_label'] = $action['label'];
 		}
 
 		return $tools;

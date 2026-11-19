@@ -306,6 +306,7 @@ class GooglePusher {
 	 * Create the Google copy (credit-gated) and store the link.
 	 *
 	 * @since 3.16.0
+	 * @since 3.18.0 Gated only while a read under five minutes old says "out"; past that the relay decides.
 	 *
 	 * @param GoogleOAuthConnection $connection  Active connection.
 	 * @param object                $event       SCE Event object.
@@ -320,8 +321,8 @@ class GooglePusher {
 			return;
 		}
 
-		// Create-only credits gate; the next save retries.
-		if ( $this->credits->is_out_of_credits() ) {
+		// Create-only gate on the editor's five-minute rule; past that the relay decides. The next save retries.
+		if ( $this->credits->is_recently_out_of_credits() ) {
 			return;
 		}
 

@@ -8,7 +8,6 @@ use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthConnectionModel;
 use Sugar_Calendar\Integrations\OAuthRelay\OAuthRelayClient;
-use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 
 /**
  * A Settings → Integrations page whose account is connected through the Product API relay.
@@ -27,6 +26,13 @@ abstract class AbstractOAuthIntegrationPage extends AbstractIntegrationPage {
 	 * @since 3.16.0
 	 */
 	const DOCS_URL = '';
+
+	/**
+	 * A relay integration: Lite's "Disable Integrations" switch and the relay credits apply to it.
+	 *
+	 * @since 3.18.0
+	 */
+	const IS_LOCAL = false;
 
 	/**
 	 * Memoized connection row for this request.
@@ -340,9 +346,6 @@ abstract class AbstractOAuthIntegrationPage extends AbstractIntegrationPage {
 		$row            = $this->get_connection_row();
 		$disconnect_url = $this->get_disconnect_url();
 		$slug           = $this->get_slug();
-
-		// Side-effect only: warms the credits transient and fires the low-credit alert.
-		( new CreditsService() )->get_credits();
 
 		$this->render_settings_rows();
 

@@ -59,9 +59,10 @@ class CreditsPresenter {
 	}
 
 	/**
-	 * Build from the service's fresh read (warms cache + fires the alert).
+	 * Build from the service's forced read, which stores it and may fire the alert.
 	 *
 	 * @since 3.12.0
+	 * @since 3.18.0 Forces the fetch, so the Settings surfaces always read fresh.
 	 *
 	 * @param CreditsService $service Credits service.
 	 *
@@ -69,7 +70,7 @@ class CreditsPresenter {
 	 */
 	public static function from_service( CreditsService $service ): self {
 
-		return new self( $service->get_credits() );
+		return new self( $service->get_credits( true ) );
 	}
 
 	/**

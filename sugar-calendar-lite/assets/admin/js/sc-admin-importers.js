@@ -34,6 +34,15 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			number_of_retries: 0,
 
 			/**
+			 * Whether the next migrate request is the first since the button was clicked.
+			 *
+			 * @since 3.18.0
+			 *
+			 * @type {boolean}
+			 */
+			from_start: false,
+
+			/**
 			 * The total number to import per context.
 			 *
 			 * @type {number}
@@ -61,6 +70,7 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 				tickets: 0,
 				orders: 0,
 				attendees: 0,
+				rsvps: 0,
 				categories: 0,
 				tags: 0,
 			},
@@ -461,6 +471,9 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 			$( '#sc-admin-importer-tec-status' )
 				.text( sc_admin_importers.strings.migration_in_progress ).show();
 
+			// A resumed run first picks up what was added while it was stopped.
+			app.runtime_vars.from_start = true;
+
 			app.runImporter();
 
 			$btn.prop( 'disabled', true );
@@ -495,7 +508,8 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 					nonce: sc_admin_importers.nonce,
 					action: 'sc_admin_importer',
 					importer_slug: app.runtime_vars.importer_slug,
-					total_number_to_import: app.runtime_vars.total_number_to_import
+					total_number_to_import: app.runtime_vars.total_number_to_import,
+					from_start: app.runtime_vars.from_start ? 1 : 0,
 				},
 				function ( response ) {
 
@@ -503,6 +517,8 @@ const SCAdminImporters = window.SCAdminImporters || ( function( document, window
 						app.retryAttempt();
 						return;
 					}
+
+					app.runtime_vars.from_start = false;
 
 					if ( ! app.runtime_vars.last_migrated_context ) {
 						app.runtime_vars.last_migrated_context = response.data.importer.process;

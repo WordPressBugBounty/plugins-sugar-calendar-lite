@@ -8,6 +8,7 @@ use Sugar_Calendar\AddOn\Ticketing\Database as Database;
 use Sugar_Calendar\AddOn\Ticketing\Common\Functions as Functions;
 use Sugar_Calendar\AddOn\Ticketing\Admin\ListTableAbstract;
 use Sugar_Calendar\AddOn\Ticketing\Admin\OrdersDiscountColumn;
+use Sugar_Calendar\AddOn\Ticketing\Helpers\Helpers;
 use Sugar_Calendar\Helper;
 
 // Include the main list table class if it's not included
@@ -408,13 +409,7 @@ class List_Table extends ListTableAbstract {
 		$retval = '<strong>' . Functions\display_price( $item->total ) . '</strong>';
 
 		// Setup URL.
-		$url = add_query_arg(
-			[
-				'page'     => 'sc-event-ticketing',
-				'order_id' => $item->id,
-			],
-			admin_url( 'admin.php' )
-		);
+		$url = Helpers::get_order_admin_url( $item->id );
 
 		/**
 		 * Filter URL.

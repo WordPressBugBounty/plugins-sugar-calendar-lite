@@ -9,6 +9,8 @@
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+use Sugar_Calendar\Events\EventMeta;
+
 /**
  * Add an event.
  *
@@ -140,10 +142,13 @@ function sugar_calendar_update_event( $event_id = 0, $data = [], $old_event_inst
 		$old_event_instance = sugar_calendar_get_event( $event_id );
 	}
 
+	// Compared before the update: update_item() saves meta, then returns false when no column changed.
+	$meta_changed = ! empty( $old_event_instance->id ) && EventMeta::changed( $event_id, $data );
+
 	$events      = new \Sugar_Calendar\Event_Query();
 	$update_item = $events->update_item( $event_id, $data );
 
-	if ( $update_item ) {
+	if ( $update_item || $meta_changed ) {
 		/**
 		 * Fires after an event is updated.
 		 *

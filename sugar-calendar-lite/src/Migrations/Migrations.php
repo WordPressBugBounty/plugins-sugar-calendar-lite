@@ -64,6 +64,7 @@ class Migrations {
 	 *
 	 * @since 3.0.0
 	 * @since 3.12.0 Register the orphaned-events cleanup migration.
+	 * @since 3.18.0 Register the TEC ignored-events migration.
 	 *
 	 * @return array Migrations classes.
 	 */
@@ -74,6 +75,7 @@ class Migrations {
 			GeocodedCacheMigration::class,
 			EventTermCountMigration::class,
 			OrphanedEventsCleanupMigration::class,
+			TecIgnoredEventsMigration::class,
 		];
 
 		/**

@@ -1,4 +1,4 @@
-/* globals jQuery, sugar_calendar_admin_event_meta_box */
+/* globals jQuery, wp, sugar_calendar_admin_event_meta_box */
 ( function ( $, settings ) {
 
 	'use strict';
@@ -258,9 +258,10 @@
 			$visibility.toggle( matches || isCustom );
 
 			// The selected provider being out of credits drives the invalid field
-			// state (red border + credits message) and blocks meeting creation. The
-			// server flags out-of-credits options with data-out-of-credits; track it
-			// here so switching the dropdown updates the state without a reload.
+			// state (red border + credits message) and hides the Create link. The
+			// server flags an option only while its credits read is under five
+			// minutes old; track it here so switching the dropdown updates the
+			// state without a reload.
 			const outOfCredits = $opt.attr( 'data-out-of-credits' ) === '1';
 
 			this.$onlineProvider.toggleClass( 'sugar-calendar-metabox__online-provider--invalid', outOfCredits );

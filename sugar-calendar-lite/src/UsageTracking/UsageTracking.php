@@ -46,6 +46,8 @@ class UsageTracking {
 		// Product Events a Lite install can fire (both editions).
 		( new ProductEvents() )->init();
 		( new AiProductEvents() )->init();
+		( new EventPublishProductEvents() )->init();
+		( new DashboardProductEvents() )->init();
 
 		// Snapshot keys kept current on save (both editions).
 		( new EventActivityData() )->hooks();

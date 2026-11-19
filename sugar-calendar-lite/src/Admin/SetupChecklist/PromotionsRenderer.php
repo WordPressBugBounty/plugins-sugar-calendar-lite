@@ -43,8 +43,7 @@ class PromotionsRenderer {
 				<span class="sugar-calendar-checklist__discount">
 					<img src="<?php echo esc_url( SC_PLUGIN_ASSETS_URL . 'images/setup-checklist/discount-badge.svg' ); ?>"
 							width="16" height="16" alt="">
-					<span class="sugar-calendar-checklist__discount-amount"><?php esc_html_e( '$50 OFF', 'sugar-calendar-lite' ); ?></span>
-					<span><?php esc_html_e( 'for Sugar Calendar Lite users!', 'sugar-calendar-lite' ); ?></span>
+					<?php echo self::get_discount_html( 'sugar-calendar-checklist__discount-amount' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</span>
 				<a class="sc-button sc-button--primary"
 						href="
@@ -66,6 +65,28 @@ class PromotionsRenderer {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * The Lite discount line, escaped, with the discount in a span of the given class.
+	 *
+	 * One string, so a translator can move the discount; the Dashboard's Pro Upsell shows it too.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @param string $amount_class The discount span's class.
+	 *
+	 * @return string
+	 */
+	public static function get_discount_html( string $amount_class ): string {
+
+		return sprintf(
+			/* translators: %1$s - opening span tag, %2$s - discount percentage, e.g. 50%, %3$s - closing span tag. */
+			esc_html__( '%1$s%2$s OFF%3$s for Sugar Calendar Lite users!', 'sugar-calendar-lite' ),
+			'<span class="' . esc_attr( $amount_class ) . '">',
+			'50%',
+			'</span>'
+		);
 	}
 
 	/**

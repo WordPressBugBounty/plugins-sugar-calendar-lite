@@ -6,9 +6,8 @@ use Sugar_Calendar\Helpers as Sugar_Calendar_Helpers;
 use Sugar_Calendar\Helpers\Helpers;
 use Sugar_Calendar\Helpers\UI;
 use Sugar_Calendar\Helpers\WP;
-use Sugar_Calendar\Admin\Pages\Integrations\GoogleCalendar;
+use Sugar_Calendar\Admin\Pages\Integrations\IntegrationPageRegistry;
 use Sugar_Calendar\Integrations\IntegrationsDisabler;
-use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsService;
 use Sugar_Calendar\Integrations\OAuthRelay\Credits\CreditsSignalRenderer;
 
 /**
@@ -122,48 +121,6 @@ class SettingsIntegrationsTab extends Settings {
 	}
 
 	/**
-	 * Map of integration slugs → real page-class instances.
-	 *
-	 * The first integration is the default when no `?integration=` is
-	 * set in the URL.
-	 *
-	 * @since 3.12.0
-	 * @since 3.16.0 Registers the Google Calendar page.
-	 *
-	 * @return array<string, object>
-	 */
-	private function get_integrations() {
-
-		static $integrations = null;
-
-		if ( $integrations === null ) {
-			$integrations = [
-				'google-maps'     => new Integrations\GoogleMaps(),
-				'zoom'            => new Integrations\Zoom(),
-				'google-calendar' => new GoogleCalendar(),
-			];
-
-			/**
-			 * Filter the registered (active) integrations on the
-			 * Settings → Integrations tab.
-			 *
-			 * Each value must implement Integrations\IntegrationPageInterface
-			 * (get_slug/get_name/get_icon_url/get_status/render_content).
-			 * Extending Integrations\AbstractIntegrationPage is recommended —
-			 * it supplies no-op defaults for the optional hooks()/handle_post()/
-			 * get_help_url()/is_local() this tab also probes for.
-			 *
-			 * @since 3.12.0
-			 *
-			 * @param array<string, object> $integrations Slug → instance.
-			 */
-			$integrations = (array) apply_filters( 'sugar_calendar_admin_settings_integrations', $integrations );
-		}
-
-		return $integrations;
-	}
-
-	/**
 	 * Placeholder sidebar entries shown alongside the real integrations.
 	 *
 	 * These are non-clickable, render a Coming Soon badge, and exist
@@ -172,30 +129,23 @@ class SettingsIntegrationsTab extends Settings {
 	 *
 	 * @since 3.12.0
 	 * @since 3.16.0 Google Calendar is no longer a placeholder.
+	 * @since 3.18.0 SMS and WhatsApp come from the integrations catalog.
 	 *
 	 * @return array<int, array{slug:string,name:string,icon:string}>
 	 */
 	private function get_placeholders() {
 
-		$image_base = SC_PLUGIN_ASSETS_URL . 'images/integrations/';
-
-		return [
+		// Zapier stays here alone: the Dashboard offers it as the add-on it is.
+		return array_merge(
+			IntegrationPageRegistry::get_coming_soon(),
 			[
-				'slug' => 'sms',
-				'name' => esc_html__( 'SMS', 'sugar-calendar-lite' ),
-				'icon' => $image_base . 'integration-sms.png',
-			],
-			[
-				'slug' => 'whatsapp',
-				'name' => esc_html__( 'WhatsApp', 'sugar-calendar-lite' ),
-				'icon' => $image_base . 'integration-whatsapp.png',
-			],
-			[
-				'slug' => 'zapier',
-				'name' => esc_html__( 'Zapier', 'sugar-calendar-lite' ),
-				'icon' => SC_PLUGIN_ASSETS_URL . 'images/addon-icons/zapier.png',
-			],
-		];
+				[
+					'slug' => 'zapier',
+					'name' => esc_html__( 'Zapier', 'sugar-calendar-lite' ),
+					'icon' => SC_PLUGIN_ASSETS_URL . 'images/addon-icons/zapier.png',
+				],
+			]
+		);
 	}
 
 	/**
@@ -210,7 +160,7 @@ class SettingsIntegrationsTab extends Settings {
 	 */
 	private function get_active_integration() {
 
-		$integrations = $this->get_integrations();
+		$integrations = IntegrationPageRegistry::get_integrations();
 
 		if ( empty( $integrations ) ) {
 			return null;
@@ -273,7 +223,7 @@ class SettingsIntegrationsTab extends Settings {
 		// inert — ignore their saves server-side too (the dimmed form can still
 		// be submitted via keyboard). Local integrations (e.g. Google Maps) stay
 		// functional while disabled, so they are exempt.
-		if ( $this->integration_is_inert( $active ) ) {
+		if ( IntegrationPageRegistry::is_inert( $active ) ) {
 			return;
 		}
 
@@ -347,39 +297,6 @@ class SettingsIntegrationsTab extends Settings {
 	private function is_disabled_state() {
 
 		return IntegrationsDisabler::is_disabled();
-	}
-
-	/**
-	 * Whether an integration is a local (non Product-API) one, exempt from the
-	 * disabled state.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param object $integration Integration instance.
-	 *
-	 * @return bool
-	 */
-	private function integration_is_local( $integration ) {
-
-		return method_exists( $integration, 'is_local' ) && $integration->is_local();
-	}
-
-	/**
-	 * Whether an integration is currently inert: the Lite kill-switch is on
-	 * and the integration is not a local (exempt) one.
-	 *
-	 * Single source of truth for the "disabled and not exempt" rule shared by
-	 * the save guard, the sidebar item, and the content panel.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param object $integration Integration instance.
-	 *
-	 * @return bool
-	 */
-	private function integration_is_inert( $integration ) {
-
-		return $this->is_disabled_state() && ! $this->integration_is_local( $integration );
 	}
 
 	/**
@@ -465,16 +382,10 @@ class SettingsIntegrationsTab extends Settings {
 			<?php
 			return;
 		}
-
-		// Cached, fail-open out-of-credits read (transient only, no HTTP). The
-		// header credits signal renders first (see display()) and warms this
-		// transient via a fresh read, so a second fresh read here would be
-		// wasteful — reuse the warmed cache for the sidebar icon + panel badge.
-		$out_of_credits = ( new CreditsService() )->is_out_of_credits();
 		?>
 		<form class="sugar-calendar-integrations-panel" method="post" action="">
-			<?php $this->render_sidebar( $active, $out_of_credits ); ?>
-			<?php $this->render_content_panel( $active, $out_of_credits ); ?>
+			<?php $this->render_sidebar( $active ); ?>
+			<?php $this->render_content_panel( $active ); ?>
 			<?php wp_nonce_field( \Sugar_Calendar\Admin\Area::SLUG ); ?>
 		</form>
 		<?php
@@ -487,12 +398,11 @@ class SettingsIntegrationsTab extends Settings {
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param object $active         Active integration instance.
-	 * @param bool   $out_of_credits Whether the account is out of credits.
+	 * @param object $active Active integration instance.
 	 *
 	 * @return void
 	 */
-	private function render_sidebar( $active, $out_of_credits = false ) {
+	private function render_sidebar( $active ) {
 
 		$active_slug = $active->get_slug();
 		?>
@@ -500,8 +410,8 @@ class SettingsIntegrationsTab extends Settings {
 			<?php $this->render_sidebar_summary( $active ); ?>
 
 			<div class="sugar-calendar-integrations-sidebar__list">
-				<?php foreach ( $this->get_integrations() as $integration ) : ?>
-					<?php $this->render_sidebar_item( $integration, $integration->get_slug() === $active_slug, $out_of_credits ); ?>
+				<?php foreach ( IntegrationPageRegistry::get_integrations() as $integration ) : ?>
+					<?php $this->render_sidebar_item( $integration, $integration->get_slug() === $active_slug ); ?>
 				<?php endforeach; ?>
 
 				<?php foreach ( $this->get_placeholders() as $placeholder ) : ?>
@@ -554,13 +464,12 @@ class SettingsIntegrationsTab extends Settings {
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param object $integration    Integration instance.
-	 * @param bool   $is_active      Whether this is the active integration.
-	 * @param bool   $out_of_credits Whether the account is out of credits.
+	 * @param object $integration Integration instance.
+	 * @param bool   $is_active   Whether this is the active integration.
 	 *
 	 * @return void
 	 */
-	private function render_sidebar_item( $integration, $is_active, $out_of_credits = false ) {
+	private function render_sidebar_item( $integration, $is_active ) {
 
 		$classes = [ 'sugar-calendar-integrations-sidebar__item' ];
 
@@ -568,14 +477,14 @@ class SettingsIntegrationsTab extends Settings {
 			$classes[] = 'sugar-calendar-integrations-sidebar__item--active';
 		}
 
-		$is_disabled = $this->integration_is_inert( $integration );
+		$is_disabled = IntegrationPageRegistry::is_inert( $integration );
 
 		if ( $is_disabled ) {
 			$classes[] = 'sugar-calendar-integrations-sidebar__item--disabled';
 		}
 
 		// Credit-using (non-local) integrations get a red ✕ when out of credits.
-		$is_credit_blocked = $out_of_credits && ! $this->integration_is_local( $integration );
+		$is_credit_blocked = IntegrationPageRegistry::is_out_of_tokens( $integration );
 
 		$status      = $integration->get_status();
 		$show_status = $status !== 'not_connected';
@@ -655,6 +564,9 @@ class SettingsIntegrationsTab extends Settings {
 	/**
 	 * Get the CSS class for the sidebar status indicator.
 	 *
+	 * The dot is binary on purpose (connected or not), while the panel badge from
+	 * IntegrationPageRegistry::get_badge() tells every status apart.
+	 *
 	 * @since 3.12.0
 	 *
 	 * @param string $status Integration status.
@@ -663,47 +575,9 @@ class SettingsIntegrationsTab extends Settings {
 	 */
 	private function get_sidebar_status_class( $status ) {
 
-		return $this->get_status_meta()[ $status ]['sidebar_class'] ?? 'sugar-calendar-integrations-sidebar__status--disconnected';
-	}
-
-	/**
-	 * Per-status metadata: sidebar dot class, badge color class, badge label.
-	 *
-	 * Single source of truth for get_sidebar_status_class(), get_status_badge_class(),
-	 * and get_status_badge_label() — previously three independent maps over the same
-	 * status keys that could silently drift apart. The sidebar dot is intentionally
-	 * binary (connected vs not — auth_error/disabled/not_connected all share one
-	 * class) while the badge distinguishes all three; that divergence is a deliberate
-	 * UX difference, not an inconsistency to remove.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @return array<string, array{sidebar_class:string, badge_class:string, badge_label:string}>
-	 */
-	private function get_status_meta() {
-
-		return [
-			'active'        => [
-				'sidebar_class' => 'sugar-calendar-integrations-sidebar__status--connected',
-				'badge_class'   => 'green',
-				'badge_label'   => esc_html__( 'Connected', 'sugar-calendar-lite' ),
-			],
-			'auth_error'    => [
-				'sidebar_class' => 'sugar-calendar-integrations-sidebar__status--disconnected',
-				'badge_class'   => 'yellow',
-				'badge_label'   => esc_html__( 'Reconnect required', 'sugar-calendar-lite' ),
-			],
-			'disabled'      => [
-				'sidebar_class' => 'sugar-calendar-integrations-sidebar__status--disconnected',
-				'badge_class'   => 'red',
-				'badge_label'   => esc_html__( 'Connection lost', 'sugar-calendar-lite' ),
-			],
-			'not_connected' => [
-				'sidebar_class' => 'sugar-calendar-integrations-sidebar__status--disconnected',
-				'badge_class'   => 'neutral',
-				'badge_label'   => esc_html__( 'Not Connected', 'sugar-calendar-lite' ),
-			],
-		];
+		return $status === 'active'
+			? 'sugar-calendar-integrations-sidebar__status--connected'
+			: 'sugar-calendar-integrations-sidebar__status--disconnected';
 	}
 
 	/**
@@ -730,41 +604,29 @@ class SettingsIntegrationsTab extends Settings {
 	 *
 	 * @since 3.12.0
 	 *
-	 * @param object $integration    Active integration instance.
-	 * @param bool   $out_of_credits Whether the account is out of credits.
+	 * @param object $integration Active integration instance.
 	 *
 	 * @return void
 	 */
-	private function render_content_panel( $integration, $out_of_credits = false ) {
+	private function render_content_panel( $integration ) {
 
-		$status      = $integration->get_status();
-		$badge_class = $this->get_status_badge_class( $status );
-		$badge_label = $this->get_status_badge_label( $status );
+		$inert = IntegrationPageRegistry::is_inert( $integration );
+		$badge = IntegrationPageRegistry::get_badge( $integration );
 
 		$content_classes = [ 'sugar-calendar-integrations-content' ];
 
-		if ( $this->integration_is_inert( $integration ) ) {
+		if ( $inert ) {
 			$content_classes[] = 'sugar-calendar-integrations-content--disabled';
 		}
-
-		// When out of tokens, the status badge is replaced by a single "Out of
-		// Tokens" badge (active credit-using, non-local integrations only).
-		$show_out_of_tokens = $out_of_credits && ! $this->integration_is_local( $integration );
 		?>
 		<div class="<?php echo esc_attr( implode( ' ', $content_classes ) ); ?>">
 			<div class="sugar-calendar-integrations-content__title-bar">
 				<h2 class="sugar-calendar-integrations-content__title">
 					<?php echo esc_html( $integration->get_name() ); ?>
 				</h2>
-				<?php if ( $show_out_of_tokens ) : ?>
-					<span class="sugar-calendar-badge sugar-calendar-badge--out-of-tokens">
-						<?php esc_html_e( 'Out of Tokens', 'sugar-calendar-lite' ); ?>
-					</span>
-				<?php else : ?>
-					<span class="sugar-calendar-badge sugar-calendar-badge--<?php echo esc_attr( $badge_class ); ?>">
-						<?php echo esc_html( $badge_label ); ?>
-					</span>
-				<?php endif; ?>
+				<span class="sugar-calendar-badge sugar-calendar-badge--<?php echo esc_attr( $badge['class'] ); ?>">
+					<?php echo esc_html( $badge['label'] ); ?>
+				</span>
 			</div>
 
 			<div class="sugar-calendar-integrations-content__body">
@@ -780,34 +642,6 @@ class SettingsIntegrationsTab extends Settings {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Map an integration status to a badge color class.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param string $status Integration status.
-	 *
-	 * @return string Color modifier (neutral|green|yellow|red).
-	 */
-	private function get_status_badge_class( $status ) {
-
-		return $this->get_status_meta()[ $status ]['badge_class'] ?? 'neutral';
-	}
-
-	/**
-	 * Map an integration status to a human-readable badge label.
-	 *
-	 * @since 3.12.0
-	 *
-	 * @param string $status Integration status.
-	 *
-	 * @return string
-	 */
-	private function get_status_badge_label( $status ) {
-
-		return $this->get_status_meta()[ $status ]['badge_label'] ?? esc_html__( 'Not Connected', 'sugar-calendar-lite' );
 	}
 
 	/**

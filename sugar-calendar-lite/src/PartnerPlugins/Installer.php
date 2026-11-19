@@ -28,6 +28,8 @@ class Installer {
 	 */
 	public function run( InstallTarget $target, $return_url ) {
 
+		$this->set_screen();
+
 		$state = $target->get_state();
 
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -43,6 +45,20 @@ class Installer {
 		}
 
 		return $this->error( 'checklist_plugin_stale_action', __( 'This plugin action is no longer available. Refresh the page and try again.', 'sugar-calendar-lite' ), $state );
+	}
+
+	/**
+	 * Give the request a screen. The upgrader and the activation hooks read the current screen,
+	 * which an AJAX request has not set, and log notices without one. A REST request has no
+	 * screen functions at all, so it keeps running as before.
+	 *
+	 * @since 3.18.0
+	 */
+	private function set_screen() {
+
+		if ( function_exists( 'set_current_screen' ) && get_current_screen() === null ) {
+			set_current_screen( 'toplevel_page_sugar-calendar' );
+		}
 	}
 
 	/**

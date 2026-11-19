@@ -4,9 +4,37 @@
   :root, :host {
     --sc-color-neutral-50: oklch(98.5% 0 0);
     --sc-color-neutral-100: oklch(97% 0 0);
+    --sc-text-xl: 1.25rem;
+    --sc-text-xl--line-height: calc(1.75 / 1.25);
+    --sc-font-weight-normal: 400;
+    --sc-font-weight-medium: 500;
+    --sc-font-weight-semibold: 600;
+    --sc-font-weight-black: 900;
+    --sc-tracking-wide: 0.025em;
+    --sc-radius-sm: 0.25rem;
   }
 }
 @layer sc-utils {
+  .sugar-calendar-scope .sc\:\@container {
+    container-type: inline-size !important;
+  }
+  .sugar-calendar-scope .sc\:sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border-width: 0 !important;
+  }
+  .sugar-calendar-scope .sc\:-mx-\[4px\] {
+    margin-inline: calc(4px * -1) !important;
+  }
+  .sugar-calendar-scope .sc\:mb-\[30px\] {
+    margin-bottom: 30px !important;
+  }
   .sugar-calendar-scope .sc\:icon-\[fa6-regular--circle-check\] {
     display: inline-block !important;
     width: 1em !important;
@@ -32,6 +60,45 @@
     -webkit-mask-size: 100% 100% !important;
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Cpath fill='black' d='M464 256a208 208 0 1 0-416 0a208 208 0 1 0 416 0M0 256a256 256 0 1 1 512 0a256 256 0 1 1-512 0'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-regular--credit-card\] {
+    display: inline-block !important;
+    width: 1.13em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' width='576' height='512'%3E%3Cpath fill='black' d='M512 80c8.8 0 16 7.2 16 16v32H48V96c0-8.8 7.2-16 16-16zm16 144v192c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V224zM64 32C28.7 32 0 60.7 0 96v320c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24h48c13.3 0 24-10.7 24-24s-10.7-24-24-24zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24h112c13.3 0 24-10.7 24-24s-10.7-24-24-24z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-regular--file-lines\] {
+    display: inline-block !important;
+    width: 0.75em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512' width='384' height='512'%3E%3Cpath fill='black' d='M64 464c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16h160v80c0 17.7 14.3 32 32 32h80v288c0 8.8-7.2 16-16 16zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V154.5c0-17-6.7-33.3-18.7-45.3l-90.6-90.5C262.7 6.7 246.5 0 229.5 0zm56 256c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-regular--money-bill-1\] {
+    display: inline-block !important;
+    width: 1.13em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' width='576' height='512'%3E%3Cpath fill='black' d='M112 112c0 35.3-28.7 64-64 64v160c35.3 0 64 28.7 64 64h352c0-35.3 28.7-64 64-64V176c-35.3 0-64-28.7-64-64zM0 128c0-35.3 28.7-64 64-64h448c35.3 0 64 28.7 64 64v256c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64zm176 128a112 112 0 1 1 224 0a112 112 0 1 1-224 0m80-48c0 8.8 7.2 16 16 16v64h-8c-8.8 0-16 7.2-16 16s7.2 16 16 16h48c8.8 0 16-7.2 16-16s-7.2-16-16-16h-8v-80c0-8.8-7.2-16-16-16h-16c-8.8 0-16 7.2-16 16'/%3E%3C/svg%3E");
   }
   .sugar-calendar-scope .sc\:icon-\[fa6-regular--thumbs-down\] {
     display: inline-block !important;
@@ -111,6 +178,19 @@
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='448' height='512'%3E%3Cpath fill='black' d='M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288h111.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5z'/%3E%3C/svg%3E");
   }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--calendar-check\] {
+    display: inline-block !important;
+    width: 0.88em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='448' height='512'%3E%3Cpath fill='black' d='M128 0c17.7 0 32 14.3 32 32v32h128V32c0-17.7 14.3-32 32-32s32 14.3 32 32v32h48c26.5 0 48 21.5 48 48v48H0v-48c0-26.5 21.5-48 48-48h48V32c0-17.7 14.3-32 32-32M0 192h448v272c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48zm329 113c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95l-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0z'/%3E%3C/svg%3E");
+  }
   .sugar-calendar-scope .sc\:icon-\[fa6-solid--calendar-days\] {
     display: inline-block !important;
     width: 0.88em !important;
@@ -175,6 +255,32 @@
     -webkit-mask-size: 100% 100% !important;
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Cpath fill='black' d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7L86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--chevron-up\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Cpath fill='black' d='M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3L86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--circle-check\] {
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'%3E%3Cpath fill='black' d='M256 512a256 256 0 1 0 0-512a256 256 0 1 0 0 512m113-303L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z'/%3E%3C/svg%3E");
   }
   .sugar-calendar-scope .sc\:icon-\[fa6-solid--circle-exclamation\] {
     display: inline-block !important;
@@ -253,6 +359,19 @@
     -webkit-mask-size: 100% 100% !important;
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='448' height='512'%3E%3Cpath fill='black' d='M208 0h124.1C344.8 0 357 5.1 366 14.1L433.9 82c9 9 14.1 21.2 14.1 33.9V336c0 26.5-21.5 48-48 48H208c-26.5 0-48-21.5-48-48V48c0-26.5 21.5-48 48-48M48 128h80v64H64v256h192v-32h64v48c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--crown\] {
+    display: inline-block !important;
+    width: 1.13em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' width='576' height='512'%3E%3Cpath fill='black' d='M309 106c11.4-7 19-19.7 19-34c0-22.1-17.9-40-40-40s-40 17.9-40 40c0 14.4 7.6 27 19 34l-57.3 114.6c-9.1 18.2-32.7 23.4-48.6 10.7L72 160c5-6.7 8-15 8-24c0-22.1-17.9-40-40-40S0 113.9 0 136s17.9 40 40 40h.7l45.7 251.4c5.5 30.4 32 52.6 63 52.6h277.2c30.9 0 57.4-22.1 63-52.6L535.3 176h.7c22.1 0 40-17.9 40-40s-17.9-40-40-40s-40 17.9-40 40c0 9 3 17.3 8 24l-89.1 71.3c-15.9 12.7-39.5 7.5-48.6-10.7z'/%3E%3C/svg%3E");
   }
   .sugar-calendar-scope .sc\:icon-\[fa6-solid--globe\] {
     display: inline-block !important;
@@ -345,6 +464,19 @@
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512' width='384' height='512'%3E%3Cpath fill='black' d='M192 0c-53 0-96 43-96 96v160c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96M64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464h-48c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24h-48v-33.6c85.8-11.7 152-85.3 152-174.4v-40c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128S64 326.7 64 256z'/%3E%3C/svg%3E");
   }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--money-bill-1\] {
+    display: inline-block !important;
+    width: 1.13em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' width='576' height='512'%3E%3Cpath fill='black' d='M64 64C28.7 64 0 92.7 0 128v256c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64zm64 320H64v-64c35.3 0 64 28.7 64 64M64 192v-64h64c0 35.3-28.7 64-64 64m384 192c0-35.3 28.7-64 64-64v64zm64-192c-35.3 0-64-28.7-64-64h64zm-336 64a112 112 0 1 1 224 0a112 112 0 1 1-224 0m76-48c0 9.7 6.9 17.7 16 19.6V276h-4c-11 0-20 9-20 20s9 20 20 20h48c11 0 20-9 20-20s-9-20-20-20h-4v-68c0-11-9-20-20-20h-16c-11 0-20 9-20 20'/%3E%3C/svg%3E");
+  }
   .sugar-calendar-scope .sc\:icon-\[fa6-solid--money-bill-trend-up\] {
     display: inline-block !important;
     width: 1em !important;
@@ -409,6 +541,19 @@
     -webkit-mask-size: 100% 100% !important;
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' width='320' height='512'%3E%3Cpath fill='black' d='M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1a87.98 87.98 0 0 0-40.4 74v1.4c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7v-3.6c0-70.7-57.3-128-128-128h-32C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32m80 320a40 40 0 1 0 0-80a40 40 0 1 0 0 80'/%3E%3C/svg%3E");
+  }
+  .sugar-calendar-scope .sc\:icon-\[fa6-solid--receipt\] {
+    display: inline-block !important;
+    width: 0.75em !important;
+    height: 1em !important;
+    background-color: currentColor !important;
+    -webkit-mask-image: var(--svg) !important;
+    mask-image: var(--svg) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512' width='384' height='512'%3E%3Cpath fill='black' d='M14 2.2c8.5-3.9 18.5-2.5 25.6 3.6L80 40.4l40.4-34.6c9-7.7 22.3-7.7 31.2 0L192 40.4l40.4-34.6c9-7.7 22.3-7.7 31.2 0L304 40.4l40.4-34.6c7.1-6.1 17.1-7.5 25.6-3.6s14 12.4 14 21.8v464c0 9.4-5.5 17.9-14 21.8s-18.5 2.5-25.6-3.6L304 471.6l-40.4 34.6c-9 7.7-22.3 7.7-31.2 0L192 471.6l-40.4 34.6c-9 7.7-22.3 7.7-31.2 0L80 471.6l-40.4 34.6c-7.1 6.1-17.1 7.5-25.6 3.6S0 497.4 0 488V24C0 14.6 5.5 6.1 14 2.2M96 144c-8.8 0-16 7.2-16 16s7.2 16 16 16h192c8.8 0 16-7.2 16-16s-7.2-16-16-16zM80 352c0 8.8 7.2 16 16 16h192c8.8 0 16-7.2 16-16s-7.2-16-16-16H96c-8.8 0-16 7.2-16 16m16-112c-8.8 0-16 7.2-16 16s7.2 16 16 16h192c8.8 0 16-7.2 16-16s-7.2-16-16-16z'/%3E%3C/svg%3E");
   }
   .sugar-calendar-scope .sc\:icon-\[fa6-solid--repeat\] {
     display: inline-block !important;
@@ -566,17 +711,259 @@
     mask-size: 100% 100% !important;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512' width='384' height='512'%3E%3Cpath fill='black' d='M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7L86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256L41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256z'/%3E%3C/svg%3E");
   }
+  .sugar-calendar-scope .sc\:line-clamp-1 {
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 1 !important;
+  }
+  .sugar-calendar-scope .sc\:flex {
+    display: flex !important;
+  }
+  .sugar-calendar-scope .sc\:grid {
+    display: grid !important;
+  }
+  .sugar-calendar-scope .sc\:inline-flex {
+    display: inline-flex !important;
+  }
+  .sugar-calendar-scope .sc\:size-10 {
+    width: calc(4px * 10) !important;
+    height: calc(4px * 10) !important;
+  }
+  .sugar-calendar-scope .sc\:size-full {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .sugar-calendar-scope .sc\:h-\[343px\] {
+    height: 343px !important;
+  }
+  .sugar-calendar-scope .sc\:h-auto {
+    height: auto !important;
+  }
+  .sugar-calendar-scope .sc\:min-h-\[22px\] {
+    min-height: 22px !important;
+  }
+  .sugar-calendar-scope .sc\:min-h-\[60px\] {
+    min-height: 60px !important;
+  }
   .sugar-calendar-scope .sc\:min-h-\[80px\] {
     min-height: 80px !important;
+  }
+  .sugar-calendar-scope .sc\:w-\[12\.8\%\] {
+    width: 12.8% !important;
+  }
+  .sugar-calendar-scope .sc\:w-\[21\.77\%\] {
+    width: 21.77% !important;
+  }
+  .sugar-calendar-scope .sc\:w-\[24\.33\%\] {
+    width: 24.33% !important;
+  }
+  .sugar-calendar-scope .sc\:w-\[28\.3\%\] {
+    width: 28.3% !important;
+  }
+  .sugar-calendar-scope .sc\:w-\[29\.57\%\] {
+    width: 29.57% !important;
   }
   .sugar-calendar-scope .sc\:w-full {
     width: 100% !important;
   }
+  .sugar-calendar-scope .sc\:min-w-0 {
+    min-width: calc(4px * 0) !important;
+  }
+  .sugar-calendar-scope .sc\:flex-1 {
+    flex: 1 !important;
+  }
+  .sugar-calendar-scope .sc\:shrink-0 {
+    flex-shrink: 0 !important;
+  }
+  .sugar-calendar-scope .sc\:cursor-pointer {
+    cursor: pointer !important;
+  }
   .sugar-calendar-scope .sc\:resize-y {
     resize: vertical !important;
   }
+  .sugar-calendar-scope .sc\:grid-cols-\[repeat\(auto-fill\,minmax\(min\(100\%\,max\(280px\,calc\(\(100\%_-_var\(--sc-spacing-20\,20px\)\)\/2\)\)\)\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fill,minmax(min(100%, max(280px, calc((100% - var(--sc-spacing-20,20px)) / 2))),1fr)) !important;
+  }
+  .sugar-calendar-scope .sc\:flex-col {
+    flex-direction: column !important;
+  }
+  .sugar-calendar-scope .sc\:flex-wrap {
+    flex-wrap: wrap !important;
+  }
+  .sugar-calendar-scope .sc\:items-center {
+    align-items: center !important;
+  }
+  .sugar-calendar-scope .sc\:items-start {
+    align-items: flex-start !important;
+  }
+  .sugar-calendar-scope .sc\:justify-between {
+    justify-content: space-between !important;
+  }
+  .sugar-calendar-scope .sc\:justify-center {
+    justify-content: center !important;
+  }
+  .sugar-calendar-scope .sc\:justify-end {
+    justify-content: flex-end !important;
+  }
+  .sugar-calendar-scope .sc\:gap-1 {
+    gap: calc(4px * 1) !important;
+  }
+  .sugar-calendar-scope .sc\:gap-2\.5 {
+    gap: calc(4px * 2.5) !important;
+  }
+  .sugar-calendar-scope .sc\:gap-5 {
+    gap: calc(4px * 5) !important;
+  }
+  .sugar-calendar-scope .sc\:gap-\[7px\] {
+    gap: 7px !important;
+  }
+  .sugar-calendar-scope .sc\:gap-\[var\(--sc-spacing-10\,10px\)\] {
+    gap: var(--sc-spacing-10,10px) !important;
+  }
+  .sugar-calendar-scope .sc\:gap-\[var\(--sc-spacing-15\,15px\)\] {
+    gap: var(--sc-spacing-15,15px) !important;
+  }
+  .sugar-calendar-scope .sc\:gap-\[var\(--sc-spacing-20\,20px\)\] {
+    gap: var(--sc-spacing-20,20px) !important;
+  }
+  .sugar-calendar-scope .sc\:self-stretch {
+    align-self: stretch !important;
+  }
+  .sugar-calendar-scope .sc\:overflow-hidden {
+    overflow: hidden !important;
+  }
+  .sugar-calendar-scope .sc\:overflow-x-auto {
+    overflow-x: auto !important;
+  }
+  .sugar-calendar-scope .sc\:rounded-sm {
+    border-radius: var(--sc-radius-sm) !important;
+  }
+  .sugar-calendar-scope .sc\:bg-\[var\(--sc-color-brand-orange-0\,\#fff3ec\)\] {
+    background-color: var(--sc-color-brand-orange-0,#fff3ec) !important;
+  }
+  .sugar-calendar-scope .sc\:bg-\[var\(--sc-surface-background-light\,\#f7f7f7\)\] {
+    background-color: var(--sc-surface-background-light,#f7f7f7) !important;
+  }
+  .sugar-calendar-scope .sc\:px-\[4px\] {
+    padding-inline: 4px !important;
+  }
+  .sugar-calendar-scope .sc\:py-\[10px\] {
+    padding-block: 10px !important;
+  }
   .sugar-calendar-scope .sc\:py-\[12px\] {
     padding-block: 12px !important;
+  }
+  .sugar-calendar-scope .sc\:pt-\[var\(--sc-spacing-20\,20px\)\] {
+    padding-top: var(--sc-spacing-20,20px) !important;
+  }
+  .sugar-calendar-scope .sc\:pr-\[var\(--sc-padding-12\,12px\)\] {
+    padding-right: var(--sc-padding-12,12px) !important;
+  }
+  .sugar-calendar-scope .sc\:pr-\[var\(--sc-spacing-30\,30px\)\] {
+    padding-right: var(--sc-spacing-30,30px) !important;
+  }
+  .sugar-calendar-scope .sc\:pb-\[var\(--sc-spacing-20\,20px\)\] {
+    padding-bottom: var(--sc-spacing-20,20px) !important;
+  }
+  .sugar-calendar-scope .sc\:pl-0 {
+    padding-left: calc(4px * 0) !important;
+  }
+  .sugar-calendar-scope .sc\:pl-\[var\(--sc-spacing-30\,30px\)\] {
+    padding-left: var(--sc-spacing-30,30px) !important;
+  }
+  .sugar-calendar-scope .sc\:text-center {
+    text-align: center !important;
+  }
+  .sugar-calendar-scope .sc\:text-left {
+    text-align: left !important;
+  }
+  .sugar-calendar-scope .sc\:font-\[family-name\:var\(--sc-typography-font-family-sans\)\] {
+    font-family: var(--sc-typography-font-family-sans) !important;
+  }
+  .sugar-calendar-scope .sc\:text-xl {
+    font-size: var(--sc-text-xl) !important;
+    line-height: var(--tw-leading, var(--sc-text-xl--line-height)) !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[13px\] {
+    font-size: 13px !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[14px\] {
+    font-size: 14px !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[15px\] {
+    font-size: 15px !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[length\:var\(--sc-typography-font-size-14\,14px\)\] {
+    font-size: var(--sc-typography-font-size-14,14px) !important;
+  }
+  .sugar-calendar-scope .sc\:leading-5 {
+    --tw-leading: calc(4px * 5);
+    line-height: calc(4px * 5) !important;
+  }
+  .sugar-calendar-scope .sc\:leading-\[16\.94px\] {
+    --tw-leading: 16.94px;
+    line-height: 16.94px !important;
+  }
+  .sugar-calendar-scope .sc\:leading-\[22\.50px\] {
+    --tw-leading: 22.50px;
+    line-height: 22.50px !important;
+  }
+  .sugar-calendar-scope .sc\:leading-\[var\(--sc-typography-line-height-20\,20px\)\] {
+    --tw-leading: var(--sc-typography-line-height-20,20px);
+    line-height: var(--sc-typography-line-height-20,20px) !important;
+  }
+  .sugar-calendar-scope .sc\:font-\[500\] {
+    --tw-font-weight: 500;
+    font-weight: 500 !important;
+  }
+  .sugar-calendar-scope .sc\:font-black {
+    --tw-font-weight: var(--sc-font-weight-black);
+    font-weight: var(--sc-font-weight-black) !important;
+  }
+  .sugar-calendar-scope .sc\:font-medium {
+    --tw-font-weight: var(--sc-font-weight-medium);
+    font-weight: var(--sc-font-weight-medium) !important;
+  }
+  .sugar-calendar-scope .sc\:font-normal {
+    --tw-font-weight: var(--sc-font-weight-normal);
+    font-weight: var(--sc-font-weight-normal) !important;
+  }
+  .sugar-calendar-scope .sc\:font-semibold {
+    --tw-font-weight: var(--sc-font-weight-semibold);
+    font-weight: var(--sc-font-weight-semibold) !important;
+  }
+  .sugar-calendar-scope .sc\:tracking-\[0px\] {
+    --tw-tracking: 0px;
+    letter-spacing: 0px !important;
+  }
+  .sugar-calendar-scope .sc\:tracking-wide {
+    --tw-tracking: var(--sc-tracking-wide);
+    letter-spacing: var(--sc-tracking-wide) !important;
+  }
+  .sugar-calendar-scope .sc\:wrap-anywhere {
+    overflow-wrap: anywhere !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[var\(--sc-color-brand-orange-50\,\#ff8845\)\] {
+    color: var(--sc-color-brand-orange-50,#ff8845) !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[var\(--sc-text-primary\,\#2c3338\)\] {
+    color: var(--sc-text-primary,#2c3338) !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[var\(--sc-text-secondary\,\#50575e\)\] {
+    color: var(--sc-text-secondary,#50575e) !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[var\(--sc-text-success\,\#008a20\)\] {
+    color: var(--sc-text-success,#008a20) !important;
+  }
+  .sugar-calendar-scope .sc\:text-\[var\(--sc-text-tertiary\,\#787c82\)\] {
+    color: var(--sc-text-tertiary,#787c82) !important;
+  }
+  .sugar-calendar-scope .sc\:uppercase {
+    text-transform: uppercase !important;
+  }
+  .sugar-calendar-scope .sc\:opacity-40 {
+    opacity: 40% !important;
   }
   .sugar-calendar-scope .sc\:checked\:before\:icon-src-\[fa6-solid--check\] {
     &:checked {
@@ -585,6 +972,85 @@
         width: 0.88em !important;
         --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512' width='448' height='512'%3E%3Cpath fill='black' d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7l233.4-233.3c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E");
       }
+    }
+  }
+  .sugar-calendar-scope .sc\:max-tablet\:grid-cols-2 {
+    @media (width < 782px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:hidden {
+    @media (width < 600px) {
+      display: none !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:basis-full {
+    @media (width < 600px) {
+      flex-basis: 100% !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:grid-cols-1 {
+    @media (width < 600px) {
+      grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:flex-col {
+    @media (width < 600px) {
+      flex-direction: column !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:flex-wrap {
+    @media (width < 600px) {
+      flex-wrap: wrap !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:items-start {
+    @media (width < 600px) {
+      align-items: flex-start !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:max-phone\:pr-0 {
+    @media (width < 600px) {
+      padding-right: calc(4px * 0) !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:phone\:\@max-\[1160px\]\:basis-\[calc\(50\%-10px\)\] {
+    @media (width >= 600px) {
+      @container (width < 1160px) {
+        flex-basis: calc(50% - 10px) !important;
+      }
+    }
+  }
+  .sugar-calendar-scope .sc\:\@min-\[740px\]\:inline-block {
+    @container (width >= 740px) {
+      display: inline-block !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:\@min-\[740px\]\:max-w-0 {
+    @container (width >= 740px) {
+      max-width: calc(4px * 0) !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:\@min-\[740px\]\:max-w-full {
+    @container (width >= 740px) {
+      max-width: 100% !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:\@min-\[740px\]\:truncate {
+    @container (width >= 740px) {
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:\@min-\[740px\]\:align-top {
+    @container (width >= 740px) {
+      vertical-align: top !important;
+    }
+  }
+  .sugar-calendar-scope .sc\:\[\&\[hidden\]\]\:hidden {
+    &[hidden] {
+      display: none !important;
     }
   }
 }
@@ -874,6 +1340,7 @@
   --sc-radius-table: var(--sc-radius-4);
   --sc-radius-field-wp: var(--sc-radius-3);
   --sc-radius-modals: var(--sc-radius-6);
+  --sc-radius-cards: var(--sc-radius-10);
   --sc-radius-full: var(--sc-radius-100);
   --sc-components-button-primary-background: var(--sc-brand-primary);
   --sc-components-button-primary-background--hover: var(--sc-brand-primary--hover);
@@ -945,6 +1412,14 @@
   --sc-color-brand-primary: var(--sc-brand-primary);
   --sc-color-brand-secondary: var(--sc-brand-secondary);
 }
+:root {
+  --sc-typography-line-height-20: 20px;
+  --sc-spacing-md: 20px;
+  --sc-typography-line-height-14: 14px;
+  --sc-text-icon-hover: #646970;
+  --sc-components-field-border-focus: #2271b1;
+  --sc-typography-line-height-10: 10px;
+}
 @layer sc-components {
   .sugar-calendar-scope .sc-prompt-header {
     font-family: var(--sc-typography-font-family-sans) !important;
@@ -964,6 +1439,13 @@
     font-family: var(--sc-typography-font-family-sans) !important;
     font-weight: var(--sc-typography-font-weight-medium) !important;
     font-size: var(--sc-typography-font-size-22) !important;
+    line-height: normal !important;
+    letter-spacing: 0 !important;
+  }
+  .sugar-calendar-scope .sc-section-title {
+    font-family: var(--sc-typography-font-family-sans) !important;
+    font-weight: var(--sc-typography-font-weight-bold) !important;
+    font-size: var(--sc-typography-font-size-16) !important;
     line-height: normal !important;
     letter-spacing: 0 !important;
   }
@@ -1051,6 +1533,22 @@
     font-size: var(--sc-typography-font-size-12) !important;
     line-height: normal !important;
     letter-spacing: 0 !important;
+  }
+  .sugar-calendar-scope .sc-buttons-underline {
+    font-family: var(--sc-typography-font-family-sans) !important;
+    font-weight: var(--sc-typography-font-weight-medium) !important;
+    font-size: var(--sc-typography-font-size-14) !important;
+    line-height: normal !important;
+    letter-spacing: 0 !important;
+    text-decoration: underline !important;
+  }
+  .sugar-calendar-scope .sc-buttons-small-underline {
+    font-family: var(--sc-typography-font-family-sans) !important;
+    font-weight: var(--sc-typography-font-weight-medium) !important;
+    font-size: var(--sc-typography-font-size-12) !important;
+    line-height: normal !important;
+    letter-spacing: 0 !important;
+    text-decoration: underline !important;
   }
   .sugar-calendar-scope .sc-buttons-wp {
     font-family: var(--sc-typography-font-family-sans) !important;
@@ -3766,6 +4264,18 @@
     }
   }
 }
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
 @property --tw-content {
   syntax: "*";
   initial-value: "";
@@ -3774,6 +4284,9 @@
 @layer sc-properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
       --tw-content: "";
     }
   }

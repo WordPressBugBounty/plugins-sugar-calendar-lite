@@ -34,7 +34,8 @@ interface IntegrationCapabilityInterface {
 	 * Is the capability ready to be used right now?
 	 *
 	 * Typical implementation: integration enabled AND a connection in
-	 * 'active' status exists AND credits are available.
+	 * 'active' status exists. Credits are not part of it: the relay refuses
+	 * an action the account cannot pay for.
 	 *
 	 * @since 3.12.0
 	 *

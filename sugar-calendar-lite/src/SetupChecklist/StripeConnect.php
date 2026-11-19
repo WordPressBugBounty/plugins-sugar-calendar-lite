@@ -92,7 +92,7 @@ class StripeConnect {
 	public function filter_completion( $args ) {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- the completion handler verified the nonce before applying this filter.
-		$flag  = isset( $_GET[ self::TEST_MODE_PARAM ] ) ? sanitize_key( wp_unslash( $_GET[ self::TEST_MODE_PARAM ] ) ) : '';
+		$flag  = isset( $_GET[ static::TEST_MODE_PARAM ] ) ? sanitize_key( wp_unslash( $_GET[ static::TEST_MODE_PARAM ] ) ) : '';
 		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 		// phpcs:enable
 
@@ -101,10 +101,22 @@ class StripeConnect {
 		}
 
 		$args['is_sandbox']        = $flag === '1';
-		$args['redirect']          = SetupChecklistPage::get_url();
+		$args['redirect']          = $this->get_redirect_url();
 		$args['customer_site_url'] = $this->get_return_url( $args['is_sandbox'], $nonce );
 
 		return $args;
+	}
+
+	/**
+	 * Where a completion this class started lands.
+	 *
+	 * @since 3.18.0
+	 *
+	 * @return string
+	 */
+	protected function get_redirect_url() {
+
+		return SetupChecklistPage::get_url();
 	}
 
 	/**
@@ -121,8 +133,8 @@ class StripeConnect {
 
 		return add_query_arg(
 			[
-				'_wpnonce'            => $nonce,
-				self::TEST_MODE_PARAM => (int) $is_sandbox,
+				'_wpnonce'              => $nonce,
+				static::TEST_MODE_PARAM => (int) $is_sandbox,
 			],
 			get_section_url( [ 'section' => 'payments' ] )
 		);
